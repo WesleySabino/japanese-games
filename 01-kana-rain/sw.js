@@ -1,4 +1,4 @@
-const CACHE='kana-rain-v7';
+const CACHE='kana-rain-v8';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
 const SHELL=['./','index.html','src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/manifest.json'];
