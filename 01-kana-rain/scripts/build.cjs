@@ -7,7 +7,7 @@ const root=path.resolve(__dirname,'..'),rootReal=fs.realpathSync(root),output=pa
 const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','manifest.webmanifest','sw.js'];
 const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js'];
 const IMAGE_FILES=[
-  'assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp',
+  'assets/garden.webp','assets/social-garden.png','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp',
   'assets/splash.webp','assets/ripple.webp','assets/icon.png',
   'assets/concepts/visual-development.png','assets/concepts/garden-mood.png',
   'assets/spirit-atlas.png','assets/water-atlas.png'

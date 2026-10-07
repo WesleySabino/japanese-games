@@ -73,7 +73,7 @@ Section 4.4 of the brainstorm selects games **01, 08, 09, 10, 16, 26, 29, and 34
 
 ## Run Kana Rain locally
 
-Use **Node.js 20.9 or later** and **pnpm**. From the project root:
+Use **Node.js 22 or later** and **pnpm 11** (CI pins pnpm 11.25.0). From the project root:
 
 ```sh
 cd 01-kana-rain

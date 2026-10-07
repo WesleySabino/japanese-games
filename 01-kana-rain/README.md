@@ -12,7 +12,7 @@ The English translation of the original game specification is in [SPECIFICATION.
 
 ## Play locally
 
-Use **Node.js 20.9 or later** and **pnpm**. From the project root:
+Use **Node.js 22 or later** and **pnpm 11** (CI pins pnpm 11.25.0). From the project root:
 
 ```sh
 cd 01-kana-rain
