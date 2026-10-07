@@ -1,0 +1,65 @@
+name: Kana Rain CI
+
+on:
+  push:
+    paths:
+      - '01-kana-rain/**'
+      - '.github/workflows/kana-rain.yml'
+  pull_request:
+    paths:
+      - '01-kana-rain/**'
+      - '.github/workflows/kana-rain.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kana-rain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: 01-kana-rain
+    env:
+      CI: 'true'
+      PLAYWRIGHT_BROWSER_CHANNEL: ''
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: '11.25.0'
+          package_json_file: 01-kana-rain/package.json
+          run_install: false
+          cache: true
+          cache_dependency_path: 01-kana-rain/pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run core tests
+        run: pnpm test
+
+      - name: Install Chromium and Linux dependencies
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run browser tests
+        run: pnpm run test:browser
+
+      - name: Build the static site
+        run: pnpm build

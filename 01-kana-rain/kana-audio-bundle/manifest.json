@@ -1,0 +1,6277 @@
+{
+  "schemaVersion": 1,
+  "name": "Japanese Core kana audio bundle",
+  "language": "ja",
+  "source": {
+    "appVersion": "0.2.0-rc.2",
+    "catalogue": "src/domain/kana.ts",
+    "catalogueSha256": "2266f7fbd1a5e8755b4c96de65eeaec7a2ab0fd30e849f65cc5070a7e1039676",
+    "audioManifest": "public/audio/manifest.json",
+    "audioManifestSha256": "994aa30ed34300044ed8d7e870a947a1ffe2b6699d4b3c689e47a1dc9eca74d0"
+  },
+  "pathBase": "All file paths are relative to this manifest (the bundle root).",
+  "license": "CC0-1.0. Synthesized by the project with the Apache-2.0 Kokoro-82M model and voice pack; no third-party recording is included.",
+  "generator": {
+    "engine": "Kokoro-82M v1.0",
+    "engineLicense": "Apache-2.0",
+    "engineSource": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "runtime": "kokoro-onnx 0.6.1, onnxruntime 1.30.0",
+    "model": {
+      "file": "kokoro-v1.0.onnx",
+      "sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+      "source": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx"
+    },
+    "voices": {
+      "file": "voices-v1.0.bin",
+      "sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+      "source": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin"
+    },
+    "voice": "jf_tebukuro",
+    "speed": 0.9,
+    "method": "Phonemes from tools/tts/kana_ipa.py, spoken at the end of a carrier phrase and cut out at the consonant closure, noise onset or energy dip (tools/tts/generate.py)"
+  },
+  "note": "Each recording serves every catalogue item whose audio stem equals its id (hiragana and katakana share). A checksum proves file integrity only; pronunciation needs a listener review.",
+  "counts": {
+    "items": 216,
+    "recordings": 112
+  },
+  "byKana": {
+    "あ": "audio/a.mp3",
+    "い": "audio/i.mp3",
+    "う": "audio/u.mp3",
+    "え": "audio/e.mp3",
+    "お": "audio/o.mp3",
+    "ア": "audio/a.mp3",
+    "イ": "audio/i.mp3",
+    "ウ": "audio/u.mp3",
+    "エ": "audio/e.mp3",
+    "オ": "audio/o.mp3",
+    "か": "audio/ka.mp3",
+    "き": "audio/ki.mp3",
+    "く": "audio/ku.mp3",
+    "け": "audio/ke.mp3",
+    "こ": "audio/ko.mp3",
+    "カ": "audio/ka.mp3",
+    "キ": "audio/ki.mp3",
+    "ク": "audio/ku.mp3",
+    "ケ": "audio/ke.mp3",
+    "コ": "audio/ko.mp3",
+    "さ": "audio/sa.mp3",
+    "し": "audio/shi.mp3",
+    "す": "audio/su.mp3",
+    "せ": "audio/se.mp3",
+    "そ": "audio/so.mp3",
+    "サ": "audio/sa.mp3",
+    "シ": "audio/shi.mp3",
+    "ス": "audio/su.mp3",
+    "セ": "audio/se.mp3",
+    "ソ": "audio/so.mp3",
+    "た": "audio/ta.mp3",
+    "ち": "audio/chi.mp3",
+    "つ": "audio/tsu.mp3",
+    "て": "audio/te.mp3",
+    "と": "audio/to.mp3",
+    "タ": "audio/ta.mp3",
+    "チ": "audio/chi.mp3",
+    "ツ": "audio/tsu.mp3",
+    "テ": "audio/te.mp3",
+    "ト": "audio/to.mp3",
+    "な": "audio/na.mp3",
+    "に": "audio/ni.mp3",
+    "ぬ": "audio/nu.mp3",
+    "ね": "audio/ne.mp3",
+    "の": "audio/no.mp3",
+    "ナ": "audio/na.mp3",
+    "ニ": "audio/ni.mp3",
+    "ヌ": "audio/nu.mp3",
+    "ネ": "audio/ne.mp3",
+    "ノ": "audio/no.mp3",
+    "は": "audio/ha.mp3",
+    "ひ": "audio/hi.mp3",
+    "ふ": "audio/fu.mp3",
+    "へ": "audio/he.mp3",
+    "ほ": "audio/ho.mp3",
+    "ハ": "audio/ha.mp3",
+    "ヒ": "audio/hi.mp3",
+    "フ": "audio/fu.mp3",
+    "ヘ": "audio/he.mp3",
+    "ホ": "audio/ho.mp3",
+    "ま": "audio/ma.mp3",
+    "み": "audio/mi.mp3",
+    "む": "audio/mu.mp3",
+    "め": "audio/me.mp3",
+    "も": "audio/mo.mp3",
+    "マ": "audio/ma.mp3",
+    "ミ": "audio/mi.mp3",
+    "ム": "audio/mu.mp3",
+    "メ": "audio/me.mp3",
+    "モ": "audio/mo.mp3",
+    "や": "audio/ya.mp3",
+    "ゆ": "audio/yu.mp3",
+    "よ": "audio/yo.mp3",
+    "ヤ": "audio/ya.mp3",
+    "ユ": "audio/yu.mp3",
+    "ヨ": "audio/yo.mp3",
+    "ら": "audio/ra.mp3",
+    "り": "audio/ri.mp3",
+    "る": "audio/ru.mp3",
+    "れ": "audio/re.mp3",
+    "ろ": "audio/ro.mp3",
+    "ラ": "audio/ra.mp3",
+    "リ": "audio/ri.mp3",
+    "ル": "audio/ru.mp3",
+    "レ": "audio/re.mp3",
+    "ロ": "audio/ro.mp3",
+    "わ": "audio/wa.mp3",
+    "を": "audio/wo.mp3",
+    "ワ": "audio/wa.mp3",
+    "ヲ": "audio/wo.mp3",
+    "ん": "audio/n.mp3",
+    "ン": "audio/n.mp3",
+    "が": "audio/ga.mp3",
+    "ぎ": "audio/gi.mp3",
+    "ぐ": "audio/gu.mp3",
+    "げ": "audio/ge.mp3",
+    "ご": "audio/go.mp3",
+    "ガ": "audio/ga.mp3",
+    "ギ": "audio/gi.mp3",
+    "グ": "audio/gu.mp3",
+    "ゲ": "audio/ge.mp3",
+    "ゴ": "audio/go.mp3",
+    "ざ": "audio/za.mp3",
+    "じ": "audio/ji.mp3",
+    "ず": "audio/zu.mp3",
+    "ぜ": "audio/ze.mp3",
+    "ぞ": "audio/zo.mp3",
+    "ザ": "audio/za.mp3",
+    "ジ": "audio/ji.mp3",
+    "ズ": "audio/zu.mp3",
+    "ゼ": "audio/ze.mp3",
+    "ゾ": "audio/zo.mp3",
+    "だ": "audio/da.mp3",
+    "ぢ": "audio/di.mp3",
+    "づ": "audio/du.mp3",
+    "で": "audio/de.mp3",
+    "ど": "audio/do.mp3",
+    "ダ": "audio/da.mp3",
+    "ヂ": "audio/di.mp3",
+    "ヅ": "audio/du.mp3",
+    "デ": "audio/de.mp3",
+    "ド": "audio/do.mp3",
+    "ば": "audio/ba.mp3",
+    "び": "audio/bi.mp3",
+    "ぶ": "audio/bu.mp3",
+    "べ": "audio/be.mp3",
+    "ぼ": "audio/bo.mp3",
+    "バ": "audio/ba.mp3",
+    "ビ": "audio/bi.mp3",
+    "ブ": "audio/bu.mp3",
+    "ベ": "audio/be.mp3",
+    "ボ": "audio/bo.mp3",
+    "ぱ": "audio/pa.mp3",
+    "ぴ": "audio/pi.mp3",
+    "ぷ": "audio/pu.mp3",
+    "ぺ": "audio/pe.mp3",
+    "ぽ": "audio/po.mp3",
+    "パ": "audio/pa.mp3",
+    "ピ": "audio/pi.mp3",
+    "プ": "audio/pu.mp3",
+    "ペ": "audio/pe.mp3",
+    "ポ": "audio/po.mp3",
+    "きゃ": "audio/kya.mp3",
+    "キャ": "audio/kya.mp3",
+    "きゅ": "audio/kyu.mp3",
+    "キュ": "audio/kyu.mp3",
+    "きょ": "audio/kyo.mp3",
+    "キョ": "audio/kyo.mp3",
+    "ぎゃ": "audio/gya.mp3",
+    "ギャ": "audio/gya.mp3",
+    "ぎゅ": "audio/gyu.mp3",
+    "ギュ": "audio/gyu.mp3",
+    "ぎょ": "audio/gyo.mp3",
+    "ギョ": "audio/gyo.mp3",
+    "しゃ": "audio/sha.mp3",
+    "シャ": "audio/sha.mp3",
+    "しゅ": "audio/shu.mp3",
+    "シュ": "audio/shu.mp3",
+    "しょ": "audio/sho.mp3",
+    "ショ": "audio/sho.mp3",
+    "じゃ": "audio/ja.mp3",
+    "ジャ": "audio/ja.mp3",
+    "じゅ": "audio/ju.mp3",
+    "ジュ": "audio/ju.mp3",
+    "じょ": "audio/jo.mp3",
+    "ジョ": "audio/jo.mp3",
+    "ちゃ": "audio/cha.mp3",
+    "チャ": "audio/cha.mp3",
+    "ちゅ": "audio/chu.mp3",
+    "チュ": "audio/chu.mp3",
+    "ちょ": "audio/cho.mp3",
+    "チョ": "audio/cho.mp3",
+    "にゃ": "audio/nya.mp3",
+    "ニャ": "audio/nya.mp3",
+    "にゅ": "audio/nyu.mp3",
+    "ニュ": "audio/nyu.mp3",
+    "にょ": "audio/nyo.mp3",
+    "ニョ": "audio/nyo.mp3",
+    "ひゃ": "audio/hya.mp3",
+    "ヒャ": "audio/hya.mp3",
+    "ひゅ": "audio/hyu.mp3",
+    "ヒュ": "audio/hyu.mp3",
+    "ひょ": "audio/hyo.mp3",
+    "ヒョ": "audio/hyo.mp3",
+    "びゃ": "audio/bya.mp3",
+    "ビャ": "audio/bya.mp3",
+    "びゅ": "audio/byu.mp3",
+    "ビュ": "audio/byu.mp3",
+    "びょ": "audio/byo.mp3",
+    "ビョ": "audio/byo.mp3",
+    "ぴゃ": "audio/pya.mp3",
+    "ピャ": "audio/pya.mp3",
+    "ぴゅ": "audio/pyu.mp3",
+    "ピュ": "audio/pyu.mp3",
+    "ぴょ": "audio/pyo.mp3",
+    "ピョ": "audio/pyo.mp3",
+    "みゃ": "audio/mya.mp3",
+    "ミャ": "audio/mya.mp3",
+    "みゅ": "audio/myu.mp3",
+    "ミュ": "audio/myu.mp3",
+    "みょ": "audio/myo.mp3",
+    "ミョ": "audio/myo.mp3",
+    "りゃ": "audio/rya.mp3",
+    "リャ": "audio/rya.mp3",
+    "りゅ": "audio/ryu.mp3",
+    "リュ": "audio/ryu.mp3",
+    "りょ": "audio/ryo.mp3",
+    "リョ": "audio/ryo.mp3",
+    "きって": "audio/kitte.mp3",
+    "がっこう": "audio/gakkoo.mp3",
+    "カップ": "audio/kappu.mp3",
+    "ベッド": "audio/beddo.mp3",
+    "コーヒー": "audio/koohii.mp3",
+    "ケーキ": "audio/keeki.mp3",
+    "おかあさん": "audio/okaasan.mp3",
+    "こうこう": "audio/kookoo.mp3"
+  },
+  "byItemId": {
+    "hiragana-あ": "audio/a.mp3",
+    "hiragana-い": "audio/i.mp3",
+    "hiragana-う": "audio/u.mp3",
+    "hiragana-え": "audio/e.mp3",
+    "hiragana-お": "audio/o.mp3",
+    "katakana-ア": "audio/a.mp3",
+    "katakana-イ": "audio/i.mp3",
+    "katakana-ウ": "audio/u.mp3",
+    "katakana-エ": "audio/e.mp3",
+    "katakana-オ": "audio/o.mp3",
+    "hiragana-か": "audio/ka.mp3",
+    "hiragana-き": "audio/ki.mp3",
+    "hiragana-く": "audio/ku.mp3",
+    "hiragana-け": "audio/ke.mp3",
+    "hiragana-こ": "audio/ko.mp3",
+    "katakana-カ": "audio/ka.mp3",
+    "katakana-キ": "audio/ki.mp3",
+    "katakana-ク": "audio/ku.mp3",
+    "katakana-ケ": "audio/ke.mp3",
+    "katakana-コ": "audio/ko.mp3",
+    "hiragana-さ": "audio/sa.mp3",
+    "hiragana-し": "audio/shi.mp3",
+    "hiragana-す": "audio/su.mp3",
+    "hiragana-せ": "audio/se.mp3",
+    "hiragana-そ": "audio/so.mp3",
+    "katakana-サ": "audio/sa.mp3",
+    "katakana-シ": "audio/shi.mp3",
+    "katakana-ス": "audio/su.mp3",
+    "katakana-セ": "audio/se.mp3",
+    "katakana-ソ": "audio/so.mp3",
+    "hiragana-た": "audio/ta.mp3",
+    "hiragana-ち": "audio/chi.mp3",
+    "hiragana-つ": "audio/tsu.mp3",
+    "hiragana-て": "audio/te.mp3",
+    "hiragana-と": "audio/to.mp3",
+    "katakana-タ": "audio/ta.mp3",
+    "katakana-チ": "audio/chi.mp3",
+    "katakana-ツ": "audio/tsu.mp3",
+    "katakana-テ": "audio/te.mp3",
+    "katakana-ト": "audio/to.mp3",
+    "hiragana-な": "audio/na.mp3",
+    "hiragana-に": "audio/ni.mp3",
+    "hiragana-ぬ": "audio/nu.mp3",
+    "hiragana-ね": "audio/ne.mp3",
+    "hiragana-の": "audio/no.mp3",
+    "katakana-ナ": "audio/na.mp3",
+    "katakana-ニ": "audio/ni.mp3",
+    "katakana-ヌ": "audio/nu.mp3",
+    "katakana-ネ": "audio/ne.mp3",
+    "katakana-ノ": "audio/no.mp3",
+    "hiragana-は": "audio/ha.mp3",
+    "hiragana-ひ": "audio/hi.mp3",
+    "hiragana-ふ": "audio/fu.mp3",
+    "hiragana-へ": "audio/he.mp3",
+    "hiragana-ほ": "audio/ho.mp3",
+    "katakana-ハ": "audio/ha.mp3",
+    "katakana-ヒ": "audio/hi.mp3",
+    "katakana-フ": "audio/fu.mp3",
+    "katakana-ヘ": "audio/he.mp3",
+    "katakana-ホ": "audio/ho.mp3",
+    "hiragana-ま": "audio/ma.mp3",
+    "hiragana-み": "audio/mi.mp3",
+    "hiragana-む": "audio/mu.mp3",
+    "hiragana-め": "audio/me.mp3",
+    "hiragana-も": "audio/mo.mp3",
+    "katakana-マ": "audio/ma.mp3",
+    "katakana-ミ": "audio/mi.mp3",
+    "katakana-ム": "audio/mu.mp3",
+    "katakana-メ": "audio/me.mp3",
+    "katakana-モ": "audio/mo.mp3",
+    "hiragana-や": "audio/ya.mp3",
+    "hiragana-ゆ": "audio/yu.mp3",
+    "hiragana-よ": "audio/yo.mp3",
+    "katakana-ヤ": "audio/ya.mp3",
+    "katakana-ユ": "audio/yu.mp3",
+    "katakana-ヨ": "audio/yo.mp3",
+    "hiragana-ら": "audio/ra.mp3",
+    "hiragana-り": "audio/ri.mp3",
+    "hiragana-る": "audio/ru.mp3",
+    "hiragana-れ": "audio/re.mp3",
+    "hiragana-ろ": "audio/ro.mp3",
+    "katakana-ラ": "audio/ra.mp3",
+    "katakana-リ": "audio/ri.mp3",
+    "katakana-ル": "audio/ru.mp3",
+    "katakana-レ": "audio/re.mp3",
+    "katakana-ロ": "audio/ro.mp3",
+    "hiragana-わ": "audio/wa.mp3",
+    "hiragana-を": "audio/wo.mp3",
+    "katakana-ワ": "audio/wa.mp3",
+    "katakana-ヲ": "audio/wo.mp3",
+    "hiragana-ん": "audio/n.mp3",
+    "katakana-ン": "audio/n.mp3",
+    "hiragana-が": "audio/ga.mp3",
+    "hiragana-ぎ": "audio/gi.mp3",
+    "hiragana-ぐ": "audio/gu.mp3",
+    "hiragana-げ": "audio/ge.mp3",
+    "hiragana-ご": "audio/go.mp3",
+    "katakana-ガ": "audio/ga.mp3",
+    "katakana-ギ": "audio/gi.mp3",
+    "katakana-グ": "audio/gu.mp3",
+    "katakana-ゲ": "audio/ge.mp3",
+    "katakana-ゴ": "audio/go.mp3",
+    "hiragana-ざ": "audio/za.mp3",
+    "hiragana-じ": "audio/ji.mp3",
+    "hiragana-ず": "audio/zu.mp3",
+    "hiragana-ぜ": "audio/ze.mp3",
+    "hiragana-ぞ": "audio/zo.mp3",
+    "katakana-ザ": "audio/za.mp3",
+    "katakana-ジ": "audio/ji.mp3",
+    "katakana-ズ": "audio/zu.mp3",
+    "katakana-ゼ": "audio/ze.mp3",
+    "katakana-ゾ": "audio/zo.mp3",
+    "hiragana-だ": "audio/da.mp3",
+    "hiragana-ぢ": "audio/di.mp3",
+    "hiragana-づ": "audio/du.mp3",
+    "hiragana-で": "audio/de.mp3",
+    "hiragana-ど": "audio/do.mp3",
+    "katakana-ダ": "audio/da.mp3",
+    "katakana-ヂ": "audio/di.mp3",
+    "katakana-ヅ": "audio/du.mp3",
+    "katakana-デ": "audio/de.mp3",
+    "katakana-ド": "audio/do.mp3",
+    "hiragana-ば": "audio/ba.mp3",
+    "hiragana-び": "audio/bi.mp3",
+    "hiragana-ぶ": "audio/bu.mp3",
+    "hiragana-べ": "audio/be.mp3",
+    "hiragana-ぼ": "audio/bo.mp3",
+    "katakana-バ": "audio/ba.mp3",
+    "katakana-ビ": "audio/bi.mp3",
+    "katakana-ブ": "audio/bu.mp3",
+    "katakana-ベ": "audio/be.mp3",
+    "katakana-ボ": "audio/bo.mp3",
+    "hiragana-ぱ": "audio/pa.mp3",
+    "hiragana-ぴ": "audio/pi.mp3",
+    "hiragana-ぷ": "audio/pu.mp3",
+    "hiragana-ぺ": "audio/pe.mp3",
+    "hiragana-ぽ": "audio/po.mp3",
+    "katakana-パ": "audio/pa.mp3",
+    "katakana-ピ": "audio/pi.mp3",
+    "katakana-プ": "audio/pu.mp3",
+    "katakana-ペ": "audio/pe.mp3",
+    "katakana-ポ": "audio/po.mp3",
+    "hiragana-きゃ": "audio/kya.mp3",
+    "katakana-キャ": "audio/kya.mp3",
+    "hiragana-きゅ": "audio/kyu.mp3",
+    "katakana-キュ": "audio/kyu.mp3",
+    "hiragana-きょ": "audio/kyo.mp3",
+    "katakana-キョ": "audio/kyo.mp3",
+    "hiragana-ぎゃ": "audio/gya.mp3",
+    "katakana-ギャ": "audio/gya.mp3",
+    "hiragana-ぎゅ": "audio/gyu.mp3",
+    "katakana-ギュ": "audio/gyu.mp3",
+    "hiragana-ぎょ": "audio/gyo.mp3",
+    "katakana-ギョ": "audio/gyo.mp3",
+    "hiragana-しゃ": "audio/sha.mp3",
+    "katakana-シャ": "audio/sha.mp3",
+    "hiragana-しゅ": "audio/shu.mp3",
+    "katakana-シュ": "audio/shu.mp3",
+    "hiragana-しょ": "audio/sho.mp3",
+    "katakana-ショ": "audio/sho.mp3",
+    "hiragana-じゃ": "audio/ja.mp3",
+    "katakana-ジャ": "audio/ja.mp3",
+    "hiragana-じゅ": "audio/ju.mp3",
+    "katakana-ジュ": "audio/ju.mp3",
+    "hiragana-じょ": "audio/jo.mp3",
+    "katakana-ジョ": "audio/jo.mp3",
+    "hiragana-ちゃ": "audio/cha.mp3",
+    "katakana-チャ": "audio/cha.mp3",
+    "hiragana-ちゅ": "audio/chu.mp3",
+    "katakana-チュ": "audio/chu.mp3",
+    "hiragana-ちょ": "audio/cho.mp3",
+    "katakana-チョ": "audio/cho.mp3",
+    "hiragana-にゃ": "audio/nya.mp3",
+    "katakana-ニャ": "audio/nya.mp3",
+    "hiragana-にゅ": "audio/nyu.mp3",
+    "katakana-ニュ": "audio/nyu.mp3",
+    "hiragana-にょ": "audio/nyo.mp3",
+    "katakana-ニョ": "audio/nyo.mp3",
+    "hiragana-ひゃ": "audio/hya.mp3",
+    "katakana-ヒャ": "audio/hya.mp3",
+    "hiragana-ひゅ": "audio/hyu.mp3",
+    "katakana-ヒュ": "audio/hyu.mp3",
+    "hiragana-ひょ": "audio/hyo.mp3",
+    "katakana-ヒョ": "audio/hyo.mp3",
+    "hiragana-びゃ": "audio/bya.mp3",
+    "katakana-ビャ": "audio/bya.mp3",
+    "hiragana-びゅ": "audio/byu.mp3",
+    "katakana-ビュ": "audio/byu.mp3",
+    "hiragana-びょ": "audio/byo.mp3",
+    "katakana-ビョ": "audio/byo.mp3",
+    "hiragana-ぴゃ": "audio/pya.mp3",
+    "katakana-ピャ": "audio/pya.mp3",
+    "hiragana-ぴゅ": "audio/pyu.mp3",
+    "katakana-ピュ": "audio/pyu.mp3",
+    "hiragana-ぴょ": "audio/pyo.mp3",
+    "katakana-ピョ": "audio/pyo.mp3",
+    "hiragana-みゃ": "audio/mya.mp3",
+    "katakana-ミャ": "audio/mya.mp3",
+    "hiragana-みゅ": "audio/myu.mp3",
+    "katakana-ミュ": "audio/myu.mp3",
+    "hiragana-みょ": "audio/myo.mp3",
+    "katakana-ミョ": "audio/myo.mp3",
+    "hiragana-りゃ": "audio/rya.mp3",
+    "katakana-リャ": "audio/rya.mp3",
+    "hiragana-りゅ": "audio/ryu.mp3",
+    "katakana-リュ": "audio/ryu.mp3",
+    "hiragana-りょ": "audio/ryo.mp3",
+    "katakana-リョ": "audio/ryo.mp3",
+    "hiragana-きって": "audio/kitte.mp3",
+    "hiragana-がっこう": "audio/gakkoo.mp3",
+    "katakana-カップ": "audio/kappu.mp3",
+    "katakana-ベッド": "audio/beddo.mp3",
+    "katakana-コーヒー": "audio/koohii.mp3",
+    "katakana-ケーキ": "audio/keeki.mp3",
+    "hiragana-おかあさん": "audio/okaasan.mp3",
+    "hiragana-こうこう": "audio/kookoo.mp3"
+  },
+  "byReading": {
+    "a": "audio/a.mp3",
+    "i": "audio/i.mp3",
+    "u": "audio/u.mp3",
+    "e": "audio/e.mp3",
+    "o": "audio/o.mp3",
+    "ka": "audio/ka.mp3",
+    "ki": "audio/ki.mp3",
+    "ku": "audio/ku.mp3",
+    "ke": "audio/ke.mp3",
+    "ko": "audio/ko.mp3",
+    "sa": "audio/sa.mp3",
+    "shi": "audio/shi.mp3",
+    "su": "audio/su.mp3",
+    "se": "audio/se.mp3",
+    "so": "audio/so.mp3",
+    "ta": "audio/ta.mp3",
+    "chi": "audio/chi.mp3",
+    "tsu": "audio/tsu.mp3",
+    "te": "audio/te.mp3",
+    "to": "audio/to.mp3",
+    "na": "audio/na.mp3",
+    "ni": "audio/ni.mp3",
+    "nu": "audio/nu.mp3",
+    "ne": "audio/ne.mp3",
+    "no": "audio/no.mp3",
+    "ha": "audio/ha.mp3",
+    "hi": "audio/hi.mp3",
+    "fu": "audio/fu.mp3",
+    "he": "audio/he.mp3",
+    "ho": "audio/ho.mp3",
+    "ma": "audio/ma.mp3",
+    "mi": "audio/mi.mp3",
+    "mu": "audio/mu.mp3",
+    "me": "audio/me.mp3",
+    "mo": "audio/mo.mp3",
+    "ya": "audio/ya.mp3",
+    "yu": "audio/yu.mp3",
+    "yo": "audio/yo.mp3",
+    "ra": "audio/ra.mp3",
+    "ri": "audio/ri.mp3",
+    "ru": "audio/ru.mp3",
+    "re": "audio/re.mp3",
+    "ro": "audio/ro.mp3",
+    "wa": "audio/wa.mp3",
+    "wo": "audio/wo.mp3",
+    "n": "audio/n.mp3",
+    "ga": "audio/ga.mp3",
+    "gi": "audio/gi.mp3",
+    "gu": "audio/gu.mp3",
+    "ge": "audio/ge.mp3",
+    "go": "audio/go.mp3",
+    "za": "audio/za.mp3",
+    "ji": "audio/ji.mp3",
+    "zu": "audio/zu.mp3",
+    "ze": "audio/ze.mp3",
+    "zo": "audio/zo.mp3",
+    "da": "audio/da.mp3",
+    "di": "audio/di.mp3",
+    "du": "audio/du.mp3",
+    "de": "audio/de.mp3",
+    "do": "audio/do.mp3",
+    "ba": "audio/ba.mp3",
+    "bi": "audio/bi.mp3",
+    "bu": "audio/bu.mp3",
+    "be": "audio/be.mp3",
+    "bo": "audio/bo.mp3",
+    "pa": "audio/pa.mp3",
+    "pi": "audio/pi.mp3",
+    "pu": "audio/pu.mp3",
+    "pe": "audio/pe.mp3",
+    "po": "audio/po.mp3",
+    "kya": "audio/kya.mp3",
+    "kyu": "audio/kyu.mp3",
+    "kyo": "audio/kyo.mp3",
+    "gya": "audio/gya.mp3",
+    "gyu": "audio/gyu.mp3",
+    "gyo": "audio/gyo.mp3",
+    "sha": "audio/sha.mp3",
+    "shu": "audio/shu.mp3",
+    "sho": "audio/sho.mp3",
+    "ja": "audio/ja.mp3",
+    "ju": "audio/ju.mp3",
+    "jo": "audio/jo.mp3",
+    "cha": "audio/cha.mp3",
+    "chu": "audio/chu.mp3",
+    "cho": "audio/cho.mp3",
+    "nya": "audio/nya.mp3",
+    "nyu": "audio/nyu.mp3",
+    "nyo": "audio/nyo.mp3",
+    "hya": "audio/hya.mp3",
+    "hyu": "audio/hyu.mp3",
+    "hyo": "audio/hyo.mp3",
+    "bya": "audio/bya.mp3",
+    "byu": "audio/byu.mp3",
+    "byo": "audio/byo.mp3",
+    "pya": "audio/pya.mp3",
+    "pyu": "audio/pyu.mp3",
+    "pyo": "audio/pyo.mp3",
+    "mya": "audio/mya.mp3",
+    "myu": "audio/myu.mp3",
+    "myo": "audio/myo.mp3",
+    "rya": "audio/rya.mp3",
+    "ryu": "audio/ryu.mp3",
+    "ryo": "audio/ryo.mp3",
+    "kitte": "audio/kitte.mp3",
+    "gakkoo": "audio/gakkoo.mp3",
+    "kappu": "audio/kappu.mp3",
+    "beddo": "audio/beddo.mp3",
+    "koohii": "audio/koohii.mp3",
+    "keeki": "audio/keeki.mp3",
+    "okaasan": "audio/okaasan.mp3",
+    "kookoo": "audio/kookoo.mp3"
+  },
+  "byAudioId": {
+    "a": "audio/a.mp3",
+    "i": "audio/i.mp3",
+    "u": "audio/u.mp3",
+    "e": "audio/e.mp3",
+    "o": "audio/o.mp3",
+    "ka": "audio/ka.mp3",
+    "ki": "audio/ki.mp3",
+    "ku": "audio/ku.mp3",
+    "ke": "audio/ke.mp3",
+    "ko": "audio/ko.mp3",
+    "sa": "audio/sa.mp3",
+    "shi": "audio/shi.mp3",
+    "su": "audio/su.mp3",
+    "se": "audio/se.mp3",
+    "so": "audio/so.mp3",
+    "ta": "audio/ta.mp3",
+    "chi": "audio/chi.mp3",
+    "tsu": "audio/tsu.mp3",
+    "te": "audio/te.mp3",
+    "to": "audio/to.mp3",
+    "na": "audio/na.mp3",
+    "ni": "audio/ni.mp3",
+    "nu": "audio/nu.mp3",
+    "ne": "audio/ne.mp3",
+    "no": "audio/no.mp3",
+    "ha": "audio/ha.mp3",
+    "hi": "audio/hi.mp3",
+    "fu": "audio/fu.mp3",
+    "he": "audio/he.mp3",
+    "ho": "audio/ho.mp3",
+    "ma": "audio/ma.mp3",
+    "mi": "audio/mi.mp3",
+    "mu": "audio/mu.mp3",
+    "me": "audio/me.mp3",
+    "mo": "audio/mo.mp3",
+    "ya": "audio/ya.mp3",
+    "yu": "audio/yu.mp3",
+    "yo": "audio/yo.mp3",
+    "ra": "audio/ra.mp3",
+    "ri": "audio/ri.mp3",
+    "ru": "audio/ru.mp3",
+    "re": "audio/re.mp3",
+    "ro": "audio/ro.mp3",
+    "wa": "audio/wa.mp3",
+    "wo": "audio/wo.mp3",
+    "n": "audio/n.mp3",
+    "ga": "audio/ga.mp3",
+    "gi": "audio/gi.mp3",
+    "gu": "audio/gu.mp3",
+    "ge": "audio/ge.mp3",
+    "go": "audio/go.mp3",
+    "za": "audio/za.mp3",
+    "ji": "audio/ji.mp3",
+    "zu": "audio/zu.mp3",
+    "ze": "audio/ze.mp3",
+    "zo": "audio/zo.mp3",
+    "da": "audio/da.mp3",
+    "di": "audio/di.mp3",
+    "du": "audio/du.mp3",
+    "de": "audio/de.mp3",
+    "do": "audio/do.mp3",
+    "ba": "audio/ba.mp3",
+    "bi": "audio/bi.mp3",
+    "bu": "audio/bu.mp3",
+    "be": "audio/be.mp3",
+    "bo": "audio/bo.mp3",
+    "pa": "audio/pa.mp3",
+    "pi": "audio/pi.mp3",
+    "pu": "audio/pu.mp3",
+    "pe": "audio/pe.mp3",
+    "po": "audio/po.mp3",
+    "kya": "audio/kya.mp3",
+    "kyu": "audio/kyu.mp3",
+    "kyo": "audio/kyo.mp3",
+    "gya": "audio/gya.mp3",
+    "gyu": "audio/gyu.mp3",
+    "gyo": "audio/gyo.mp3",
+    "sha": "audio/sha.mp3",
+    "shu": "audio/shu.mp3",
+    "sho": "audio/sho.mp3",
+    "ja": "audio/ja.mp3",
+    "ju": "audio/ju.mp3",
+    "jo": "audio/jo.mp3",
+    "cha": "audio/cha.mp3",
+    "chu": "audio/chu.mp3",
+    "cho": "audio/cho.mp3",
+    "nya": "audio/nya.mp3",
+    "nyu": "audio/nyu.mp3",
+    "nyo": "audio/nyo.mp3",
+    "hya": "audio/hya.mp3",
+    "hyu": "audio/hyu.mp3",
+    "hyo": "audio/hyo.mp3",
+    "bya": "audio/bya.mp3",
+    "byu": "audio/byu.mp3",
+    "byo": "audio/byo.mp3",
+    "pya": "audio/pya.mp3",
+    "pyu": "audio/pyu.mp3",
+    "pyo": "audio/pyo.mp3",
+    "mya": "audio/mya.mp3",
+    "myu": "audio/myu.mp3",
+    "myo": "audio/myo.mp3",
+    "rya": "audio/rya.mp3",
+    "ryu": "audio/ryu.mp3",
+    "ryo": "audio/ryo.mp3",
+    "kitte": "audio/kitte.mp3",
+    "gakkoo": "audio/gakkoo.mp3",
+    "kappu": "audio/kappu.mp3",
+    "beddo": "audio/beddo.mp3",
+    "koohii": "audio/koohii.mp3",
+    "keeki": "audio/keeki.mp3",
+    "okaasan": "audio/okaasan.mp3",
+    "kookoo": "audio/kookoo.mp3"
+  },
+  "items": [
+    {
+      "id": "hiragana-あ",
+      "symbol": "あ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "a",
+      "accepted": [],
+      "typing": "a",
+      "audioId": "a",
+      "file": "audio/a.mp3"
+    },
+    {
+      "id": "hiragana-い",
+      "symbol": "い",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "i",
+      "accepted": [],
+      "typing": "i",
+      "audioId": "i",
+      "file": "audio/i.mp3"
+    },
+    {
+      "id": "hiragana-う",
+      "symbol": "う",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "u",
+      "accepted": [],
+      "typing": "u",
+      "audioId": "u",
+      "file": "audio/u.mp3"
+    },
+    {
+      "id": "hiragana-え",
+      "symbol": "え",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "e",
+      "accepted": [],
+      "typing": "e",
+      "audioId": "e",
+      "file": "audio/e.mp3"
+    },
+    {
+      "id": "hiragana-お",
+      "symbol": "お",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "o",
+      "accepted": [],
+      "typing": "o",
+      "audioId": "o",
+      "file": "audio/o.mp3"
+    },
+    {
+      "id": "katakana-ア",
+      "symbol": "ア",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "a",
+      "accepted": [],
+      "typing": "a",
+      "audioId": "a",
+      "file": "audio/a.mp3"
+    },
+    {
+      "id": "katakana-イ",
+      "symbol": "イ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "i",
+      "accepted": [],
+      "typing": "i",
+      "audioId": "i",
+      "file": "audio/i.mp3"
+    },
+    {
+      "id": "katakana-ウ",
+      "symbol": "ウ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "u",
+      "accepted": [],
+      "typing": "u",
+      "audioId": "u",
+      "file": "audio/u.mp3"
+    },
+    {
+      "id": "katakana-エ",
+      "symbol": "エ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "e",
+      "accepted": [],
+      "typing": "e",
+      "audioId": "e",
+      "file": "audio/e.mp3"
+    },
+    {
+      "id": "katakana-オ",
+      "symbol": "オ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "o",
+      "accepted": [],
+      "typing": "o",
+      "audioId": "o",
+      "file": "audio/o.mp3"
+    },
+    {
+      "id": "hiragana-か",
+      "symbol": "か",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ka",
+      "accepted": [],
+      "typing": "ka",
+      "audioId": "ka",
+      "file": "audio/ka.mp3"
+    },
+    {
+      "id": "hiragana-き",
+      "symbol": "き",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ki",
+      "accepted": [],
+      "typing": "ki",
+      "audioId": "ki",
+      "file": "audio/ki.mp3"
+    },
+    {
+      "id": "hiragana-く",
+      "symbol": "く",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ku",
+      "accepted": [],
+      "typing": "ku",
+      "audioId": "ku",
+      "file": "audio/ku.mp3"
+    },
+    {
+      "id": "hiragana-け",
+      "symbol": "け",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ke",
+      "accepted": [],
+      "typing": "ke",
+      "audioId": "ke",
+      "file": "audio/ke.mp3"
+    },
+    {
+      "id": "hiragana-こ",
+      "symbol": "こ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ko",
+      "accepted": [],
+      "typing": "ko",
+      "audioId": "ko",
+      "file": "audio/ko.mp3"
+    },
+    {
+      "id": "katakana-カ",
+      "symbol": "カ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ka",
+      "accepted": [],
+      "typing": "ka",
+      "audioId": "ka",
+      "file": "audio/ka.mp3"
+    },
+    {
+      "id": "katakana-キ",
+      "symbol": "キ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ki",
+      "accepted": [],
+      "typing": "ki",
+      "audioId": "ki",
+      "file": "audio/ki.mp3"
+    },
+    {
+      "id": "katakana-ク",
+      "symbol": "ク",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ku",
+      "accepted": [],
+      "typing": "ku",
+      "audioId": "ku",
+      "file": "audio/ku.mp3"
+    },
+    {
+      "id": "katakana-ケ",
+      "symbol": "ケ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ke",
+      "accepted": [],
+      "typing": "ke",
+      "audioId": "ke",
+      "file": "audio/ke.mp3"
+    },
+    {
+      "id": "katakana-コ",
+      "symbol": "コ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ko",
+      "accepted": [],
+      "typing": "ko",
+      "audioId": "ko",
+      "file": "audio/ko.mp3"
+    },
+    {
+      "id": "hiragana-さ",
+      "symbol": "さ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "sa",
+      "accepted": [],
+      "typing": "sa",
+      "audioId": "sa",
+      "file": "audio/sa.mp3"
+    },
+    {
+      "id": "hiragana-し",
+      "symbol": "し",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "shi",
+      "accepted": [
+        "si"
+      ],
+      "typing": "shi",
+      "audioId": "shi",
+      "file": "audio/shi.mp3",
+      "pronunciation": "Hepburn romaji writes this sound shi; si is also accepted."
+    },
+    {
+      "id": "hiragana-す",
+      "symbol": "す",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "su",
+      "accepted": [],
+      "typing": "su",
+      "audioId": "su",
+      "file": "audio/su.mp3"
+    },
+    {
+      "id": "hiragana-せ",
+      "symbol": "せ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "se",
+      "accepted": [],
+      "typing": "se",
+      "audioId": "se",
+      "file": "audio/se.mp3"
+    },
+    {
+      "id": "hiragana-そ",
+      "symbol": "そ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "so",
+      "accepted": [],
+      "typing": "so",
+      "audioId": "so",
+      "file": "audio/so.mp3"
+    },
+    {
+      "id": "katakana-サ",
+      "symbol": "サ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "sa",
+      "accepted": [],
+      "typing": "sa",
+      "audioId": "sa",
+      "file": "audio/sa.mp3"
+    },
+    {
+      "id": "katakana-シ",
+      "symbol": "シ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "shi",
+      "accepted": [
+        "si"
+      ],
+      "typing": "shi",
+      "audioId": "shi",
+      "file": "audio/shi.mp3",
+      "pronunciation": "Hepburn romaji writes this sound shi; si is also accepted."
+    },
+    {
+      "id": "katakana-ス",
+      "symbol": "ス",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "su",
+      "accepted": [],
+      "typing": "su",
+      "audioId": "su",
+      "file": "audio/su.mp3"
+    },
+    {
+      "id": "katakana-セ",
+      "symbol": "セ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "se",
+      "accepted": [],
+      "typing": "se",
+      "audioId": "se",
+      "file": "audio/se.mp3"
+    },
+    {
+      "id": "katakana-ソ",
+      "symbol": "ソ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "so",
+      "accepted": [],
+      "typing": "so",
+      "audioId": "so",
+      "file": "audio/so.mp3"
+    },
+    {
+      "id": "hiragana-た",
+      "symbol": "た",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ta",
+      "accepted": [],
+      "typing": "ta",
+      "audioId": "ta",
+      "file": "audio/ta.mp3"
+    },
+    {
+      "id": "hiragana-ち",
+      "symbol": "ち",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "chi",
+      "accepted": [
+        "ti"
+      ],
+      "typing": "chi",
+      "audioId": "chi",
+      "file": "audio/chi.mp3",
+      "pronunciation": "Hepburn romaji writes this sound chi; ti is also accepted."
+    },
+    {
+      "id": "hiragana-つ",
+      "symbol": "つ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "tsu",
+      "accepted": [
+        "tu"
+      ],
+      "typing": "tsu",
+      "audioId": "tsu",
+      "file": "audio/tsu.mp3",
+      "pronunciation": "Hepburn romaji writes this sound tsu; tu is also accepted."
+    },
+    {
+      "id": "hiragana-て",
+      "symbol": "て",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "te",
+      "accepted": [],
+      "typing": "te",
+      "audioId": "te",
+      "file": "audio/te.mp3"
+    },
+    {
+      "id": "hiragana-と",
+      "symbol": "と",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "to",
+      "accepted": [],
+      "typing": "to",
+      "audioId": "to",
+      "file": "audio/to.mp3"
+    },
+    {
+      "id": "katakana-タ",
+      "symbol": "タ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ta",
+      "accepted": [],
+      "typing": "ta",
+      "audioId": "ta",
+      "file": "audio/ta.mp3"
+    },
+    {
+      "id": "katakana-チ",
+      "symbol": "チ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "chi",
+      "accepted": [
+        "ti"
+      ],
+      "typing": "chi",
+      "audioId": "chi",
+      "file": "audio/chi.mp3",
+      "pronunciation": "Hepburn romaji writes this sound chi; ti is also accepted."
+    },
+    {
+      "id": "katakana-ツ",
+      "symbol": "ツ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "tsu",
+      "accepted": [
+        "tu"
+      ],
+      "typing": "tsu",
+      "audioId": "tsu",
+      "file": "audio/tsu.mp3",
+      "pronunciation": "Hepburn romaji writes this sound tsu; tu is also accepted."
+    },
+    {
+      "id": "katakana-テ",
+      "symbol": "テ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "te",
+      "accepted": [],
+      "typing": "te",
+      "audioId": "te",
+      "file": "audio/te.mp3"
+    },
+    {
+      "id": "katakana-ト",
+      "symbol": "ト",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "to",
+      "accepted": [],
+      "typing": "to",
+      "audioId": "to",
+      "file": "audio/to.mp3"
+    },
+    {
+      "id": "hiragana-な",
+      "symbol": "な",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "na",
+      "accepted": [],
+      "typing": "na",
+      "audioId": "na",
+      "file": "audio/na.mp3"
+    },
+    {
+      "id": "hiragana-に",
+      "symbol": "に",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ni",
+      "accepted": [],
+      "typing": "ni",
+      "audioId": "ni",
+      "file": "audio/ni.mp3"
+    },
+    {
+      "id": "hiragana-ぬ",
+      "symbol": "ぬ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "nu",
+      "accepted": [],
+      "typing": "nu",
+      "audioId": "nu",
+      "file": "audio/nu.mp3"
+    },
+    {
+      "id": "hiragana-ね",
+      "symbol": "ね",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ne",
+      "accepted": [],
+      "typing": "ne",
+      "audioId": "ne",
+      "file": "audio/ne.mp3"
+    },
+    {
+      "id": "hiragana-の",
+      "symbol": "の",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "no",
+      "accepted": [],
+      "typing": "no",
+      "audioId": "no",
+      "file": "audio/no.mp3"
+    },
+    {
+      "id": "katakana-ナ",
+      "symbol": "ナ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "na",
+      "accepted": [],
+      "typing": "na",
+      "audioId": "na",
+      "file": "audio/na.mp3"
+    },
+    {
+      "id": "katakana-ニ",
+      "symbol": "ニ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ni",
+      "accepted": [],
+      "typing": "ni",
+      "audioId": "ni",
+      "file": "audio/ni.mp3"
+    },
+    {
+      "id": "katakana-ヌ",
+      "symbol": "ヌ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "nu",
+      "accepted": [],
+      "typing": "nu",
+      "audioId": "nu",
+      "file": "audio/nu.mp3"
+    },
+    {
+      "id": "katakana-ネ",
+      "symbol": "ネ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ne",
+      "accepted": [],
+      "typing": "ne",
+      "audioId": "ne",
+      "file": "audio/ne.mp3"
+    },
+    {
+      "id": "katakana-ノ",
+      "symbol": "ノ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "no",
+      "accepted": [],
+      "typing": "no",
+      "audioId": "no",
+      "file": "audio/no.mp3"
+    },
+    {
+      "id": "hiragana-は",
+      "symbol": "は",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ha",
+      "accepted": [],
+      "typing": "ha",
+      "audioId": "ha",
+      "file": "audio/ha.mp3"
+    },
+    {
+      "id": "hiragana-ひ",
+      "symbol": "ひ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "hi",
+      "accepted": [],
+      "typing": "hi",
+      "audioId": "hi",
+      "file": "audio/hi.mp3"
+    },
+    {
+      "id": "hiragana-ふ",
+      "symbol": "ふ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "fu",
+      "accepted": [
+        "hu"
+      ],
+      "typing": "fu",
+      "audioId": "fu",
+      "file": "audio/fu.mp3",
+      "pronunciation": "A soft f made with both lips; hu is also accepted."
+    },
+    {
+      "id": "hiragana-へ",
+      "symbol": "へ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "he",
+      "accepted": [],
+      "typing": "he",
+      "audioId": "he",
+      "file": "audio/he.mp3"
+    },
+    {
+      "id": "hiragana-ほ",
+      "symbol": "ほ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ho",
+      "accepted": [],
+      "typing": "ho",
+      "audioId": "ho",
+      "file": "audio/ho.mp3"
+    },
+    {
+      "id": "katakana-ハ",
+      "symbol": "ハ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ha",
+      "accepted": [],
+      "typing": "ha",
+      "audioId": "ha",
+      "file": "audio/ha.mp3"
+    },
+    {
+      "id": "katakana-ヒ",
+      "symbol": "ヒ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "hi",
+      "accepted": [],
+      "typing": "hi",
+      "audioId": "hi",
+      "file": "audio/hi.mp3"
+    },
+    {
+      "id": "katakana-フ",
+      "symbol": "フ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "fu",
+      "accepted": [
+        "hu"
+      ],
+      "typing": "fu",
+      "audioId": "fu",
+      "file": "audio/fu.mp3",
+      "pronunciation": "A soft f made with both lips; hu is also accepted."
+    },
+    {
+      "id": "katakana-ヘ",
+      "symbol": "ヘ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "he",
+      "accepted": [],
+      "typing": "he",
+      "audioId": "he",
+      "file": "audio/he.mp3"
+    },
+    {
+      "id": "katakana-ホ",
+      "symbol": "ホ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ho",
+      "accepted": [],
+      "typing": "ho",
+      "audioId": "ho",
+      "file": "audio/ho.mp3"
+    },
+    {
+      "id": "hiragana-ま",
+      "symbol": "ま",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ma",
+      "accepted": [],
+      "typing": "ma",
+      "audioId": "ma",
+      "file": "audio/ma.mp3"
+    },
+    {
+      "id": "hiragana-み",
+      "symbol": "み",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "mi",
+      "accepted": [],
+      "typing": "mi",
+      "audioId": "mi",
+      "file": "audio/mi.mp3"
+    },
+    {
+      "id": "hiragana-む",
+      "symbol": "む",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "mu",
+      "accepted": [],
+      "typing": "mu",
+      "audioId": "mu",
+      "file": "audio/mu.mp3"
+    },
+    {
+      "id": "hiragana-め",
+      "symbol": "め",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "me",
+      "accepted": [],
+      "typing": "me",
+      "audioId": "me",
+      "file": "audio/me.mp3"
+    },
+    {
+      "id": "hiragana-も",
+      "symbol": "も",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "mo",
+      "accepted": [],
+      "typing": "mo",
+      "audioId": "mo",
+      "file": "audio/mo.mp3"
+    },
+    {
+      "id": "katakana-マ",
+      "symbol": "マ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ma",
+      "accepted": [],
+      "typing": "ma",
+      "audioId": "ma",
+      "file": "audio/ma.mp3"
+    },
+    {
+      "id": "katakana-ミ",
+      "symbol": "ミ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "mi",
+      "accepted": [],
+      "typing": "mi",
+      "audioId": "mi",
+      "file": "audio/mi.mp3"
+    },
+    {
+      "id": "katakana-ム",
+      "symbol": "ム",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "mu",
+      "accepted": [],
+      "typing": "mu",
+      "audioId": "mu",
+      "file": "audio/mu.mp3"
+    },
+    {
+      "id": "katakana-メ",
+      "symbol": "メ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "me",
+      "accepted": [],
+      "typing": "me",
+      "audioId": "me",
+      "file": "audio/me.mp3"
+    },
+    {
+      "id": "katakana-モ",
+      "symbol": "モ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "mo",
+      "accepted": [],
+      "typing": "mo",
+      "audioId": "mo",
+      "file": "audio/mo.mp3"
+    },
+    {
+      "id": "hiragana-や",
+      "symbol": "や",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ya",
+      "accepted": [],
+      "typing": "ya",
+      "audioId": "ya",
+      "file": "audio/ya.mp3"
+    },
+    {
+      "id": "hiragana-ゆ",
+      "symbol": "ゆ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "yu",
+      "accepted": [],
+      "typing": "yu",
+      "audioId": "yu",
+      "file": "audio/yu.mp3"
+    },
+    {
+      "id": "hiragana-よ",
+      "symbol": "よ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "yo",
+      "accepted": [],
+      "typing": "yo",
+      "audioId": "yo",
+      "file": "audio/yo.mp3"
+    },
+    {
+      "id": "katakana-ヤ",
+      "symbol": "ヤ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ya",
+      "accepted": [],
+      "typing": "ya",
+      "audioId": "ya",
+      "file": "audio/ya.mp3"
+    },
+    {
+      "id": "katakana-ユ",
+      "symbol": "ユ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "yu",
+      "accepted": [],
+      "typing": "yu",
+      "audioId": "yu",
+      "file": "audio/yu.mp3"
+    },
+    {
+      "id": "katakana-ヨ",
+      "symbol": "ヨ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "yo",
+      "accepted": [],
+      "typing": "yo",
+      "audioId": "yo",
+      "file": "audio/yo.mp3"
+    },
+    {
+      "id": "hiragana-ら",
+      "symbol": "ら",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ra",
+      "accepted": [],
+      "typing": "ra",
+      "audioId": "ra",
+      "file": "audio/ra.mp3"
+    },
+    {
+      "id": "hiragana-り",
+      "symbol": "り",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ri",
+      "accepted": [],
+      "typing": "ri",
+      "audioId": "ri",
+      "file": "audio/ri.mp3"
+    },
+    {
+      "id": "hiragana-る",
+      "symbol": "る",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ru",
+      "accepted": [],
+      "typing": "ru",
+      "audioId": "ru",
+      "file": "audio/ru.mp3"
+    },
+    {
+      "id": "hiragana-れ",
+      "symbol": "れ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "re",
+      "accepted": [],
+      "typing": "re",
+      "audioId": "re",
+      "file": "audio/re.mp3"
+    },
+    {
+      "id": "hiragana-ろ",
+      "symbol": "ろ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "ro",
+      "accepted": [],
+      "typing": "ro",
+      "audioId": "ro",
+      "file": "audio/ro.mp3"
+    },
+    {
+      "id": "katakana-ラ",
+      "symbol": "ラ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ra",
+      "accepted": [],
+      "typing": "ra",
+      "audioId": "ra",
+      "file": "audio/ra.mp3"
+    },
+    {
+      "id": "katakana-リ",
+      "symbol": "リ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ri",
+      "accepted": [],
+      "typing": "ri",
+      "audioId": "ri",
+      "file": "audio/ri.mp3"
+    },
+    {
+      "id": "katakana-ル",
+      "symbol": "ル",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ru",
+      "accepted": [],
+      "typing": "ru",
+      "audioId": "ru",
+      "file": "audio/ru.mp3"
+    },
+    {
+      "id": "katakana-レ",
+      "symbol": "レ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "re",
+      "accepted": [],
+      "typing": "re",
+      "audioId": "re",
+      "file": "audio/re.mp3"
+    },
+    {
+      "id": "katakana-ロ",
+      "symbol": "ロ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "ro",
+      "accepted": [],
+      "typing": "ro",
+      "audioId": "ro",
+      "file": "audio/ro.mp3"
+    },
+    {
+      "id": "hiragana-わ",
+      "symbol": "わ",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "wa",
+      "accepted": [],
+      "typing": "wa",
+      "audioId": "wa",
+      "file": "audio/wa.mp3"
+    },
+    {
+      "id": "hiragana-を",
+      "symbol": "を",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "wo",
+      "accepted": [
+        "o"
+      ],
+      "typing": "wo",
+      "audioId": "wo",
+      "file": "audio/wo.mp3",
+      "pronunciation": "を sounds like お (o); it is written with w and used mainly as a particle."
+    },
+    {
+      "id": "katakana-ワ",
+      "symbol": "ワ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "wa",
+      "accepted": [],
+      "typing": "wa",
+      "audioId": "wa",
+      "file": "audio/wa.mp3"
+    },
+    {
+      "id": "katakana-ヲ",
+      "symbol": "ヲ",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "wo",
+      "accepted": [
+        "o"
+      ],
+      "typing": "wo",
+      "audioId": "wo",
+      "file": "audio/wo.mp3",
+      "pronunciation": "を sounds like お (o); it is written with w and used mainly as a particle."
+    },
+    {
+      "id": "hiragana-ん",
+      "symbol": "ん",
+      "script": "hiragana",
+      "kind": "basic",
+      "reading": "n",
+      "accepted": [
+        "n'"
+      ],
+      "typing": "nn",
+      "audioId": "n",
+      "file": "audio/n.mp3",
+      "pronunciation": "ん is a full beat of its own, never joined to the next kana."
+    },
+    {
+      "id": "katakana-ン",
+      "symbol": "ン",
+      "script": "katakana",
+      "kind": "basic",
+      "reading": "n",
+      "accepted": [
+        "n'"
+      ],
+      "typing": "nn",
+      "audioId": "n",
+      "file": "audio/n.mp3",
+      "pronunciation": "ん is a full beat of its own, never joined to the next kana."
+    },
+    {
+      "id": "hiragana-が",
+      "symbol": "が",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "ga",
+      "accepted": [],
+      "typing": "ga",
+      "audioId": "ga",
+      "file": "audio/ga.mp3"
+    },
+    {
+      "id": "hiragana-ぎ",
+      "symbol": "ぎ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "gi",
+      "accepted": [],
+      "typing": "gi",
+      "audioId": "gi",
+      "file": "audio/gi.mp3"
+    },
+    {
+      "id": "hiragana-ぐ",
+      "symbol": "ぐ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "gu",
+      "accepted": [],
+      "typing": "gu",
+      "audioId": "gu",
+      "file": "audio/gu.mp3"
+    },
+    {
+      "id": "hiragana-げ",
+      "symbol": "げ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "ge",
+      "accepted": [],
+      "typing": "ge",
+      "audioId": "ge",
+      "file": "audio/ge.mp3"
+    },
+    {
+      "id": "hiragana-ご",
+      "symbol": "ご",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "go",
+      "accepted": [],
+      "typing": "go",
+      "audioId": "go",
+      "file": "audio/go.mp3"
+    },
+    {
+      "id": "katakana-ガ",
+      "symbol": "ガ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "ga",
+      "accepted": [],
+      "typing": "ga",
+      "audioId": "ga",
+      "file": "audio/ga.mp3"
+    },
+    {
+      "id": "katakana-ギ",
+      "symbol": "ギ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "gi",
+      "accepted": [],
+      "typing": "gi",
+      "audioId": "gi",
+      "file": "audio/gi.mp3"
+    },
+    {
+      "id": "katakana-グ",
+      "symbol": "グ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "gu",
+      "accepted": [],
+      "typing": "gu",
+      "audioId": "gu",
+      "file": "audio/gu.mp3"
+    },
+    {
+      "id": "katakana-ゲ",
+      "symbol": "ゲ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "ge",
+      "accepted": [],
+      "typing": "ge",
+      "audioId": "ge",
+      "file": "audio/ge.mp3"
+    },
+    {
+      "id": "katakana-ゴ",
+      "symbol": "ゴ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "go",
+      "accepted": [],
+      "typing": "go",
+      "audioId": "go",
+      "file": "audio/go.mp3"
+    },
+    {
+      "id": "hiragana-ざ",
+      "symbol": "ざ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "za",
+      "accepted": [],
+      "typing": "za",
+      "audioId": "za",
+      "file": "audio/za.mp3"
+    },
+    {
+      "id": "hiragana-じ",
+      "symbol": "じ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "ji",
+      "accepted": [
+        "zi"
+      ],
+      "typing": "ji",
+      "audioId": "ji",
+      "file": "audio/ji.mp3"
+    },
+    {
+      "id": "hiragana-ず",
+      "symbol": "ず",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "zu",
+      "accepted": [],
+      "typing": "zu",
+      "audioId": "zu",
+      "file": "audio/zu.mp3"
+    },
+    {
+      "id": "hiragana-ぜ",
+      "symbol": "ぜ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "ze",
+      "accepted": [],
+      "typing": "ze",
+      "audioId": "ze",
+      "file": "audio/ze.mp3"
+    },
+    {
+      "id": "hiragana-ぞ",
+      "symbol": "ぞ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "zo",
+      "accepted": [],
+      "typing": "zo",
+      "audioId": "zo",
+      "file": "audio/zo.mp3"
+    },
+    {
+      "id": "katakana-ザ",
+      "symbol": "ザ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "za",
+      "accepted": [],
+      "typing": "za",
+      "audioId": "za",
+      "file": "audio/za.mp3"
+    },
+    {
+      "id": "katakana-ジ",
+      "symbol": "ジ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "ji",
+      "accepted": [
+        "zi"
+      ],
+      "typing": "ji",
+      "audioId": "ji",
+      "file": "audio/ji.mp3"
+    },
+    {
+      "id": "katakana-ズ",
+      "symbol": "ズ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "zu",
+      "accepted": [],
+      "typing": "zu",
+      "audioId": "zu",
+      "file": "audio/zu.mp3"
+    },
+    {
+      "id": "katakana-ゼ",
+      "symbol": "ゼ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "ze",
+      "accepted": [],
+      "typing": "ze",
+      "audioId": "ze",
+      "file": "audio/ze.mp3"
+    },
+    {
+      "id": "katakana-ゾ",
+      "symbol": "ゾ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "zo",
+      "accepted": [],
+      "typing": "zo",
+      "audioId": "zo",
+      "file": "audio/zo.mp3"
+    },
+    {
+      "id": "hiragana-だ",
+      "symbol": "だ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "da",
+      "accepted": [],
+      "typing": "da",
+      "audioId": "da",
+      "file": "audio/da.mp3"
+    },
+    {
+      "id": "hiragana-ぢ",
+      "symbol": "ぢ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "di",
+      "accepted": [
+        "ji"
+      ],
+      "typing": "di",
+      "audioId": "di",
+      "file": "audio/di.mp3",
+      "pronunciation": "ぢ sounds like じ (ji) but belongs to the た row."
+    },
+    {
+      "id": "hiragana-づ",
+      "symbol": "づ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "du",
+      "accepted": [
+        "zu"
+      ],
+      "typing": "du",
+      "audioId": "du",
+      "file": "audio/du.mp3",
+      "pronunciation": "づ sounds like ず (zu) but belongs to the た row."
+    },
+    {
+      "id": "hiragana-で",
+      "symbol": "で",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "de",
+      "accepted": [],
+      "typing": "de",
+      "audioId": "de",
+      "file": "audio/de.mp3"
+    },
+    {
+      "id": "hiragana-ど",
+      "symbol": "ど",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "do",
+      "accepted": [],
+      "typing": "do",
+      "audioId": "do",
+      "file": "audio/do.mp3"
+    },
+    {
+      "id": "katakana-ダ",
+      "symbol": "ダ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "da",
+      "accepted": [],
+      "typing": "da",
+      "audioId": "da",
+      "file": "audio/da.mp3"
+    },
+    {
+      "id": "katakana-ヂ",
+      "symbol": "ヂ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "di",
+      "accepted": [
+        "ji"
+      ],
+      "typing": "di",
+      "audioId": "di",
+      "file": "audio/di.mp3",
+      "pronunciation": "ぢ sounds like じ (ji) but belongs to the た row."
+    },
+    {
+      "id": "katakana-ヅ",
+      "symbol": "ヅ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "du",
+      "accepted": [
+        "zu"
+      ],
+      "typing": "du",
+      "audioId": "du",
+      "file": "audio/du.mp3",
+      "pronunciation": "づ sounds like ず (zu) but belongs to the た row."
+    },
+    {
+      "id": "katakana-デ",
+      "symbol": "デ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "de",
+      "accepted": [],
+      "typing": "de",
+      "audioId": "de",
+      "file": "audio/de.mp3"
+    },
+    {
+      "id": "katakana-ド",
+      "symbol": "ド",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "do",
+      "accepted": [],
+      "typing": "do",
+      "audioId": "do",
+      "file": "audio/do.mp3"
+    },
+    {
+      "id": "hiragana-ば",
+      "symbol": "ば",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "ba",
+      "accepted": [],
+      "typing": "ba",
+      "audioId": "ba",
+      "file": "audio/ba.mp3"
+    },
+    {
+      "id": "hiragana-び",
+      "symbol": "び",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "bi",
+      "accepted": [],
+      "typing": "bi",
+      "audioId": "bi",
+      "file": "audio/bi.mp3"
+    },
+    {
+      "id": "hiragana-ぶ",
+      "symbol": "ぶ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "bu",
+      "accepted": [],
+      "typing": "bu",
+      "audioId": "bu",
+      "file": "audio/bu.mp3"
+    },
+    {
+      "id": "hiragana-べ",
+      "symbol": "べ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "be",
+      "accepted": [],
+      "typing": "be",
+      "audioId": "be",
+      "file": "audio/be.mp3"
+    },
+    {
+      "id": "hiragana-ぼ",
+      "symbol": "ぼ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "bo",
+      "accepted": [],
+      "typing": "bo",
+      "audioId": "bo",
+      "file": "audio/bo.mp3"
+    },
+    {
+      "id": "katakana-バ",
+      "symbol": "バ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "ba",
+      "accepted": [],
+      "typing": "ba",
+      "audioId": "ba",
+      "file": "audio/ba.mp3"
+    },
+    {
+      "id": "katakana-ビ",
+      "symbol": "ビ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "bi",
+      "accepted": [],
+      "typing": "bi",
+      "audioId": "bi",
+      "file": "audio/bi.mp3"
+    },
+    {
+      "id": "katakana-ブ",
+      "symbol": "ブ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "bu",
+      "accepted": [],
+      "typing": "bu",
+      "audioId": "bu",
+      "file": "audio/bu.mp3"
+    },
+    {
+      "id": "katakana-ベ",
+      "symbol": "ベ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "be",
+      "accepted": [],
+      "typing": "be",
+      "audioId": "be",
+      "file": "audio/be.mp3"
+    },
+    {
+      "id": "katakana-ボ",
+      "symbol": "ボ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "bo",
+      "accepted": [],
+      "typing": "bo",
+      "audioId": "bo",
+      "file": "audio/bo.mp3"
+    },
+    {
+      "id": "hiragana-ぱ",
+      "symbol": "ぱ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "pa",
+      "accepted": [],
+      "typing": "pa",
+      "audioId": "pa",
+      "file": "audio/pa.mp3"
+    },
+    {
+      "id": "hiragana-ぴ",
+      "symbol": "ぴ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "pi",
+      "accepted": [],
+      "typing": "pi",
+      "audioId": "pi",
+      "file": "audio/pi.mp3"
+    },
+    {
+      "id": "hiragana-ぷ",
+      "symbol": "ぷ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "pu",
+      "accepted": [],
+      "typing": "pu",
+      "audioId": "pu",
+      "file": "audio/pu.mp3"
+    },
+    {
+      "id": "hiragana-ぺ",
+      "symbol": "ぺ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "pe",
+      "accepted": [],
+      "typing": "pe",
+      "audioId": "pe",
+      "file": "audio/pe.mp3"
+    },
+    {
+      "id": "hiragana-ぽ",
+      "symbol": "ぽ",
+      "script": "hiragana",
+      "kind": "voiced",
+      "reading": "po",
+      "accepted": [],
+      "typing": "po",
+      "audioId": "po",
+      "file": "audio/po.mp3"
+    },
+    {
+      "id": "katakana-パ",
+      "symbol": "パ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "pa",
+      "accepted": [],
+      "typing": "pa",
+      "audioId": "pa",
+      "file": "audio/pa.mp3"
+    },
+    {
+      "id": "katakana-ピ",
+      "symbol": "ピ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "pi",
+      "accepted": [],
+      "typing": "pi",
+      "audioId": "pi",
+      "file": "audio/pi.mp3"
+    },
+    {
+      "id": "katakana-プ",
+      "symbol": "プ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "pu",
+      "accepted": [],
+      "typing": "pu",
+      "audioId": "pu",
+      "file": "audio/pu.mp3"
+    },
+    {
+      "id": "katakana-ペ",
+      "symbol": "ペ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "pe",
+      "accepted": [],
+      "typing": "pe",
+      "audioId": "pe",
+      "file": "audio/pe.mp3"
+    },
+    {
+      "id": "katakana-ポ",
+      "symbol": "ポ",
+      "script": "katakana",
+      "kind": "voiced",
+      "reading": "po",
+      "accepted": [],
+      "typing": "po",
+      "audioId": "po",
+      "file": "audio/po.mp3"
+    },
+    {
+      "id": "hiragana-きゃ",
+      "symbol": "きゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "kya",
+      "accepted": [],
+      "typing": "kya",
+      "audioId": "kya",
+      "file": "audio/kya.mp3",
+      "pronunciation": "The small ゃ merges with き into one beat: kya, not ki-ya."
+    },
+    {
+      "id": "katakana-キャ",
+      "symbol": "キャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "kya",
+      "accepted": [],
+      "typing": "kya",
+      "audioId": "kya",
+      "file": "audio/kya.mp3",
+      "pronunciation": "The small ャ merges with キ into one beat: kya, not ki-ya."
+    },
+    {
+      "id": "hiragana-きゅ",
+      "symbol": "きゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "kyu",
+      "accepted": [],
+      "typing": "kyu",
+      "audioId": "kyu",
+      "file": "audio/kyu.mp3",
+      "pronunciation": "The small ゅ merges with き into one beat: kyu, not ki-yu."
+    },
+    {
+      "id": "katakana-キュ",
+      "symbol": "キュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "kyu",
+      "accepted": [],
+      "typing": "kyu",
+      "audioId": "kyu",
+      "file": "audio/kyu.mp3",
+      "pronunciation": "The small ュ merges with キ into one beat: kyu, not ki-yu."
+    },
+    {
+      "id": "hiragana-きょ",
+      "symbol": "きょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "kyo",
+      "accepted": [],
+      "typing": "kyo",
+      "audioId": "kyo",
+      "file": "audio/kyo.mp3",
+      "pronunciation": "The small ょ merges with き into one beat: kyo, not ki-yo."
+    },
+    {
+      "id": "katakana-キョ",
+      "symbol": "キョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "kyo",
+      "accepted": [],
+      "typing": "kyo",
+      "audioId": "kyo",
+      "file": "audio/kyo.mp3",
+      "pronunciation": "The small ョ merges with キ into one beat: kyo, not ki-yo."
+    },
+    {
+      "id": "hiragana-ぎゃ",
+      "symbol": "ぎゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "gya",
+      "accepted": [],
+      "typing": "gya",
+      "audioId": "gya",
+      "file": "audio/gya.mp3",
+      "pronunciation": "The small ゃ merges with ぎ into one beat: gya, not gi-ya."
+    },
+    {
+      "id": "katakana-ギャ",
+      "symbol": "ギャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "gya",
+      "accepted": [],
+      "typing": "gya",
+      "audioId": "gya",
+      "file": "audio/gya.mp3",
+      "pronunciation": "The small ャ merges with ギ into one beat: gya, not gi-ya."
+    },
+    {
+      "id": "hiragana-ぎゅ",
+      "symbol": "ぎゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "gyu",
+      "accepted": [],
+      "typing": "gyu",
+      "audioId": "gyu",
+      "file": "audio/gyu.mp3",
+      "pronunciation": "The small ゅ merges with ぎ into one beat: gyu, not gi-yu."
+    },
+    {
+      "id": "katakana-ギュ",
+      "symbol": "ギュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "gyu",
+      "accepted": [],
+      "typing": "gyu",
+      "audioId": "gyu",
+      "file": "audio/gyu.mp3",
+      "pronunciation": "The small ュ merges with ギ into one beat: gyu, not gi-yu."
+    },
+    {
+      "id": "hiragana-ぎょ",
+      "symbol": "ぎょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "gyo",
+      "accepted": [],
+      "typing": "gyo",
+      "audioId": "gyo",
+      "file": "audio/gyo.mp3",
+      "pronunciation": "The small ょ merges with ぎ into one beat: gyo, not gi-yo."
+    },
+    {
+      "id": "katakana-ギョ",
+      "symbol": "ギョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "gyo",
+      "accepted": [],
+      "typing": "gyo",
+      "audioId": "gyo",
+      "file": "audio/gyo.mp3",
+      "pronunciation": "The small ョ merges with ギ into one beat: gyo, not gi-yo."
+    },
+    {
+      "id": "hiragana-しゃ",
+      "symbol": "しゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "sha",
+      "accepted": [
+        "sya"
+      ],
+      "typing": "sha",
+      "audioId": "sha",
+      "file": "audio/sha.mp3",
+      "pronunciation": "The small ゃ merges with し into one beat: sha, not shi-ya."
+    },
+    {
+      "id": "katakana-シャ",
+      "symbol": "シャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "sha",
+      "accepted": [
+        "sya"
+      ],
+      "typing": "sha",
+      "audioId": "sha",
+      "file": "audio/sha.mp3",
+      "pronunciation": "The small ャ merges with シ into one beat: sha, not shi-ya."
+    },
+    {
+      "id": "hiragana-しゅ",
+      "symbol": "しゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "shu",
+      "accepted": [
+        "syu"
+      ],
+      "typing": "shu",
+      "audioId": "shu",
+      "file": "audio/shu.mp3",
+      "pronunciation": "The small ゅ merges with し into one beat: shu, not shi-yu."
+    },
+    {
+      "id": "katakana-シュ",
+      "symbol": "シュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "shu",
+      "accepted": [
+        "syu"
+      ],
+      "typing": "shu",
+      "audioId": "shu",
+      "file": "audio/shu.mp3",
+      "pronunciation": "The small ュ merges with シ into one beat: shu, not shi-yu."
+    },
+    {
+      "id": "hiragana-しょ",
+      "symbol": "しょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "sho",
+      "accepted": [
+        "syo"
+      ],
+      "typing": "sho",
+      "audioId": "sho",
+      "file": "audio/sho.mp3",
+      "pronunciation": "The small ょ merges with し into one beat: sho, not shi-yo."
+    },
+    {
+      "id": "katakana-ショ",
+      "symbol": "ショ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "sho",
+      "accepted": [
+        "syo"
+      ],
+      "typing": "sho",
+      "audioId": "sho",
+      "file": "audio/sho.mp3",
+      "pronunciation": "The small ョ merges with シ into one beat: sho, not shi-yo."
+    },
+    {
+      "id": "hiragana-じゃ",
+      "symbol": "じゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "ja",
+      "accepted": [
+        "jya",
+        "zya"
+      ],
+      "typing": "ja",
+      "audioId": "ja",
+      "file": "audio/ja.mp3",
+      "pronunciation": "The small ゃ merges with じ into one beat: ja, not ji-ya."
+    },
+    {
+      "id": "katakana-ジャ",
+      "symbol": "ジャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "ja",
+      "accepted": [
+        "jya",
+        "zya"
+      ],
+      "typing": "ja",
+      "audioId": "ja",
+      "file": "audio/ja.mp3",
+      "pronunciation": "The small ャ merges with ジ into one beat: ja, not ji-ya."
+    },
+    {
+      "id": "hiragana-じゅ",
+      "symbol": "じゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "ju",
+      "accepted": [
+        "jyu",
+        "zyu"
+      ],
+      "typing": "ju",
+      "audioId": "ju",
+      "file": "audio/ju.mp3",
+      "pronunciation": "The small ゅ merges with じ into one beat: ju, not ji-yu."
+    },
+    {
+      "id": "katakana-ジュ",
+      "symbol": "ジュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "ju",
+      "accepted": [
+        "jyu",
+        "zyu"
+      ],
+      "typing": "ju",
+      "audioId": "ju",
+      "file": "audio/ju.mp3",
+      "pronunciation": "The small ュ merges with ジ into one beat: ju, not ji-yu."
+    },
+    {
+      "id": "hiragana-じょ",
+      "symbol": "じょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "jo",
+      "accepted": [
+        "jyo",
+        "zyo"
+      ],
+      "typing": "jo",
+      "audioId": "jo",
+      "file": "audio/jo.mp3",
+      "pronunciation": "The small ょ merges with じ into one beat: jo, not ji-yo."
+    },
+    {
+      "id": "katakana-ジョ",
+      "symbol": "ジョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "jo",
+      "accepted": [
+        "jyo",
+        "zyo"
+      ],
+      "typing": "jo",
+      "audioId": "jo",
+      "file": "audio/jo.mp3",
+      "pronunciation": "The small ョ merges with ジ into one beat: jo, not ji-yo."
+    },
+    {
+      "id": "hiragana-ちゃ",
+      "symbol": "ちゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "cha",
+      "accepted": [
+        "tya",
+        "cya"
+      ],
+      "typing": "cha",
+      "audioId": "cha",
+      "file": "audio/cha.mp3",
+      "pronunciation": "The small ゃ merges with ち into one beat: cha, not chi-ya."
+    },
+    {
+      "id": "katakana-チャ",
+      "symbol": "チャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "cha",
+      "accepted": [
+        "tya",
+        "cya"
+      ],
+      "typing": "cha",
+      "audioId": "cha",
+      "file": "audio/cha.mp3",
+      "pronunciation": "The small ャ merges with チ into one beat: cha, not chi-ya."
+    },
+    {
+      "id": "hiragana-ちゅ",
+      "symbol": "ちゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "chu",
+      "accepted": [
+        "tyu",
+        "cyu"
+      ],
+      "typing": "chu",
+      "audioId": "chu",
+      "file": "audio/chu.mp3",
+      "pronunciation": "The small ゅ merges with ち into one beat: chu, not chi-yu."
+    },
+    {
+      "id": "katakana-チュ",
+      "symbol": "チュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "chu",
+      "accepted": [
+        "tyu",
+        "cyu"
+      ],
+      "typing": "chu",
+      "audioId": "chu",
+      "file": "audio/chu.mp3",
+      "pronunciation": "The small ュ merges with チ into one beat: chu, not chi-yu."
+    },
+    {
+      "id": "hiragana-ちょ",
+      "symbol": "ちょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "cho",
+      "accepted": [
+        "tyo",
+        "cyo"
+      ],
+      "typing": "cho",
+      "audioId": "cho",
+      "file": "audio/cho.mp3",
+      "pronunciation": "The small ょ merges with ち into one beat: cho, not chi-yo."
+    },
+    {
+      "id": "katakana-チョ",
+      "symbol": "チョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "cho",
+      "accepted": [
+        "tyo",
+        "cyo"
+      ],
+      "typing": "cho",
+      "audioId": "cho",
+      "file": "audio/cho.mp3",
+      "pronunciation": "The small ョ merges with チ into one beat: cho, not chi-yo."
+    },
+    {
+      "id": "hiragana-にゃ",
+      "symbol": "にゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "nya",
+      "accepted": [],
+      "typing": "nya",
+      "audioId": "nya",
+      "file": "audio/nya.mp3",
+      "pronunciation": "The small ゃ merges with に into one beat: nya, not ni-ya."
+    },
+    {
+      "id": "katakana-ニャ",
+      "symbol": "ニャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "nya",
+      "accepted": [],
+      "typing": "nya",
+      "audioId": "nya",
+      "file": "audio/nya.mp3",
+      "pronunciation": "The small ャ merges with ニ into one beat: nya, not ni-ya."
+    },
+    {
+      "id": "hiragana-にゅ",
+      "symbol": "にゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "nyu",
+      "accepted": [],
+      "typing": "nyu",
+      "audioId": "nyu",
+      "file": "audio/nyu.mp3",
+      "pronunciation": "The small ゅ merges with に into one beat: nyu, not ni-yu."
+    },
+    {
+      "id": "katakana-ニュ",
+      "symbol": "ニュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "nyu",
+      "accepted": [],
+      "typing": "nyu",
+      "audioId": "nyu",
+      "file": "audio/nyu.mp3",
+      "pronunciation": "The small ュ merges with ニ into one beat: nyu, not ni-yu."
+    },
+    {
+      "id": "hiragana-にょ",
+      "symbol": "にょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "nyo",
+      "accepted": [],
+      "typing": "nyo",
+      "audioId": "nyo",
+      "file": "audio/nyo.mp3",
+      "pronunciation": "The small ょ merges with に into one beat: nyo, not ni-yo."
+    },
+    {
+      "id": "katakana-ニョ",
+      "symbol": "ニョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "nyo",
+      "accepted": [],
+      "typing": "nyo",
+      "audioId": "nyo",
+      "file": "audio/nyo.mp3",
+      "pronunciation": "The small ョ merges with ニ into one beat: nyo, not ni-yo."
+    },
+    {
+      "id": "hiragana-ひゃ",
+      "symbol": "ひゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "hya",
+      "accepted": [],
+      "typing": "hya",
+      "audioId": "hya",
+      "file": "audio/hya.mp3",
+      "pronunciation": "The small ゃ merges with ひ into one beat: hya, not hi-ya."
+    },
+    {
+      "id": "katakana-ヒャ",
+      "symbol": "ヒャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "hya",
+      "accepted": [],
+      "typing": "hya",
+      "audioId": "hya",
+      "file": "audio/hya.mp3",
+      "pronunciation": "The small ャ merges with ヒ into one beat: hya, not hi-ya."
+    },
+    {
+      "id": "hiragana-ひゅ",
+      "symbol": "ひゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "hyu",
+      "accepted": [],
+      "typing": "hyu",
+      "audioId": "hyu",
+      "file": "audio/hyu.mp3",
+      "pronunciation": "The small ゅ merges with ひ into one beat: hyu, not hi-yu."
+    },
+    {
+      "id": "katakana-ヒュ",
+      "symbol": "ヒュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "hyu",
+      "accepted": [],
+      "typing": "hyu",
+      "audioId": "hyu",
+      "file": "audio/hyu.mp3",
+      "pronunciation": "The small ュ merges with ヒ into one beat: hyu, not hi-yu."
+    },
+    {
+      "id": "hiragana-ひょ",
+      "symbol": "ひょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "hyo",
+      "accepted": [],
+      "typing": "hyo",
+      "audioId": "hyo",
+      "file": "audio/hyo.mp3",
+      "pronunciation": "The small ょ merges with ひ into one beat: hyo, not hi-yo."
+    },
+    {
+      "id": "katakana-ヒョ",
+      "symbol": "ヒョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "hyo",
+      "accepted": [],
+      "typing": "hyo",
+      "audioId": "hyo",
+      "file": "audio/hyo.mp3",
+      "pronunciation": "The small ョ merges with ヒ into one beat: hyo, not hi-yo."
+    },
+    {
+      "id": "hiragana-びゃ",
+      "symbol": "びゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "bya",
+      "accepted": [],
+      "typing": "bya",
+      "audioId": "bya",
+      "file": "audio/bya.mp3",
+      "pronunciation": "The small ゃ merges with び into one beat: bya, not bi-ya."
+    },
+    {
+      "id": "katakana-ビャ",
+      "symbol": "ビャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "bya",
+      "accepted": [],
+      "typing": "bya",
+      "audioId": "bya",
+      "file": "audio/bya.mp3",
+      "pronunciation": "The small ャ merges with ビ into one beat: bya, not bi-ya."
+    },
+    {
+      "id": "hiragana-びゅ",
+      "symbol": "びゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "byu",
+      "accepted": [],
+      "typing": "byu",
+      "audioId": "byu",
+      "file": "audio/byu.mp3",
+      "pronunciation": "The small ゅ merges with び into one beat: byu, not bi-yu."
+    },
+    {
+      "id": "katakana-ビュ",
+      "symbol": "ビュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "byu",
+      "accepted": [],
+      "typing": "byu",
+      "audioId": "byu",
+      "file": "audio/byu.mp3",
+      "pronunciation": "The small ュ merges with ビ into one beat: byu, not bi-yu."
+    },
+    {
+      "id": "hiragana-びょ",
+      "symbol": "びょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "byo",
+      "accepted": [],
+      "typing": "byo",
+      "audioId": "byo",
+      "file": "audio/byo.mp3",
+      "pronunciation": "The small ょ merges with び into one beat: byo, not bi-yo."
+    },
+    {
+      "id": "katakana-ビョ",
+      "symbol": "ビョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "byo",
+      "accepted": [],
+      "typing": "byo",
+      "audioId": "byo",
+      "file": "audio/byo.mp3",
+      "pronunciation": "The small ョ merges with ビ into one beat: byo, not bi-yo."
+    },
+    {
+      "id": "hiragana-ぴゃ",
+      "symbol": "ぴゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "pya",
+      "accepted": [],
+      "typing": "pya",
+      "audioId": "pya",
+      "file": "audio/pya.mp3",
+      "pronunciation": "The small ゃ merges with ぴ into one beat: pya, not pi-ya."
+    },
+    {
+      "id": "katakana-ピャ",
+      "symbol": "ピャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "pya",
+      "accepted": [],
+      "typing": "pya",
+      "audioId": "pya",
+      "file": "audio/pya.mp3",
+      "pronunciation": "The small ャ merges with ピ into one beat: pya, not pi-ya."
+    },
+    {
+      "id": "hiragana-ぴゅ",
+      "symbol": "ぴゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "pyu",
+      "accepted": [],
+      "typing": "pyu",
+      "audioId": "pyu",
+      "file": "audio/pyu.mp3",
+      "pronunciation": "The small ゅ merges with ぴ into one beat: pyu, not pi-yu."
+    },
+    {
+      "id": "katakana-ピュ",
+      "symbol": "ピュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "pyu",
+      "accepted": [],
+      "typing": "pyu",
+      "audioId": "pyu",
+      "file": "audio/pyu.mp3",
+      "pronunciation": "The small ュ merges with ピ into one beat: pyu, not pi-yu."
+    },
+    {
+      "id": "hiragana-ぴょ",
+      "symbol": "ぴょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "pyo",
+      "accepted": [],
+      "typing": "pyo",
+      "audioId": "pyo",
+      "file": "audio/pyo.mp3",
+      "pronunciation": "The small ょ merges with ぴ into one beat: pyo, not pi-yo."
+    },
+    {
+      "id": "katakana-ピョ",
+      "symbol": "ピョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "pyo",
+      "accepted": [],
+      "typing": "pyo",
+      "audioId": "pyo",
+      "file": "audio/pyo.mp3",
+      "pronunciation": "The small ョ merges with ピ into one beat: pyo, not pi-yo."
+    },
+    {
+      "id": "hiragana-みゃ",
+      "symbol": "みゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "mya",
+      "accepted": [],
+      "typing": "mya",
+      "audioId": "mya",
+      "file": "audio/mya.mp3",
+      "pronunciation": "The small ゃ merges with み into one beat: mya, not mi-ya."
+    },
+    {
+      "id": "katakana-ミャ",
+      "symbol": "ミャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "mya",
+      "accepted": [],
+      "typing": "mya",
+      "audioId": "mya",
+      "file": "audio/mya.mp3",
+      "pronunciation": "The small ャ merges with ミ into one beat: mya, not mi-ya."
+    },
+    {
+      "id": "hiragana-みゅ",
+      "symbol": "みゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "myu",
+      "accepted": [],
+      "typing": "myu",
+      "audioId": "myu",
+      "file": "audio/myu.mp3",
+      "pronunciation": "The small ゅ merges with み into one beat: myu, not mi-yu."
+    },
+    {
+      "id": "katakana-ミュ",
+      "symbol": "ミュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "myu",
+      "accepted": [],
+      "typing": "myu",
+      "audioId": "myu",
+      "file": "audio/myu.mp3",
+      "pronunciation": "The small ュ merges with ミ into one beat: myu, not mi-yu."
+    },
+    {
+      "id": "hiragana-みょ",
+      "symbol": "みょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "myo",
+      "accepted": [],
+      "typing": "myo",
+      "audioId": "myo",
+      "file": "audio/myo.mp3",
+      "pronunciation": "The small ょ merges with み into one beat: myo, not mi-yo."
+    },
+    {
+      "id": "katakana-ミョ",
+      "symbol": "ミョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "myo",
+      "accepted": [],
+      "typing": "myo",
+      "audioId": "myo",
+      "file": "audio/myo.mp3",
+      "pronunciation": "The small ョ merges with ミ into one beat: myo, not mi-yo."
+    },
+    {
+      "id": "hiragana-りゃ",
+      "symbol": "りゃ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "rya",
+      "accepted": [],
+      "typing": "rya",
+      "audioId": "rya",
+      "file": "audio/rya.mp3",
+      "pronunciation": "The small ゃ merges with り into one beat: rya, not ri-ya."
+    },
+    {
+      "id": "katakana-リャ",
+      "symbol": "リャ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "rya",
+      "accepted": [],
+      "typing": "rya",
+      "audioId": "rya",
+      "file": "audio/rya.mp3",
+      "pronunciation": "The small ャ merges with リ into one beat: rya, not ri-ya."
+    },
+    {
+      "id": "hiragana-りゅ",
+      "symbol": "りゅ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "ryu",
+      "accepted": [],
+      "typing": "ryu",
+      "audioId": "ryu",
+      "file": "audio/ryu.mp3",
+      "pronunciation": "The small ゅ merges with り into one beat: ryu, not ri-yu."
+    },
+    {
+      "id": "katakana-リュ",
+      "symbol": "リュ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "ryu",
+      "accepted": [],
+      "typing": "ryu",
+      "audioId": "ryu",
+      "file": "audio/ryu.mp3",
+      "pronunciation": "The small ュ merges with リ into one beat: ryu, not ri-yu."
+    },
+    {
+      "id": "hiragana-りょ",
+      "symbol": "りょ",
+      "script": "hiragana",
+      "kind": "yoon",
+      "reading": "ryo",
+      "accepted": [],
+      "typing": "ryo",
+      "audioId": "ryo",
+      "file": "audio/ryo.mp3",
+      "pronunciation": "The small ょ merges with り into one beat: ryo, not ri-yo."
+    },
+    {
+      "id": "katakana-リョ",
+      "symbol": "リョ",
+      "script": "katakana",
+      "kind": "yoon",
+      "reading": "ryo",
+      "accepted": [],
+      "typing": "ryo",
+      "audioId": "ryo",
+      "file": "audio/ryo.mp3",
+      "pronunciation": "The small ョ merges with リ into one beat: ryo, not ri-yo."
+    },
+    {
+      "id": "hiragana-きって",
+      "symbol": "きって",
+      "script": "hiragana",
+      "kind": "sokuon",
+      "reading": "kitte",
+      "accepted": [],
+      "typing": "kitte",
+      "audioId": "kitte",
+      "file": "audio/kitte.mp3",
+      "pronunciation": "Small っ is a silent beat: hold before the t (kit-te)."
+    },
+    {
+      "id": "hiragana-がっこう",
+      "symbol": "がっこう",
+      "script": "hiragana",
+      "kind": "sokuon",
+      "reading": "gakkoo",
+      "accepted": [
+        "gakkou",
+        "gakkō"
+      ],
+      "typing": "gakkou",
+      "audioId": "gakkoo",
+      "file": "audio/gakkoo.mp3",
+      "pronunciation": "A held k beat, then a long o written こう."
+    },
+    {
+      "id": "katakana-カップ",
+      "symbol": "カップ",
+      "script": "katakana",
+      "kind": "sokuon",
+      "reading": "kappu",
+      "accepted": [],
+      "typing": "kappu",
+      "audioId": "kappu",
+      "file": "audio/kappu.mp3",
+      "pronunciation": "Small ッ is a silent beat before the p (kap-pu)."
+    },
+    {
+      "id": "katakana-ベッド",
+      "symbol": "ベッド",
+      "script": "katakana",
+      "kind": "sokuon",
+      "reading": "beddo",
+      "accepted": [],
+      "typing": "beddo",
+      "audioId": "beddo",
+      "file": "audio/beddo.mp3",
+      "pronunciation": "Small ッ is a silent beat before the d (bed-do)."
+    },
+    {
+      "id": "katakana-コーヒー",
+      "symbol": "コーヒー",
+      "script": "katakana",
+      "kind": "long-vowel",
+      "reading": "koohii",
+      "accepted": [
+        "ko-hi-",
+        "kouhii",
+        "kōhī"
+      ],
+      "typing": "ko-hi-",
+      "audioId": "koohii",
+      "file": "audio/koohii.mp3",
+      "pronunciation": "ー holds the vowel for an extra beat: ko-o-hi-i."
+    },
+    {
+      "id": "katakana-ケーキ",
+      "symbol": "ケーキ",
+      "script": "katakana",
+      "kind": "long-vowel",
+      "reading": "keeki",
+      "accepted": [
+        "ke-ki",
+        "kēki"
+      ],
+      "typing": "ke-ki",
+      "audioId": "keeki",
+      "file": "audio/keeki.mp3",
+      "pronunciation": "ー holds the e for an extra beat: ke-e-ki."
+    },
+    {
+      "id": "hiragana-おかあさん",
+      "symbol": "おかあさん",
+      "script": "hiragana",
+      "kind": "long-vowel",
+      "reading": "okaasan",
+      "accepted": [
+        "okāsan"
+      ],
+      "typing": "okaasann",
+      "audioId": "okaasan",
+      "file": "audio/okaasan.mp3",
+      "pronunciation": "かあ is one long a (two beats), and ん ends the word."
+    },
+    {
+      "id": "hiragana-こうこう",
+      "symbol": "こうこう",
+      "script": "hiragana",
+      "kind": "long-vowel",
+      "reading": "kookoo",
+      "accepted": [
+        "koukou",
+        "kōkō"
+      ],
+      "typing": "koukou",
+      "audioId": "kookoo",
+      "file": "audio/kookoo.mp3",
+      "pronunciation": "こう is read as a long o (koo), although it is written and typed with う."
+    }
+  ],
+  "recordings": [
+    {
+      "id": "a",
+      "file": "audio/a.mp3",
+      "text": "あ",
+      "phonemes": "a",
+      "phrase": "ʦɨɡi βa. a.",
+      "sourceFile": "a.flac",
+      "sourceSha256": "accdb9a7fc5395dbdb9425445f761cc865d03453fe75fff035dcb11b905cb0e3",
+      "sha256": "21308e0393cda80f987f4f921ddc9657aa562166d0bf1967b343908f6afca582",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-あ",
+        "katakana-ア"
+      ],
+      "symbols": [
+        "あ",
+        "ア"
+      ]
+    },
+    {
+      "id": "ba",
+      "file": "audio/ba.mp3",
+      "text": "ば",
+      "phonemes": "ba",
+      "phrase": "ʦɨɡi βa. ba.",
+      "sourceFile": "ba.flac",
+      "sourceSha256": "588d445e40e896876a9521aaf7adb284d0feab0751ccc11c6ecab0291f58cdc3",
+      "sha256": "06a0e8fd8df2df9015891e8e42c382c46d174699897d0c78fbde6dbb012eeac8",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ば",
+        "katakana-バ"
+      ],
+      "symbols": [
+        "ば",
+        "バ"
+      ]
+    },
+    {
+      "id": "be",
+      "file": "audio/be.mp3",
+      "text": "べ",
+      "phonemes": "be",
+      "phrase": "ʦɨɡi βa. be.",
+      "sourceFile": "be.flac",
+      "sourceSha256": "9536ef7235bd6bd02c0fe7f5cf6ebff6341c01bd0cc5034a1bd0fda9f251aaaf",
+      "sha256": "620d98e63730dc13b71eac665271c39bf0bf3958b981e6c57a9ae2f73388cb36",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-べ",
+        "katakana-ベ"
+      ],
+      "symbols": [
+        "べ",
+        "ベ"
+      ]
+    },
+    {
+      "id": "beddo",
+      "file": "audio/beddo.mp3",
+      "text": "べっど",
+      "phonemes": "beʔdo",
+      "phrase": "ʦɨɡi βa. beʔdo.",
+      "sourceFile": "beddo.flac",
+      "sourceSha256": "6bd4fdd9402d6412e8c406928902421590587a498c203aaac60d502a35de616a",
+      "sha256": "a2e3b93d9e467a8f5e98af4fadc1e8da8cdf1f416b79ce2f3b75a8a21e3406b6",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 14254,
+      "itemIds": [
+        "katakana-ベッド"
+      ],
+      "symbols": [
+        "ベッド"
+      ]
+    },
+    {
+      "id": "bi",
+      "file": "audio/bi.mp3",
+      "text": "び",
+      "phonemes": "bʲi",
+      "phrase": "ʦɨɡi βa. bʲi.",
+      "sourceFile": "bi.flac",
+      "sourceSha256": "3da5319ed7d5ca3f891d34f94d4d5cabd06aa9ec59c84e847c2282319d14b8d6",
+      "sha256": "af76a667d55e89485ad8ae223378b07808f9c82188e62dafff46ba959980d09a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-び",
+        "katakana-ビ"
+      ],
+      "symbols": [
+        "び",
+        "ビ"
+      ]
+    },
+    {
+      "id": "bo",
+      "file": "audio/bo.mp3",
+      "text": "ぼ",
+      "phonemes": "bo",
+      "phrase": "ʦɨɡi βa. bo.",
+      "sourceFile": "bo.flac",
+      "sourceSha256": "3b615d7210ac40cb3b0a357f2b3e6ff463d430e9dc9f1b0a2dbd80f3b34b3d88",
+      "sha256": "5cf4fd499a6a5ecc40430989a3c04519ad3e31fd65b727a84f45a3acc9868bbb",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ぼ",
+        "katakana-ボ"
+      ],
+      "symbols": [
+        "ぼ",
+        "ボ"
+      ]
+    },
+    {
+      "id": "bu",
+      "file": "audio/bu.mp3",
+      "text": "ぶ",
+      "phonemes": "bɯ",
+      "phrase": "ʦɨɡi βa. bɯ.",
+      "sourceFile": "bu.flac",
+      "sourceSha256": "6cecefc25d3d67d31b91ce219d7fe591fcd5e2dc94c2290752a8451e6f22a00d",
+      "sha256": "ef92607ddafe3cef4fc84de7671386475f4dd251cdf58c3d5fa924cf55ce63d6",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ぶ",
+        "katakana-ブ"
+      ],
+      "symbols": [
+        "ぶ",
+        "ブ"
+      ]
+    },
+    {
+      "id": "bya",
+      "file": "audio/bya.mp3",
+      "text": "びゃ",
+      "phonemes": "bja",
+      "phrase": "ʦɨɡi βa. bja.",
+      "sourceFile": "bya.flac",
+      "sourceSha256": "512d9b3296193c43b037db0955900195e5e00f54a7a82eabb158c3a630111048",
+      "sha256": "dba63de1dcd1996ed3f4f97d25e964463b576ea122f83fda5595acfaf55cd73d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-びゃ",
+        "katakana-ビャ"
+      ],
+      "symbols": [
+        "びゃ",
+        "ビャ"
+      ]
+    },
+    {
+      "id": "byo",
+      "file": "audio/byo.mp3",
+      "text": "びょ",
+      "phonemes": "bjo",
+      "phrase": "ʦɨɡi βa. bjo.",
+      "sourceFile": "byo.flac",
+      "sourceSha256": "4b9b050f764ae531b9ee11fb84ef6756637373911bcf586a0cceb61d5d8bd2c5",
+      "sha256": "974edf09180dd6131e9fef4b4ddf937b59dbc98e77b4f6df81306baff12fe82c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-びょ",
+        "katakana-ビョ"
+      ],
+      "symbols": [
+        "びょ",
+        "ビョ"
+      ]
+    },
+    {
+      "id": "byu",
+      "file": "audio/byu.mp3",
+      "text": "びゅ",
+      "phonemes": "bjɯ",
+      "phrase": "ʦɨɡi βa. bjɯ.",
+      "sourceFile": "byu.flac",
+      "sourceSha256": "4a8bb42552ea35b9f4d65e0841111cba268eb62daf69e64c5666df8f023dca6c",
+      "sha256": "c950f1343e52e7f96cc9dbff6c549e1a9063fb8516683d3d2158a80d615bdc05",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-びゅ",
+        "katakana-ビュ"
+      ],
+      "symbols": [
+        "びゅ",
+        "ビュ"
+      ]
+    },
+    {
+      "id": "cha",
+      "file": "audio/cha.mp3",
+      "text": "ちゃ",
+      "phonemes": "ʨʰa",
+      "phrase": "ʦɨɡi βa. ʨʰa.",
+      "sourceFile": "cha.flac",
+      "sourceSha256": "41cb0a2f5f8daf097ce5d901796bb6ee8676e0f83969116ebeaa127857f60849",
+      "sha256": "82e8b9b805031fe47659adea643d80dfb36979e06321dfb3d1b6d569d3f2c549",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ちゃ",
+        "katakana-チャ"
+      ],
+      "symbols": [
+        "ちゃ",
+        "チャ"
+      ]
+    },
+    {
+      "id": "chi",
+      "file": "audio/chi.mp3",
+      "text": "ち",
+      "phonemes": "ʨi",
+      "phrase": "ʦɨɡi βa. ʨi.",
+      "sourceFile": "chi.flac",
+      "sourceSha256": "e866074e243b46a9ae8b40de7ef2ee57e8bfbe480c441b49ae25f43a76c4881a",
+      "sha256": "55f0ee4cb248e4defd04138271fdc1bbf22f51640190b5cf486a83f5ced61391",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-ち",
+        "katakana-チ"
+      ],
+      "symbols": [
+        "ち",
+        "チ"
+      ]
+    },
+    {
+      "id": "cho",
+      "file": "audio/cho.mp3",
+      "text": "ちょ",
+      "phonemes": "ʨo",
+      "phrase": "ʦɨɡi βa. ʨo.",
+      "sourceFile": "cho.flac",
+      "sourceSha256": "236f9dc49cb159670895b6e3a7db62ba8c650d170dca4f0e56656e5d975583d8",
+      "sha256": "a0c9ca2c3a42b3cde4829a5bbbbe24db7acd6bae17c499eba8d703aca487a5db",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ちょ",
+        "katakana-チョ"
+      ],
+      "symbols": [
+        "ちょ",
+        "チョ"
+      ]
+    },
+    {
+      "id": "chu",
+      "file": "audio/chu.mp3",
+      "text": "ちゅ",
+      "phonemes": "ʨɯ",
+      "phrase": "ʦɨɡi βa. ʨɯ.",
+      "sourceFile": "chu.flac",
+      "sourceSha256": "833e2b21dfa7b47b448f1076d73a4f17e1f7575d31c7ed1a5df1e2e24c8311bb",
+      "sha256": "b9db870d880a9c01fe50856694fdac8df4c49778161ea9679517c345ef48d3c5",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-ちゅ",
+        "katakana-チュ"
+      ],
+      "symbols": [
+        "ちゅ",
+        "チュ"
+      ]
+    },
+    {
+      "id": "da",
+      "file": "audio/da.mp3",
+      "text": "だ",
+      "phonemes": "da",
+      "phrase": "ʦɨɡi βa. da.",
+      "sourceFile": "da.flac",
+      "sourceSha256": "a198bb9f9d1545d5c26c5c60e4f1b19360ab7ebb9bdc685c38ef05ffb0f743e2",
+      "sha256": "0e55035b42ec50a9a333724f412b0086147bb66966b9a61530b65eb24284a516",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-だ",
+        "katakana-ダ"
+      ],
+      "symbols": [
+        "だ",
+        "ダ"
+      ]
+    },
+    {
+      "id": "de",
+      "file": "audio/de.mp3",
+      "text": "で",
+      "phonemes": "de",
+      "phrase": "ʦɨɡi βa. de.",
+      "sourceFile": "de.flac",
+      "sourceSha256": "9e9fb9020ac0b1993b8c9a6a822100d70be8710f74b03222a868a241e44e39a1",
+      "sha256": "da042657b1956ca1f16559ac84af1e20129c51de0268f1967a04d8a8c4ec894c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-で",
+        "katakana-デ"
+      ],
+      "symbols": [
+        "で",
+        "デ"
+      ]
+    },
+    {
+      "id": "di",
+      "file": "audio/di.mp3",
+      "text": "ぢ",
+      "phonemes": "ʥi",
+      "phrase": "ʦɨɡi βa. ʥi.",
+      "sourceFile": "di.flac",
+      "sourceSha256": "c74fc5c31db9ddce00294691519ac1e404e397a2e829ddc35d9e9a6b86456159",
+      "sha256": "46ecb7e2b6bec97f1897e227b153892fe8f71d8e73df26090bc7a7361820b8a5",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-ぢ",
+        "katakana-ヂ"
+      ],
+      "symbols": [
+        "ぢ",
+        "ヂ"
+      ]
+    },
+    {
+      "id": "do",
+      "file": "audio/do.mp3",
+      "text": "ど",
+      "phonemes": "do",
+      "phrase": "ʦɨɡi βa. do.",
+      "sourceFile": "do.flac",
+      "sourceSha256": "252aff08f49206a9c0afaef5f4941be0bfdea161f8c453ec7a09ab871872d6d4",
+      "sha256": "7c4e5486d304835c53c0212d280c243796fff6a6c13d0990d2ad5b6377e9458f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ど",
+        "katakana-ド"
+      ],
+      "symbols": [
+        "ど",
+        "ド"
+      ]
+    },
+    {
+      "id": "du",
+      "file": "audio/du.mp3",
+      "text": "づ",
+      "phonemes": "zɯ",
+      "phrase": "ʦɨɡi βa. zɯ.",
+      "sourceFile": "du.flac",
+      "sourceSha256": "f59c5dde0450f01cc001fd45a2f3ae5b16d193005f479eb9d86d171203d581c3",
+      "sha256": "45a06d7eb0bef11641b4a14fedec54e687df8086790c89a0beafee634b0dd9f9",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-づ",
+        "katakana-ヅ"
+      ],
+      "symbols": [
+        "づ",
+        "ヅ"
+      ]
+    },
+    {
+      "id": "e",
+      "file": "audio/e.mp3",
+      "text": "え",
+      "phonemes": "e",
+      "phrase": "ʦɨɡi βa. e.",
+      "sourceFile": "e.flac",
+      "sourceSha256": "b838027f3944f695d429f4be2abdd9c04ea13af696faf27efb3f4586675ad738",
+      "sha256": "ee061f69c97639692d8be720843af9a637fcdf5b338b4f2c1e5496f228200892",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-え",
+        "katakana-エ"
+      ],
+      "symbols": [
+        "え",
+        "エ"
+      ]
+    },
+    {
+      "id": "fu",
+      "file": "audio/fu.mp3",
+      "text": "ふ",
+      "phonemes": "ɸɯ",
+      "phrase": "ʦɨɡi βa. ɸɯ.",
+      "sourceFile": "fu.flac",
+      "sourceSha256": "943358ec4ffbf539717e81d02db0f1c9a575944603b62fe1189a64678774b535",
+      "sha256": "d3c4f5d1493d364133dbdecd2d7cf538e75c908ecd396218b8d19b79315ccaf1",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-ふ",
+        "katakana-フ"
+      ],
+      "symbols": [
+        "ふ",
+        "フ"
+      ]
+    },
+    {
+      "id": "ga",
+      "file": "audio/ga.mp3",
+      "text": "が",
+      "phonemes": "ɡa",
+      "phrase": "ʦɨɡi βa. ɡa.",
+      "sourceFile": "ga.flac",
+      "sourceSha256": "35c1dd693abdcb2c75628b383f0654f828ede6137ec48004458413436d0dde39",
+      "sha256": "f87715d14b727a45730b97e108f16687776211303cada3eaad0eb44e7bade327",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-が",
+        "katakana-ガ"
+      ],
+      "symbols": [
+        "が",
+        "ガ"
+      ]
+    },
+    {
+      "id": "gakkoo",
+      "file": "audio/gakkoo.mp3",
+      "text": "がっこう",
+      "phonemes": "ɡaʔkoː",
+      "phrase": "ʦɨɡi βa. ɡaʔkoː.",
+      "sourceFile": "gakkoo.flac",
+      "sourceSha256": "eebacb6c6b648cc3836b985ec3715f5c3f5a441a2805623c039ce0d5c8e8a2c4",
+      "sha256": "a503fa4b7df29c41226bfdd6ae1c216d7f3611063713fed2afa672400f878b73",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 15090,
+      "itemIds": [
+        "hiragana-がっこう"
+      ],
+      "symbols": [
+        "がっこう"
+      ]
+    },
+    {
+      "id": "ge",
+      "file": "audio/ge.mp3",
+      "text": "げ",
+      "phonemes": "ɡe",
+      "phrase": "ʦɨɡi βa. ɡe.",
+      "sourceFile": "ge.flac",
+      "sourceSha256": "70e123b3c530f45cff895222f70ae02d452a0ecc74ef0c94ab24bb67d4281965",
+      "sha256": "6c8edda4feb458eb5d23c4684186900b77a4bf0939dae2647bf06e17ee545a1f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-げ",
+        "katakana-ゲ"
+      ],
+      "symbols": [
+        "げ",
+        "ゲ"
+      ]
+    },
+    {
+      "id": "gi",
+      "file": "audio/gi.mp3",
+      "text": "ぎ",
+      "phonemes": "ɡʲi",
+      "phrase": "ʦɨɡi βa. ɡʲi.",
+      "sourceFile": "gi.flac",
+      "sourceSha256": "6c227121df53ba5c6fd715a33b64124310c46f0a8be0691b8bd0ef86757d97d1",
+      "sha256": "440ca10462ef8fdf72f296dc2b01ca6d9dd254a1f8c810d499c7321e0488119d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-ぎ",
+        "katakana-ギ"
+      ],
+      "symbols": [
+        "ぎ",
+        "ギ"
+      ]
+    },
+    {
+      "id": "go",
+      "file": "audio/go.mp3",
+      "text": "ご",
+      "phonemes": "ɡo",
+      "phrase": "ʦɨɡi βa. ɡo.",
+      "sourceFile": "go.flac",
+      "sourceSha256": "4dedcd4acb97e40f2e561b84d38c56e2e0879343653da0fed27b26744a87f8f9",
+      "sha256": "1969d42326236658929fdbbb408167160101a3735fe1d552e574f928daaca448",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ご",
+        "katakana-ゴ"
+      ],
+      "symbols": [
+        "ご",
+        "ゴ"
+      ]
+    },
+    {
+      "id": "gu",
+      "file": "audio/gu.mp3",
+      "text": "ぐ",
+      "phonemes": "ɡɯ",
+      "phrase": "ʦɨɡi βa. ɡɯ.",
+      "sourceFile": "gu.flac",
+      "sourceSha256": "8b86df58d2cad38d463fef7d35cf06e14511de7fe25c94f4bcb2e5a2d83e2b92",
+      "sha256": "75fa8e83ca1725a31247495053fc8320bf3f81630c3590040c6798801e2f51c6",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ぐ",
+        "katakana-グ"
+      ],
+      "symbols": [
+        "ぐ",
+        "グ"
+      ]
+    },
+    {
+      "id": "gya",
+      "file": "audio/gya.mp3",
+      "text": "ぎゃ",
+      "phonemes": "ɡja",
+      "phrase": "ʦɨɡi βa. ɡja.",
+      "sourceFile": "gya.flac",
+      "sourceSha256": "6fcfe03f6ca8866cbb0c68c2044c826f488cad2b47d15de847183aa23d4dd714",
+      "sha256": "8339676714fe79c2201d7cbcc255cbbe4cc36d6435a7d83a596fd6a4457beb7b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-ぎゃ",
+        "katakana-ギャ"
+      ],
+      "symbols": [
+        "ぎゃ",
+        "ギャ"
+      ]
+    },
+    {
+      "id": "gyo",
+      "file": "audio/gyo.mp3",
+      "text": "ぎょ",
+      "phonemes": "ɡjo",
+      "phrase": "ʦɨɡi βa. ɡjo.",
+      "sourceFile": "gyo.flac",
+      "sourceSha256": "54f497a69d92f8dbe74dc8b667907007ef11a8bed1d31c9f3314c8307c63bdff",
+      "sha256": "eea5ad2e75893e05c2707fd4641cb0a7213fa5ed47bef685c45bf2d51bdf239b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-ぎょ",
+        "katakana-ギョ"
+      ],
+      "symbols": [
+        "ぎょ",
+        "ギョ"
+      ]
+    },
+    {
+      "id": "gyu",
+      "file": "audio/gyu.mp3",
+      "text": "ぎゅ",
+      "phonemes": "ɡjɯ",
+      "phrase": "ʦɨɡi βa. ɡjɯ.",
+      "sourceFile": "gyu.flac",
+      "sourceSha256": "d5ee75a011a8125a114848d12c9afbc37da29fc8ab2978806fe3e4615f8229cc",
+      "sha256": "5dedaf1c89057b0caa171f5d34367c310e74c4239b4b6a60127df773a7e8fa27",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-ぎゅ",
+        "katakana-ギュ"
+      ],
+      "symbols": [
+        "ぎゅ",
+        "ギュ"
+      ]
+    },
+    {
+      "id": "ha",
+      "file": "audio/ha.mp3",
+      "text": "は",
+      "phonemes": "ha",
+      "phrase": "ʦɨɡi βa. ha.",
+      "sourceFile": "ha.flac",
+      "sourceSha256": "f52737f69ab7abbc4f8a3d8eb47754c62c23fb2e1bc26e76ba37bdb13b985331",
+      "sha256": "f02665644308b6d605525a2bdcd98add06b28e1287e259c51d017cbf3ee0c854",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-は",
+        "katakana-ハ"
+      ],
+      "symbols": [
+        "は",
+        "ハ"
+      ]
+    },
+    {
+      "id": "he",
+      "file": "audio/he.mp3",
+      "text": "へ",
+      "phonemes": "he",
+      "phrase": "ʦɨɡi βa. he.",
+      "sourceFile": "he.flac",
+      "sourceSha256": "8984130ce9da50ab66fc05a7e6190f0386ec70e054d339e68b49e1f4bc3780d5",
+      "sha256": "ab27eac5f6ce9422b6c7bf29960767efad0049c3d5e4292072697740f004de4f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-へ",
+        "katakana-ヘ"
+      ],
+      "symbols": [
+        "へ",
+        "ヘ"
+      ]
+    },
+    {
+      "id": "hi",
+      "file": "audio/hi.mp3",
+      "text": "ひ",
+      "phonemes": "çi",
+      "phrase": "ʦɨɡi βa. çi.",
+      "sourceFile": "hi.flac",
+      "sourceSha256": "e555be01bc223aaf6c86e98af2dd8de5f6b23a1a1d040b30237ea5a334f865b3",
+      "sha256": "78457914db2de862b90e724d159fc4106e5cdb0bc09c4dfc83031ad8685d405a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8403,
+      "itemIds": [
+        "hiragana-ひ",
+        "katakana-ヒ"
+      ],
+      "symbols": [
+        "ひ",
+        "ヒ"
+      ]
+    },
+    {
+      "id": "ho",
+      "file": "audio/ho.mp3",
+      "text": "ほ",
+      "phonemes": "ho",
+      "phrase": "ʦɨɡi βa. ho.",
+      "sourceFile": "ho.flac",
+      "sourceSha256": "53dd9cb23d720b8fbc4d782d32d3c8e1e0eab82d5db77357873c1bdb22b286da",
+      "sha256": "7f463f23874c2c598ec072a96b6fef21e0c59ed0413fc13b63639cdf60e4c226",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-ほ",
+        "katakana-ホ"
+      ],
+      "symbols": [
+        "ほ",
+        "ホ"
+      ]
+    },
+    {
+      "id": "hya",
+      "file": "audio/hya.mp3",
+      "text": "ひゃ",
+      "phonemes": "hja",
+      "phrase": "ʦɨɡi βa. hja.",
+      "sourceFile": "hya.flac",
+      "sourceSha256": "7679d14edd1af1180af9f645393b392320774de01262164a63636f77bc64c299",
+      "sha256": "04f7c4764c1f417170f79ec0df7defd2b17f1cde93221f3233e800701deb02db",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ひゃ",
+        "katakana-ヒャ"
+      ],
+      "symbols": [
+        "ひゃ",
+        "ヒャ"
+      ]
+    },
+    {
+      "id": "hyo",
+      "file": "audio/hyo.mp3",
+      "text": "ひょ",
+      "phonemes": "hjo",
+      "phrase": "ʦɨɡi βa. hjo.",
+      "sourceFile": "hyo.flac",
+      "sourceSha256": "8cdc71ec28aae2d8fe737010c9202a93b15627fd63718d1cb9938d48c826dfcf",
+      "sha256": "6a8ef07e580eb00e8f61920cf6ffdab7322cdd02640a409f8a0fd5c102f446fe",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ひょ",
+        "katakana-ヒョ"
+      ],
+      "symbols": [
+        "ひょ",
+        "ヒョ"
+      ]
+    },
+    {
+      "id": "hyu",
+      "file": "audio/hyu.mp3",
+      "text": "ひゅ",
+      "phonemes": "hjɯ",
+      "phrase": "ʦɨɡi βa. hjɯ.",
+      "sourceFile": "hyu.flac",
+      "sourceSha256": "dc5ae443488b1409b15b1baec346778fbd70e7ea32b06d7b76cc8febc10bea97",
+      "sha256": "fc63e02af946cc713e5cc4eb9893ad463bedeab8586662c65c426f8d9c668046",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ひゅ",
+        "katakana-ヒュ"
+      ],
+      "symbols": [
+        "ひゅ",
+        "ヒュ"
+      ]
+    },
+    {
+      "id": "i",
+      "file": "audio/i.mp3",
+      "text": "い",
+      "phonemes": "i",
+      "phrase": "ʦɨɡi βa. i.",
+      "sourceFile": "i.flac",
+      "sourceSha256": "41a6b0f83db42291377bef95c790a8f66d015151ba2d4a5538f9adb418e88f1e",
+      "sha256": "5b7d3e678bb19b92781fa3c8440186a0152dd0bae6b7976a6d779f9caa30316a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8403,
+      "itemIds": [
+        "hiragana-い",
+        "katakana-イ"
+      ],
+      "symbols": [
+        "い",
+        "イ"
+      ]
+    },
+    {
+      "id": "ja",
+      "file": "audio/ja.mp3",
+      "text": "じゃ",
+      "phonemes": "ʥa",
+      "phrase": "ʦɨɡi βa. ʥa.",
+      "sourceFile": "ja.flac",
+      "sourceSha256": "b22db3d7d38f5b66c257fdd4785228a8a121bda06f0206028a646e62d8db410c",
+      "sha256": "c6b841e6dc69a387ae6b33fff9d481312f3df0e097ac2c8bcc38746bd922e5f5",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-じゃ",
+        "katakana-ジャ"
+      ],
+      "symbols": [
+        "じゃ",
+        "ジャ"
+      ]
+    },
+    {
+      "id": "ji",
+      "file": "audio/ji.mp3",
+      "text": "じ",
+      "phonemes": "ʥi",
+      "phrase": "ʦɨɡi βa. ʥi.",
+      "sourceFile": "ji.flac",
+      "sourceSha256": "806631a57c20cd1732ed484eb1c1f9553b22562c5988d13a15a9852bfd3503db",
+      "sha256": "a8f526de72ae9f7f77608d57728c457e60a788330628bee90fd836d39ebade40",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-じ",
+        "katakana-ジ"
+      ],
+      "symbols": [
+        "じ",
+        "ジ"
+      ]
+    },
+    {
+      "id": "jo",
+      "file": "audio/jo.mp3",
+      "text": "じょ",
+      "phonemes": "ʥo",
+      "phrase": "ʦɨɡi βa. ʥo.",
+      "sourceFile": "jo.flac",
+      "sourceSha256": "923be5632884a066f42ed2b8f3c33a9eaed59a69e012642541d4cb45ff07af3b",
+      "sha256": "c22b4f48698870e796a99803b4f8a277f84d6696ba4b882ca0b66a7af402098c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-じょ",
+        "katakana-ジョ"
+      ],
+      "symbols": [
+        "じょ",
+        "ジョ"
+      ]
+    },
+    {
+      "id": "ju",
+      "file": "audio/ju.mp3",
+      "text": "じゅ",
+      "phonemes": "ʥɯ",
+      "phrase": "ʦɨɡi βa. ʥɯ.",
+      "sourceFile": "ju.flac",
+      "sourceSha256": "fd7814b95aa8fcaacb60e357a40b808e32ffd79fb02bbf82e816b7f7d99970db",
+      "sha256": "992b502a658893a3f83dabc41317c662d0f839d625cad5c4e4e531992502716a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-じゅ",
+        "katakana-ジュ"
+      ],
+      "symbols": [
+        "じゅ",
+        "ジュ"
+      ]
+    },
+    {
+      "id": "ka",
+      "file": "audio/ka.mp3",
+      "text": "か",
+      "phonemes": "ka",
+      "phrase": "ʦɨɡi βa. ka.",
+      "sourceFile": "ka.flac",
+      "sourceSha256": "c8ce0060a6071d08cefd4b0b85cdebe29240eb195343e08dbfd310860fe71a62",
+      "sha256": "e9f421af838d373e7f7c462f1699f60775c91063e4b7f647aee770ee23fe0f0b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-か",
+        "katakana-カ"
+      ],
+      "symbols": [
+        "か",
+        "カ"
+      ]
+    },
+    {
+      "id": "kappu",
+      "file": "audio/kappu.mp3",
+      "text": "かっぷ",
+      "phonemes": "kaʔpɯ",
+      "phrase": "ʦɨɡi βa. kaʔpɯ.",
+      "sourceFile": "kappu.flac",
+      "sourceSha256": "4141c4044dacf83fdfdcdff1523bb2a4a3e0facc31334d58f1c13a69ec30d55d",
+      "sha256": "0b40e97ef757f3eadf855550a3fd2045b32a41e1e60f3730f86080de3d88bfbb",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 13418,
+      "itemIds": [
+        "katakana-カップ"
+      ],
+      "symbols": [
+        "カップ"
+      ]
+    },
+    {
+      "id": "ke",
+      "file": "audio/ke.mp3",
+      "text": "け",
+      "phonemes": "ke",
+      "phrase": "ʦɨɡi βa. ke.",
+      "sourceFile": "ke.flac",
+      "sourceSha256": "14bc8b7566632516e5376408583aaa9cc5aa0f70131eee0c228f5161a4c74325",
+      "sha256": "c48e185811954c91619cdb3f7dd64af2f15393b0f7940ca914e6d3250df66741",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-け",
+        "katakana-ケ"
+      ],
+      "symbols": [
+        "け",
+        "ケ"
+      ]
+    },
+    {
+      "id": "keeki",
+      "file": "audio/keeki.mp3",
+      "text": "けーき",
+      "phonemes": "keːkʲi",
+      "phrase": "ʦɨɡi βa. keːkʲi.",
+      "sourceFile": "keeki.flac",
+      "sourceSha256": "35faf7496a4ffa84ce730461dd8e026a65330c108e01ceaf85995d8aaa16eeda",
+      "sha256": "7d5cb7ba6157f575883e52d0f8ffb5f168327cd011f6a29cee7e8ad8bd828db3",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 13836,
+      "itemIds": [
+        "katakana-ケーキ"
+      ],
+      "symbols": [
+        "ケーキ"
+      ]
+    },
+    {
+      "id": "ki",
+      "file": "audio/ki.mp3",
+      "text": "き",
+      "phonemes": "kʲi",
+      "phrase": "ʦɨɡi βa. kʲi.",
+      "sourceFile": "ki.flac",
+      "sourceSha256": "3b9f1e3cf7b9f2b5debb1aa9a0c2f5f9815291c7a6d2ac6da91174a9b1094d26",
+      "sha256": "e23f2e6c596128d4ad027134661a13a2d5e31044ef85fbad4a4121c280ab496b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-き",
+        "katakana-キ"
+      ],
+      "symbols": [
+        "き",
+        "キ"
+      ]
+    },
+    {
+      "id": "kitte",
+      "file": "audio/kitte.mp3",
+      "text": "きって",
+      "phonemes": "kʲiʔte",
+      "phrase": "ʦɨɡi βa. kʲiʔte.",
+      "sourceFile": "kitte.flac",
+      "sourceSha256": "bc4e8944998c2a7f6622607e136ea65d9df6df640f66da2acc5a782d8cb02c31",
+      "sha256": "d5c81d4177fd445233e96b0ea83249a985097807ee153061ad445068b4bd4d7b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 13418,
+      "itemIds": [
+        "hiragana-きって"
+      ],
+      "symbols": [
+        "きって"
+      ]
+    },
+    {
+      "id": "ko",
+      "file": "audio/ko.mp3",
+      "text": "こ",
+      "phonemes": "ko",
+      "phrase": "ʦɨɡi βa. ko.",
+      "sourceFile": "ko.flac",
+      "sourceSha256": "bdc4884ee6780786c83bc00c9f1a967d0093fa5b94838b7ab0ee1b482a5ec3a8",
+      "sha256": "84ea0ccef54d6b88fc208e5b7c60bd3bbe77757294044a684f103725491e2298",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-こ",
+        "katakana-コ"
+      ],
+      "symbols": [
+        "こ",
+        "コ"
+      ]
+    },
+    {
+      "id": "koohii",
+      "file": "audio/koohii.mp3",
+      "text": "こーひー",
+      "phonemes": "koːçiː",
+      "phrase": "ʦɨɡi βa. koːçiː.",
+      "sourceFile": "koohii.flac",
+      "sourceSha256": "bd45292fde3ecd9f56a832d919a948c56ec9e9d65769409dd013da5f16c05c96",
+      "sha256": "ac1bb2b33166afc2ad730615d34fc4793844a5ec8074507331f99b8872a91681",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 14254,
+      "itemIds": [
+        "katakana-コーヒー"
+      ],
+      "symbols": [
+        "コーヒー"
+      ]
+    },
+    {
+      "id": "kookoo",
+      "file": "audio/kookoo.mp3",
+      "text": "こうこう",
+      "phonemes": "koːkoː",
+      "phrase": "ʦɨɡi βa. koːkoː.",
+      "sourceFile": "kookoo.flac",
+      "sourceSha256": "ea6c36444c9af186dedd6649018bd3b2c4879b8cd9c4bbdcb8c307e11d9ec768",
+      "sha256": "344f544b8c4e4a54bab1511c18f3a9ff7e6c8d7afeab7cfbe515c88e8dcddbbd",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 14672,
+      "itemIds": [
+        "hiragana-こうこう"
+      ],
+      "symbols": [
+        "こうこう"
+      ]
+    },
+    {
+      "id": "ku",
+      "file": "audio/ku.mp3",
+      "text": "く",
+      "phonemes": "kɯ",
+      "phrase": "ʦɨɡi βa. kɯ.",
+      "sourceFile": "ku.flac",
+      "sourceSha256": "8f80ac36e9e4e96b9a2340a161d7299577a92d4fe981f1010551e0645b70f4b3",
+      "sha256": "cfc505fa1a692c1efc8965685a4cdc4ed89605f44581a1cfbdda285b3ff8a5e0",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-く",
+        "katakana-ク"
+      ],
+      "symbols": [
+        "く",
+        "ク"
+      ]
+    },
+    {
+      "id": "kya",
+      "file": "audio/kya.mp3",
+      "text": "きゃ",
+      "phonemes": "kja",
+      "phrase": "ʦɨɡi βa. kja.",
+      "sourceFile": "kya.flac",
+      "sourceSha256": "28fd662404b47222ce45a04efe2c1b6e6b1b3ea71f565d6ac544698c8e525da4",
+      "sha256": "f3075bc62e4092fe4a501292d677ae25d2f09601089be06a8084b4ffef9a56b9",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-きゃ",
+        "katakana-キャ"
+      ],
+      "symbols": [
+        "きゃ",
+        "キャ"
+      ]
+    },
+    {
+      "id": "kyo",
+      "file": "audio/kyo.mp3",
+      "text": "きょ",
+      "phonemes": "kjo",
+      "phrase": "ʦɨɡi βa. kjo.",
+      "sourceFile": "kyo.flac",
+      "sourceSha256": "cc53b421c72ee4006dc6fb428d567d02eeddadfad926f19ea45ab18f91b16ee6",
+      "sha256": "ec1ad0ea2b26da9eef0340754f153b9ae32c4eca890b8ae25116f264f608a83c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-きょ",
+        "katakana-キョ"
+      ],
+      "symbols": [
+        "きょ",
+        "キョ"
+      ]
+    },
+    {
+      "id": "kyu",
+      "file": "audio/kyu.mp3",
+      "text": "きゅ",
+      "phonemes": "kjɯ",
+      "phrase": "ʦɨɡi βa. kjɯ.",
+      "sourceFile": "kyu.flac",
+      "sourceSha256": "f678cdddd65f5895fc0de475e179d08e6da49b4edb500c337b075834ed4f3767",
+      "sha256": "8ed31e6637cfc6af04801cb387f5d659b9a2a657f3c1cb86282f6e5f615ed1ee",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-きゅ",
+        "katakana-キュ"
+      ],
+      "symbols": [
+        "きゅ",
+        "キュ"
+      ]
+    },
+    {
+      "id": "ma",
+      "file": "audio/ma.mp3",
+      "text": "ま",
+      "phonemes": "ma",
+      "phrase": "ʦɨɡi βa. ma.",
+      "sourceFile": "ma.flac",
+      "sourceSha256": "5ea7c3294d2beb2e2800dcd05876256f424fdfb24ee2785b0fde26bd89131c23",
+      "sha256": "b2fd250cae9e6a4ecae7d41af8072cb573b035cdb79ead736f72516bc063583b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ま",
+        "katakana-マ"
+      ],
+      "symbols": [
+        "ま",
+        "マ"
+      ]
+    },
+    {
+      "id": "me",
+      "file": "audio/me.mp3",
+      "text": "め",
+      "phonemes": "me",
+      "phrase": "ʦɨɡi βa. me.",
+      "sourceFile": "me.flac",
+      "sourceSha256": "5247062def9a65731163a92fedc7651ee037c5e1f0f2fa68ac8ae590581b6d6b",
+      "sha256": "e7e7755bce6fe9425534ab7d0476b3179dc9c44e7cc6c02dbb075ac5647a6ef7",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-め",
+        "katakana-メ"
+      ],
+      "symbols": [
+        "め",
+        "メ"
+      ]
+    },
+    {
+      "id": "mi",
+      "file": "audio/mi.mp3",
+      "text": "み",
+      "phonemes": "mʲi",
+      "phrase": "ʦɨɡi βa. mʲi.",
+      "sourceFile": "mi.flac",
+      "sourceSha256": "e3e9e5328de90f7ddfa707d46e4cdbfdf3e7f65ff590cd6e4bf5c9c352162067",
+      "sha256": "e19ac63f626661c27c60469a114782517fbd57b2fa9b2587d0d586eadd935ae4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-み",
+        "katakana-ミ"
+      ],
+      "symbols": [
+        "み",
+        "ミ"
+      ]
+    },
+    {
+      "id": "mo",
+      "file": "audio/mo.mp3",
+      "text": "も",
+      "phonemes": "mo",
+      "phrase": "ʦɨɡi βa. mo.",
+      "sourceFile": "mo.flac",
+      "sourceSha256": "7e9d356e4e6b97318fefd397733022b785eedcb6009b47fcb40ffdc1b0b9ec8f",
+      "sha256": "b8543d63f75fb90cb38959d360b57110b1441d6d01865f811b75364cb41d381e",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-も",
+        "katakana-モ"
+      ],
+      "symbols": [
+        "も",
+        "モ"
+      ]
+    },
+    {
+      "id": "mu",
+      "file": "audio/mu.mp3",
+      "text": "む",
+      "phonemes": "mɯ",
+      "phrase": "ʦɨɡi βa. mɯ.",
+      "sourceFile": "mu.flac",
+      "sourceSha256": "85bf8d5793dd161a2ad42ea2fa23d655322d76dae821d268426fdb11685cda35",
+      "sha256": "df97869374c218de7b0d46c6e3a151cc31a8366b4b9524f500e58991f6b64b01",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-む",
+        "katakana-ム"
+      ],
+      "symbols": [
+        "む",
+        "ム"
+      ]
+    },
+    {
+      "id": "mya",
+      "file": "audio/mya.mp3",
+      "text": "みゃ",
+      "phonemes": "mja",
+      "phrase": "ʦɨɡi βa. mja.",
+      "sourceFile": "mya.flac",
+      "sourceSha256": "87f3390eb8d63904aa566a569399f32f0fcb4cf07a464d21b84e2eb37d7dc89b",
+      "sha256": "d0fa62967fcba0c88a549501e431bb68ea9f106cfe81088fc7c44fbee208f978",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-みゃ",
+        "katakana-ミャ"
+      ],
+      "symbols": [
+        "みゃ",
+        "ミャ"
+      ]
+    },
+    {
+      "id": "myo",
+      "file": "audio/myo.mp3",
+      "text": "みょ",
+      "phonemes": "mjo",
+      "phrase": "ʦɨɡi βa. mjo.",
+      "sourceFile": "myo.flac",
+      "sourceSha256": "74f1130904080c7cd03801e57477225015b3836ae7e1c9946609d42d2aeec183",
+      "sha256": "0eb50a4e819f49d373063811a917f425ad4a463c6a85dee36507bc8449f45050",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-みょ",
+        "katakana-ミョ"
+      ],
+      "symbols": [
+        "みょ",
+        "ミョ"
+      ]
+    },
+    {
+      "id": "myu",
+      "file": "audio/myu.mp3",
+      "text": "みゅ",
+      "phonemes": "mjɯ",
+      "phrase": "ʦɨɡi βa. mjɯ.",
+      "sourceFile": "myu.flac",
+      "sourceSha256": "552395f28b4fd05ce55316bb59c2206cf132ada2c8f0b986638d2672ba418860",
+      "sha256": "7544a9328dd078a2719df8891123ec9057c55f15959a9d94a2192719fbcea29f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-みゅ",
+        "katakana-ミュ"
+      ],
+      "symbols": [
+        "みゅ",
+        "ミュ"
+      ]
+    },
+    {
+      "id": "n",
+      "file": "audio/n.mp3",
+      "text": "ん",
+      "phonemes": "ɴ",
+      "phrase": "ɴː",
+      "sourceFile": "n.flac",
+      "sourceSha256": "4c8023a2255c3530751f76f6fb303fa18ef48b5a73f5cbb001b66851886cafad",
+      "sha256": "1c898705173db4ec46e4469bc53aa16f3ce5682df3f5b2dcf79187a1b1fc9f40",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "pending",
+        "note": "Pronunciation not yet confirmed by a listener."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9238,
+      "itemIds": [
+        "hiragana-ん",
+        "katakana-ン"
+      ],
+      "symbols": [
+        "ん",
+        "ン"
+      ]
+    },
+    {
+      "id": "na",
+      "file": "audio/na.mp3",
+      "text": "な",
+      "phonemes": "na",
+      "phrase": "ʦɨɡi βa. na.",
+      "sourceFile": "na.flac",
+      "sourceSha256": "c0b273aa2172e6f75ce87ddb16816161203e50717aad69f59ce9e0bc424e06d2",
+      "sha256": "c6d5f6168545ed5a025de817f63618c2ae293b1abeae870d66dd05ce8d1dedfa",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-な",
+        "katakana-ナ"
+      ],
+      "symbols": [
+        "な",
+        "ナ"
+      ]
+    },
+    {
+      "id": "ne",
+      "file": "audio/ne.mp3",
+      "text": "ね",
+      "phonemes": "ne",
+      "phrase": "ʦɨɡi βa. ne.",
+      "sourceFile": "ne.flac",
+      "sourceSha256": "2a30c4a4ee855fdec3f0865b2c0a361d254375f2913b3e9b6ba6f50d2a2942c3",
+      "sha256": "f9503380dfe672eab61cb45b2e2ef1b76b8633a7b54a1c86383ac436f83fcc01",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-ね",
+        "katakana-ネ"
+      ],
+      "symbols": [
+        "ね",
+        "ネ"
+      ]
+    },
+    {
+      "id": "ni",
+      "file": "audio/ni.mp3",
+      "text": "に",
+      "phonemes": "ɲi",
+      "phrase": "ʦɨɡi βa. ɲi.",
+      "sourceFile": "ni.flac",
+      "sourceSha256": "0385a36942f89f5ee05963c46623e3e0d8dc434b3a0f3be0c941a7a3d97b14ff",
+      "sha256": "3936bed056756d97e01c4a4fb29525a57a48afe5e55d069a80c5e318a4b2d343",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 7985,
+      "itemIds": [
+        "hiragana-に",
+        "katakana-ニ"
+      ],
+      "symbols": [
+        "に",
+        "ニ"
+      ]
+    },
+    {
+      "id": "no",
+      "file": "audio/no.mp3",
+      "text": "の",
+      "phonemes": "no",
+      "phrase": "ʦɨɡi βa. no.",
+      "sourceFile": "no.flac",
+      "sourceSha256": "1a9783ee0c67011f5d3ef2a25c7c5e725c829a7c89a4b383d354afcba35f2b7b",
+      "sha256": "817fc3dac70d73bb033ad3f99bc88692c48e56f3d8413cc2e57400c1523b9843",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-の",
+        "katakana-ノ"
+      ],
+      "symbols": [
+        "の",
+        "ノ"
+      ]
+    },
+    {
+      "id": "nu",
+      "file": "audio/nu.mp3",
+      "text": "ぬ",
+      "phonemes": "nɯ",
+      "phrase": "ʦɨɡi βa. nɯ.",
+      "sourceFile": "nu.flac",
+      "sourceSha256": "816a7570ba7e4225acdcdc1e5e4a42b000a72e8bfc9720f6a58cbe1226dfaf9b",
+      "sha256": "0034913e3b049d4369d5ff687d20ee626b97e19d8c5d78dbfb089f5bcd2c7495",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ぬ",
+        "katakana-ヌ"
+      ],
+      "symbols": [
+        "ぬ",
+        "ヌ"
+      ]
+    },
+    {
+      "id": "nya",
+      "file": "audio/nya.mp3",
+      "text": "にゃ",
+      "phonemes": "nja",
+      "phrase": "ʦɨɡi βa. nja.",
+      "sourceFile": "nya.flac",
+      "sourceSha256": "15a567906046bfb82564e573ab9a7ce923bb3a80c671bbe8a223c5e6b0740d65",
+      "sha256": "46b1aa55c47a70f939d766d290f08e49f124c71b3610dd486a231d63d82678dd",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-にゃ",
+        "katakana-ニャ"
+      ],
+      "symbols": [
+        "にゃ",
+        "ニャ"
+      ]
+    },
+    {
+      "id": "nyo",
+      "file": "audio/nyo.mp3",
+      "text": "にょ",
+      "phonemes": "njo",
+      "phrase": "ʦɨɡi βa. njo.",
+      "sourceFile": "nyo.flac",
+      "sourceSha256": "34858a64a73e52833baa26e1c0635505e5ad42abdab0384d5866d12c4516a73f",
+      "sha256": "086a4da788c90306203516fd5826aa15e6c5efe2a918cf22d149c88859b419a8",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-にょ",
+        "katakana-ニョ"
+      ],
+      "symbols": [
+        "にょ",
+        "ニョ"
+      ]
+    },
+    {
+      "id": "nyu",
+      "file": "audio/nyu.mp3",
+      "text": "にゅ",
+      "phonemes": "njɯ",
+      "phrase": "ʦɨɡi βa. njɯ.",
+      "sourceFile": "nyu.flac",
+      "sourceSha256": "31ac5466213e671aa54a8e07c1b1dd212b06836d5095b46a13b106050fa0241f",
+      "sha256": "cbbfc37e65fde362a5bb82cf9ff2ee4c2a94bcfc9f445a980d20e9b9919c4b75",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-にゅ",
+        "katakana-ニュ"
+      ],
+      "symbols": [
+        "にゅ",
+        "ニュ"
+      ]
+    },
+    {
+      "id": "o",
+      "file": "audio/o.mp3",
+      "text": "お",
+      "phonemes": "o",
+      "phrase": "ʦɨɡi βa. o.",
+      "sourceFile": "o.flac",
+      "sourceSha256": "046151846b221ed1123f9c1f6519fbea6dff69c4dfa509f064df0ea977e81164",
+      "sha256": "9b01b8890267fe84315e86dda4128b1ae7aa2427275bde87d67f9e456ca5aa35",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-お",
+        "katakana-オ"
+      ],
+      "symbols": [
+        "お",
+        "オ"
+      ]
+    },
+    {
+      "id": "okaasan",
+      "file": "audio/okaasan.mp3",
+      "text": "おかあさん",
+      "phonemes": "okaːsaɴ",
+      "phrase": "ʦɨɡi βa. okaːsaɴ.",
+      "sourceFile": "okaasan.flac",
+      "sourceSha256": "00310d2b90d0cf097d69d866c06f5a8d12146e94bef852b7889534aacffaec5c",
+      "sha256": "e0a71643c4c98f217dd46bd6f90d0ff4b20824aa0e8070a282d9cbf0f4fc495e",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 17180,
+      "itemIds": [
+        "hiragana-おかあさん"
+      ],
+      "symbols": [
+        "おかあさん"
+      ]
+    },
+    {
+      "id": "pa",
+      "file": "audio/pa.mp3",
+      "text": "ぱ",
+      "phonemes": "pa",
+      "phrase": "ʦɨɡi βa. pa.",
+      "sourceFile": "pa.flac",
+      "sourceSha256": "3ec19bc936927f5059e151e88e590d45c6c43f86c07cfc8eae8222ca6c3f51f4",
+      "sha256": "a8bbe48004906464b50aafd879c354147f295149394ac36ede7401d8ee59dbc1",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-ぱ",
+        "katakana-パ"
+      ],
+      "symbols": [
+        "ぱ",
+        "パ"
+      ]
+    },
+    {
+      "id": "pe",
+      "file": "audio/pe.mp3",
+      "text": "ぺ",
+      "phonemes": "pe",
+      "phrase": "ʦɨɡi βa. pe.",
+      "sourceFile": "pe.flac",
+      "sourceSha256": "0aa41683cbee94b397e9cbdc58049a0154cb527c188b6ad475e16d502d3370df",
+      "sha256": "47848aba82d31a27ab40705811b8abdff06d9c63424d664993ac311c1a16762e",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-ぺ",
+        "katakana-ペ"
+      ],
+      "symbols": [
+        "ぺ",
+        "ペ"
+      ]
+    },
+    {
+      "id": "pi",
+      "file": "audio/pi.mp3",
+      "text": "ぴ",
+      "phonemes": "pʲi",
+      "phrase": "ʦɨɡi βa. pʲi.",
+      "sourceFile": "pi.flac",
+      "sourceSha256": "fff7d51ff635fcf22a796d8f694a8ef5ceadc0548429a9c914e3874f63462026",
+      "sha256": "24911fce09f4e7800fdcc29ffcec7e319e050b68e6a42a7a136227bdd93b0a30",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ぴ",
+        "katakana-ピ"
+      ],
+      "symbols": [
+        "ぴ",
+        "ピ"
+      ]
+    },
+    {
+      "id": "po",
+      "file": "audio/po.mp3",
+      "text": "ぽ",
+      "phonemes": "po",
+      "phrase": "ʦɨɡi βa. po.",
+      "sourceFile": "po.flac",
+      "sourceSha256": "de3389e8c9db9b1380d46cd3e5fdd64ca6213d8c9d0ff2e439d7f9ef8c6ae2fb",
+      "sha256": "d1b7c660a0700d9456091667e0750cbc6f57b12f1c0c5b59ddfba8975c1d035c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-ぽ",
+        "katakana-ポ"
+      ],
+      "symbols": [
+        "ぽ",
+        "ポ"
+      ]
+    },
+    {
+      "id": "pu",
+      "file": "audio/pu.mp3",
+      "text": "ぷ",
+      "phonemes": "pɯ",
+      "phrase": "ʦɨɡi βa. pɯ.",
+      "sourceFile": "pu.flac",
+      "sourceSha256": "736722dbc14642cf48f4bdc9f43e0bf97370e102d6f09a23cb1c576554ffe81b",
+      "sha256": "bde0149eaa991df0c49a8a816bfafa084e82bd25d96ca303968463b99b79ab4d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8403,
+      "itemIds": [
+        "hiragana-ぷ",
+        "katakana-プ"
+      ],
+      "symbols": [
+        "ぷ",
+        "プ"
+      ]
+    },
+    {
+      "id": "pya",
+      "file": "audio/pya.mp3",
+      "text": "ぴゃ",
+      "phonemes": "pja",
+      "phrase": "ʦɨɡi βa. pja.",
+      "sourceFile": "pya.flac",
+      "sourceSha256": "b5945877585f98770b50cbb2c1ee0b280355f2af0872db0266b930e3e0250399",
+      "sha256": "723b0c5234272b4718e31d57849d939544bab818d096ac29dc49dfba156fd046",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ぴゃ",
+        "katakana-ピャ"
+      ],
+      "symbols": [
+        "ぴゃ",
+        "ピャ"
+      ]
+    },
+    {
+      "id": "pyo",
+      "file": "audio/pyo.mp3",
+      "text": "ぴょ",
+      "phonemes": "pjo",
+      "phrase": "ʦɨɡi βa. pjo.",
+      "sourceFile": "pyo.flac",
+      "sourceSha256": "f2830cbe52d7e614b42cc8574e2a4949695e66e84f3d739d7e3dc0f4da0c91cd",
+      "sha256": "4b547384f027855f1404588da434eed433510b4ecd2171f4a6f23781344fc6c4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ぴょ",
+        "katakana-ピョ"
+      ],
+      "symbols": [
+        "ぴょ",
+        "ピョ"
+      ]
+    },
+    {
+      "id": "pyu",
+      "file": "audio/pyu.mp3",
+      "text": "ぴゅ",
+      "phonemes": "pjɯ",
+      "phrase": "ʦɨɡi βa. pjɯ.",
+      "sourceFile": "pyu.flac",
+      "sourceSha256": "d3f1dfb155d6f4da6fecdad26aaac7267f4d968c82a8941ddba99b568c25777f",
+      "sha256": "c8b896c86790e11fad66e2e5ab70528ef145100dc91667b37fbc49f3d5e563c4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-ぴゅ",
+        "katakana-ピュ"
+      ],
+      "symbols": [
+        "ぴゅ",
+        "ピュ"
+      ]
+    },
+    {
+      "id": "ra",
+      "file": "audio/ra.mp3",
+      "text": "ら",
+      "phonemes": "ɾa",
+      "phrase": "ʦɨɡi βa. ɾa.",
+      "sourceFile": "ra.flac",
+      "sourceSha256": "ce7502176f9291efe78d902b0024b869d9e5d28572ebb629e86b5f819bb5cdc7",
+      "sha256": "2b2ec2a1f7ebe9b2bfae47ca31936a5b6460ff40b328a6e8c41f9ed7e4e5241d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-ら",
+        "katakana-ラ"
+      ],
+      "symbols": [
+        "ら",
+        "ラ"
+      ]
+    },
+    {
+      "id": "re",
+      "file": "audio/re.mp3",
+      "text": "れ",
+      "phonemes": "ɾe",
+      "phrase": "ʦɨɡi βa. ɾe.",
+      "sourceFile": "re.flac",
+      "sourceSha256": "b28a2876459202e65dbc2704edac4f76f747caf7b4bed9851529d5fc11c27e12",
+      "sha256": "8338e54014894bca982911d6723e1dfc79973925bd2a49c174dfafbfe35762cb",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-れ",
+        "katakana-レ"
+      ],
+      "symbols": [
+        "れ",
+        "レ"
+      ]
+    },
+    {
+      "id": "ri",
+      "file": "audio/ri.mp3",
+      "text": "り",
+      "phonemes": "ɾʲi",
+      "phrase": "ʦɨɡi βa. ɾʲi.",
+      "sourceFile": "ri.flac",
+      "sourceSha256": "f3f1b0635696c2ae7bacc5a6c47a35754053bf88f135758cf4e77452acf5b85b",
+      "sha256": "76661300b70e695d1d12e9e9b13615c8253b9fa40cdf21fbae684490ba697a2b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-り",
+        "katakana-リ"
+      ],
+      "symbols": [
+        "り",
+        "リ"
+      ]
+    },
+    {
+      "id": "ro",
+      "file": "audio/ro.mp3",
+      "text": "ろ",
+      "phonemes": "ɾo",
+      "phrase": "ʦɨɡi βa. ɾo.",
+      "sourceFile": "ro.flac",
+      "sourceSha256": "89029e6e114ab416a20df54f0cf3041eabe56a93b8e90b2bd8cca5a0b1f4f2dc",
+      "sha256": "396338e6ea20394dcd6baa664bbddadd96e14ec05a5262a74af18337c4412c45",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ろ",
+        "katakana-ロ"
+      ],
+      "symbols": [
+        "ろ",
+        "ロ"
+      ]
+    },
+    {
+      "id": "ru",
+      "file": "audio/ru.mp3",
+      "text": "る",
+      "phonemes": "ɾɯ",
+      "phrase": "ʦɨɡi βa. ɾɯ.",
+      "sourceFile": "ru.flac",
+      "sourceSha256": "fe8175adec26941b871a1ba7beface134a494bafafbbbaa5e3be1eb374d88868",
+      "sha256": "520e9f84eb5203536a8a2e35a88e4aec80e9b5e942b5bf4e653d7a98c257a9b4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-る",
+        "katakana-ル"
+      ],
+      "symbols": [
+        "る",
+        "ル"
+      ]
+    },
+    {
+      "id": "rya",
+      "file": "audio/rya.mp3",
+      "text": "りゃ",
+      "phonemes": "ɾja",
+      "phrase": "ʦɨɡi βa. ɾja.",
+      "sourceFile": "rya.flac",
+      "sourceSha256": "f749509920564c82c8b1ea44b4af01fbeae8f677f8559ceae0ecef94460e76c8",
+      "sha256": "f7eabf52d0e6615a5d273bca38f179092b088fc3739965fabd88fee065148371",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10911,
+      "itemIds": [
+        "hiragana-りゃ",
+        "katakana-リャ"
+      ],
+      "symbols": [
+        "りゃ",
+        "リャ"
+      ]
+    },
+    {
+      "id": "ryo",
+      "file": "audio/ryo.mp3",
+      "text": "りょ",
+      "phonemes": "ɾjo",
+      "phrase": "ʦɨɡi βa. ɾjo.",
+      "sourceFile": "ryo.flac",
+      "sourceSha256": "fb32d5a597d48b27e1e90c429f76e9c532fe317a80817f86b793f357d777be04",
+      "sha256": "1b9d6828f23e6586e68e0dcea6a4effd8051735ff9147da509c9d461aeba7613",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-りょ",
+        "katakana-リョ"
+      ],
+      "symbols": [
+        "りょ",
+        "リョ"
+      ]
+    },
+    {
+      "id": "ryu",
+      "file": "audio/ryu.mp3",
+      "text": "りゅ",
+      "phonemes": "ɾjɯ",
+      "phrase": "ʦɨɡi βa. ɾjɯ.",
+      "sourceFile": "ryu.flac",
+      "sourceSha256": "a5e152fd6355b897481f5dd6bdf7a0f5a0894cef0f03ac3f1a0c184677fe160d",
+      "sha256": "2c482b42b604e81d7f71f229b3450b3f0e71022509196b830e78fbbf83259fa4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-りゅ",
+        "katakana-リュ"
+      ],
+      "symbols": [
+        "りゅ",
+        "リュ"
+      ]
+    },
+    {
+      "id": "sa",
+      "file": "audio/sa.mp3",
+      "text": "さ",
+      "phonemes": "sa",
+      "phrase": "ʦɨɡi βa. sa.",
+      "sourceFile": "sa.flac",
+      "sourceSha256": "3d89cba243567d937aa60cf38a45477a5bc810d521a4de1be472abdffe9633f6",
+      "sha256": "b70b8bbebc6d4880a3ef05bc263989fbcc20371b24b5677fc54fdcb1a9844686",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-さ",
+        "katakana-サ"
+      ],
+      "symbols": [
+        "さ",
+        "サ"
+      ]
+    },
+    {
+      "id": "se",
+      "file": "audio/se.mp3",
+      "text": "せ",
+      "phonemes": "se",
+      "phrase": "ʦɨɡi βa. se.",
+      "sourceFile": "se.flac",
+      "sourceSha256": "2ae83c1ba355b0659adbb7bc74744c3ec77c61802550fbcea91cb7072c766f64",
+      "sha256": "f4afc7fe1b07ca58e80bfbc477c98add0a65d2e9501485fa9755871b87f40aef",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-せ",
+        "katakana-セ"
+      ],
+      "symbols": [
+        "せ",
+        "セ"
+      ]
+    },
+    {
+      "id": "sha",
+      "file": "audio/sha.mp3",
+      "text": "しゃ",
+      "phonemes": "ɕa",
+      "phrase": "ʦɨɡi βa. ɕa.",
+      "sourceFile": "sha.flac",
+      "sourceSha256": "c8cb424b2ff0062eeb6d14da1d62fb6030a9d7765beebb815123d0cd3d8ef6b1",
+      "sha256": "ecf8b1f96e5fd9ae633230f5e052337ff834a525a8f9471600c6f5fc11304b04",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-しゃ",
+        "katakana-シャ"
+      ],
+      "symbols": [
+        "しゃ",
+        "シャ"
+      ]
+    },
+    {
+      "id": "shi",
+      "file": "audio/shi.mp3",
+      "text": "し",
+      "phonemes": "ɕi",
+      "phrase": "ʦɨɡi βa. ɕi.",
+      "sourceFile": "shi.flac",
+      "sourceSha256": "0a41e1f5e82c59b068b2e61ce50b44cb01a6ecc2a1c3ea97897d6fe237c4d07c",
+      "sha256": "5f02d9ea6d6992b780ed6dc986bb4b2bf4dbeebe9c2b8f5869e21dbf38948483",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-し",
+        "katakana-シ"
+      ],
+      "symbols": [
+        "し",
+        "シ"
+      ]
+    },
+    {
+      "id": "sho",
+      "file": "audio/sho.mp3",
+      "text": "しょ",
+      "phonemes": "ɕo",
+      "phrase": "ʦɨɡi βa. ɕo.",
+      "sourceFile": "sho.flac",
+      "sourceSha256": "4c9213eca1a71294ab02599b9bec580384d9bf4d0cd952b1094ebb3573721e34",
+      "sha256": "f4adc43f9b397643c68da69f25b398dbc3e600ed1206e429746ad55ed9291bdd",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-しょ",
+        "katakana-ショ"
+      ],
+      "symbols": [
+        "しょ",
+        "ショ"
+      ]
+    },
+    {
+      "id": "shu",
+      "file": "audio/shu.mp3",
+      "text": "しゅ",
+      "phonemes": "ɕɯ",
+      "phrase": "ʦɨɡi βa. ɕɯ.",
+      "sourceFile": "shu.flac",
+      "sourceSha256": "2fc416f69a3265418f2fc842ac5758d879888395a6ced59e9226df886daef9be",
+      "sha256": "ded3430bea83b79c20d41d16cb6633190d1d33832f42ceb468afaf202cb0cf36",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-しゅ",
+        "katakana-シュ"
+      ],
+      "symbols": [
+        "しゅ",
+        "シュ"
+      ]
+    },
+    {
+      "id": "so",
+      "file": "audio/so.mp3",
+      "text": "そ",
+      "phonemes": "so",
+      "phrase": "ʦɨɡi βa. so.",
+      "sourceFile": "so.flac",
+      "sourceSha256": "674ba8a5f2ce4f5a83a0d95251c2154866c2f69dbe9895edf4de679fdc7dcf4f",
+      "sha256": "c0c7aa1428147bb50590a90d8406e28979c29b4fe9e01c0e556e7de5dd543b69",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-そ",
+        "katakana-ソ"
+      ],
+      "symbols": [
+        "そ",
+        "ソ"
+      ]
+    },
+    {
+      "id": "su",
+      "file": "audio/su.mp3",
+      "text": "す",
+      "phonemes": "sɯ",
+      "phrase": "ʦɨɡi βa. sɯ.",
+      "sourceFile": "su.flac",
+      "sourceSha256": "0ce43e7b9de66df3041c48056174f1c1301ddec8b37911b667cf194d3358474b",
+      "sha256": "c6fc6d1068546823c97b8e83ed5bf0789fc0a2dc397fde6d1241a5e3164465a4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9657,
+      "itemIds": [
+        "hiragana-す",
+        "katakana-ス"
+      ],
+      "symbols": [
+        "す",
+        "ス"
+      ]
+    },
+    {
+      "id": "ta",
+      "file": "audio/ta.mp3",
+      "text": "た",
+      "phonemes": "ta",
+      "phrase": "ʦɨɡi βa. ta.",
+      "sourceFile": "ta.flac",
+      "sourceSha256": "ae5ba7365334cb56a053e0c32586cf78dd7779e602b6e6366c0ea2d0d0b16b8b",
+      "sha256": "51e5cb0e45bf841076ac8443e6121878c04971e739a80c7bd1f556f84d3f225f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-た",
+        "katakana-タ"
+      ],
+      "symbols": [
+        "た",
+        "タ"
+      ]
+    },
+    {
+      "id": "te",
+      "file": "audio/te.mp3",
+      "text": "て",
+      "phonemes": "te",
+      "phrase": "ʦɨɡi βa. te.",
+      "sourceFile": "te.flac",
+      "sourceSha256": "079e9a96c337d5b63c9c1a92b84d55949ba847a19fd4a20edd6ce1e909b730ae",
+      "sha256": "260ea204129d2cf6ad2c50941c47adbee258df3bf3505ee0c419061d28ab0bc2",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-て",
+        "katakana-テ"
+      ],
+      "symbols": [
+        "て",
+        "テ"
+      ]
+    },
+    {
+      "id": "to",
+      "file": "audio/to.mp3",
+      "text": "と",
+      "phonemes": "to",
+      "phrase": "ʦɨɡi βa. to.",
+      "sourceFile": "to.flac",
+      "sourceSha256": "d52619867e358a73d4b55ec5a49a043439a698a4c7d719c4d390c0f69c19c492",
+      "sha256": "2019356387d42f6a0f3ffb2f91c321432f3552489c76821fc3e5b8f9ec4a38fa",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-と",
+        "katakana-ト"
+      ],
+      "symbols": [
+        "と",
+        "ト"
+      ]
+    },
+    {
+      "id": "tsu",
+      "file": "audio/tsu.mp3",
+      "text": "つ",
+      "phonemes": "ʦɯ",
+      "phrase": "ʦɨɡi βa. ʦɯ.",
+      "sourceFile": "tsu.flac",
+      "sourceSha256": "91b80567d1d127cc9a06a9511b36f86c4155c29ab6e76675e9fa1c5adf90c2ba",
+      "sha256": "21f500a5ab18ef3ec87f51e67fab5840f17e3adcbaa9c53f07f6f01c072f7812",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-つ",
+        "katakana-ツ"
+      ],
+      "symbols": [
+        "つ",
+        "ツ"
+      ]
+    },
+    {
+      "id": "u",
+      "file": "audio/u.mp3",
+      "text": "う",
+      "phonemes": "ɯ",
+      "phrase": "ʦɨɡi βa. ɯ.",
+      "sourceFile": "u.flac",
+      "sourceSha256": "1c721f0d425ef0e1177c4b0567b25207aacd01e0a3a72c59d3df51c799ccc293",
+      "sha256": "3485b54f91f01f4be0a24b83d2899d160b513e608147a8e4daf8572e4b47b3b7",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8403,
+      "itemIds": [
+        "hiragana-う",
+        "katakana-ウ"
+      ],
+      "symbols": [
+        "う",
+        "ウ"
+      ]
+    },
+    {
+      "id": "wa",
+      "file": "audio/wa.mp3",
+      "text": "わ",
+      "phonemes": "βa",
+      "phrase": "koɾe βa kɯɾɯ. βa.",
+      "sourceFile": "wa.flac",
+      "sourceSha256": "4a888ee2f54736084248b2b8e5495f35858348699f94edf377bd31d42bb1fd8e",
+      "sha256": "60b1645a6d21b3690aefd5c21ee7acbec2efdbd2975c3a9b7c9374f03bb3cc62",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-わ",
+        "katakana-ワ"
+      ],
+      "symbols": [
+        "わ",
+        "ワ"
+      ]
+    },
+    {
+      "id": "wo",
+      "file": "audio/wo.mp3",
+      "text": "を",
+      "phonemes": "o",
+      "phrase": "ʦɨɡi βa. o.",
+      "sourceFile": "wo.flac",
+      "sourceSha256": "1fde2db6c036d8cda3970df4f0e8544d3ca4229c71f2feb16f014e07326da34a",
+      "sha256": "8331d8b5be4d64282ccd7428f7323d2a672a8417ad31691c573ab28451dda669",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 8821,
+      "itemIds": [
+        "hiragana-を",
+        "katakana-ヲ"
+      ],
+      "symbols": [
+        "を",
+        "ヲ"
+      ]
+    },
+    {
+      "id": "ya",
+      "file": "audio/ya.mp3",
+      "text": "や",
+      "phonemes": "ja",
+      "phrase": "koɾe βa ʦɨɡi. ja.",
+      "sourceFile": "ya.flac",
+      "sourceSha256": "1be75aef92f52cba4b6b4f14649517f073b2b17fa4f9f9e6a77c86f249e07e9a",
+      "sha256": "2f877ed0c34d63ce3d39e38f396f1d1ddc8c91d565ff6948b6bc488a6890c1ad",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-や",
+        "katakana-ヤ"
+      ],
+      "symbols": [
+        "や",
+        "ヤ"
+      ]
+    },
+    {
+      "id": "yo",
+      "file": "audio/yo.mp3",
+      "text": "よ",
+      "phonemes": "jo",
+      "phrase": "koɾe βa ʦɨɡi. jo.",
+      "sourceFile": "yo.flac",
+      "sourceSha256": "062d197f5ee6ecc5e2df4706dea34a26dfce65f4bfb77302d7a28f69c0869311",
+      "sha256": "6343493c09b558cc0768b51227006e4793cd61cecba2749364e3b38b5c23bda2",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-よ",
+        "katakana-ヨ"
+      ],
+      "symbols": [
+        "よ",
+        "ヨ"
+      ]
+    },
+    {
+      "id": "yu",
+      "file": "audio/yu.mp3",
+      "text": "ゆ",
+      "phonemes": "jɯ",
+      "phrase": "koɾe βa ʦɨɡi. jɯ.",
+      "sourceFile": "yu.flac",
+      "sourceSha256": "3002718d32966ea76e9547cc2afcbd52d8fe50382a16537cafdc9a6b6103eda1",
+      "sha256": "1d468dcf8cdf5c8c7a43257331e4b4f1ca26975e28fb0cd210b62079e0253c69",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ゆ",
+        "katakana-ユ"
+      ],
+      "symbols": [
+        "ゆ",
+        "ユ"
+      ]
+    },
+    {
+      "id": "za",
+      "file": "audio/za.mp3",
+      "text": "ざ",
+      "phonemes": "ʣa",
+      "phrase": "ʦɨɡi βa. ʣa.",
+      "sourceFile": "za.flac",
+      "sourceSha256": "9ef952ce27082f03571292a27fa4b48ed285b6381a32bb4c06dd1d94a810ec74",
+      "sha256": "28054e1380001574e51a4844ff6e6894ad3bd63e1c75ad545aa3a03597a33641",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 9239,
+      "itemIds": [
+        "hiragana-ざ",
+        "katakana-ザ"
+      ],
+      "symbols": [
+        "ざ",
+        "ザ"
+      ]
+    },
+    {
+      "id": "ze",
+      "file": "audio/ze.mp3",
+      "text": "ぜ",
+      "phonemes": "ʣe",
+      "phrase": "ʦɨɡi βa. ʣe.",
+      "sourceFile": "ze.flac",
+      "sourceSha256": "7047c459653ce715028d711a7c55bc3ab7ae29a05fa30aed714da70f88d847e1",
+      "sha256": "e48f71e72bdbc123819064926c19b990b7d9dfaa4bfcbbc7f25a80c5ad30428c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ぜ",
+        "katakana-ゼ"
+      ],
+      "symbols": [
+        "ぜ",
+        "ゼ"
+      ]
+    },
+    {
+      "id": "zo",
+      "file": "audio/zo.mp3",
+      "text": "ぞ",
+      "phonemes": "ʣo",
+      "phrase": "ʦɨɡi βa. ʣo.",
+      "sourceFile": "zo.flac",
+      "sourceSha256": "51e25354394f74faecc4e348df0ceefae09d45722c63cdfdac79e61502b69f12",
+      "sha256": "9d905baaf300ece273dfac532e7b7de767010c9e1385e9f0f6a9706e4348f31d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10075,
+      "itemIds": [
+        "hiragana-ぞ",
+        "katakana-ゾ"
+      ],
+      "symbols": [
+        "ぞ",
+        "ゾ"
+      ]
+    },
+    {
+      "id": "zu",
+      "file": "audio/zu.mp3",
+      "text": "ず",
+      "phonemes": "zɯ",
+      "phrase": "ʦɨɡi βa. zɯ.",
+      "sourceFile": "zu.flac",
+      "sourceSha256": "9884ce9af0582dabbb81d0aac6cf5d2505df01d1ea004b8d069394406f19da47",
+      "sha256": "a926b5f426266b83bd8566bf64e57315ed2b04e368aa2c77abbe39bad2704c52",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      },
+      "mimeType": "audio/mpeg",
+      "bytes": 10493,
+      "itemIds": [
+        "hiragana-ず",
+        "katakana-ズ"
+      ],
+      "symbols": [
+        "ず",
+        "ズ"
+      ]
+    }
+  ]
+}

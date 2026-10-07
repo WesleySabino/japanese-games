@@ -1,0 +1,12 @@
+Japanese Core generated kana audio
+
+CC0-1.0. Synthesized by the project with the Apache-2.0 Kokoro-82M model and voice pack; no third-party recording is included.
+
+SPDX identifier: CC0-1.0
+License reference: https://creativecommons.org/publicdomain/zero/1.0/
+Legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+This notice covers audio/*.mp3. Metadata, documentation and example code
+from the project are covered by LICENSE-MIT.txt. The generator models,
+voice packs and runtime are not distributed in this bundle. Their original
+license and provenance metadata is retained in original-manifest.json.

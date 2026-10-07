@@ -1,0 +1,35 @@
+# Local credentials and private tooling
+.env
+.env.*
+!.env.example
+.secrets/
+credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+.codex/
+.agents/
+.aws/
+.wrangler/
+.vscode/
+.idea/
+
+# Dependencies and generated releases
+node_modules/
+.release/
+dist/
+
+# Test artifacts, logs, and local learning exports
+coverage/
+playwright-report/
+test-results/
+**/tests/*.png
+**/tests/artifacts/
+*.log
+kana-rain-progress*.json
+
+# Operating-system clutter
+.DS_Store
+Thumbs.db
+Desktop.ini

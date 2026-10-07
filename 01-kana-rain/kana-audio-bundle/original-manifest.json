@@ -1,0 +1,1928 @@
+{
+  "version": 3,
+  "generator": {
+    "engine": "Kokoro-82M v1.0",
+    "engineLicense": "Apache-2.0",
+    "engineSource": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "runtime": "kokoro-onnx 0.6.1, onnxruntime 1.30.0",
+    "model": {
+      "file": "kokoro-v1.0.onnx",
+      "sha256": "beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a",
+      "source": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/kokoro-v1.0.onnx"
+    },
+    "voices": {
+      "file": "voices-v1.0.bin",
+      "sha256": "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
+      "source": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.1/voices-v1.0.bin"
+    },
+    "voice": "jf_tebukuro",
+    "speed": 0.9,
+    "method": "Phonemes from tools/tts/kana_ipa.py, spoken at the end of a carrier phrase and cut out at the consonant closure, noise onset or energy dip (tools/tts/generate.py)"
+  },
+  "license": "CC0-1.0. Synthesized by the project with the Apache-2.0 Kokoro-82M model and voice pack; no third-party recording is included.",
+  "note": "Each recording serves every catalogue item whose audio stem equals its id (hiragana and katakana share). A checksum proves file integrity only; pronunciation needs a listener review.",
+  "recordings": [
+    {
+      "id": "a",
+      "file": "a.mp3",
+      "text": "あ",
+      "phonemes": "a",
+      "phrase": "ʦɨɡi βa. a.",
+      "sourceFile": "a.flac",
+      "sourceSha256": "accdb9a7fc5395dbdb9425445f761cc865d03453fe75fff035dcb11b905cb0e3",
+      "sha256": "21308e0393cda80f987f4f921ddc9657aa562166d0bf1967b343908f6afca582",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ba",
+      "file": "ba.mp3",
+      "text": "ば",
+      "phonemes": "ba",
+      "phrase": "ʦɨɡi βa. ba.",
+      "sourceFile": "ba.flac",
+      "sourceSha256": "588d445e40e896876a9521aaf7adb284d0feab0751ccc11c6ecab0291f58cdc3",
+      "sha256": "06a0e8fd8df2df9015891e8e42c382c46d174699897d0c78fbde6dbb012eeac8",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "be",
+      "file": "be.mp3",
+      "text": "べ",
+      "phonemes": "be",
+      "phrase": "ʦɨɡi βa. be.",
+      "sourceFile": "be.flac",
+      "sourceSha256": "9536ef7235bd6bd02c0fe7f5cf6ebff6341c01bd0cc5034a1bd0fda9f251aaaf",
+      "sha256": "620d98e63730dc13b71eac665271c39bf0bf3958b981e6c57a9ae2f73388cb36",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "beddo",
+      "file": "beddo.mp3",
+      "text": "べっど",
+      "phonemes": "beʔdo",
+      "phrase": "ʦɨɡi βa. beʔdo.",
+      "sourceFile": "beddo.flac",
+      "sourceSha256": "6bd4fdd9402d6412e8c406928902421590587a498c203aaac60d502a35de616a",
+      "sha256": "a2e3b93d9e467a8f5e98af4fadc1e8da8cdf1f416b79ce2f3b75a8a21e3406b6",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "bi",
+      "file": "bi.mp3",
+      "text": "び",
+      "phonemes": "bʲi",
+      "phrase": "ʦɨɡi βa. bʲi.",
+      "sourceFile": "bi.flac",
+      "sourceSha256": "3da5319ed7d5ca3f891d34f94d4d5cabd06aa9ec59c84e847c2282319d14b8d6",
+      "sha256": "af76a667d55e89485ad8ae223378b07808f9c82188e62dafff46ba959980d09a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "bo",
+      "file": "bo.mp3",
+      "text": "ぼ",
+      "phonemes": "bo",
+      "phrase": "ʦɨɡi βa. bo.",
+      "sourceFile": "bo.flac",
+      "sourceSha256": "3b615d7210ac40cb3b0a357f2b3e6ff463d430e9dc9f1b0a2dbd80f3b34b3d88",
+      "sha256": "5cf4fd499a6a5ecc40430989a3c04519ad3e31fd65b727a84f45a3acc9868bbb",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "bu",
+      "file": "bu.mp3",
+      "text": "ぶ",
+      "phonemes": "bɯ",
+      "phrase": "ʦɨɡi βa. bɯ.",
+      "sourceFile": "bu.flac",
+      "sourceSha256": "6cecefc25d3d67d31b91ce219d7fe591fcd5e2dc94c2290752a8451e6f22a00d",
+      "sha256": "ef92607ddafe3cef4fc84de7671386475f4dd251cdf58c3d5fa924cf55ce63d6",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "bya",
+      "file": "bya.mp3",
+      "text": "びゃ",
+      "phonemes": "bja",
+      "phrase": "ʦɨɡi βa. bja.",
+      "sourceFile": "bya.flac",
+      "sourceSha256": "512d9b3296193c43b037db0955900195e5e00f54a7a82eabb158c3a630111048",
+      "sha256": "dba63de1dcd1996ed3f4f97d25e964463b576ea122f83fda5595acfaf55cd73d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "byo",
+      "file": "byo.mp3",
+      "text": "びょ",
+      "phonemes": "bjo",
+      "phrase": "ʦɨɡi βa. bjo.",
+      "sourceFile": "byo.flac",
+      "sourceSha256": "4b9b050f764ae531b9ee11fb84ef6756637373911bcf586a0cceb61d5d8bd2c5",
+      "sha256": "974edf09180dd6131e9fef4b4ddf937b59dbc98e77b4f6df81306baff12fe82c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "byu",
+      "file": "byu.mp3",
+      "text": "びゅ",
+      "phonemes": "bjɯ",
+      "phrase": "ʦɨɡi βa. bjɯ.",
+      "sourceFile": "byu.flac",
+      "sourceSha256": "4a8bb42552ea35b9f4d65e0841111cba268eb62daf69e64c5666df8f023dca6c",
+      "sha256": "c950f1343e52e7f96cc9dbff6c549e1a9063fb8516683d3d2158a80d615bdc05",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "cha",
+      "file": "cha.mp3",
+      "text": "ちゃ",
+      "phonemes": "ʨʰa",
+      "phrase": "ʦɨɡi βa. ʨʰa.",
+      "sourceFile": "cha.flac",
+      "sourceSha256": "41cb0a2f5f8daf097ce5d901796bb6ee8676e0f83969116ebeaa127857f60849",
+      "sha256": "82e8b9b805031fe47659adea643d80dfb36979e06321dfb3d1b6d569d3f2c549",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "chi",
+      "file": "chi.mp3",
+      "text": "ち",
+      "phonemes": "ʨi",
+      "phrase": "ʦɨɡi βa. ʨi.",
+      "sourceFile": "chi.flac",
+      "sourceSha256": "e866074e243b46a9ae8b40de7ef2ee57e8bfbe480c441b49ae25f43a76c4881a",
+      "sha256": "55f0ee4cb248e4defd04138271fdc1bbf22f51640190b5cf486a83f5ced61391",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "cho",
+      "file": "cho.mp3",
+      "text": "ちょ",
+      "phonemes": "ʨo",
+      "phrase": "ʦɨɡi βa. ʨo.",
+      "sourceFile": "cho.flac",
+      "sourceSha256": "236f9dc49cb159670895b6e3a7db62ba8c650d170dca4f0e56656e5d975583d8",
+      "sha256": "a0c9ca2c3a42b3cde4829a5bbbbe24db7acd6bae17c499eba8d703aca487a5db",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "chu",
+      "file": "chu.mp3",
+      "text": "ちゅ",
+      "phonemes": "ʨɯ",
+      "phrase": "ʦɨɡi βa. ʨɯ.",
+      "sourceFile": "chu.flac",
+      "sourceSha256": "833e2b21dfa7b47b448f1076d73a4f17e1f7575d31c7ed1a5df1e2e24c8311bb",
+      "sha256": "b9db870d880a9c01fe50856694fdac8df4c49778161ea9679517c345ef48d3c5",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "da",
+      "file": "da.mp3",
+      "text": "だ",
+      "phonemes": "da",
+      "phrase": "ʦɨɡi βa. da.",
+      "sourceFile": "da.flac",
+      "sourceSha256": "a198bb9f9d1545d5c26c5c60e4f1b19360ab7ebb9bdc685c38ef05ffb0f743e2",
+      "sha256": "0e55035b42ec50a9a333724f412b0086147bb66966b9a61530b65eb24284a516",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "de",
+      "file": "de.mp3",
+      "text": "で",
+      "phonemes": "de",
+      "phrase": "ʦɨɡi βa. de.",
+      "sourceFile": "de.flac",
+      "sourceSha256": "9e9fb9020ac0b1993b8c9a6a822100d70be8710f74b03222a868a241e44e39a1",
+      "sha256": "da042657b1956ca1f16559ac84af1e20129c51de0268f1967a04d8a8c4ec894c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "di",
+      "file": "di.mp3",
+      "text": "ぢ",
+      "phonemes": "ʥi",
+      "phrase": "ʦɨɡi βa. ʥi.",
+      "sourceFile": "di.flac",
+      "sourceSha256": "c74fc5c31db9ddce00294691519ac1e404e397a2e829ddc35d9e9a6b86456159",
+      "sha256": "46ecb7e2b6bec97f1897e227b153892fe8f71d8e73df26090bc7a7361820b8a5",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "do",
+      "file": "do.mp3",
+      "text": "ど",
+      "phonemes": "do",
+      "phrase": "ʦɨɡi βa. do.",
+      "sourceFile": "do.flac",
+      "sourceSha256": "252aff08f49206a9c0afaef5f4941be0bfdea161f8c453ec7a09ab871872d6d4",
+      "sha256": "7c4e5486d304835c53c0212d280c243796fff6a6c13d0990d2ad5b6377e9458f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "du",
+      "file": "du.mp3",
+      "text": "づ",
+      "phonemes": "zɯ",
+      "phrase": "ʦɨɡi βa. zɯ.",
+      "sourceFile": "du.flac",
+      "sourceSha256": "f59c5dde0450f01cc001fd45a2f3ae5b16d193005f479eb9d86d171203d581c3",
+      "sha256": "45a06d7eb0bef11641b4a14fedec54e687df8086790c89a0beafee634b0dd9f9",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "e",
+      "file": "e.mp3",
+      "text": "え",
+      "phonemes": "e",
+      "phrase": "ʦɨɡi βa. e.",
+      "sourceFile": "e.flac",
+      "sourceSha256": "b838027f3944f695d429f4be2abdd9c04ea13af696faf27efb3f4586675ad738",
+      "sha256": "ee061f69c97639692d8be720843af9a637fcdf5b338b4f2c1e5496f228200892",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "fu",
+      "file": "fu.mp3",
+      "text": "ふ",
+      "phonemes": "ɸɯ",
+      "phrase": "ʦɨɡi βa. ɸɯ.",
+      "sourceFile": "fu.flac",
+      "sourceSha256": "943358ec4ffbf539717e81d02db0f1c9a575944603b62fe1189a64678774b535",
+      "sha256": "d3c4f5d1493d364133dbdecd2d7cf538e75c908ecd396218b8d19b79315ccaf1",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ga",
+      "file": "ga.mp3",
+      "text": "が",
+      "phonemes": "ɡa",
+      "phrase": "ʦɨɡi βa. ɡa.",
+      "sourceFile": "ga.flac",
+      "sourceSha256": "35c1dd693abdcb2c75628b383f0654f828ede6137ec48004458413436d0dde39",
+      "sha256": "f87715d14b727a45730b97e108f16687776211303cada3eaad0eb44e7bade327",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "gakkoo",
+      "file": "gakkoo.mp3",
+      "text": "がっこう",
+      "phonemes": "ɡaʔkoː",
+      "phrase": "ʦɨɡi βa. ɡaʔkoː.",
+      "sourceFile": "gakkoo.flac",
+      "sourceSha256": "eebacb6c6b648cc3836b985ec3715f5c3f5a441a2805623c039ce0d5c8e8a2c4",
+      "sha256": "a503fa4b7df29c41226bfdd6ae1c216d7f3611063713fed2afa672400f878b73",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ge",
+      "file": "ge.mp3",
+      "text": "げ",
+      "phonemes": "ɡe",
+      "phrase": "ʦɨɡi βa. ɡe.",
+      "sourceFile": "ge.flac",
+      "sourceSha256": "70e123b3c530f45cff895222f70ae02d452a0ecc74ef0c94ab24bb67d4281965",
+      "sha256": "6c8edda4feb458eb5d23c4684186900b77a4bf0939dae2647bf06e17ee545a1f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "gi",
+      "file": "gi.mp3",
+      "text": "ぎ",
+      "phonemes": "ɡʲi",
+      "phrase": "ʦɨɡi βa. ɡʲi.",
+      "sourceFile": "gi.flac",
+      "sourceSha256": "6c227121df53ba5c6fd715a33b64124310c46f0a8be0691b8bd0ef86757d97d1",
+      "sha256": "440ca10462ef8fdf72f296dc2b01ca6d9dd254a1f8c810d499c7321e0488119d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "go",
+      "file": "go.mp3",
+      "text": "ご",
+      "phonemes": "ɡo",
+      "phrase": "ʦɨɡi βa. ɡo.",
+      "sourceFile": "go.flac",
+      "sourceSha256": "4dedcd4acb97e40f2e561b84d38c56e2e0879343653da0fed27b26744a87f8f9",
+      "sha256": "1969d42326236658929fdbbb408167160101a3735fe1d552e574f928daaca448",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "gu",
+      "file": "gu.mp3",
+      "text": "ぐ",
+      "phonemes": "ɡɯ",
+      "phrase": "ʦɨɡi βa. ɡɯ.",
+      "sourceFile": "gu.flac",
+      "sourceSha256": "8b86df58d2cad38d463fef7d35cf06e14511de7fe25c94f4bcb2e5a2d83e2b92",
+      "sha256": "75fa8e83ca1725a31247495053fc8320bf3f81630c3590040c6798801e2f51c6",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "gya",
+      "file": "gya.mp3",
+      "text": "ぎゃ",
+      "phonemes": "ɡja",
+      "phrase": "ʦɨɡi βa. ɡja.",
+      "sourceFile": "gya.flac",
+      "sourceSha256": "6fcfe03f6ca8866cbb0c68c2044c826f488cad2b47d15de847183aa23d4dd714",
+      "sha256": "8339676714fe79c2201d7cbcc255cbbe4cc36d6435a7d83a596fd6a4457beb7b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "gyo",
+      "file": "gyo.mp3",
+      "text": "ぎょ",
+      "phonemes": "ɡjo",
+      "phrase": "ʦɨɡi βa. ɡjo.",
+      "sourceFile": "gyo.flac",
+      "sourceSha256": "54f497a69d92f8dbe74dc8b667907007ef11a8bed1d31c9f3314c8307c63bdff",
+      "sha256": "eea5ad2e75893e05c2707fd4641cb0a7213fa5ed47bef685c45bf2d51bdf239b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "gyu",
+      "file": "gyu.mp3",
+      "text": "ぎゅ",
+      "phonemes": "ɡjɯ",
+      "phrase": "ʦɨɡi βa. ɡjɯ.",
+      "sourceFile": "gyu.flac",
+      "sourceSha256": "d5ee75a011a8125a114848d12c9afbc37da29fc8ab2978806fe3e4615f8229cc",
+      "sha256": "5dedaf1c89057b0caa171f5d34367c310e74c4239b4b6a60127df773a7e8fa27",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ha",
+      "file": "ha.mp3",
+      "text": "は",
+      "phonemes": "ha",
+      "phrase": "ʦɨɡi βa. ha.",
+      "sourceFile": "ha.flac",
+      "sourceSha256": "f52737f69ab7abbc4f8a3d8eb47754c62c23fb2e1bc26e76ba37bdb13b985331",
+      "sha256": "f02665644308b6d605525a2bdcd98add06b28e1287e259c51d017cbf3ee0c854",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "he",
+      "file": "he.mp3",
+      "text": "へ",
+      "phonemes": "he",
+      "phrase": "ʦɨɡi βa. he.",
+      "sourceFile": "he.flac",
+      "sourceSha256": "8984130ce9da50ab66fc05a7e6190f0386ec70e054d339e68b49e1f4bc3780d5",
+      "sha256": "ab27eac5f6ce9422b6c7bf29960767efad0049c3d5e4292072697740f004de4f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "hi",
+      "file": "hi.mp3",
+      "text": "ひ",
+      "phonemes": "çi",
+      "phrase": "ʦɨɡi βa. çi.",
+      "sourceFile": "hi.flac",
+      "sourceSha256": "e555be01bc223aaf6c86e98af2dd8de5f6b23a1a1d040b30237ea5a334f865b3",
+      "sha256": "78457914db2de862b90e724d159fc4106e5cdb0bc09c4dfc83031ad8685d405a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ho",
+      "file": "ho.mp3",
+      "text": "ほ",
+      "phonemes": "ho",
+      "phrase": "ʦɨɡi βa. ho.",
+      "sourceFile": "ho.flac",
+      "sourceSha256": "53dd9cb23d720b8fbc4d782d32d3c8e1e0eab82d5db77357873c1bdb22b286da",
+      "sha256": "7f463f23874c2c598ec072a96b6fef21e0c59ed0413fc13b63639cdf60e4c226",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "hya",
+      "file": "hya.mp3",
+      "text": "ひゃ",
+      "phonemes": "hja",
+      "phrase": "ʦɨɡi βa. hja.",
+      "sourceFile": "hya.flac",
+      "sourceSha256": "7679d14edd1af1180af9f645393b392320774de01262164a63636f77bc64c299",
+      "sha256": "04f7c4764c1f417170f79ec0df7defd2b17f1cde93221f3233e800701deb02db",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "hyo",
+      "file": "hyo.mp3",
+      "text": "ひょ",
+      "phonemes": "hjo",
+      "phrase": "ʦɨɡi βa. hjo.",
+      "sourceFile": "hyo.flac",
+      "sourceSha256": "8cdc71ec28aae2d8fe737010c9202a93b15627fd63718d1cb9938d48c826dfcf",
+      "sha256": "6a8ef07e580eb00e8f61920cf6ffdab7322cdd02640a409f8a0fd5c102f446fe",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "hyu",
+      "file": "hyu.mp3",
+      "text": "ひゅ",
+      "phonemes": "hjɯ",
+      "phrase": "ʦɨɡi βa. hjɯ.",
+      "sourceFile": "hyu.flac",
+      "sourceSha256": "dc5ae443488b1409b15b1baec346778fbd70e7ea32b06d7b76cc8febc10bea97",
+      "sha256": "fc63e02af946cc713e5cc4eb9893ad463bedeab8586662c65c426f8d9c668046",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "i",
+      "file": "i.mp3",
+      "text": "い",
+      "phonemes": "i",
+      "phrase": "ʦɨɡi βa. i.",
+      "sourceFile": "i.flac",
+      "sourceSha256": "41a6b0f83db42291377bef95c790a8f66d015151ba2d4a5538f9adb418e88f1e",
+      "sha256": "5b7d3e678bb19b92781fa3c8440186a0152dd0bae6b7976a6d779f9caa30316a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ja",
+      "file": "ja.mp3",
+      "text": "じゃ",
+      "phonemes": "ʥa",
+      "phrase": "ʦɨɡi βa. ʥa.",
+      "sourceFile": "ja.flac",
+      "sourceSha256": "b22db3d7d38f5b66c257fdd4785228a8a121bda06f0206028a646e62d8db410c",
+      "sha256": "c6b841e6dc69a387ae6b33fff9d481312f3df0e097ac2c8bcc38746bd922e5f5",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ji",
+      "file": "ji.mp3",
+      "text": "じ",
+      "phonemes": "ʥi",
+      "phrase": "ʦɨɡi βa. ʥi.",
+      "sourceFile": "ji.flac",
+      "sourceSha256": "806631a57c20cd1732ed484eb1c1f9553b22562c5988d13a15a9852bfd3503db",
+      "sha256": "a8f526de72ae9f7f77608d57728c457e60a788330628bee90fd836d39ebade40",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "jo",
+      "file": "jo.mp3",
+      "text": "じょ",
+      "phonemes": "ʥo",
+      "phrase": "ʦɨɡi βa. ʥo.",
+      "sourceFile": "jo.flac",
+      "sourceSha256": "923be5632884a066f42ed2b8f3c33a9eaed59a69e012642541d4cb45ff07af3b",
+      "sha256": "c22b4f48698870e796a99803b4f8a277f84d6696ba4b882ca0b66a7af402098c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ju",
+      "file": "ju.mp3",
+      "text": "じゅ",
+      "phonemes": "ʥɯ",
+      "phrase": "ʦɨɡi βa. ʥɯ.",
+      "sourceFile": "ju.flac",
+      "sourceSha256": "fd7814b95aa8fcaacb60e357a40b808e32ffd79fb02bbf82e816b7f7d99970db",
+      "sha256": "992b502a658893a3f83dabc41317c662d0f839d625cad5c4e4e531992502716a",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ka",
+      "file": "ka.mp3",
+      "text": "か",
+      "phonemes": "ka",
+      "phrase": "ʦɨɡi βa. ka.",
+      "sourceFile": "ka.flac",
+      "sourceSha256": "c8ce0060a6071d08cefd4b0b85cdebe29240eb195343e08dbfd310860fe71a62",
+      "sha256": "e9f421af838d373e7f7c462f1699f60775c91063e4b7f647aee770ee23fe0f0b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "kappu",
+      "file": "kappu.mp3",
+      "text": "かっぷ",
+      "phonemes": "kaʔpɯ",
+      "phrase": "ʦɨɡi βa. kaʔpɯ.",
+      "sourceFile": "kappu.flac",
+      "sourceSha256": "4141c4044dacf83fdfdcdff1523bb2a4a3e0facc31334d58f1c13a69ec30d55d",
+      "sha256": "0b40e97ef757f3eadf855550a3fd2045b32a41e1e60f3730f86080de3d88bfbb",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ke",
+      "file": "ke.mp3",
+      "text": "け",
+      "phonemes": "ke",
+      "phrase": "ʦɨɡi βa. ke.",
+      "sourceFile": "ke.flac",
+      "sourceSha256": "14bc8b7566632516e5376408583aaa9cc5aa0f70131eee0c228f5161a4c74325",
+      "sha256": "c48e185811954c91619cdb3f7dd64af2f15393b0f7940ca914e6d3250df66741",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "keeki",
+      "file": "keeki.mp3",
+      "text": "けーき",
+      "phonemes": "keːkʲi",
+      "phrase": "ʦɨɡi βa. keːkʲi.",
+      "sourceFile": "keeki.flac",
+      "sourceSha256": "35faf7496a4ffa84ce730461dd8e026a65330c108e01ceaf85995d8aaa16eeda",
+      "sha256": "7d5cb7ba6157f575883e52d0f8ffb5f168327cd011f6a29cee7e8ad8bd828db3",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ki",
+      "file": "ki.mp3",
+      "text": "き",
+      "phonemes": "kʲi",
+      "phrase": "ʦɨɡi βa. kʲi.",
+      "sourceFile": "ki.flac",
+      "sourceSha256": "3b9f1e3cf7b9f2b5debb1aa9a0c2f5f9815291c7a6d2ac6da91174a9b1094d26",
+      "sha256": "e23f2e6c596128d4ad027134661a13a2d5e31044ef85fbad4a4121c280ab496b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "kitte",
+      "file": "kitte.mp3",
+      "text": "きって",
+      "phonemes": "kʲiʔte",
+      "phrase": "ʦɨɡi βa. kʲiʔte.",
+      "sourceFile": "kitte.flac",
+      "sourceSha256": "bc4e8944998c2a7f6622607e136ea65d9df6df640f66da2acc5a782d8cb02c31",
+      "sha256": "d5c81d4177fd445233e96b0ea83249a985097807ee153061ad445068b4bd4d7b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ko",
+      "file": "ko.mp3",
+      "text": "こ",
+      "phonemes": "ko",
+      "phrase": "ʦɨɡi βa. ko.",
+      "sourceFile": "ko.flac",
+      "sourceSha256": "bdc4884ee6780786c83bc00c9f1a967d0093fa5b94838b7ab0ee1b482a5ec3a8",
+      "sha256": "84ea0ccef54d6b88fc208e5b7c60bd3bbe77757294044a684f103725491e2298",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "koohii",
+      "file": "koohii.mp3",
+      "text": "こーひー",
+      "phonemes": "koːçiː",
+      "phrase": "ʦɨɡi βa. koːçiː.",
+      "sourceFile": "koohii.flac",
+      "sourceSha256": "bd45292fde3ecd9f56a832d919a948c56ec9e9d65769409dd013da5f16c05c96",
+      "sha256": "ac1bb2b33166afc2ad730615d34fc4793844a5ec8074507331f99b8872a91681",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "kookoo",
+      "file": "kookoo.mp3",
+      "text": "こうこう",
+      "phonemes": "koːkoː",
+      "phrase": "ʦɨɡi βa. koːkoː.",
+      "sourceFile": "kookoo.flac",
+      "sourceSha256": "ea6c36444c9af186dedd6649018bd3b2c4879b8cd9c4bbdcb8c307e11d9ec768",
+      "sha256": "344f544b8c4e4a54bab1511c18f3a9ff7e6c8d7afeab7cfbe515c88e8dcddbbd",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ku",
+      "file": "ku.mp3",
+      "text": "く",
+      "phonemes": "kɯ",
+      "phrase": "ʦɨɡi βa. kɯ.",
+      "sourceFile": "ku.flac",
+      "sourceSha256": "8f80ac36e9e4e96b9a2340a161d7299577a92d4fe981f1010551e0645b70f4b3",
+      "sha256": "cfc505fa1a692c1efc8965685a4cdc4ed89605f44581a1cfbdda285b3ff8a5e0",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "kya",
+      "file": "kya.mp3",
+      "text": "きゃ",
+      "phonemes": "kja",
+      "phrase": "ʦɨɡi βa. kja.",
+      "sourceFile": "kya.flac",
+      "sourceSha256": "28fd662404b47222ce45a04efe2c1b6e6b1b3ea71f565d6ac544698c8e525da4",
+      "sha256": "f3075bc62e4092fe4a501292d677ae25d2f09601089be06a8084b4ffef9a56b9",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "kyo",
+      "file": "kyo.mp3",
+      "text": "きょ",
+      "phonemes": "kjo",
+      "phrase": "ʦɨɡi βa. kjo.",
+      "sourceFile": "kyo.flac",
+      "sourceSha256": "cc53b421c72ee4006dc6fb428d567d02eeddadfad926f19ea45ab18f91b16ee6",
+      "sha256": "ec1ad0ea2b26da9eef0340754f153b9ae32c4eca890b8ae25116f264f608a83c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "kyu",
+      "file": "kyu.mp3",
+      "text": "きゅ",
+      "phonemes": "kjɯ",
+      "phrase": "ʦɨɡi βa. kjɯ.",
+      "sourceFile": "kyu.flac",
+      "sourceSha256": "f678cdddd65f5895fc0de475e179d08e6da49b4edb500c337b075834ed4f3767",
+      "sha256": "8ed31e6637cfc6af04801cb387f5d659b9a2a657f3c1cb86282f6e5f615ed1ee",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ma",
+      "file": "ma.mp3",
+      "text": "ま",
+      "phonemes": "ma",
+      "phrase": "ʦɨɡi βa. ma.",
+      "sourceFile": "ma.flac",
+      "sourceSha256": "5ea7c3294d2beb2e2800dcd05876256f424fdfb24ee2785b0fde26bd89131c23",
+      "sha256": "b2fd250cae9e6a4ecae7d41af8072cb573b035cdb79ead736f72516bc063583b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "me",
+      "file": "me.mp3",
+      "text": "め",
+      "phonemes": "me",
+      "phrase": "ʦɨɡi βa. me.",
+      "sourceFile": "me.flac",
+      "sourceSha256": "5247062def9a65731163a92fedc7651ee037c5e1f0f2fa68ac8ae590581b6d6b",
+      "sha256": "e7e7755bce6fe9425534ab7d0476b3179dc9c44e7cc6c02dbb075ac5647a6ef7",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "mi",
+      "file": "mi.mp3",
+      "text": "み",
+      "phonemes": "mʲi",
+      "phrase": "ʦɨɡi βa. mʲi.",
+      "sourceFile": "mi.flac",
+      "sourceSha256": "e3e9e5328de90f7ddfa707d46e4cdbfdf3e7f65ff590cd6e4bf5c9c352162067",
+      "sha256": "e19ac63f626661c27c60469a114782517fbd57b2fa9b2587d0d586eadd935ae4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "mo",
+      "file": "mo.mp3",
+      "text": "も",
+      "phonemes": "mo",
+      "phrase": "ʦɨɡi βa. mo.",
+      "sourceFile": "mo.flac",
+      "sourceSha256": "7e9d356e4e6b97318fefd397733022b785eedcb6009b47fcb40ffdc1b0b9ec8f",
+      "sha256": "b8543d63f75fb90cb38959d360b57110b1441d6d01865f811b75364cb41d381e",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "mu",
+      "file": "mu.mp3",
+      "text": "む",
+      "phonemes": "mɯ",
+      "phrase": "ʦɨɡi βa. mɯ.",
+      "sourceFile": "mu.flac",
+      "sourceSha256": "85bf8d5793dd161a2ad42ea2fa23d655322d76dae821d268426fdb11685cda35",
+      "sha256": "df97869374c218de7b0d46c6e3a151cc31a8366b4b9524f500e58991f6b64b01",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "mya",
+      "file": "mya.mp3",
+      "text": "みゃ",
+      "phonemes": "mja",
+      "phrase": "ʦɨɡi βa. mja.",
+      "sourceFile": "mya.flac",
+      "sourceSha256": "87f3390eb8d63904aa566a569399f32f0fcb4cf07a464d21b84e2eb37d7dc89b",
+      "sha256": "d0fa62967fcba0c88a549501e431bb68ea9f106cfe81088fc7c44fbee208f978",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "myo",
+      "file": "myo.mp3",
+      "text": "みょ",
+      "phonemes": "mjo",
+      "phrase": "ʦɨɡi βa. mjo.",
+      "sourceFile": "myo.flac",
+      "sourceSha256": "74f1130904080c7cd03801e57477225015b3836ae7e1c9946609d42d2aeec183",
+      "sha256": "0eb50a4e819f49d373063811a917f425ad4a463c6a85dee36507bc8449f45050",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "myu",
+      "file": "myu.mp3",
+      "text": "みゅ",
+      "phonemes": "mjɯ",
+      "phrase": "ʦɨɡi βa. mjɯ.",
+      "sourceFile": "myu.flac",
+      "sourceSha256": "552395f28b4fd05ce55316bb59c2206cf132ada2c8f0b986638d2672ba418860",
+      "sha256": "7544a9328dd078a2719df8891123ec9057c55f15959a9d94a2192719fbcea29f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "n",
+      "file": "n.mp3",
+      "text": "ん",
+      "phonemes": "ɴ",
+      "phrase": "ɴː",
+      "sourceFile": "n.flac",
+      "sourceSha256": "4c8023a2255c3530751f76f6fb303fa18ef48b5a73f5cbb001b66851886cafad",
+      "sha256": "1c898705173db4ec46e4469bc53aa16f3ce5682df3f5b2dcf79187a1b1fc9f40",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "pending",
+        "note": "Pronunciation not yet confirmed by a listener."
+      }
+    },
+    {
+      "id": "na",
+      "file": "na.mp3",
+      "text": "な",
+      "phonemes": "na",
+      "phrase": "ʦɨɡi βa. na.",
+      "sourceFile": "na.flac",
+      "sourceSha256": "c0b273aa2172e6f75ce87ddb16816161203e50717aad69f59ce9e0bc424e06d2",
+      "sha256": "c6d5f6168545ed5a025de817f63618c2ae293b1abeae870d66dd05ce8d1dedfa",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ne",
+      "file": "ne.mp3",
+      "text": "ね",
+      "phonemes": "ne",
+      "phrase": "ʦɨɡi βa. ne.",
+      "sourceFile": "ne.flac",
+      "sourceSha256": "2a30c4a4ee855fdec3f0865b2c0a361d254375f2913b3e9b6ba6f50d2a2942c3",
+      "sha256": "f9503380dfe672eab61cb45b2e2ef1b76b8633a7b54a1c86383ac436f83fcc01",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ni",
+      "file": "ni.mp3",
+      "text": "に",
+      "phonemes": "ɲi",
+      "phrase": "ʦɨɡi βa. ɲi.",
+      "sourceFile": "ni.flac",
+      "sourceSha256": "0385a36942f89f5ee05963c46623e3e0d8dc434b3a0f3be0c941a7a3d97b14ff",
+      "sha256": "3936bed056756d97e01c4a4fb29525a57a48afe5e55d069a80c5e318a4b2d343",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "no",
+      "file": "no.mp3",
+      "text": "の",
+      "phonemes": "no",
+      "phrase": "ʦɨɡi βa. no.",
+      "sourceFile": "no.flac",
+      "sourceSha256": "1a9783ee0c67011f5d3ef2a25c7c5e725c829a7c89a4b383d354afcba35f2b7b",
+      "sha256": "817fc3dac70d73bb033ad3f99bc88692c48e56f3d8413cc2e57400c1523b9843",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "nu",
+      "file": "nu.mp3",
+      "text": "ぬ",
+      "phonemes": "nɯ",
+      "phrase": "ʦɨɡi βa. nɯ.",
+      "sourceFile": "nu.flac",
+      "sourceSha256": "816a7570ba7e4225acdcdc1e5e4a42b000a72e8bfc9720f6a58cbe1226dfaf9b",
+      "sha256": "0034913e3b049d4369d5ff687d20ee626b97e19d8c5d78dbfb089f5bcd2c7495",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "nya",
+      "file": "nya.mp3",
+      "text": "にゃ",
+      "phonemes": "nja",
+      "phrase": "ʦɨɡi βa. nja.",
+      "sourceFile": "nya.flac",
+      "sourceSha256": "15a567906046bfb82564e573ab9a7ce923bb3a80c671bbe8a223c5e6b0740d65",
+      "sha256": "46b1aa55c47a70f939d766d290f08e49f124c71b3610dd486a231d63d82678dd",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "nyo",
+      "file": "nyo.mp3",
+      "text": "にょ",
+      "phonemes": "njo",
+      "phrase": "ʦɨɡi βa. njo.",
+      "sourceFile": "nyo.flac",
+      "sourceSha256": "34858a64a73e52833baa26e1c0635505e5ad42abdab0384d5866d12c4516a73f",
+      "sha256": "086a4da788c90306203516fd5826aa15e6c5efe2a918cf22d149c88859b419a8",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "nyu",
+      "file": "nyu.mp3",
+      "text": "にゅ",
+      "phonemes": "njɯ",
+      "phrase": "ʦɨɡi βa. njɯ.",
+      "sourceFile": "nyu.flac",
+      "sourceSha256": "31ac5466213e671aa54a8e07c1b1dd212b06836d5095b46a13b106050fa0241f",
+      "sha256": "cbbfc37e65fde362a5bb82cf9ff2ee4c2a94bcfc9f445a980d20e9b9919c4b75",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "o",
+      "file": "o.mp3",
+      "text": "お",
+      "phonemes": "o",
+      "phrase": "ʦɨɡi βa. o.",
+      "sourceFile": "o.flac",
+      "sourceSha256": "046151846b221ed1123f9c1f6519fbea6dff69c4dfa509f064df0ea977e81164",
+      "sha256": "9b01b8890267fe84315e86dda4128b1ae7aa2427275bde87d67f9e456ca5aa35",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "okaasan",
+      "file": "okaasan.mp3",
+      "text": "おかあさん",
+      "phonemes": "okaːsaɴ",
+      "phrase": "ʦɨɡi βa. okaːsaɴ.",
+      "sourceFile": "okaasan.flac",
+      "sourceSha256": "00310d2b90d0cf097d69d866c06f5a8d12146e94bef852b7889534aacffaec5c",
+      "sha256": "e0a71643c4c98f217dd46bd6f90d0ff4b20824aa0e8070a282d9cbf0f4fc495e",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pa",
+      "file": "pa.mp3",
+      "text": "ぱ",
+      "phonemes": "pa",
+      "phrase": "ʦɨɡi βa. pa.",
+      "sourceFile": "pa.flac",
+      "sourceSha256": "3ec19bc936927f5059e151e88e590d45c6c43f86c07cfc8eae8222ca6c3f51f4",
+      "sha256": "a8bbe48004906464b50aafd879c354147f295149394ac36ede7401d8ee59dbc1",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pe",
+      "file": "pe.mp3",
+      "text": "ぺ",
+      "phonemes": "pe",
+      "phrase": "ʦɨɡi βa. pe.",
+      "sourceFile": "pe.flac",
+      "sourceSha256": "0aa41683cbee94b397e9cbdc58049a0154cb527c188b6ad475e16d502d3370df",
+      "sha256": "47848aba82d31a27ab40705811b8abdff06d9c63424d664993ac311c1a16762e",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pi",
+      "file": "pi.mp3",
+      "text": "ぴ",
+      "phonemes": "pʲi",
+      "phrase": "ʦɨɡi βa. pʲi.",
+      "sourceFile": "pi.flac",
+      "sourceSha256": "fff7d51ff635fcf22a796d8f694a8ef5ceadc0548429a9c914e3874f63462026",
+      "sha256": "24911fce09f4e7800fdcc29ffcec7e319e050b68e6a42a7a136227bdd93b0a30",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "po",
+      "file": "po.mp3",
+      "text": "ぽ",
+      "phonemes": "po",
+      "phrase": "ʦɨɡi βa. po.",
+      "sourceFile": "po.flac",
+      "sourceSha256": "de3389e8c9db9b1380d46cd3e5fdd64ca6213d8c9d0ff2e439d7f9ef8c6ae2fb",
+      "sha256": "d1b7c660a0700d9456091667e0750cbc6f57b12f1c0c5b59ddfba8975c1d035c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pu",
+      "file": "pu.mp3",
+      "text": "ぷ",
+      "phonemes": "pɯ",
+      "phrase": "ʦɨɡi βa. pɯ.",
+      "sourceFile": "pu.flac",
+      "sourceSha256": "736722dbc14642cf48f4bdc9f43e0bf97370e102d6f09a23cb1c576554ffe81b",
+      "sha256": "bde0149eaa991df0c49a8a816bfafa084e82bd25d96ca303968463b99b79ab4d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pya",
+      "file": "pya.mp3",
+      "text": "ぴゃ",
+      "phonemes": "pja",
+      "phrase": "ʦɨɡi βa. pja.",
+      "sourceFile": "pya.flac",
+      "sourceSha256": "b5945877585f98770b50cbb2c1ee0b280355f2af0872db0266b930e3e0250399",
+      "sha256": "723b0c5234272b4718e31d57849d939544bab818d096ac29dc49dfba156fd046",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pyo",
+      "file": "pyo.mp3",
+      "text": "ぴょ",
+      "phonemes": "pjo",
+      "phrase": "ʦɨɡi βa. pjo.",
+      "sourceFile": "pyo.flac",
+      "sourceSha256": "f2830cbe52d7e614b42cc8574e2a4949695e66e84f3d739d7e3dc0f4da0c91cd",
+      "sha256": "4b547384f027855f1404588da434eed433510b4ecd2171f4a6f23781344fc6c4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "pyu",
+      "file": "pyu.mp3",
+      "text": "ぴゅ",
+      "phonemes": "pjɯ",
+      "phrase": "ʦɨɡi βa. pjɯ.",
+      "sourceFile": "pyu.flac",
+      "sourceSha256": "d3f1dfb155d6f4da6fecdad26aaac7267f4d968c82a8941ddba99b568c25777f",
+      "sha256": "c8b896c86790e11fad66e2e5ab70528ef145100dc91667b37fbc49f3d5e563c4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ra",
+      "file": "ra.mp3",
+      "text": "ら",
+      "phonemes": "ɾa",
+      "phrase": "ʦɨɡi βa. ɾa.",
+      "sourceFile": "ra.flac",
+      "sourceSha256": "ce7502176f9291efe78d902b0024b869d9e5d28572ebb629e86b5f819bb5cdc7",
+      "sha256": "2b2ec2a1f7ebe9b2bfae47ca31936a5b6460ff40b328a6e8c41f9ed7e4e5241d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "re",
+      "file": "re.mp3",
+      "text": "れ",
+      "phonemes": "ɾe",
+      "phrase": "ʦɨɡi βa. ɾe.",
+      "sourceFile": "re.flac",
+      "sourceSha256": "b28a2876459202e65dbc2704edac4f76f747caf7b4bed9851529d5fc11c27e12",
+      "sha256": "8338e54014894bca982911d6723e1dfc79973925bd2a49c174dfafbfe35762cb",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ri",
+      "file": "ri.mp3",
+      "text": "り",
+      "phonemes": "ɾʲi",
+      "phrase": "ʦɨɡi βa. ɾʲi.",
+      "sourceFile": "ri.flac",
+      "sourceSha256": "f3f1b0635696c2ae7bacc5a6c47a35754053bf88f135758cf4e77452acf5b85b",
+      "sha256": "76661300b70e695d1d12e9e9b13615c8253b9fa40cdf21fbae684490ba697a2b",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ro",
+      "file": "ro.mp3",
+      "text": "ろ",
+      "phonemes": "ɾo",
+      "phrase": "ʦɨɡi βa. ɾo.",
+      "sourceFile": "ro.flac",
+      "sourceSha256": "89029e6e114ab416a20df54f0cf3041eabe56a93b8e90b2bd8cca5a0b1f4f2dc",
+      "sha256": "396338e6ea20394dcd6baa664bbddadd96e14ec05a5262a74af18337c4412c45",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ru",
+      "file": "ru.mp3",
+      "text": "る",
+      "phonemes": "ɾɯ",
+      "phrase": "ʦɨɡi βa. ɾɯ.",
+      "sourceFile": "ru.flac",
+      "sourceSha256": "fe8175adec26941b871a1ba7beface134a494bafafbbbaa5e3be1eb374d88868",
+      "sha256": "520e9f84eb5203536a8a2e35a88e4aec80e9b5e942b5bf4e653d7a98c257a9b4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "rya",
+      "file": "rya.mp3",
+      "text": "りゃ",
+      "phonemes": "ɾja",
+      "phrase": "ʦɨɡi βa. ɾja.",
+      "sourceFile": "rya.flac",
+      "sourceSha256": "f749509920564c82c8b1ea44b4af01fbeae8f677f8559ceae0ecef94460e76c8",
+      "sha256": "f7eabf52d0e6615a5d273bca38f179092b088fc3739965fabd88fee065148371",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ryo",
+      "file": "ryo.mp3",
+      "text": "りょ",
+      "phonemes": "ɾjo",
+      "phrase": "ʦɨɡi βa. ɾjo.",
+      "sourceFile": "ryo.flac",
+      "sourceSha256": "fb32d5a597d48b27e1e90c429f76e9c532fe317a80817f86b793f357d777be04",
+      "sha256": "1b9d6828f23e6586e68e0dcea6a4effd8051735ff9147da509c9d461aeba7613",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ryu",
+      "file": "ryu.mp3",
+      "text": "りゅ",
+      "phonemes": "ɾjɯ",
+      "phrase": "ʦɨɡi βa. ɾjɯ.",
+      "sourceFile": "ryu.flac",
+      "sourceSha256": "a5e152fd6355b897481f5dd6bdf7a0f5a0894cef0f03ac3f1a0c184677fe160d",
+      "sha256": "2c482b42b604e81d7f71f229b3450b3f0e71022509196b830e78fbbf83259fa4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "sa",
+      "file": "sa.mp3",
+      "text": "さ",
+      "phonemes": "sa",
+      "phrase": "ʦɨɡi βa. sa.",
+      "sourceFile": "sa.flac",
+      "sourceSha256": "3d89cba243567d937aa60cf38a45477a5bc810d521a4de1be472abdffe9633f6",
+      "sha256": "b70b8bbebc6d4880a3ef05bc263989fbcc20371b24b5677fc54fdcb1a9844686",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "se",
+      "file": "se.mp3",
+      "text": "せ",
+      "phonemes": "se",
+      "phrase": "ʦɨɡi βa. se.",
+      "sourceFile": "se.flac",
+      "sourceSha256": "2ae83c1ba355b0659adbb7bc74744c3ec77c61802550fbcea91cb7072c766f64",
+      "sha256": "f4afc7fe1b07ca58e80bfbc477c98add0a65d2e9501485fa9755871b87f40aef",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "sha",
+      "file": "sha.mp3",
+      "text": "しゃ",
+      "phonemes": "ɕa",
+      "phrase": "ʦɨɡi βa. ɕa.",
+      "sourceFile": "sha.flac",
+      "sourceSha256": "c8cb424b2ff0062eeb6d14da1d62fb6030a9d7765beebb815123d0cd3d8ef6b1",
+      "sha256": "ecf8b1f96e5fd9ae633230f5e052337ff834a525a8f9471600c6f5fc11304b04",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "shi",
+      "file": "shi.mp3",
+      "text": "し",
+      "phonemes": "ɕi",
+      "phrase": "ʦɨɡi βa. ɕi.",
+      "sourceFile": "shi.flac",
+      "sourceSha256": "0a41e1f5e82c59b068b2e61ce50b44cb01a6ecc2a1c3ea97897d6fe237c4d07c",
+      "sha256": "5f02d9ea6d6992b780ed6dc986bb4b2bf4dbeebe9c2b8f5869e21dbf38948483",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "sho",
+      "file": "sho.mp3",
+      "text": "しょ",
+      "phonemes": "ɕo",
+      "phrase": "ʦɨɡi βa. ɕo.",
+      "sourceFile": "sho.flac",
+      "sourceSha256": "4c9213eca1a71294ab02599b9bec580384d9bf4d0cd952b1094ebb3573721e34",
+      "sha256": "f4adc43f9b397643c68da69f25b398dbc3e600ed1206e429746ad55ed9291bdd",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "shu",
+      "file": "shu.mp3",
+      "text": "しゅ",
+      "phonemes": "ɕɯ",
+      "phrase": "ʦɨɡi βa. ɕɯ.",
+      "sourceFile": "shu.flac",
+      "sourceSha256": "2fc416f69a3265418f2fc842ac5758d879888395a6ced59e9226df886daef9be",
+      "sha256": "ded3430bea83b79c20d41d16cb6633190d1d33832f42ceb468afaf202cb0cf36",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "so",
+      "file": "so.mp3",
+      "text": "そ",
+      "phonemes": "so",
+      "phrase": "ʦɨɡi βa. so.",
+      "sourceFile": "so.flac",
+      "sourceSha256": "674ba8a5f2ce4f5a83a0d95251c2154866c2f69dbe9895edf4de679fdc7dcf4f",
+      "sha256": "c0c7aa1428147bb50590a90d8406e28979c29b4fe9e01c0e556e7de5dd543b69",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "su",
+      "file": "su.mp3",
+      "text": "す",
+      "phonemes": "sɯ",
+      "phrase": "ʦɨɡi βa. sɯ.",
+      "sourceFile": "su.flac",
+      "sourceSha256": "0ce43e7b9de66df3041c48056174f1c1301ddec8b37911b667cf194d3358474b",
+      "sha256": "c6fc6d1068546823c97b8e83ed5bf0789fc0a2dc397fde6d1241a5e3164465a4",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ta",
+      "file": "ta.mp3",
+      "text": "た",
+      "phonemes": "ta",
+      "phrase": "ʦɨɡi βa. ta.",
+      "sourceFile": "ta.flac",
+      "sourceSha256": "ae5ba7365334cb56a053e0c32586cf78dd7779e602b6e6366c0ea2d0d0b16b8b",
+      "sha256": "51e5cb0e45bf841076ac8443e6121878c04971e739a80c7bd1f556f84d3f225f",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "te",
+      "file": "te.mp3",
+      "text": "て",
+      "phonemes": "te",
+      "phrase": "ʦɨɡi βa. te.",
+      "sourceFile": "te.flac",
+      "sourceSha256": "079e9a96c337d5b63c9c1a92b84d55949ba847a19fd4a20edd6ce1e909b730ae",
+      "sha256": "260ea204129d2cf6ad2c50941c47adbee258df3bf3505ee0c419061d28ab0bc2",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "to",
+      "file": "to.mp3",
+      "text": "と",
+      "phonemes": "to",
+      "phrase": "ʦɨɡi βa. to.",
+      "sourceFile": "to.flac",
+      "sourceSha256": "d52619867e358a73d4b55ec5a49a043439a698a4c7d719c4d390c0f69c19c492",
+      "sha256": "2019356387d42f6a0f3ffb2f91c321432f3552489c76821fc3e5b8f9ec4a38fa",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "tsu",
+      "file": "tsu.mp3",
+      "text": "つ",
+      "phonemes": "ʦɯ",
+      "phrase": "ʦɨɡi βa. ʦɯ.",
+      "sourceFile": "tsu.flac",
+      "sourceSha256": "91b80567d1d127cc9a06a9511b36f86c4155c29ab6e76675e9fa1c5adf90c2ba",
+      "sha256": "21f500a5ab18ef3ec87f51e67fab5840f17e3adcbaa9c53f07f6f01c072f7812",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "u",
+      "file": "u.mp3",
+      "text": "う",
+      "phonemes": "ɯ",
+      "phrase": "ʦɨɡi βa. ɯ.",
+      "sourceFile": "u.flac",
+      "sourceSha256": "1c721f0d425ef0e1177c4b0567b25207aacd01e0a3a72c59d3df51c799ccc293",
+      "sha256": "3485b54f91f01f4be0a24b83d2899d160b513e608147a8e4daf8572e4b47b3b7",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "wa",
+      "file": "wa.mp3",
+      "text": "わ",
+      "phonemes": "βa",
+      "phrase": "koɾe βa kɯɾɯ. βa.",
+      "sourceFile": "wa.flac",
+      "sourceSha256": "4a888ee2f54736084248b2b8e5495f35858348699f94edf377bd31d42bb1fd8e",
+      "sha256": "60b1645a6d21b3690aefd5c21ee7acbec2efdbd2975c3a9b7c9374f03bb3cc62",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "wo",
+      "file": "wo.mp3",
+      "text": "を",
+      "phonemes": "o",
+      "phrase": "ʦɨɡi βa. o.",
+      "sourceFile": "wo.flac",
+      "sourceSha256": "1fde2db6c036d8cda3970df4f0e8544d3ca4229c71f2feb16f014e07326da34a",
+      "sha256": "8331d8b5be4d64282ccd7428f7323d2a672a8417ad31691c573ab28451dda669",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ya",
+      "file": "ya.mp3",
+      "text": "や",
+      "phonemes": "ja",
+      "phrase": "koɾe βa ʦɨɡi. ja.",
+      "sourceFile": "ya.flac",
+      "sourceSha256": "1be75aef92f52cba4b6b4f14649517f073b2b17fa4f9f9e6a77c86f249e07e9a",
+      "sha256": "2f877ed0c34d63ce3d39e38f396f1d1ddc8c91d565ff6948b6bc488a6890c1ad",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "yo",
+      "file": "yo.mp3",
+      "text": "よ",
+      "phonemes": "jo",
+      "phrase": "koɾe βa ʦɨɡi. jo.",
+      "sourceFile": "yo.flac",
+      "sourceSha256": "062d197f5ee6ecc5e2df4706dea34a26dfce65f4bfb77302d7a28f69c0869311",
+      "sha256": "6343493c09b558cc0768b51227006e4793cd61cecba2749364e3b38b5c23bda2",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "yu",
+      "file": "yu.mp3",
+      "text": "ゆ",
+      "phonemes": "jɯ",
+      "phrase": "koɾe βa ʦɨɡi. jɯ.",
+      "sourceFile": "yu.flac",
+      "sourceSha256": "3002718d32966ea76e9547cc2afcbd52d8fe50382a16537cafdc9a6b6103eda1",
+      "sha256": "1d468dcf8cdf5c8c7a43257331e4b4f1ca26975e28fb0cd210b62079e0253c69",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "za",
+      "file": "za.mp3",
+      "text": "ざ",
+      "phonemes": "ʣa",
+      "phrase": "ʦɨɡi βa. ʣa.",
+      "sourceFile": "za.flac",
+      "sourceSha256": "9ef952ce27082f03571292a27fa4b48ed285b6381a32bb4c06dd1d94a810ec74",
+      "sha256": "28054e1380001574e51a4844ff6e6894ad3bd63e1c75ad545aa3a03597a33641",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "ze",
+      "file": "ze.mp3",
+      "text": "ぜ",
+      "phonemes": "ʣe",
+      "phrase": "ʦɨɡi βa. ʣe.",
+      "sourceFile": "ze.flac",
+      "sourceSha256": "7047c459653ce715028d711a7c55bc3ab7ae29a05fa30aed714da70f88d847e1",
+      "sha256": "e48f71e72bdbc123819064926c19b990b7d9dfaa4bfcbbc7f25a80c5ad30428c",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "zo",
+      "file": "zo.mp3",
+      "text": "ぞ",
+      "phonemes": "ʣo",
+      "phrase": "ʦɨɡi βa. ʣo.",
+      "sourceFile": "zo.flac",
+      "sourceSha256": "51e25354394f74faecc4e348df0ceefae09d45722c63cdfdac79e61502b69f12",
+      "sha256": "9d905baaf300ece273dfac532e7b7de767010c9e1385e9f0f6a9706e4348f31d",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    },
+    {
+      "id": "zu",
+      "file": "zu.mp3",
+      "text": "ず",
+      "phonemes": "zɯ",
+      "phrase": "ʦɨɡi βa. zɯ.",
+      "sourceFile": "zu.flac",
+      "sourceSha256": "9884ce9af0582dabbb81d0aac6cf5d2505df01d1ea004b8d069394406f19da47",
+      "sha256": "a926b5f426266b83bd8566bf64e57315ed2b04e368aa2c77abbe39bad2704c52",
+      "processing": "Silence trimmed (-50 dB), loudness-normalized to -16 LUFS with a -1.5 dBTP ceiling (EBU R128, two-pass ffmpeg loudnorm), 60 ms lead-in, mono 44.1 kHz MP3 128 kbps",
+      "review": {
+        "status": "approved",
+        "by": "Wesley Sabino",
+        "at": "2026-09-28",
+        "note": "Provisional approval; confirm in a full listening pass before release."
+      }
+    }
+  ]
+}

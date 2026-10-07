@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#102b2d">
+  <meta name="description" content="Practice hiragana and katakana with falling kana, pronunciation audio, short sessions, and saved progress. Play Kana Rain free in your browser.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <title>Kana Rain | Free Hiragana &amp; Katakana Game</title>
+  <link rel="canonical" href="https://kana-rain.nihongogrove.top/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Nihongo Grove">
+  <meta property="og:title" content="Kana Rain — Free Japanese Kana Game">
+  <meta property="og:description" content="A little rain. A little reading. Practice hiragana and katakana with audio, growing kana rows, and a rain garden that fills your screen.">
+  <meta property="og:url" content="https://kana-rain.nihongogrove.top/">
+  <meta property="og:image" content="https://kana-rain.nihongogrove.top/assets/garden.webp">
+  <meta property="og:image:type" content="image/webp">
+  <meta property="og:image:width" content="1600">
+  <meta property="og:image:height" content="900">
+  <meta property="og:image:alt" content="Kana Rain's illustrated Japanese rain garden, with a glowing lantern beside a misty pond.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kana Rain — Free Japanese Kana Game">
+  <meta name="twitter:description" content="Read the falling kana. Type its sound. Grow your hiragana and katakana familiarity in a free browser game with audio and short sessions.">
+  <meta name="twitter:image" content="https://kana-rain.nihongogrove.top/assets/garden.webp">
+  <meta name="twitter:image:alt" content="Kana Rain's illustrated Japanese rain garden, with a glowing lantern beside a misty pond.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["VideoGame", "WebApplication"],
+    "@id": "https://kana-rain.nihongogrove.top/#game",
+    "name": "Kana Rain",
+    "url": "https://kana-rain.nihongogrove.top/",
+    "description": "A free browser game for practicing Japanese hiragana and katakana through falling kana, typed answers, pronunciation audio, progressive rows, and saved local progress.",
+    "image": "https://kana-rain.nihongogrove.top/assets/garden.webp",
+    "applicationCategory": "GameApplication",
+    "applicationSubCategory": "Japanese kana reading game",
+    "operatingSystem": "Any",
+    "browserRequirements": "JavaScript enabled; an internet connection for the initial game and audio download.",
+    "gamePlatform": "Web browser",
+    "playMode": "https://schema.org/SinglePlayer",
+    "genre": ["Educational", "Language learning"],
+    "inLanguage": "en",
+    "isAccessibleForFree": true,
+    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+    "isPartOf": {"@type": "WebSite", "name": "Nihongo Grove", "url": "https://nihongogrove.top/"}
+  }
+  </script>
+  <link rel="icon" href="assets/icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="src/style.css">
+  <script defer src="src/data.js"></script>
+  <script defer src="src/learner.js"></script>
+  <script defer src="src/audio.js"></script>
+  <script defer src="src/sfx.js"></script>
+  <script defer src="src/difficulty.js"></script>
+  <script defer src="src/game.js"></script>
+</head>
+<body class="game-console is-menu" data-keyboard="false">
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="icon-leaf" viewBox="0 0 24 24"><path d="M5 19C3 10 7 4 21 3c0 11-5 17-13 16M4 22 17 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-book" viewBox="0 0 24 24"><path d="M12 6C8 3 4 3 2 5v14c3-2 6-2 10 1 4-3 7-3 10-1V5c-2-2-6-2-10 1Zm0 0v14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-sound" viewBox="0 0 24 24"><path d="M3 9h4l5-5v16l-5-5H3Zm13-2c3 3 3 7 0 10m3-13c5 4 5 12 0 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-muted" viewBox="0 0 24 24"><path d="M3 9h4l5-5v16l-5-5H3Zm13 0 6 6m0-6-6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6Zm8 0h4v16h-4Z" fill="currentColor"/></symbol>
+    <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4m0 3h.01" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="icon-gear" viewBox="0 0 24 24"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 3-1 2 3 3-1 1-3 3-1 2-3-2-2 1-3-3-2-3 1-2-3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="11" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="icon-return" viewBox="0 0 24 24"><path d="M8 5 3 10l5 5m-5-5h12a5 5 0 0 1 0 10h-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-keyboard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 9h1m3 0h1m3 0h1m3 0h1M6 12h1m3 0h1m3 0h1m3 0h1M7 16h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+  </svg>
+  <main class="game-world" aria-label="Kana Rain">
+    <div class="garden-scene" aria-hidden="true"></div>
+    <div class="rain-lines" aria-hidden="true"></div>
+    <div class="scene-vignette" aria-hidden="true"></div>
+    <div class="utility-controls">
+      <button id="soundBtn" class="hud-button" aria-label="Mute sound" aria-pressed="true" title="Mute sound"><svg class="control-icon" aria-hidden="true"><use href="#icon-sound"/></svg><span class="control-label">Sound on</span></button>
+      <button id="helpBtn" class="hud-button" aria-label="How to play" title="How to play"><svg class="control-icon" aria-hidden="true"><use href="#icon-help"/></svg><span class="control-label">How to play</span></button>
+    </div>
+    <header id="gameHud" class="game-hud hidden" aria-label="Game status">
+      <div class="mode-plaque"><svg class="control-icon" aria-hidden="true"><use href="#icon-leaf"/></svg><span id="gameLabel">Normal · Hiragana</span></div>
+      <span id="personalBest" class="personal-best">BEST 0</span>
+      <div class="hud-stats">
+        <div class="stat"><small>SCORE</small><b id="score">000</b></div>
+        <div class="stat"><small>STREAK</small><b id="streak">—</b></div>
+        <div class="stat"><small>TIME</small><b id="time">3:00</b></div>
+        <span id="lives" class="lives" aria-label="3 hearts">♥ ♥ ♥</span>
+      </div>
+      <div class="hud-actions">
+        <button id="listenBtn" class="hud-button" aria-label="Listen to the target kana" title="Listen (assisted answer)"><svg class="control-icon" aria-hidden="true"><use href="#icon-sound"/></svg><span class="sr-only">Listen</span></button>
+        <button id="progressBtn" class="hud-button" aria-label="My Kana Garden" title="My Kana Garden"><svg class="control-icon" aria-hidden="true"><use href="#icon-book"/></svg></button>
+        <button id="pauseBtn" class="hud-button" aria-label="Pause game" title="Pause (Esc)"><svg class="control-icon" aria-hidden="true"><use href="#icon-pause"/></svg></button>
+      </div>
+    </header>
+    <div id="field" class="playfield" aria-label="Falling kana">
+      <div class="waterline" aria-hidden="true"></div>
+    </div>
+    <div id="fieldSpirit" class="spirit idle" aria-hidden="true"></div>
+    <section id="welcome" class="title-screen" aria-label="Main menu">
+      <div class="title-lockup"><div class="title-emblem" aria-hidden="true"></div><h1 class="game-title">Kana Rain<svg class="title-leaf" aria-hidden="true"><use href="#icon-leaf"/></svg></h1><p class="title-subtitle">A little rain. A little reading.</p></div>
+      <nav class="main-menu" aria-label="Game menu">
+        <button id="startBtn" class="menu-button primary"><svg class="control-icon" aria-hidden="true"><use href="#icon-leaf"/></svg><span>Enter the Garden</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+        <button id="gardenBtn" class="menu-button"><svg class="control-icon" aria-hidden="true"><use href="#icon-book"/></svg><span>My Kana Garden</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+        <button id="settingsBtn" class="menu-button"><svg class="control-icon" aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span><span class="menu-chevron" aria-hidden="true">›</span></button>
+      </nav>
+      <div class="session-selectors" aria-label="Session setup">
+        <label><span class="sr-only">Reading practice</span><select id="mode"><option value="hira">Hiragana</option><option value="kata">Katakana</option><option value="mix">Mixed scripts</option><option value="pair">Script pairs</option><option value="words">Little words</option></select></label>
+        <label><span class="sr-only">Difficulty</span><select id="difficultySelect"><option value="easy">Easy · 5 hearts</option><option value="normal" selected>Normal · 3 hearts</option><option value="hard">Hard · 1 heart</option></select></label>
+        <label><span class="sr-only">Session duration</span><select id="durationSelect"><option value="60">1 min</option><option value="180" selected>3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></label>
+      </div>
+      <p id="menuBest" class="menu-best">Personal best · 0</p>
+      <p class="menu-hint">Press <kbd>Enter</kbd> to begin</p>
+    </section>
+    <div id="answerDock" class="answer-dock hidden">
+      <div class="answer-guidance"><span id="inputFormat" class="input-format">Type romaji</span><span id="targetHint" class="target-hint">Any kana · highlighted first</span></div>
+      <form id="answerForm" class="answer-bar">
+        <span id="inputScript" class="input-symbol" aria-hidden="true">a</span>
+        <input id="answer" disabled aria-label="Answer the falling kana" aria-describedby="inputFormat targetHint" placeholder="Type the sound…" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button id="submitBtn" class="dock-button" disabled type="submit" aria-label="Submit answer">↵</button>
+        <button id="keyboardModeBtn" class="dock-button keyboard-mode hidden" type="button" aria-label="Switch keyboard to romaji">ABC</button>
+        <button id="keyboardBtn" class="dock-button" type="button" aria-expanded="false" aria-label="Show touch keyboard"><svg class="control-icon" aria-hidden="true"><use href="#icon-keyboard"/></svg></button>
+      </form>
+      <div id="keyboard" class="touch-keyboard hidden" aria-label="Touch keyboard"></div>
+      <p id="inputNote" class="input-note">Enter to submit · Esc to pause</p>
+    </div>
+    <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+    <div id="milestoneFeedback" class="milestone-feedback" role="status" aria-live="polite"></div>
+    <div id="heartLoss" class="heart-loss hidden" role="status" aria-live="assertive"><span class="heart-loss-icon" aria-hidden="true">♡</span><span>One heart lost</span></div>
+    <section id="countdownOverlay" class="countdown-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="countdownTitle"><p class="eyebrow">READ · RECALL · REPEAT</p><h2 id="countdownTitle">Ready for the rain?</h2><strong id="countdownNumber" class="countdown-number" aria-live="polite">3</strong><p>Read the drop. Follow the answer format.</p><button id="skipCountdown" class="text-button" type="button">Skip countdown</button></section>
+    <div class="world-status"><span id="saveStatus">Progress saved on this device</span><span id="offlineStatus">Preparing your offline garden…</span></div>
+    <nav class="art-link" aria-label="About the game"><a href="about.html">About Kana Rain</a> · <a href="art.html">Artwork ↗</a></nav>
+  </main>
+  <dialog id="pauseOverlay" class="game-dialog pause-dialog" aria-labelledby="pauseTitle">
+    <div class="dialog-panel"><div class="pause-mark" aria-hidden="true">Ⅱ</div><p class="eyebrow">GAME PAUSED</p><h2 id="pauseTitle">A moment of quiet.</h2><p>Your garden will wait.</p><p id="pauseHint" class="pause-hint" role="status"></p>
+      <div class="dialog-menu"><button id="resumeBtn" class="menu-button primary"><span>Continue</span><span aria-hidden="true">›</span></button><button id="pauseGardenBtn" class="menu-button"><span>My Kana Garden</span><svg class="control-icon" aria-hidden="true"><use href="#icon-book"/></svg></button><button id="pauseSettingsBtn" class="menu-button"><span>Settings</span><svg class="control-icon" aria-hidden="true"><use href="#icon-gear"/></svg></button><button id="pauseHelpBtn" class="menu-button"><span>How to play</span><svg class="control-icon" aria-hidden="true"><use href="#icon-help"/></svg></button><button id="finishBtn" class="text-button">Finish this session</button></div>
+    </div>
+  </dialog>
+  <dialog id="progressDialog" class="game-dialog garden-dialog" aria-labelledby="gardenTitle">
+    <div class="dialog-panel"><div class="panel-heading"><h2 id="gardenTitle">My Kana Garden</h2><button id="closeGarden" class="dialog-close" aria-label="Close kana garden">×</button></div><p id="gardenContext" class="eyebrow">ONE DROP AT A TIME</p>
+      <div class="map-tabs" aria-label="Progress script"><button data-script="hiragana" class="selected" aria-pressed="true">Hiragana</button><button data-script="katakana" aria-pressed="false">Katakana</button></div>
+      <div id="masteryMap" class="mastery-map"></div>
+      <div class="map-legend"><span><i class="new"></i>New</span><span><i class="learning"></i>Learning</span><span><i class="known"></i>Known</span></div>
+      <div class="progress-caption"><span id="masteryCount">0 / 104 familiar</span><span id="masteryPercent">0%</span></div><div class="progress-track"><div id="masteryBar"></div></div>
+      <div class="milestone"><span id="milestone">Meet the K-row</span><span id="milestoneKana" lang="ja">か き く け こ</span></div>
+      <div class="lesson-heading"><span class="field-label">LISTEN TO YOUR CURRENT ROW</span><span id="rowName" class="badge">Vowels</span></div><div id="lesson" class="lesson"></div><p id="unlockNote" class="field-note">A new row opens as you learn.</p>
+      <section class="unlock-progress" aria-label="Next row readiness"><p id="unlockSummary" class="unlock-summary">Practice each sound twice without a hint.</p><div class="progress-track unlock-track"><div id="unlockBar" style="width:0%"></div></div><details class="unlock-details"><summary>See row readiness</summary><div id="unlockDetails" class="unlock-list"></div></details></section>
+      <div class="panel-actions"><button id="returnGarden" class="menu-button primary"><svg class="control-icon" aria-hidden="true"><use href="#icon-return"/></svg><span>Return to the Garden</span></button><button id="exportBtn" class="text-button">Export my progress</button></div><span id="totalLearned" class="sr-only">0</span>
+    </div>
+  </dialog>
+  <dialog id="settingsDialog" class="game-dialog settings-dialog" aria-labelledby="settingsTitle">
+    <div class="dialog-panel"><div class="panel-heading"><h2 id="settingsTitle">Your little rain</h2><button id="closeSettings" class="dialog-close" aria-label="Close settings">×</button></div><p class="eyebrow">SESSION SETTINGS</p>
+      <label class="field-label" for="settingsMode">Reading practice</label><select id="settingsMode"><option value="hira">Hiragana</option><option value="kata">Katakana</option><option value="mix">Mixed scripts</option><option value="pair">Script pairs</option><option value="words">Little words</option></select><p id="modeNote" class="field-note">Start with hiragana. Other modes grow with you.</p>
+      <div id="modeLocks" class="mode-locks" aria-label="Practice mode unlocks"></div>
+      <fieldset aria-describedby="difficultyNote"><legend>Choose your difficulty</legend><div class="difficulty-options"><button data-difficulty="easy" class="difficulty" aria-pressed="false" aria-label="Easy, 5 hearts, gentler rain"><span class="difficulty-hearts" aria-hidden="true">♥ 5</span><strong>Easy</strong><small>Gentler rain</small></button><button data-difficulty="normal" class="difficulty selected" aria-pressed="true" aria-label="Normal, 3 hearts, steady rain"><span class="difficulty-hearts" aria-hidden="true">♥ 3</span><strong>Normal</strong><small>Steady rain</small></button><button data-difficulty="hard" class="difficulty" aria-pressed="false" aria-label="Hard, 1 heart, faster rain"><span class="difficulty-hearts" aria-hidden="true">♥ 1</span><strong>Hard</strong><small>Faster rain</small></button></div></fieldset>
+      <p id="difficultyNote" class="field-note">Drops fall faster as session time passes. Each drop that reaches the ground costs one heart. Your session ends when no hearts remain.</p>
+      <fieldset><legend>Time for yourself</legend><div class="durations" aria-label="Session duration"><button data-duration="60">1 min</button><button data-duration="180" class="selected">3 min</button><button data-duration="300">5 min</button><button data-duration="600">10 min</button></div></fieldset><p id="settingsNote" class="field-note">Small, steady steps. Every answer saves your progress.</p>
+      <button id="effectsBtn" class="effects-toggle" type="button" aria-pressed="false">Reduced effects <span class="effects-state">Off</span></button><p class="field-note effects-note">Calmer motion; gameplay stays the same.</p>
+      <div class="panel-actions"><button id="saveSettings" class="menu-button primary"><span>Return to the Garden</span><span aria-hidden="true">›</span></button></div>
+    </div>
+  </dialog>
+  <dialog id="results" class="game-dialog results-dialog" aria-labelledby="resultTitle">
+    <div class="dialog-panel"><p class="eyebrow">A LITTLE MORE FAMILIAR</p><h2 id="resultTitle">Your garden grew.</h2><p id="resultMessage"></p><div id="resultStats" class="result-stats"></div><div id="resultReview" class="result-review"></div><div class="result-actions"><button id="reviewPracticeBtn" class="menu-button primary hidden"><span>Review these kana</span><span aria-hidden="true">›</span></button><button id="againBtn" class="menu-button primary"><span>Another little rain</span><span aria-hidden="true">›</span></button><button id="backBtn" class="text-button">Return to the main menu</button></div></div>
+  </dialog>
+  <dialog id="scriptDialog" class="game-dialog script-dialog" aria-labelledby="scriptTitle"><div class="dialog-panel"><p class="eyebrow">MATCH THE SCRIPTS</p><h2 id="scriptTitle">A new way to read.</h2><div id="scriptExample" class="script-example" lang="ja">あ → ア</div><p id="scriptExplanation">This drop asks for the matching kana in the other script. Use your Japanese keyboard or the kana touch keyboard.</p><button id="continueScriptBtn" class="menu-button primary"><span>Got it</span><span aria-hidden="true">›</span></button></div></dialog>
+  <dialog id="helpDialog" class="game-dialog help-dialog" aria-labelledby="helpTitle">
+    <div class="dialog-panel"><div class="panel-heading"><h2 id="helpTitle">Read. Recall. Let it rain.</h2><button id="closeHelp" class="dialog-close" aria-label="Close instructions">×</button></div><p class="eyebrow">WELCOME TO THE GARDEN</p>
+      <p>Read a falling kana and type its sound: <b>あ → a</b>, <b>し → shi</b>. Correct answers submit automatically. Press <kbd>Enter</kbd> for an ambiguous answer such as <b>n</b>.</p>
+      <p>Each session begins with a short countdown; choose <b>Skip countdown</b> when you are ready. The answer label tells you whether to type <b>romaji</b> or a matching <b>kana</b>. You can answer any visible drop; the highlighted drop is the priority.</p>
+      <p>Choose your difficulty before you begin: <b>Easy</b> starts with <b>5 hearts</b> and gentler rain, <b>Normal</b> with <b>3 hearts</b> and steady rain, and <b>Hard</b> with <b>1 heart</b> and faster rain. Drops speed up as session time passes. Every drop that reaches the ground costs one heart; losing all your hearts ends the session.</p>
+      <p>New kana briefly show their sound. Open My Kana Garden and tap a lesson tile to listen. A new row opens when each available kana has two unaided successes and at least 85% accuracy. Wrong answers show the correct reading, stain the drop, and make it fall faster. Missed or mistaken kana return for practice.</p>
+      <p>Romaji hints disappear as you learn. Strong kana ask for the opposite script: <b>か → カ</b>. Use the touch keyboard or your Japanese keyboard. Script pairs always ask you to produce the matching kana. Words reveal their English meaning after an answer.</p>
+      <p>An <b>!</b> badge warns that a drop is close to the ground. The heart counter shows how many misses you can afford. After a session, tap a review card to hear its kana, or choose <b>Review these kana</b> to practice your mistakes. My Kana Garden shows the exact readiness for your next row.</p>
+      <p><kbd>Esc</kbd> pauses or returns from a menu. Leaving the tab pauses automatically. Every answer saves on this device.</p><button id="resetBtn" class="text-button danger">Reset saved progress</button>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,20 @@
+User-agent: *
+Disallow: /tests/
+Disallow: /scripts/
+Disallow: /assets/concepts/
+Disallow: /assets/PROMPTS.md
+Disallow: /assets/garden-source.png
+Disallow: /assets/spirit-atlas.png
+Disallow: /assets/water-atlas.png
+Disallow: /README.md
+Disallow: /SPECIFICATION.md
+Disallow: /REVIEW.md
+Disallow: /.git/
+Disallow: /.codex/
+Disallow: /.agents/
+Disallow: /.aws/
+Disallow: /.env
+Disallow: /package.json
+Disallow: /package-lock.json
+
+Sitemap: https://kana-rain.nihongogrove.top/sitemap.xml
