@@ -4,6 +4,12 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const {spawn}=require('node:child_process');
 let server,browser;
+async function gameContext(options={}){
+  const context=await browser.newContext(options);
+  // Existing gameplay checks use an explicit decline; consent boundaries have their own suite.
+  await context.addCookies([{name:'ng_analytics_consent',value:'denied',url:'http://127.0.0.1:4180/',sameSite:'Lax'}]);
+  return context;
+}
 async function readyToPlay(page){
   if(await page.locator('#scriptDialog').isVisible())await page.locator('#continueScriptBtn').click();
   if(await page.locator('#countdownOverlay').isVisible())await page.locator('#skipCountdown').click();
@@ -103,7 +109,7 @@ async function assertGameFits(page,label){
   assert.ok(!layers.visible||layers.spirit<layers.field,label+' mascot must remain behind falling kana: '+JSON.stringify(layers));
 }
 async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,844],[412,915],[568,320],[640,360],[844,390]]){
-  const context=await browser.newContext({viewport:{width:320,height:568},isMobile:true,hasTouch:true}),page=await context.newPage();
+  const context=await gameContext({viewport:{width:320,height:568},isMobile:true,hasTouch:true}),page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));
   for(const [width,height] of sizes){
     const label=width+'×'+height;
@@ -140,7 +146,7 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
   await context.close();
 }
 async function exerciseMixedKeyboard(errors){
-  const context=await browser.newContext({viewport:{width:320,height:568},isMobile:true,hasTouch:true}),page=await context.newPage();
+  const context=await gameContext({viewport:{width:320,height:568},isMobile:true,hasTouch:true}),page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));
   for(const [width,height] of [[320,568],[568,320]]){
     const label=width+'×'+height+' mixed input';
@@ -180,7 +186,7 @@ async function exerciseMixedKeyboard(errors){
   await context.close();
 }
 async function exerciseQuickWins(errors){
-  const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
+  const context=await gameContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>window.KanaRain&&window.KanaSfx);
   // Native menu/change gestures unlock browser audio; a declined audio context remains a safe no-op.
@@ -266,7 +272,7 @@ async function exerciseQuickWins(errors){
     console.log('PASS: focused320portrait menu/game/dialogs, mascotbelowfield, mixedABC/kana touch + nativeEnter/Space, incompatibleinput reset, portrait/landscapekeyboardgeometry.');
     await browser.close();server.kill();return;
   }
-  const context=await browser.newContext({viewport:{width:1440,height:1000}});
+  const context=await gameContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:4180');
@@ -436,7 +442,7 @@ async function exerciseQuickWins(errors){
   assert.ok(await page.evaluate(()=>!!window.KanaSfx),'the offline shell includes interface audio');
   assert.ok(await page.evaluate(async()=>{const r=await fetch('kana-audio-bundle/audio/a.mp3');return r.ok&&(await r.arrayBuffer()).byteLength>1000;}));
   await context.setOffline(false);
-  const mobileContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const mobileContext=await gameContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const mobile=await mobileContext.newPage();mobile.on('pageerror',e=>errors.push(e.message));
   await mobile.goto('http://127.0.0.1:4180');await mobile.waitForFunction(()=>window.KanaRain);
   await assertWholeViewport(mobile,'Mobile title');await screenshot(mobile,'mobile');
@@ -488,7 +494,7 @@ async function exerciseQuickWins(errors){
   await mobileContext.close();
   // Every selectable difficulty accelerates with elapsed play time, even without correct answers.
   // Passing the pond removes exactly one heart; each chosen allowance determines the loss boundary.
-  const difficultyContext=await browser.newContext();
+  const difficultyContext=await gameContext();
   for(const [difficulty,hearts] of [['easy',5],['normal',3],['hard',1]]){
     const level=await difficultyContext.newPage();level.on('pageerror',e=>errors.push(e.message));
     await level.goto('http://127.0.0.1:4180');await level.waitForFunction(()=>window.KanaRain);

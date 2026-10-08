@@ -13,7 +13,7 @@
   const mobile=()=>matchMedia('(pointer:coarse)').matches || innerWidth<=650;
   const running=()=>G && !G.over;
   function focusAnswer(){if(!running() || G.paused || G.countingDown)return;$('answer').inputMode=mobile()&&keyboardOpen?'none':'text';$('answer').focus({preventScroll:true});}
-  function closeDialogs(){document.querySelectorAll('dialog[open]').forEach(d=>d.close());}
+  function closeDialogs(){document.querySelectorAll('dialog.game-dialog[open]').forEach(d=>d.close());}
   function openPanel(id){
     const current=document.querySelector('dialog[open]');
     const origin=current?.id==='pauseOverlay'?'pause':current?.id==='results'?'results':running()&&(!G.paused||G.countingDown)?'game':'title';
@@ -144,6 +144,8 @@
     if(!running()||!G.countingDown)return;cancelCountdown();
     const now=performance.now(),elapsed=now-(G.pauseAt||now);G.drops.forEach(d=>d.pausedMs+=elapsed);
     G.paused=false;G.last=now;$('answer').disabled=false;$('submitBtn').disabled=false;focusAnswer();spirit('idle');
+    // Count real gameplay once; countdowns on pause/resume are not new sessions.
+    if(!G.analyticsStarted){G.analyticsStarted=true;window.NihongoAnalytics?.track('practice_start',{practice_mode:G.reviewIds?'review':G.mode});}
   }
   function start(options={}){
     if(G&&!G.over)return;
@@ -201,7 +203,7 @@
       raf=requestAnimationFrame(loop);return;
     }
     if(!G.paused){
-      G.t-=dt;G.elapsed+=dt;G.sinceSpawn+=dt*1000;if(G.t<=0){end('Session complete');return;}
+      G.t-=dt;G.elapsed+=dt;G.sinceSpawn+=dt*1000;if(G.t<=0){end('Session complete','timer_elapsed');return;}
       const weather=R.atTime(G.difficulty,G.elapsed);G.speed=weather.speed;G.gap=weather.gap;
       if(!G.queue.length)refill();
       const cap=Math.min(R.profiles[G.difficulty].maxDrops,2+Math.floor(G.correct/8));
@@ -280,7 +282,7 @@
     clearTimeout(heartTimer);document.body.classList.remove('heart-hit');void $('heartLoss').offsetWidth;document.body.classList.add('heart-hit');$('heartLoss').classList.remove('hidden');
     sfx('heart');heartTimer=setTimeout(()=>{document.body.classList.remove('heart-hit');$('heartLoss').classList.add('hidden');},900);
     A.play(symbol(d.id));spirit('worried');effect(d,'ripple');remove(d);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();renderUnlocks(mapScript);
-    if(G.lives===0)end(`All ${G.totalLives} ${G.totalLives===1?'heart':'hearts'} lost · ${R.profiles[G.difficulty].name}`);
+    if(G.lives===0)end(`All ${G.totalLives} ${G.totalLives===1?'heart':'hearts'} lost · ${R.profiles[G.difficulty].name}`,'hearts_lost');
   }
   function checkUnlock(){
     if(explore||cfg.mode==='words')return;
@@ -312,10 +314,12 @@
     G.last=performance.now();
   }
   function dispose(){cancelCountdown();cancelAnimationFrame(raf);A.stop();if(G){G.over=true;G.drops.forEach(d=>d.el.remove());G.drops=[];}L.flush();}
-  function end(reason){
+  function end(reason,completionReason='manual_finish'){
     if(!G||G.over)return;
     const acc=G.attempts?Math.round(G.correct/G.attempts*100):0,key=G.bestKey;
     const old=gd.best[key]||0;gd.best[key]=Math.max(old,G.score);gd.sessions=(gd.sessions||0)+1;L.flush();
+    // Explicit end reasons, never inferred from UI copy; no answer, score, or item data leaves the app.
+    if(G.analyticsStarted)window.NihongoAnalytics?.track('practice_complete',{practice_mode:G.reviewIds?'review':G.mode,completion_reason:completionReason});
     $('resultTitle').textContent=G.correct?'Your garden grew.':'Every drop is a new beginning.';
     $('resultMessage').textContent=reason+(G.score>old&&G.score?' · A new personal best!':'')+(cfg.mode==='hira'&&gd.rows.hiragana>=12?' Try Little words next.':'');
     $('resultStats').innerHTML=`<div><b>${G.score}</b><small>SCORE</small></div><div><b>${acc}%</b><small>ACCURACY</small></div><div><b>${G.correct}</b><small>READ CORRECTLY</small></div><div><b>${G.bestStreak}</b><small>BEST STREAK</small></div>`;
@@ -377,7 +381,8 @@
   $('helpBtn').onclick=$('pauseHelpBtn').onclick=()=>openPanel('helpDialog');$('closeHelp').onclick=()=>closePanel('helpDialog');
   $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};cfg.mode='hira';cfg.difficulty='normal';L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-  document.querySelectorAll('dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='scriptDialog')acknowledgeScript();else if(d.id==='results')showMenu();else closePanel(d.id);}));
+  document.querySelectorAll('dialog.game-dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='scriptDialog')acknowledgeScript();else if(d.id==='results')showMenu();else closePanel(d.id);}));
+  window.addEventListener('nihongo-analytics-settings-open',()=>{if(running())pause();});
   document.addEventListener('keydown',e=>{
     if(G?.countingDown&&e.key==='Tab'){e.preventDefault();$('skipCountdown').focus({preventScroll:true});return;}
     if(document.querySelector('dialog[open]'))return;

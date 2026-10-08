@@ -4,8 +4,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 
 const root=path.resolve(__dirname,'..'),rootReal=fs.realpathSync(root),output=path.resolve(root,'dist');
-const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','manifest.webmanifest','sw.js'];
-const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js'];
+const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','privacy.html','manifest.webmanifest','sw.js'];
+const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js','assets/nihongo-analytics.js','assets/nihongo-analytics.css'];
 const IMAGE_FILES=[
   'assets/garden.webp','assets/social-garden.png','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp',
   'assets/splash.webp','assets/ripple.webp','assets/icon.png',

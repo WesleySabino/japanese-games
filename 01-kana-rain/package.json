@@ -5,7 +5,8 @@
   "description": "An immersive, offline-first kana reading game with progressive rain and difficulty-based hearts",
   "scripts": {
     "start": "node scripts/serve.cjs",
-    "test": "node --test tests/core.test.cjs",
+    "test": "node --test tests/core.test.cjs tests/analytics.test.mjs tests/analytics-game.test.mjs",
+    "test:analytics": "node --test tests/analytics.test.mjs tests/analytics-game.test.mjs",
     "test:browser": "node tests/browser.cjs",
     "assets": "node scripts/prepare-assets.cjs",
     "build": "node scripts/build.cjs"

@@ -6,6 +6,10 @@ Game 01 from `../brainstorm-minijogos-japones.md`, implemented as a small HTML/C
 
 The game is public and requires no account. Learning progress and preferences are stored locally in the current browser, with no account or cloud synchronization. My Kana Garden lets players export their progress.
 
+Optional Google Analytics 4 measures basic app usage only after explicit opt-in.
+You can play with analytics off. [Privacy and cookies](https://kana-rain.nihongogrove.top/privacy.html)
+explains the shared choice across Nihongo Grove, Japanese Core, and Kana Rain.
+
 Everything specific to this game is contained in `01-kana-rain/`: application files, artwork and concepts, the audio bundle, scripts, tests, and documentation. The shared brainstorm document stays at the Japanese-games project root.
 
 The English translation of the original game specification is in [SPECIFICATION.md](./SPECIFICATION.md). The design review and proposed improvements are in [REVIEW.md](./REVIEW.md). The numbered catalogue is in the [project index](../README.md).
@@ -63,6 +67,48 @@ All menu buttons and session selectors have short, gentle Web Audio interface to
 
 The service worker caches the application, optimized gameplay images, manifest, and all 112 MP3 recordings. The main menu confirms when this initial cache completes. Gameplay and sound then work offline. The separate art gallery includes full-resolution source images and is loaded on demand.
 
+## Optional analytics
+
+The local `assets/nihongo-analytics.js` client loads Google Analytics 4
+(`G-F69S8JDW5M`) only after you allow it, and only on the three production HTTPS
+hosts. Enhanced Measurement is disabled. DNT and Global Privacy Control keep
+analytics off. Local previews display the same settings interface without
+contacting Google. The functional `ng_analytics_consent` cookie stores the
+choice for 180 days across the root domain and both apps.
+
+Every page has an **Analytics settings** button and a privacy notice. Turning
+analytics off disables future measurement, clears pending analytics commands,
+and deletes accessible Google Analytics cookies. This does not reload the
+game or erase learner progress. Open sibling sites check the shared preference
+before events, on focus/visibility changes, and with a one-second timer that
+background browsers may throttle. Opening analytics settings pauses active rain.
+
+The client sends one sanitized page view per page or virtual route. Query
+strings and fragments are excluded, titles use fixed values, and only known
+page paths are allowed. Hosting aliases such as `/privacy` normalize to the
+same fixed page as `/privacy.html`; duplicate alias page views are suppressed.
+Referrers include only the referring site's origin. Google signals and
+advertising personalization/storage are disabled. No answers, scores,
+accuracy, kana IDs, usernames, access keys, exports, or learner records are sent.
+
+`practice_start` fires once when the first countdown finishes and gameplay
+begins. Pause/resume countdowns do not add starts. `practice_complete` fires
+once from the real end function, with an explicit `timer_elapsed`,
+`hearts_lost`, or `manual_finish` reason. Focused sessions use
+`practice_mode: review`; other modes are `hira`, `kata`, `mix`, `pair`, and
+`words`. These events describe activity, not learning or mastery. Tab closure,
+reset, disposal, and a countdown ended before play do not count as completion.
+
+The client accepts only fixed event names, parameters, and enum values.
+Unknown fields reject the whole event. Activity before opt-in is discarded;
+it is never replayed. Opting in mid-session can produce a measured end without
+a measured start, so reports are an incomplete sample of consenting visitors.
+The service worker caches only local analytics interface assets and the privacy
+page; it does not cache Google's library or collection endpoints.
+
+`pnpm test` includes 13 tracking-boundary checks and five checks against the
+actual game lifecycle. Run only those checks with `pnpm test:analytics`.
+
 ## Artwork
 
 Open `art.html` for the English art gallery. Artwork was generated **before implementation** with the built-in imagegen tool:
@@ -83,7 +129,7 @@ The approved immersive screen concepts and their prompts are retained in `assets
 
 `src/data.js` is the shared kana/word catalogue; `src/learner.js` owns evidence and scheduling; `src/audio.js` resolves the supplied recordings; `src/sfx.js` supplies interface and game effect tones; `src/difficulty.js` defines hearts and the time-based rain curve; `src/game.js` owns Kana Rain. `window.KanaRain` exposes the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`) for integration into a future minigame shell. Sound recall and script pairing use separate learner facets.
 
-Run the content, scheduler, storage, and difficulty checks inside `01-kana-rain/`:
+Run the content, scheduler, storage, difficulty, consent, and analytics checks inside `01-kana-rain/`:
 
 ```sh
 pnpm test
