@@ -75,24 +75,54 @@
   });
 
   // Romanize kana string (Hepburn, accepts alternative spellings via `romajiVariants`)
-  function toRomaji(s) {
-    var u = splitKana(s), out = '';
-    for (var i = 0; i < u.length; i++) {
-      var c = u[i];
-      if (c === 'っ' || c === 'ッ') { var nx = byChar[u[i + 1]]; out += nx ? (nx.romaji.slice(0, 2) === 'ch' ? 't' : nx.romaji[0]) : 't'; continue; }
-      if (c === 'ー') { out += out.slice(-1); continue; }
-      out += byChar[c] ? byChar[c].romaji : c;
-    }
-    return out;
+  function romanize(s, alternatives) {
+    var units = splitKana(s.normalize('NFC')), variants = [''], doubled = false;
+    units.forEach(function (unit, index) {
+      if (unit === 'っ' || unit === 'ッ') { doubled = true; return; }
+      if (unit === 'ー') {
+        variants = variants.map(function (value) { return value + (value.match(/[aiueo]$/) || [''])[0]; });
+        return;
+      }
+      var kanaUnit = byChar[unit], choices = kanaUnit ? [kanaUnit.romaji].concat(alternatives ? kanaUnit.alt : []) : [unit];
+      // Only the standalone nasal has an nn variant. Preserve its boundary before a vowel/y.
+      if (unit === 'ん' || unit === 'ン') {
+        var next = byChar[units[index + 1]], needsBoundary = next && /^[aiueoy]/.test(next.romaji);
+        choices = needsBoundary ? (alternatives ? ["n'", 'nn'] : ["n'"]) : (alternatives ? ['n', 'nn'] : ['n']);
+      }
+      if (doubled) {
+        choices = choices.map(function (reading) { return (reading.startsWith('ch') ? 't' : reading[0]) + reading; });
+        doubled = false;
+      }
+      var nextVariants = [];
+      variants.forEach(function (prefix) { choices.forEach(function (choice) { nextVariants.push(prefix + choice); }); });
+      variants = [...new Set(nextVariants)];
+    });
+    return variants;
   }
-  function romajiVariants(s) { // also accept "nn", "si", "tu", etc.
-    var base = toRomaji(s), v = [base];
-    var subs = [['shi','si'],['chi','ti'],['tsu','tu'],['fu','hu'],['ji','zi'],['sh','sy'],['ch','ty'],['j','zy'],['n','nn']];
-    subs.forEach(function (p) { v.slice().forEach(function (x) { var y = x.split(p[0]).join(p[1]); if (v.indexOf(y) < 0) v.push(y); }); });
-    return v;
+  function toRomaji(s) { return romanize(s, false)[0]; }
+  function romajiVariants(s) { return romanize(s, true); }
+  // Introductions explain the spelling used by this game's reading input, not IME keystrokes.
+  var features = [
+    { id:'sokuon', title:'Small っ: hold the consonant', explanation:'Small っ / ッ adds a beat before the next consonant. Do not read it as tsu. In this game, repeat that consonant in romaji.', example:'きっぷ', reading:'kippu', contrast:'つ / っ', contrastReading:'Full つ = tsu; small っ holds the next consonant.', source:'https://www.coelang.tufs.ac.jp/ja/en/pmod/practical/02-01-01.php' },
+    { id:'long-vowel-mark', title:'ー: keep the vowel long', explanation:'The katakana mark ー lengthens the preceding vowel. Hold that vowel for two beats. This game writes the extra vowel letter.', example:'コーヒー', reading:'koohii', contrast:'コ / コー', contrastReading:'ko / koo', source:'https://www.coelang.tufs.ac.jp/ja/en/pmod/practical/02-02-01.php' },
+    { id:'long-vowel-sequence', title:'Long vowels written with kana', explanation:'Hiragana can use a second vowel kana for a long vowel. おう often has a long o sound; えい often has a long e sound. Keep the written vowel letters in this game’s romaji.', example:'こう', reading:'kou', contrast:'こ / こう', contrastReading:'ko / kou', source:'https://www.coelang.tufs.ac.jp/ja/en/pmod/practical/02-02-01.php' }
+  ];
+  function wordRequirements(word) {
+    var surface = typeof word === 'string' ? word : word.surface, units = splitKana(surface), required = [];
+    if (/[っッ]/.test(surface)) required.push('sokuon');
+    if (surface.includes('ー')) required.push('long-vowel-mark');
+    if (units.some(function (unit, index) {
+      if (!index || !/^[あいうえおアイウエオ]$/.test(unit)) return false;
+      var previous = byChar[units[index - 1]], current = byChar[unit];
+      if (!previous || !current) return false;
+      var vowel = previous.romaji.slice(-1);
+      return vowel === current.romaji || vowel === 'o' && current.romaji === 'u' || vowel === 'e' && current.romaji === 'i';
+    })) required.push('long-vowel-sequence');
+    return required;
   }
+  words.forEach(function (word) { word.features = wordRequirements(word); word.acceptedRomaji = romajiVariants(word.surface); });
   root.JPData = { kana: kana, kanaByChar: byChar, kanaById: kana.reduce(function (m, k) { m[k.id] = k; return m; }, {}),
-                  words: words, splitKana: splitKana, toRomaji: toRomaji, romajiVariants: romajiVariants, rowsOrder: ROWS };
+                  words: words, features: features, wordRequirements: wordRequirements, splitKana: splitKana, toRomaji: toRomaji, romajiVariants: romajiVariants, rowsOrder: ROWS };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 

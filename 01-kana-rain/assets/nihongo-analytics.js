@@ -19,7 +19,7 @@
   const schemas = {
     app_open: { target_app: ['core', 'rain'] },
     practice_start: { practice_mode: modes },
-    practice_complete: { practice_mode: modes, completion_reason: ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed'] }
+    practice_complete: { practice_mode: modes, completion_reason: ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed', 'practice_set_complete'] }
   };
   let choice = 'unknown', active = false, tag = null, configured = false, currentPath = safePath(location.pathname), lastPath = null;
   let dialog, status, allow, decline, close, returnFocus;

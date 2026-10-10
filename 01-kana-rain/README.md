@@ -1,18 +1,22 @@
 # Kana Rain
 
-Game 01 from `../brainstorm-minijogos-japones.md`, implemented as a small HTML/CSS/JavaScript application. All game instructions, controls, and feedback are in English. Japanese is used for the learning content. The supplied standalone prototype is preserved; its kana catalogue and shared learner model form the basis of this implementation.
+Game 01 from `../planejamento/brainstorm-minijogos-japones.md`, implemented as a small HTML/CSS/JavaScript application. All game instructions, controls, and feedback are in English. Japanese is used for the learning content. The supplied standalone prototype is preserved; its kana catalogue and shared learner model form the basis of this implementation.
 
 [Play Kana Rain](https://kana-rain.nihongogrove.top/) · [How to play](https://kana-rain.nihongogrove.top/about.html) · [Artwork](https://kana-rain.nihongogrove.top/art.html)
 
 The game is public and requires no account. Learning progress and preferences are stored locally in the current browser, with no account or cloud synchronization. My Kana Garden lets players export their progress.
 
+**Arcade challenge** is the main experience and the default for new players: read falling kana, keep the rain clear, and build your score before time or hearts run out. **Steady practice** is an alternative in Settings. The game remembers the session style you choose.
+
 Optional Google Analytics 4 measures basic app usage only after explicit opt-in.
 You can play with analytics off. [Privacy and cookies](https://kana-rain.nihongogrove.top/privacy.html)
 explains the shared choice across Nihongo Grove, Japanese Core, and Kana Rain.
 
-Everything specific to this game is contained in `01-kana-rain/`: application files, artwork and concepts, the audio bundle, scripts, tests, and documentation. The shared brainstorm document stays at the Japanese-games project root.
+Everything specific to this game is contained in `01-kana-rain/`: application files, artwork and concepts, the audio bundle, scripts, tests, and documentation. The shared brainstorm document is in the repository's `planejamento/` directory.
 
 The English translation of the original game specification is in [SPECIFICATION.md](./SPECIFICATION.md). The design review and proposed improvements are in [REVIEW.md](./REVIEW.md). The numbered catalogue is in the [project index](../README.md).
+
+The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
 
 ## Play locally
 
@@ -38,22 +42,24 @@ Starting or resuming a session shows a skippable three-second countdown. The clo
 
 ## Gameplay
 
-- Start with the five hiragana vowels. Choose Easy, Normal, or Hard before entering the garden; session lengths are 1, 3, 5, or 10 minutes.
-- Easy provides 5 hearts and gentler rain, Normal provides 3 hearts, and Hard provides 1 heart and faster rain. Your selected difficulty is saved and cannot change during a session.
-- Every drop reaching the ground is removed and costs exactly one heart. Losing all hearts ends the session. Missed kana remain available for future learning review.
-- Falling speed increases with active session time, regardless of how many answers are correct. Starting fall times are 14 seconds on Easy, 10 on Normal, and 7 on Hard. Speed ramps linearly and is capped at 3×, 3.5×, and 4× respectively. The spawn interval also shortens as rain accelerates. Pauses stop both the clock and acceleration.
+- Start with the five hiragana vowels in **Arcade challenge**, the default session style. Choose your difficulty and session length in Settings; a saved choice of **Steady practice** is kept when you return.
+- In Arcade, Easy provides 5 hearts and gentler rain, Normal provides 3 hearts, and Hard provides 1 heart and faster rain. Session lengths are 1, 3, 5, or 10 minutes. Difficulty is saved and cannot change during a session.
+- In Arcade, each drop reaching the ground is removed and costs exactly one heart. Losing all hearts ends the session. Expiration is recorded separately from an incorrect submitted answer.
+- Arcade speed increases with active session time, regardless of how many answers are correct. Starting fall times are 14 seconds on Easy, 10 on Normal, and 7 on Hard. Speed ramps linearly and is capped at 3×, 3.5×, and 4× respectively. Practice uses a constant 18-second fall. Pauses stop motion and correction visibility time.
+- Choose **Steady practice** in Settings for eight opportunities, one drop at a time, constant speed and no lost hearts. Errors and expired drops wait for **Continue practice**.
 - Read a kana and type its sound. Answers submit automatically; Enter forces submission. Standalone `n` needs Enter so it does not consume the beginning of `na`, `ni`, etc. Common alternate romanizations are accepted.
 - New items show an initial reading hint; the hint disappears after the first correct response. Assisted responses do not count as unaided successes for learning new rows.
-- Rows unlock after every available kana has at least two unaided successes and 85% accuracy. Katakana, mixed scripts, and script pairing open after the basic hiragana rows. Words open when at least four readable words are available; the game recommends words after the basic rows.
-- Wrong answers stain and accelerate the affected drop. They preserve your hearts until the drop reaches the ground.
+- Rows unlock after every available kana has at least two independent first-answer successes and 85% accuracy on independent first answers. A revealed answer stays assisted until at least 60 seconds and two other distinct assessed items have passed; a round born during that exposure stays assisted. Existing earned rows are preserved during migration.
+- Words require their kana and explicit introductions for small っ/ッ, the long-vowel mark ー and long vowels written with kana. The finite accepted romaji lists are composed from kana units; copying a displayed kana or word is not accepted as a reading.
+- Arcade errors stain and accelerate the affected drop without immediately taking a heart. Practice errors finish that opportunity after explicit acknowledgement. Both retain correction text across pauses.
 - Drops approaching the pond show an exclamation mark and stronger warning outline. The pond edge highlights imminent misses, and the final heart has a distinct visual state. A missed drop produces a heart-loss cue; all cues remain useful with sound muted.
 - The answer dock explicitly says whether to type romaji, hiragana, or katakana. Any visible drop can be answered; the highlighted drop is the priority for forced submissions and listening.
 - Strong kana move to producing the opposite script rather than romaji. Script pairing uses a full kana keyboard, avoiding multiple-choice guessing. Desktop Japanese IME and touch input are supported.
 - Personal confusions are revisited together, side by side. The shared scheduler targets review, weak, and new items with a bounded new-item count.
 - Pause with Escape or the Pause button. Leaving the tab pauses automatically. Finish preserves all answer evidence and displays session results.
-- Progress is written after every answer to an immediate localStorage journal and IndexedDB. The newer stored snapshot is restored. Progress can be exported from My Kana Garden and reset in the instructions menu.
-- My Kana Garden shows exact next-row readiness, with unaided successes and overall accuracy for every unlocked kana, including earlier rows. Settings explains locked modes. Corrections and unlock announcements stay visible instead of being replaced by routine success feedback.
-- Results include every mistaken or missed item with its reading and a pronunciation button when a recording exists. **Review these kana** starts a focused 60-second round using the same difficulty and hearts. It leaves the normal duration selection unchanged and stores its personal best separately.
+- Progress uses a localStorage journal and IndexedDB. Saved status follows completed writes, with a persistent export action when both fail. The newer compatible snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates on reload; v1 history retains unknown assistance and dated legacy errors.
+- My Kana Garden labels all four estimated familiarity states and shows first-answer readiness for every unlocked kana, including earlier rows. Results separate independent readings, script matches, helped answers and expired drops. Response, input and residence times are distinct exported fields; none is labelled pure reading speed.
+- Results include mistaken or missed items with reading and available pronunciation. **Review these kana** uses the chosen style: a focused 60-second Arcade round or eight Steady practice opportunities. Personal bests stay separate; existing arcade best keys are preserved.
 - Streaks of 5, 10, and 20 receive small celebrations. The title screen and HUD show the personal best for the selected mode, difficulty, and duration; beating an existing record receives its own announcement.
 - The touch keyboard supports taps, clicks, and native Enter/Space activation. An ABC/kana switch supports mixed answer formats on phones; changing formats clears incompatible partial text, while ordinary pauses preserve it. Reduced effects can be enabled in Settings and is saved on this device; the system's reduced-motion preference is also respected.
 
@@ -76,7 +82,7 @@ analytics off. Local previews display the same settings interface without
 contacting Google. The functional `ng_analytics_consent` cookie stores the
 choice for 180 days across the root domain and both apps.
 
-Every page has an **Analytics settings** button and a privacy notice. Turning
+The game has **Analytics and privacy** inside Settings, clear of the answer dock. Other pages retain their analytics button. Turning
 analytics off disables future measurement, clears pending analytics commands,
 and deletes accessible Google Analytics cookies. This does not reload the
 game or erase learner progress. Open sibling sites check the shared preference
@@ -94,7 +100,7 @@ accuracy, kana IDs, usernames, access keys, exports, or learner records are sent
 `practice_start` fires once when the first countdown finishes and gameplay
 begins. Pause/resume countdowns do not add starts. `practice_complete` fires
 once from the real end function, with an explicit `timer_elapsed`,
-`hearts_lost`, or `manual_finish` reason. Focused sessions use
+`hearts_lost`, `practice_set_complete`, or `manual_finish` reason. Focused sessions use
 `practice_mode: review`; other modes are `hira`, `kata`, `mix`, `pair`, and
 `words`. These events describe activity, not learning or mastery. Tab closure,
 reset, disposal, and a countdown ended before play do not count as completion.

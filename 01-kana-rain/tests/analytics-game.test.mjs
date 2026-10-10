@@ -34,7 +34,7 @@ async function game() {
     querySelector: selector => selector === 'dialog[open]' ? [...nodes.values()].find(el => el.open) : null,
     querySelectorAll: selector => selector === 'dialog.game-dialog[open]' ? [...nodes.values()].filter(el => el.open) : []
   };
-  const gd = {}, window = {
+  const gd = {playStyle:'arcade'}, window = {
     Learner: { ready: Promise.resolve(), gameData: () => gd, state: () => null, mastery: () => 0, record: () => ({}), flush() {}, selectRound: ids => ids.slice(0, 8), shuffle() {}, reset() {} },
     KanaAudio: { enabled: true, ready: Promise.resolve(), available: true, play: async () => true, stop() {}, hasRecording: () => false },
     NihongoAnalytics: { track(name, params) { events.push({ name, params: { ...params } }); return true; } },

@@ -1,0 +1,341 @@
+[
+  {
+    "surface": "ねこ",
+    "reviewedCanonical": "neko",
+    "aliasesOutsideLocalUnitReference": [
+      "nneko"
+    ]
+  },
+  {
+    "surface": "いぬ",
+    "reviewedCanonical": "inu",
+    "aliasesOutsideLocalUnitReference": [
+      "innu"
+    ]
+  },
+  {
+    "surface": "さかな",
+    "reviewedCanonical": "sakana",
+    "aliasesOutsideLocalUnitReference": [
+      "sakanna"
+    ]
+  },
+  {
+    "surface": "すし",
+    "reviewedCanonical": "sushi",
+    "aliasesOutsideLocalUnitReference": [
+      "susyi"
+    ]
+  },
+  {
+    "surface": "みず",
+    "reviewedCanonical": "mizu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "あさ",
+    "reviewedCanonical": "asa",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "よる",
+    "reviewedCanonical": "yoru",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "うみ",
+    "reviewedCanonical": "umi",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "そら",
+    "reviewedCanonical": "sora",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "はな",
+    "reviewedCanonical": "hana",
+    "aliasesOutsideLocalUnitReference": [
+      "hanna"
+    ]
+  },
+  {
+    "surface": "て",
+    "reviewedCanonical": "te",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "め",
+    "reviewedCanonical": "me",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "くち",
+    "reviewedCanonical": "kuchi",
+    "aliasesOutsideLocalUnitReference": [
+      "kutyi"
+    ]
+  },
+  {
+    "surface": "あし",
+    "reviewedCanonical": "ashi",
+    "aliasesOutsideLocalUnitReference": [
+      "asyi"
+    ]
+  },
+  {
+    "surface": "いえ",
+    "reviewedCanonical": "ie",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "なつ",
+    "reviewedCanonical": "natsu",
+    "aliasesOutsideLocalUnitReference": [
+      "nnatsu",
+      "nnatu"
+    ]
+  },
+  {
+    "surface": "ふゆ",
+    "reviewedCanonical": "fuyu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "あき",
+    "reviewedCanonical": "aki",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "はる",
+    "reviewedCanonical": "haru",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ほん",
+    "reviewedCanonical": "hon",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "かさ",
+    "reviewedCanonical": "kasa",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "くつ",
+    "reviewedCanonical": "kutsu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "たまご",
+    "reviewedCanonical": "tamago",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ごはん",
+    "reviewedCanonical": "gohan",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "おちゃ",
+    "reviewedCanonical": "ocha",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "でんしゃ",
+    "reviewedCanonical": "densha",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "きっぷ",
+    "reviewedCanonical": "kippu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "がっこう",
+    "reviewedCanonical": "gakkou",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ともだち",
+    "reviewedCanonical": "tomodachi",
+    "aliasesOutsideLocalUnitReference": [
+      "tomodatyi"
+    ]
+  },
+  {
+    "surface": "せんせい",
+    "reviewedCanonical": "sensei",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "いく",
+    "reviewedCanonical": "iku",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "くる",
+    "reviewedCanonical": "kuru",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "たべる",
+    "reviewedCanonical": "taberu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "のむ",
+    "reviewedCanonical": "nomu",
+    "aliasesOutsideLocalUnitReference": [
+      "nnomu"
+    ]
+  },
+  {
+    "surface": "みる",
+    "reviewedCanonical": "miru",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ねる",
+    "reviewedCanonical": "neru",
+    "aliasesOutsideLocalUnitReference": [
+      "nneru"
+    ]
+  },
+  {
+    "surface": "よむ",
+    "reviewedCanonical": "yomu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "かく",
+    "reviewedCanonical": "kaku",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "あおい",
+    "reviewedCanonical": "aoi",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "あかい",
+    "reviewedCanonical": "akai",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "おおきい",
+    "reviewedCanonical": "ookii",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ちいさい",
+    "reviewedCanonical": "chiisai",
+    "aliasesOutsideLocalUnitReference": [
+      "tyiisai"
+    ]
+  },
+  {
+    "surface": "あつい",
+    "reviewedCanonical": "atsui",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "さむい",
+    "reviewedCanonical": "samui",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "しゃしん",
+    "reviewedCanonical": "shashin",
+    "aliasesOutsideLocalUnitReference": [
+      "syasyin",
+      "syasyinn"
+    ]
+  },
+  {
+    "surface": "きょう",
+    "reviewedCanonical": "kyou",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "あした",
+    "reviewedCanonical": "ashita",
+    "aliasesOutsideLocalUnitReference": [
+      "asyita"
+    ]
+  },
+  {
+    "surface": "じかん",
+    "reviewedCanonical": "jikan",
+    "aliasesOutsideLocalUnitReference": [
+      "zyikan",
+      "zyikann"
+    ]
+  },
+  {
+    "surface": "りんご",
+    "reviewedCanonical": "ringo",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "やま",
+    "reviewedCanonical": "yama",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "コーヒー",
+    "reviewedCanonical": "koohii",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "パン",
+    "reviewedCanonical": "pan",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "テレビ",
+    "reviewedCanonical": "terebi",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "カメラ",
+    "reviewedCanonical": "kamera",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ホテル",
+    "reviewedCanonical": "hoteru",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "バス",
+    "reviewedCanonical": "basu",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "タクシー",
+    "reviewedCanonical": "takushii",
+    "aliasesOutsideLocalUnitReference": [
+      "takusyii"
+    ]
+  },
+  {
+    "surface": "ケーキ",
+    "reviewedCanonical": "keeki",
+    "aliasesOutsideLocalUnitReference": []
+  },
+  {
+    "surface": "ピアノ",
+    "reviewedCanonical": "piano",
+    "aliasesOutsideLocalUnitReference": [
+      "pianno"
+    ]
+  },
+  {
+    "surface": "メニュー",
+    "reviewedCanonical": "menyuu",
+    "aliasesOutsideLocalUnitReference": [
+      "mennyuu"
+    ]
+  }
+]

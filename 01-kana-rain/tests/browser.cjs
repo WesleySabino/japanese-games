@@ -8,9 +8,17 @@ async function gameContext(options={}){
   const context=await browser.newContext(options);
   // Existing gameplay checks use an explicit decline; consent boundaries have their own suite.
   await context.addCookies([{name:'ng_analytics_consent',value:'denied',url:'http://127.0.0.1:4180/',sameSite:'Lax'}]);
+  // This suite exercises the arcade contract; default steady practice has a separate suite.
+  await context.addInitScript(()=>{
+    const key='jp-learner-v1';
+    const saved=JSON.parse(localStorage.getItem(key)||'null')||{version:1,items:{},errorLog:[],games:{},created:Date.now()};
+    saved.games ||= {};saved.games['kana-rain'] ||= {};saved.games['kana-rain'].playStyle='arcade';
+    localStorage.setItem(key,JSON.stringify(saved));
+  });
   return context;
 }
 async function readyToPlay(page){
+  for(let i=0;i<5&&await page.locator('#featureDialog').isVisible();i++)await page.locator('#continueFeatureBtn').click();
   if(await page.locator('#scriptDialog').isVisible())await page.locator('#continueScriptBtn').click();
   if(await page.locator('#countdownOverlay').isVisible())await page.locator('#skipCountdown').click();
   await page.waitForFunction(()=>KanaRain.state&&!KanaRain.state.paused&&!KanaRain.state.countingDown);
@@ -153,8 +161,8 @@ async function exerciseMixedKeyboard(errors){
     await page.setViewportSize({width,height});await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>window.KanaRain);
     await page.evaluate(()=>{
       Learner.reset();const gd=Learner.gameData('kana-rain');gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};
-      for(let i=0;i<6;i++)Learner.record('kana:あ','form→sound',{correct:true,rtMs:500});
-      Learner.state('kana:あ').facets['form→sound'].stability=60;Learner.flush();
+      for(let i=0;i<6;i++)Learner.record('kana:あ','form→sound',{correct:true,rtMs:500,firstAttempt:true,assistance:false,responseFormat:'romaji',now:Date.now()-(5-i)*7*86400000});
+      Learner.flush();
     });
     await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#difficultySelect').selectOption('easy');await page.locator('#startBtn').tap();await readyToPlay(page);
     const ordinary=await page.evaluate(()=>({id:KanaRain.state.target.id,answer:KanaRain.accepted(KanaRain.state.target.id,false)[0]}));
@@ -246,8 +254,10 @@ async function exerciseQuickWins(errors){
   await page.evaluate(()=>{
     Learner.reset();const gd=Learner.gameData('kana-rain');gd.rows={hiragana:2,katakana:1};gd.best={};gd.accuracy={};
     const kana=JPData.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row));
-    for(const k of kana){for(let i=0;i<2;i++)Learner.record(k.id,'form→sound',{correct:true,rtMs:1000});Learner.state(k.id).facets['form→sound'].unaided=2;}
-    const first=Learner.state(kana[0].id).facets['form→sound'];first.correct=11;first.errors=2;Learner.flush();
+    for(const k of kana){for(let i=0;i<2;i++)Learner.record(k.id,'form→sound',{correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});}
+    for(let i=0;i<9;i++)Learner.record(kana[0].id,'form→sound',{correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
+    for(let i=0;i<2;i++)Learner.record(kana[0].id,'form→sound',{correct:false,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
+    Learner.flush();
   });
   await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#gardenBtn').click();
   assert.match(await page.locator('#unlockSummary').textContent(),/9\s*\/\s*10/);
@@ -307,7 +317,7 @@ async function exerciseQuickWins(errors){
   assert.ok(await page.locator('#masteryMap button').count()>100);
   assert.match(await page.locator('#unlockSummary').textContent(),/0\s*\/\s*5/);
   assert.equal(await page.locator('#unlockDetails .unlock-item').count(),5);
-  assert.match(await page.locator('#unlockNote').textContent(),/2 unaided.*85%.*Earlier rows/);
+  assert.match(await page.locator('#unlockNote').textContent(),/2 independent first.*85%.*independent first/);
   await assertWholeViewport(page,'Desktop progress menu');
   await page.locator('#closeGarden').click();
   assert.equal(await page.locator('#welcome').isVisible(),true);
@@ -535,7 +545,8 @@ async function exerciseQuickWins(errors){
         assert.equal(await level.locator('#heartLoss').isVisible(),true);
       }
     }
-    assert.equal(await level.evaluate(()=>KanaRain.state.attempts),hearts);
+    assert.equal(await level.evaluate(()=>KanaRain.state.attempts),0,'expired drops do not invent submitted answers');
+    assert.equal(await level.evaluate(()=>KanaRain.state.events.filter(event=>event.outcome==='timeout').length),hearts);
     assert.match(await level.locator('#resultMessage').textContent(),new RegExp('All '+hearts+' hearts? lost'),difficulty+' loss message uses its chosen heart allowance');
     await level.close();
   }
@@ -545,8 +556,7 @@ async function exerciseQuickWins(errors){
   await grow.evaluate(()=>{
     Learner.reset();const gd=Learner.gameData('kana-rain');gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};
     for(const k of JPData.kana.filter(k=>k.script==='hiragana'&&k.row==='a')){
-      for(let i=0;i<2;i++)Learner.record(k.id,'form→sound',{correct:true,rtMs:1000});
-      const facet=Learner.state(k.id).facets['form→sound'];facet.unaided=2;facet.correct=20;
+      for(let i=0;i<20;i++)Learner.record(k.id,'form→sound',{correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
     }Learner.flush();
   });
   await grow.reload();await grow.waitForFunction(()=>window.KanaRain);await grow.locator('#startBtn').click();
@@ -557,9 +567,11 @@ async function exerciseQuickWins(errors){
   assert.equal(await grow.evaluate(()=>KanaRain.gameData.rows.hiragana),2);
   assert.equal(await grow.locator('#feedback').textContent(),protectedError,'unlock does not replace a still-visible correction');
   await grow.locator('#pauseBtn').click();
+  await grow.waitForTimeout(4000);
+  assert.equal(await grow.locator('#feedback').textContent(),protectedError,'paused correction cannot expire to make room for an unlock message');
+  await grow.locator('#resumeBtn').click();await readyToPlay(grow);
   await grow.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('A new row is growing'),{},{timeout:5000});
   const unlockMessage=await grow.locator('#feedback').textContent();
-  await grow.locator('#resumeBtn').click();await readyToPlay(grow);
   await grow.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await grow.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(grow);
   await grow.locator('#answer').fill(await grow.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]));
   assert.equal(await grow.locator('#feedback').textContent(),unlockMessage,'success does not replace a protected unlock announcement');

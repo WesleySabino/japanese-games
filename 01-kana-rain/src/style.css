@@ -540,3 +540,45 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .rain-lines { opacity:.035; } .heart-hit .game-world::after { display:none; }
 }
 
+/* Learning controls share the existing garden panels and leave the answer lane clear. */
+.session-selectors { display:grid; grid-template-columns:1.15fr 1fr 1fr .7fr; gap:4px; }
+.session-selectors label { padding:0 5px; }
+.session-selectors select { min-height:40px; font-size:12px; }
+.title-screen { overflow-y:auto; justify-content:safe center; }
+.feedback-stack { position:absolute; z-index:20; top:118px; left:50%; transform:translateX(-50%); width:min(600px,91%); text-align:center; pointer-events:none; }
+.feedback-stack .feedback { position:static; transform:none; width:100%; max-width:none; }
+.feedback-continue { display:inline-block; pointer-events:auto; min-height:44px; margin-top:8px; padding:10px 20px; border:1px solid var(--gold-bright); border-radius:3px; background:#174239; color:var(--ivory); font-weight:600; }
+.storage-notice { position:absolute; z-index:21; left:16px; right:16px; bottom:calc(var(--dock-height) + 12px); margin:0; padding:8px 12px; border:1px solid #d99a73; border-radius:3px; background:#342b26f5; color:#ffe1c6; font-size:11px; line-height:1.5; text-align:center; }
+.storage-notice button { min-height:32px; margin-left:8px; border:0; background:transparent; color:var(--gold-bright); text-decoration:underline; }
+.is-menu .storage-notice { bottom:12px; }
+.game-world:has(.storage-notice:not(.hidden)) .playfield { bottom:calc(var(--dock-height) + 90px); }
+.map-legend { flex-wrap:wrap; gap:12px 22px; }
+.map-legend .strong { background:#d9ecc1; box-shadow:0 0 4px #cad6a5; }
+.feature-dialog { width:min(490px,calc(100% - 28px)); text-align:center; }
+.feature-example,.feature-contrast { padding:14px 10px; margin:12px 0; border:1px solid #b7c49e44; border-radius:3px; background:#07242d; color:#f9efd1; font-size:22px; line-height:1.5; overflow-wrap:anywhere; }
+.feature-example { font:30px/1.5 var(--kana-font); }
+.feature-contrast { font-size:15px; }
+.feature-dialog .menu-button { justify-content:center; margin-top:18px; }
+.analytics-entry { margin-top:12px; }
+@media (max-width:760px) {
+  .session-selectors { grid-template-columns:1fr 1fr; gap:4px; }
+  .session-selectors label + label { border-left:0; }
+  .session-selectors label:nth-child(even) { border-left:1px solid #c9ac7145; }
+  .feedback-stack { top:137px; }
+  .map-legend { gap:9px 15px; }
+}
+@container game (max-width:760px) and (max-height:700px) {
+  .title-screen { padding:52px 18px 52px; }
+  .game-title { font-size:52px; }
+  .title-lockup { margin-bottom:15px; }
+  .session-selectors { margin-top:12px; }
+  .feedback-stack { top:118px; }
+}
+@container game (min-width:480px) and (max-height:400px) {
+  .session-selectors { grid-template-columns:1.15fr 1fr 1fr .7fr; }
+  .title-screen { padding-top:12px; padding-bottom:12px; }
+  .game-title { font-size:36px; }
+  .session-selectors select { min-height:30px; }
+  .feedback-stack { top:78px; }
+}
+

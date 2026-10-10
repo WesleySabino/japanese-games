@@ -2,9 +2,9 @@
 
 **Catalogue ID:** 01.
 **Status:** implemented; see also [README.md](./README.md).
-**Source:** [original brainstorm](../brainstorm-minijogos-japones.md), section 1, game 1.
+**Source:** [original brainstorm](../planejamento/brainstorm-minijogos-japones.md), section 1, game 1.
 
-The 14 fields below are an English translation of the complete original catalogue entry, including its examples, risks, and caveats. Proposed improvements are kept separately in [REVIEW.md](./REVIEW.md) and have not been applied to the game.
+The 14 fields below are an English translation of the complete original catalogue entry, including its examples, risks, and caveats. [REVIEW.md](./REVIEW.md) preserves the subsequent design review. The implementation was updated on 2026-10-09; see [README.md](./README.md) for current behavior and the [completed improvements](./LEARNING_IMPROVEMENTS.md) for verification.
 
 This specification also depends on the brainstorm's shared guidelines: section 0 (principles), section 2 (curriculum), section 3 (learner model), section 5.2 (interface and data), and sections 5.4–5.7 (variation, scaffolding, errors, and progression). The [project index](../README.md) records the proposed shared implementation decisions.
 

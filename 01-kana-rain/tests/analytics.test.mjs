@@ -155,6 +155,7 @@ test('event allowlist rejects arbitrary names, values, and extra learner fields'
   assert.equal(b.events().length, before);
   assert.equal(b.api.track('practice_start', { practice_mode: 'spaced_review' }), true);
   assert.equal(b.api.track('practice_complete', { practice_mode: 'hira', completion_reason: 'timer_elapsed' }), true);
+  assert.equal(b.api.track('practice_complete', { practice_mode: 'hira', completion_reason: 'practice_set_complete' }), true);
   assert.equal(b.api.track('app_open', { target_app: 'core' }), true);
   const event = b.events().at(-1)[2];
   assert.equal(event.site_app, 'rain');
