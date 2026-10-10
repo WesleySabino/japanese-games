@@ -10,8 +10,15 @@
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
   const panelOrigins=new Map();
+  let progressDirty=true,keyboardSignature=null,fieldSize={width:0,height:0};
   const mobile=()=>matchMedia('(pointer:coarse)').matches || innerWidth<=650;
   const running=()=>G && !G.over;
+  function stopLoop(){cancelAnimationFrame(raf);raf=0;}
+  function wakeLoop(){if(!raf&&running()&&!document.hidden&&(G.countingDown||(!G.paused&&!G.awaitingFeedback)))raf=requestAnimationFrame(loop);}
+  function syncAnimationState(){document.body.classList.toggle('game-paused',document.hidden||!!(running()&&(G.paused||G.countingDown||G.awaitingFeedback)));}
+  function textIfChanged(el,value){value=String(value);if(el.textContent!==value)el.textContent=value;}
+  function invalidateProgress(){progressDirty=true;renderProgress();}
+  function renderProgress(force=false){if(force||progressDirty&&$('progressDialog').open){renderMap();renderUnlocks(mapScript);progressDirty=false;}}
   function focusAnswer(){if(!running() || G.paused || G.countingDown)return;$('answer').inputMode=mobile()&&keyboardOpen?'none':'text';$('answer').focus({preventScroll:true});}
   function closeDialogs(){document.querySelectorAll('dialog.game-dialog[open]').forEach(d=>d.close());}
   function openPanel(id){
@@ -23,6 +30,7 @@
     if(id==='progressDialog'){$('gardenContext').textContent=running()?'GAME PAUSED':'ONE DROP AT A TIME';exposeReference();}
     if(id==='settingsDialog')$('settingsNote').textContent=running()?'Your current session is paused. Session options unlock when it finishes.':'Small, steady steps. Progress stays on this device when storage is available.';
     $(id).showModal();
+    if(id==='progressDialog')renderProgress(true);
     $(id).querySelector('.dialog-close')?.focus({preventScroll:true});
     $(id).querySelector('.dialog-panel').scrollTop=0;
   }
@@ -40,6 +48,7 @@
     closeDialogs();$('welcome').classList.remove('hidden');$('gameHud').classList.add('hidden');$('answerDock').classList.add('hidden');
     document.body.classList.remove('is-playing');document.body.classList.add('is-menu');
     keyboardOpen=false;keyboardOverride=null;keyboard();enableSetup(true);$('fieldSpirit').className='spirit idle';document.body.classList.remove('low-hearts','heart-hit');$('heartLoss').classList.add('hidden');$('startBtn').focus({preventScroll:true});
+    syncAnimationState();
     exposeLesson();
   }
   function showPause(){
@@ -134,7 +143,7 @@
     $('unlockNote').textContent=explore?'Exploration: all kana are available. Word features are introduced before use.':'Each unlocked kana needs 2 independent first-answer successes and at least 85% accuracy on independent first answers. Reference help stays marked until 60 seconds and two other items have passed. This is a practice estimate.';
     const next=D.rowsOrder[count];$('milestone').textContent=next?'Meet '+(rowNames[next]||next.toUpperCase()+'-row'):'Your whole kana garden';
     $('milestoneKana').textContent=next?D.kana.filter(k=>k.script===sc && k.row===next).map(k=>k.char).join(' '):'Keep your reading growing';
-    renderMap();renderUnlocks(sc);renderBest();renderEffects();
+    invalidateProgress();renderBest();renderEffects();
   }
   function renderMap(){
     const items=D.kana.filter(k=>k.script===mapScript), available=new Set(unlocked(mapScript).map(k=>k.id));
@@ -144,7 +153,7 @@
     $('totalLearned').textContent=D.kana.filter(k=>L.mastery(k.id,FACET)>=.55).length;
   }
   function enableSetup(value){for(const id of ['mode','settingsMode','difficultySelect','durationSelect','practiceSelect','settingsPracticeSelect'])$(id).disabled=!value;document.querySelectorAll('[data-difficulty],[data-duration]').forEach(b=>b.disabled=!value);$('startBtn').disabled=!value;if(value)renderMenu();}
-  function cancelCountdown(){if(G)G.countingDown=false;$('countdownOverlay').classList.add('hidden');}
+  function cancelCountdown(){if(G)G.countingDown=false;$('countdownOverlay').classList.add('hidden');stopLoop();}
   function scriptFormat(d){return d?.responseFormat||'romaji';}
   function needsScriptIntro(d){return d?.kanaOnly && !gd.scriptIntro?.[scriptFormat(d)];}
   function introduceScript(d){
@@ -160,12 +169,13 @@
   function beginCountdown(title='Ready for the rain?'){
     if(!running())return;
     if(G.pendingFeatures?.length){introduceFeature();return;}
-    if(G.awaitingFeedback){G.paused=false;scheduleFeedback();$('continueFeedbackBtn').focus({preventScroll:true});return;}
+    if(G.awaitingFeedback){G.paused=false;stopLoop();syncAnimationState();scheduleFeedback();$('continueFeedbackBtn').focus({preventScroll:true});return;}
     if(needsScriptIntro(G.target)){introduceScript(G.target);return;}
     if(!G.paused){G.paused=true;G.pauseAt=performance.now();}
     G.countingDown=true;G.countdownEnd=performance.now()+3000;G.countdownValue=3;
     $('countdownTitle').textContent=title;$('countdownNumber').textContent='3';$('countdownOverlay').classList.remove('hidden');
     $('answer').disabled=true;$('submitBtn').disabled=true;$('skipCountdown').focus({preventScroll:true});sfx('tick');
+    syncAnimationState();wakeLoop();
   }
   function completeCountdown(){
     if(!running()||!G.countingDown)return;cancelCountdown();
@@ -175,10 +185,11 @@
     scheduleFeedback();
     // Count real gameplay once; countdowns on pause/resume are not new sessions.
     if(!G.analyticsStarted){G.analyticsStarted=true;window.NihongoAnalytics?.track('practice_start',{practice_mode:G.reviewIds?'review':G.mode});}
+    syncAnimationState();wakeLoop();
   }
   function start(options={}){
     if(G&&!G.over)return;
-    cancelAnimationFrame(raf);clearTimeout(feedbackTimer);clearTimeout(milestoneTimer);clearTimeout(heartTimer);feedbackPriority=-1;feedbackUntil=0;currentFeedback=null;feedbackQueue=[];
+    stopLoop();clearTimeout(feedbackTimer);clearTimeout(milestoneTimer);clearTimeout(heartTimer);feedbackPriority=-1;feedbackUntil=0;currentFeedback=null;feedbackQueue=[];
     $('feedback').className='feedback';$('milestoneFeedback').className='milestone-feedback';$('heartLoss').classList.add('hidden');document.body.classList.remove('heart-hit');$('field').querySelectorAll('.drop,.effect').forEach(e=>e.remove());
     $('continueFeedbackBtn').classList.add('hidden');
     const profile=cfg.playStyle==='practice'?R.practiceProfile:R.profiles[cfg.difficulty],weather=R.atTime(cfg.difficulty,0,cfg.playStyle);
@@ -194,7 +205,7 @@
     $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana',mix:'Mixed scripts',pair:'Script pairs',words:'Little words'}[cfg.mode]);
     $('personalBest').textContent=(G.reviewIds?'Review best · ':'Best · ')+G.previousBest;
     $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOverride=null;keyboardOpen=mobile();keyboard();focusAnswer();
-    if(G.pendingFeatures.length)introduceFeature();else initializeRounds();raf=requestAnimationFrame(loop);
+    fitField();if(G.pendingFeatures.length)introduceFeature();else initializeRounds();syncAnimationState();wakeLoop();
   }
   function introduceFeature(){
     if(!running()||!G.pendingFeatures.length)return;cancelCountdown();pause(true,false);const f=D.features.find(x=>x.id===G.pendingFeatures[0]);
@@ -230,26 +241,27 @@
   }
   function spawn(entry,xHint){
     if(!entry)return;
-    const round=generateRound(entry),view=render($('field'),round),w=view.el.offsetWidth,h=view.el.offsetHeight,W=$('field').clientWidth;
+    const round=generateRound(entry),view=render($('field'),round),w=view.el.offsetWidth,h=view.el.offsetHeight,W=fieldSize.width;
     let x=xHint;
     if(x==null){for(let tries=0;tries<10;tries++){x=12+Math.random()*Math.max(1,W-w-24);if(!G.drops.some(d=>d.y<110 && Math.abs(d.x-x)<w+8))break;}}
     x=Math.max(5,Math.min(W-w-5,x));
     const prior=L.assistanceFor?.(round.id,round.facet)||{assisted:false,reasons:[]};
     const d={...round,...view,hint:view.hint||prior.assisted,roundId:`${G.sessionId}:r:${++G.roundSerial}`,attemptCount:0,assistanceReasons:new Set([...(view.hint?['initial-reading']:[]),...(prior.assisted?prior.reasons:[])]),firstResponseMs:null,x,y:8,progress:0,w,h,wrong:0,v:1,born:performance.now(),pausedMs:0};
-    if(!L.state(d.id))G.newIds.add(d.id);G.drops.push(d);if(view.hint)exposeReading(d.id,'initial-reading');place(d);if(G.target)keyboard();return d;
+    if(!L.state(d.id))G.newIds.add(d.id);G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');place(d);if(G.target)keyboard();return d;
   }
   function place(d){d.el.style.transform=`translate(${d.x}px,${d.y}px)`;}
-  function positionDrop(d,H=$('field').clientHeight){
+  function positionDrop(d,H=fieldSize.height){
     const floor=Math.max(8,H-d.h-27);
     d.y=8+d.progress*(floor-8);place(d);
   }
   function loop(now){
+    raf=0;
     if(!G||G.over)return;const dt=Math.min(.1,Math.max(0,(now-G.last)/1000));G.last=now;
     if(G.countingDown){
       const remaining=Math.ceil((G.countdownEnd-now)/1000);
       if(remaining<=0)completeCountdown();
       else if(remaining!==G.countdownValue){G.countdownValue=remaining;$('countdownNumber').textContent=remaining;sfx('tick');}
-      raf=requestAnimationFrame(loop);return;
+      wakeLoop();return;
     }
     if(!G.paused&&!G.awaitingFeedback){
       if(G.playStyle==='arcade')G.t-=dt;G.elapsed+=dt;G.sinceSpawn+=dt*1000;if(G.playStyle==='arcade'&&G.t<=0){end('Session complete','timer_elapsed');return;}
@@ -261,20 +273,16 @@
         if(e.partner && G.drops.length<cap){spawn({id:e.partner},d.x+d.w+8);}
         G.sinceSpawn=0;
       }
-      const H=$('field').clientHeight,W=$('field').clientWidth;
-      // Container queries can resize a sprite after the field observer has fired.
-      // Read all sprite sizes together before writing transforms so orientation changes are safe.
-      const sizes=G.drops.map(d=>({d,w:d.el.offsetWidth,h:d.el.offsetHeight}));
-      sizes.forEach(({d,w,h})=>{if(d.w!==w||d.h!==h){d.w=w;d.h=h;d.x=Math.max(5,Math.min(d.x,W-w-5));}});
+      const H=fieldSize.height;
       [...G.drops].forEach(d=>{if(G.over)return;d.progress+=G.speed*d.v*dt;
         if(d.progress>=1){miss(d);return;}positionDrop(d,H);
-        const danger=d.progress>=.78;d.el.classList.toggle('danger',danger);
+        const danger=d.progress>=.78;if(d.danger!==danger){d.danger=danger;d.el.classList.toggle('danger',danger);}
         if(danger&&!d.warned){d.warned=true;if(G.elapsed-G.lastWarning>=3){sfx('warning');G.lastWarning=G.elapsed;}}
       });
-      $('field').querySelector('.waterline').classList.toggle('danger-active',G.drops.some(d=>d.progress>=.78));
-      updateTarget();$('time').textContent=G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t);
+      const danger=G.drops.some(d=>d.progress>=.78);if(G.dangerActive!==danger){G.dangerActive=danger;$('field').querySelector('.waterline').classList.toggle('danger-active',danger);}
+      updateTarget();textIfChanged($('time'),G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t));
     }
-    if(!G.over)raf=requestAnimationFrame(loop);
+    wakeLoop();
   }
   function lowest(){return G?.drops.reduce((a,b)=>!a||b.y>a.y?b:a,null);}
   function prepareAnswerFormat(format){
@@ -302,7 +310,7 @@
     const prior=L.assistanceFor?.(d.id,d.facet)||{assisted:false,reasons:[],delaySinceExposureMs:null};
     const reasons=[...d.assistanceReasons,...(prior.assisted?prior.reasons:[])];
     if(d.wrong)reasons.push('previous-incorrect-attempt');
-    const ev=score(d,{...detail,correct,sessionId:G.sessionId,roundId:d.roundId,attemptId:`${d.roundId}:a:${++d.attemptCount}`,firstAttempt,assistance:reasons.length>0,assistanceReasons:[...new Set(reasons)],firstResponseMs:d.firstResponseMs,inputActiveMs,displayActiveMs,waitMs:inputActiveMs==null?null:Math.max(0,displayActiveMs-inputActiveMs),delaySinceExposureMs:prior.delaySinceExposureMs})[0];
+    const ev=score(d,{...detail,deferSave:true,correct,sessionId:G.sessionId,roundId:d.roundId,attemptId:`${d.roundId}:a:${++d.attemptCount}`,firstAttempt,assistance:reasons.length>0,assistanceReasons:[...new Set(reasons)],firstResponseMs:d.firstResponseMs,inputActiveMs,displayActiveMs,waitMs:inputActiveMs==null?null:Math.max(0,displayActiveMs-inputActiveMs),delaySinceExposureMs:prior.delaySinceExposureMs})[0];
     L.record(ev.itemId,ev.facet,ev);G.events.push(ev);G.inputStartedAt=null;G.inputPausedMs=0;
     if(detail.outcome!=='timeout'){G.attempts++;if(correct){G.correct++;G.rts.push(displayActiveMs);}}
     const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
@@ -310,7 +318,7 @@
     L.flush();G.recent.push(correct?1:0);if(G.recent.length>12)G.recent.shift();return ev;
   }
   function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
-  function remove(d,pop=false){G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
+  function remove(d,pop=false){dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
   function hit(d){
     const ev=record(d,true,{response:d.submittedResponse,reason:'accepted'});G.streak=d.wrong?0:G.streak+1;G.score+=Math.round((ev.assistance?5:10)*(1+Math.min(G.streak,10)*.1)*(d.wrong?.3:1));
     G.bestStreak=Math.max(G.bestStreak,G.streak);
@@ -319,7 +327,7 @@
     if(!G.bestBeaten&&G.previousBest>0&&G.score>G.previousBest){G.bestBeaten=true;celebrate('New personal best!','record');}
     else if([5,10,20].includes(G.streak))celebrate(`${G.streak} in a row!`);
     $('personalBest').textContent=(G.reviewIds?'Review best · ':'Best · ')+Math.max(G.previousBest,G.score);
-    effect(d,'splash');spirit('happy');remove(d,true);checkUnlock();if(G.playStyle==='practice')finishPracticeOpportunity(false);hud();renderMap();renderUnlocks(mapScript);updateTarget();
+    effect(d,'splash');spirit('happy');remove(d,true);checkUnlock();if(G.playStyle==='practice')finishPracticeOpportunity(false);hud();invalidateProgress();updateTarget();
   }
   function confusionFor(d,text){
     const format=d.responseFormat;
@@ -337,9 +345,9 @@
     const reading=d.id.startsWith('w:')?D.toRomaji(symbol(d.id)):k.romaji;
     if(G.playStyle==='practice')G.awaitingFeedback=true;
     flash(`${symbol(d.id)} = ${reading}${d.kanaOnly?' → '+opposite(k).char:''}. You typed ${text}${chosen?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
-    if(G.playStyle==='practice'){remove(d);finishPracticeOpportunity(true);hud();renderMap();renderUnlocks(mapScript);updateTarget();return;}
+    if(G.playStyle==='practice'){remove(d);finishPracticeOpportunity(true);hud();invalidateProgress();updateTarget();return;}
     if(chosen && (G.reviewIds||candidates()).includes(chosen.id)){G.confs.add(d.id+'|'+chosen.id);G.queue=G.queue.filter(e=>e.id!==d.id && e.id!==chosen.id);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id,partner:chosen.id});}
-    else G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();renderMap();renderUnlocks(mapScript);
+    else G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
   }
   function miss(d){
     if(G.over||!G.drops.includes(d))return;record(d,null,{outcome:'timeout',reason:'timeout'});G.missed.add(d.id);if(G.playStyle==='arcade')G.lives--;G.streak=0;
@@ -349,12 +357,12 @@
     if(G.playStyle==='practice'){spirit('worried');remove(d);finishPracticeOpportunity(true);hud();updateTarget();return;}
     clearTimeout(heartTimer);document.body.classList.remove('heart-hit');void $('heartLoss').offsetWidth;document.body.classList.add('heart-hit');$('heartLoss').classList.remove('hidden');
     sfx('heart');heartTimer=setTimeout(()=>{document.body.classList.remove('heart-hit');$('heartLoss').classList.add('hidden');},900);
-    spirit('worried');effect(d,'ripple');remove(d);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();renderUnlocks(mapScript);
+    spirit('worried');effect(d,'ripple');remove(d);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
     if(G.lives===0)end(`All ${G.totalLives} ${G.totalLives===1?'heart':'hearts'} lost · ${R.profiles[G.difficulty].name}`,'hearts_lost');
   }
   function finishPracticeOpportunity(needsConfirmation){
     G.practiceCompleted++;G.awaitingFeedback=needsConfirmation;
-    if(needsConfirmation){$('answer').disabled=true;$('submitBtn').disabled=true;$('continueFeedbackBtn').classList.remove('hidden');$('continueFeedbackBtn').focus({preventScroll:true});}
+    if(needsConfirmation){stopLoop();syncAnimationState();$('answer').disabled=true;$('submitBtn').disabled=true;$('continueFeedbackBtn').classList.remove('hidden');$('continueFeedbackBtn').focus({preventScroll:true});}
     else if(G.practiceCompleted>=G.practiceTotal)end('Eight practice opportunities complete','practice_set_complete');
   }
   function continueFeedback(){
@@ -382,7 +390,7 @@
   }
   function hud(){
     $('score').textContent=String(G.score).padStart(3,'0');$('streak').textContent=G.streak>1?'×'+G.streak:'—';
-    $('time').textContent=G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t);
+    textIfChanged($('time'),G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t));
     const caption=$('time').parentElement?.querySelector('small');if(caption)caption.textContent=G.playStyle==='practice'?'ITEMS':'TIME';
     $('lives').classList.toggle('hidden',G.playStyle==='practice');$('lives').textContent=G.playStyle==='practice'?'':'♥ '.repeat(G.lives)+'♡ '.repeat(G.totalLives-G.lives);
     $('lives').setAttribute('aria-label',G.playStyle==='practice'?'Practice has no hearts':`${G.lives} of ${G.totalLives} hearts remaining`);document.body.classList.toggle('low-hearts',G.playStyle==='arcade'&&G.lives===1);
@@ -390,15 +398,16 @@
   function pause(value=(G?.countingDown||!G?.paused),showDialog=true){
     if(!running())return;
     if(value)cancelCountdown();
-    if(G.paused===value){if(value&&showDialog&&!document.querySelector('dialog[open]'))showPause();return;}
+    if(G.paused===value){if(value){stopLoop();syncAnimationState();if(showDialog&&!document.querySelector('dialog[open]'))showPause();}return;}
     if(value){if(currentFeedback&&!G.awaitingFeedback)currentFeedback.ms=Math.max(0,feedbackUntil-performance.now());clearTimeout(feedbackTimer);G.paused=true;G.pauseAt=performance.now();A.stop();spirit('sleep');$('pauseHint').textContent='';if(showDialog){closeDialogs();showPause();}}
     else{
       if($('pauseOverlay').open)$('pauseOverlay').close();
       beginCountdown('Ready to continue?');
     }
     G.last=performance.now();
+    if(value)stopLoop();syncAnimationState();
   }
-  function dispose(){cancelCountdown();cancelAnimationFrame(raf);A.stop();feedbackQueue=[];clearFeedback();if(G){G.over=true;G.drops.forEach(d=>d.el.remove());G.drops=[];}L.flush();}
+  function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}syncAnimationState();L.flush();}
   function end(reason,completionReason='manual_finish'){
     if(!G||G.over)return;
     const key=G.bestKey,first=G.events.filter(e=>e.firstAttempt&&e.outcome!=='timeout'),independent=first.filter(e=>!e.assistance),independentCorrect=independent.filter(e=>e.correct),helpCorrect=G.events.filter(e=>e.correct&&e.assistance),expired=G.events.filter(e=>e.outcome==='timeout');
@@ -432,6 +441,7 @@
     // Pair mode can use hiragana counterparts even when katakana has progressed farther.
     if(kana){candidates().forEach(id=>{const k=D.kanaById[id];if(k){const c=opposite(k).char;if(!pool.includes(c))pool.push(c);}});}
     $('keyboard').classList.toggle('letters',!kana);
+    const signature=JSON.stringify([kana,kana?pool:[]]);if(signature===keyboardSignature)return;keyboardSignature=signature;
     const activeKey=$('keyboard').contains(document.activeElement)?document.activeElement.dataset.key:null;
     const key=c=>`<button type="button" data-key="${escapeText(c)}">${escapeText(c)}</button>`;
     const actions='<button type="button" class="wide" data-key="backspace">Delete</button><button type="button" class="wide" data-key="enter">Enter ↵</button>';
@@ -477,20 +487,25 @@
     if(e.key==='Escape'&&running()){e.preventDefault();pause();}
     else if(e.key==='Enter'&&!running()&&!['SELECT','BUTTON','INPUT'].includes(e.target.tagName)){e.preventDefault();start();}
   });
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause(true);});
-  let previousField={width:0,height:0};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){pause(true);stopLoop();}syncAnimationState();});
   function fitField(){
     const W=$('field').clientWidth,H=$('field').clientHeight;
     if(running())G.drops.forEach(d=>{
-      d.w=d.el.offsetWidth;d.h=d.el.offsetHeight;
-      if(previousField.width)d.x=d.x*W/previousField.width;
+      if(fieldSize.width)d.x=d.x*W/fieldSize.width;
       d.x=Math.max(5,Math.min(d.x,W-d.w-5));positionDrop(d,H);
     });
-    previousField={width:W,height:H};
+    fieldSize={width:W,height:H};
   }
+  // Container queries and font changes can resize drops without changing the field.
+  // Observe those changes once, rather than reading every sprite in every frame.
+  const dropResizeObserver=new ResizeObserver(entries=>{
+    if(!running())return;
+    const sizes=entries.map(entry=>{const d=G.drops.find(d=>d.el===entry.target);return d?{d,w:d.el.offsetWidth,h:d.el.offsetHeight}:null;}).filter(Boolean);
+    sizes.forEach(({d,w,h})=>{if(d.w!==w||d.h!==h){d.w=w;d.h=h;d.x=Math.max(5,Math.min(d.x,fieldSize.width-w-5));positionDrop(d);}});
+  });
   function syncViewport(){const v=window.visualViewport;document.documentElement.style.setProperty('--viewport-height',(v?.height||innerHeight)+'px');document.documentElement.style.setProperty('--viewport-top',(v?.offsetTop||0)+'px');}
   syncViewport();window.addEventListener('resize',syncViewport);window.visualViewport?.addEventListener('resize',syncViewport);window.visualViewport?.addEventListener('scroll',syncViewport);
-  new ResizeObserver(fitField).observe($('field'));
+  new ResizeObserver(fitField).observe($('field'));fitField();
   new ResizeObserver(()=>document.documentElement.style.setProperty('--dock-height',$('answerDock').getBoundingClientRect().height+'px')).observe($('answerDock'));
   renderMenu();renderSound();exposeLesson();
   let storageWarning=false;

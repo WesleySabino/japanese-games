@@ -1,6 +1,6 @@
 {
   "name": "kana-rain",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "description": "An immersive, offline-first kana reading game with progressive rain and difficulty-based hearts",
   "scripts": {
@@ -9,6 +9,7 @@
     "test:analytics": "node --test tests/analytics.test.mjs tests/analytics-game.test.mjs",
     "test:browser": "node tests/browser.cjs",
     "test:improvements": "node tests/improvements.browser.cjs",
+    "test:performance": "node --test tests/runtime-performance.test.cjs tests/production-performance.test.cjs",
     "assets": "node scripts/prepare-assets.cjs",
     "build": "node scripts/build.cjs"
   },

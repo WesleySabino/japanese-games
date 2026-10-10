@@ -6,6 +6,8 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..'),rootReal=fs.realpathSync(root),output=path.resolve(root,'dist');
 const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','privacy.html','manifest.webmanifest','sw.js'];
 const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js','assets/nihongo-analytics.js','assets/nihongo-analytics.css'];
+const CORE_FILES=SOURCE_FILES.filter(file=>file.startsWith('src/')&&file.endsWith('.js'));
+const RUNTIME_FILE='assets/game-runtime.js';
 const IMAGE_FILES=[
   'assets/garden.webp','assets/social-garden.png','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp',
   'assets/splash.webp','assets/ripple.webp','assets/icon.png',
@@ -13,7 +15,7 @@ const IMAGE_FILES=[
   'assets/spirit-atlas.png','assets/water-atlas.png'
 ];
 const AUDIO_METADATA=[
-  'kana-audio-bundle/manifest.json','kana-audio-bundle/original-manifest.json',
+  'kana-audio-bundle/runtime-manifest.json','kana-audio-bundle/manifest.json','kana-audio-bundle/original-manifest.json',
   'kana-audio-bundle/LICENSE-AUDIO.txt','kana-audio-bundle/LICENSE-MIT.txt',
   'kana-audio-bundle/PROVENANCE.md'
 ];
@@ -53,8 +55,8 @@ function validateCss(text,from,allowed){
   }
   for(const match of css.matchAll(/@import\s+(['"])([^'"]+)\1/gi))validateReference(match[2],from,allowed);
 }
-function validateHtml(file,allowed){
-  const html=read(file).replace(/<!--[\s\S]*?-->/g,'');
+function validateHtml(file,allowed,contents=read(file)){
+  const html=contents.replace(/<!--[\s\S]*?-->/g,'');
   for(const match of html.matchAll(/\b(?:src|href|poster)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>\x60]+))/gi)){
     validateReference(match[1]??match[2]??match[3],file,allowed);
   }
@@ -64,6 +66,23 @@ function validateHtml(file,allowed){
   }
   validateCss(html,file,allowed);
 }
+function inlineGameStyles(html,gameCss,analyticsCss){
+  // A single compressed document avoids two render-blocking network round trips.
+  // Rebase CSS image URLs because inline styles are resolved relative to index.html.
+  const css=gameCss.replace(/url\(\s*(['"]?)([^)'"\s]+)\1\s*\)/gi,(match,quote,value)=>{
+    const file=localReference(value,'src/style.css');
+    return file?'url('+JSON.stringify(file)+')':match;
+  });
+  return html.replace(/<link\b[^>]*\bhref="src\/style\.css"[^>]*>/i,()=>'<style data-game-styles>\n'+css+'\n</style>')
+    .replace(/<link\b[^>]*\bhref="\/assets\/nihongo-analytics\.css"[^>]*>/i,()=>'<style data-analytics-styles>\n'+analyticsCss+'\n</style>');
+}
+function productionHtml(file){
+  const html=read(file);
+  if(file!=='index.html')return html;
+  let output=inlineGameStyles(html,read('src/style.css'),read('assets/nihongo-analytics.css'));
+  for(const [index,source] of CORE_FILES.entries())output=output.replace('<script defer src="'+source+'"></script>',index===0?'<script defer src="'+RUNTIME_FILE+'"></script>':'');
+  return output;
+}
 function productionPlan(){
   const audioManifest=JSON.parse(read('kana-audio-bundle/manifest.json'));
   if(!audioManifest.byKana||!Object.keys(audioManifest.byKana).length)throw new Error('Audio manifest has no recordings');
@@ -71,11 +90,14 @@ function productionPlan(){
   for(const recording of recordings){
     if(typeof recording!=='string'||!/^audio\/[a-z0-9-]+\.mp3$/i.test(recording))throw new Error('Invalid audio recording path: '+recording);
   }
-  const files=[...ROOT_FILES,...SOURCE_FILES,...IMAGE_FILES,...AUDIO_METADATA,...recordings.map(file=>'kana-audio-bundle/'+file)].sort();
+  const runtime=CORE_FILES.map(file=>'/* '+file+' */\n'+read(file)+'\n;').join('\n');
+  const files=[...ROOT_FILES,...SOURCE_FILES,RUNTIME_FILE,...IMAGE_FILES,...AUDIO_METADATA,...recordings.map(file=>'kana-audio-bundle/'+file)].sort();
   const allowed=new Set(files);
   if(allowed.size!==files.length)throw new Error('Duplicate production file in allowlist');
-  const entries=files.map(file=>({file,...sourceFile(file)}));
-  for(const file of ROOT_FILES.filter(file=>file.endsWith('.html')))validateHtml(file,allowed);
+  const entries=files.map(file=>file===RUNTIME_FILE?{file,generated:runtime,bytes:Buffer.byteLength(runtime)}:{file,...sourceFile(file),...(file==='index.html'?{bytes:Buffer.byteLength(productionHtml(file))}:{})});
+  const runtimeManifest=JSON.parse(read('kana-audio-bundle/runtime-manifest.json'));
+  if(JSON.stringify(runtimeManifest.byKana)!==JSON.stringify(audioManifest.byKana))throw new Error('Runtime pronunciation lookup is stale');
+  for(const file of ROOT_FILES.filter(file=>file.endsWith('.html')))validateHtml(file,allowed,productionHtml(file));
   for(const file of SOURCE_FILES.filter(file=>file.endsWith('.css')))validateCss(read(file),file,allowed);
   const manifest=JSON.parse(read('manifest.webmanifest'));
   validateReference(manifest.start_url||'./','manifest.webmanifest',allowed);
@@ -94,15 +116,18 @@ function build(plan){
   }
   fs.rmSync(output,{recursive:true,force:true});
   fs.mkdirSync(output);
-  for(const {file,absolute} of plan.entries){
+  for(const {file,absolute,generated} of plan.entries){
     const destination=path.resolve(output,file);
     if(!inside(output,destination))throw new Error('Output path leaves dist: '+file);
     fs.mkdirSync(path.dirname(destination),{recursive:true});
-    fs.copyFileSync(absolute,destination);
+    if(generated!==undefined)fs.writeFileSync(destination,generated);
+    else if(file==='index.html')fs.writeFileSync(destination,productionHtml(file));
+    else fs.copyFileSync(absolute,destination);
   }
 }
 
-try{
+module.exports={inlineGameStyles,productionHtml,productionPlan};
+if(require.main===module)try{
   if(process.argv.slice(2).some(arg=>arg!=='--check'))throw new Error('Usage: node scripts/build.cjs [--check]');
   const plan=productionPlan(),check=process.argv.includes('--check');
   if(!check)build(plan);

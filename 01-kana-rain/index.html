@@ -47,6 +47,7 @@
   </script>
   <link rel="icon" href="assets/icon.png">
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preload" href="assets/garden.webp" as="image" fetchpriority="high">
   <link rel="stylesheet" href="src/style.css">
   <script defer src="src/data.js"></script>
   <script defer src="src/learner.js"></script>
@@ -92,7 +93,7 @@
         <button id="pauseBtn" class="hud-button" aria-label="Pause game" title="Pause (Esc)"><svg class="control-icon" aria-hidden="true"><use href="#icon-pause"/></svg></button>
       </div>
     </header>
-    <div id="field" class="playfield" aria-label="Falling kana">
+    <div id="field" class="playfield" role="group" aria-label="Falling kana">
       <div class="waterline" aria-hidden="true"></div>
     </div>
     <div id="fieldSpirit" class="spirit idle" aria-hidden="true"></div>

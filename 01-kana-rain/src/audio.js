@@ -1,7 +1,7 @@
 /* Every pronunciation comes from the supplied manifest. No synthesized browser speech. */
 (function (root) {
   'use strict';
-  const manifestUrl = new URL('../kana-audio-bundle/manifest.json', document.currentScript.src);
+  const manifestUrl = new URL('../kana-audio-bundle/runtime-manifest.json', document.currentScript.src);
   let pack = null, enabled = true, current = null, generation = 0;
   const ready = fetch(manifestUrl).then(r => { if(!r.ok) throw new Error('Audio manifest unavailable'); return r.json(); }).then(p => {pack=p; return p;}).catch(() => null);
   function stop() { generation++; if(current) {current.pause(); current.onended = null;} current=null; }

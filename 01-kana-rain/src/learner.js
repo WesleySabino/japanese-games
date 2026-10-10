@@ -3,6 +3,7 @@
 (function(root){
 'use strict';
 var KEY='jp-learner-v1',DAY=86400000,MIN=60000,mem,db=null,store=null,revision=0,listeners=[];
+var attemptIds=new Set(),exposureIds=new Set();
 var status={state:'checking',saved:false,backend:null,journal:false,indexedDB:false,revision:0};
 var clamp=function(x,a,b){return Math.max(a,Math.min(b,x));};
 function publish(next){status=Object.assign({},status,next);listeners.slice().forEach(function(fn){try{fn(Object.assign({},status));}catch(e){}});return status;}
@@ -45,8 +46,9 @@ mem=d;mem.errorLog=[];
 Object.keys(d.items).forEach(function(id){var s=d.items[id],base=s.legacyFacets||{};s.facets={};s.confusions={};s.confusionsByFacet={};s.scaffold=s.scaffold||{romaji:true};s.flags=s.flags||{};s.exposures=0;
 Object.keys(base).forEach(function(name){var old=base[name];s.facets[name]=Object.assign(facet(old.lastReview||Date.now()),old,{unaided:0,independentFirstCorrect:0,independentFirstAttempts:0,firstAttempts:0,firstCorrect:0,assistedCorrect:0,unknownCorrect:old.correct||0,timeouts:0,legacyAssistance:'unknown'});});
 });
-var seen=new Set();d.attemptLedger=(d.attemptLedger||[]).filter(function(ev){if(!ev||!ev.attemptId||seen.has(ev.attemptId)||!ev.itemId||!ev.facet)return false;seen.add(ev.attemptId);apply(ev);return true;});
+attemptIds=new Set();exposureIds=new Set();d.attemptLedger=(d.attemptLedger||[]).filter(function(ev){if(!ev||!ev.attemptId||attemptIds.has(ev.attemptId)||!ev.itemId||!ev.facet)return false;attemptIds.add(ev.attemptId);apply(ev);return true;});
 d.exposureLedger=Array.isArray(d.exposureLedger)?d.exposureLedger:[];
+d.exposureLedger.forEach(function(ev){if(ev&&ev.exposureId)exposureIds.add(ev.exposureId);});
 if(d.errorLog.length>500)d.errorLog=d.errorLog.slice(-500);return d;
 }
 try{store=root.localStorage;store.setItem('__t','1');store.removeItem('__t');}catch(e){store=null;}
@@ -63,14 +65,14 @@ read.onsuccess=function(){if(!done&&read.result&&(read.result.updatedAt||0)>(mem
 };
 });
 function flush(){
-var token=++revision,journalOK=false;mem.updatedAt=Date.now();var snapshot=JSON.parse(JSON.stringify(mem));
+var token=++revision,journalOK=false;mem.updatedAt=Date.now();var serialized=JSON.stringify(mem);
 publish({state:'saving',saved:false,revision:token});
-if(store)try{store.setItem(KEY,JSON.stringify(snapshot));journalOK=true;}catch(e){}
+if(store)try{store.setItem(KEY,serialized);journalOK=true;}catch(e){}
 if(journalOK)publish({state:'saving',saved:true,backend:'journal',journal:true,indexedDB:false,revision:token});
 return new Promise(function(resolve){
 var settled=false;function finish(idbOK){if(settled)return;settled=true;var result={state:journalOK||idbOK?'saved':'unsaved',saved:journalOK||idbOK,backend:journalOK&&idbOK?'journal+indexedDB':journalOK?'journal':idbOK?'indexedDB':null,journal:journalOK,indexedDB:idbOK,revision:token};if(token===revision)publish(result);resolve(result);}
 if(!db){finish(false);return;}
-try{var tx=db.transaction('learner','readwrite');tx.oncomplete=function(){finish(true);};tx.onerror=tx.onabort=function(){finish(false);};tx.objectStore('learner').put(snapshot,KEY);}catch(e){finish(false);}
+try{var snapshot=JSON.parse(serialized),tx=db.transaction('learner','readwrite');tx.oncomplete=function(){finish(true);};tx.onerror=tx.onabort=function(){finish(false);};tx.objectStore('learner').put(snapshot,KEY);}catch(e){finish(false);}
 });
 }
 function nextId(prefix){mem.sequence++;return prefix+':'+mem.created+':'+mem.sequence;}
@@ -79,16 +81,16 @@ function beginSession(gameId){var id=nextId(gameId+':session');flush();return id
 // This conservative bookkeeping rule does not prove long-term retention.
 function assistanceFor(id,name,now){var r=mem.reveals[id+'|'+name],delay=r?Math.max(0,(now??Date.now())-r.at):null,assisted=!!r&&(delay<MIN||r.intervening.length<2);return {assisted:assisted,reasons:assisted?['recent-'+r.reason]:[],lastExposureReason:r?r.reason:null,delaySinceExposureMs:delay,interveningItems:r?r.intervening.slice():[]};}
 function recordExposure(id,name,ev){ev=ev||{};var at=ev.now||Date.now(),entry={exposureId:ev.exposureId||nextId('exposure'),itemId:id,facet:name,at:at,reason:ev.reason||'reference',gameId:ev.gameId||'',sessionId:ev.sessionId||null,roundId:ev.roundId||null};
-if(mem.exposureLedger.some(function(x){return x.exposureId===entry.exposureId;}))return entry;
-mem.exposureLedger.push(entry);mem.reveals[id+'|'+name]=Object.assign({},entry,{intervening:[]});if(!ev.deferSave)flush();return entry;
+if(exposureIds.has(entry.exposureId))return entry;
+exposureIds.add(entry.exposureId);mem.exposureLedger.push(entry);mem.reveals[id+'|'+name]=Object.assign({},entry,{intervening:[]});if(!ev.deferSave)flush();return entry;
 }
 function record(id,name,ev){
-ev=ev||{};var attemptId=ev.attemptId||nextId('legacy-call');if(mem.attemptLedger.some(function(x){return x.attemptId===attemptId;}))return state(id,true);
+ev=ev||{};var attemptId=ev.attemptId||nextId('legacy-call');if(attemptIds.has(attemptId))return state(id,true);
 var first=ev.firstAttempt===true,assistance=typeof ev.assistance==='boolean'?ev.assistance:null;
 var entry={attemptId:attemptId,sessionId:ev.sessionId||null,roundId:ev.roundId||null,itemId:id,facet:name,responseFormat:ev.responseFormat||null,firstAttempt:first,assistance:assistance,assistanceReasons:Array.isArray(ev.assistanceReasons)?ev.assistanceReasons.slice():[],outcome:ev.outcome==='timeout'?'timeout':ev.correct?'correct':'incorrect',correct:ev.outcome==='timeout'?null:!!ev.correct,reason:ev.reason||(ev.correct?'accepted':'unrecognized-response'),at:ev.now||Date.now(),gameId:ev.gameId||'',response:ev.response==null?null:String(ev.response),chosenItemId:ev.chosenItemId||null,submittedItemId:ev.submittedItemId||null,candidateItemIds:ev.candidateItemIds||[],firstResponseMs:ev.firstResponseMs==null?(first?ev.rtMs??null:null):ev.firstResponseMs,inputActiveMs:ev.inputActiveMs??null,displayActiveMs:ev.displayActiveMs??ev.rtMs??null,waitMs:ev.waitMs??null,delaySinceExposureMs:ev.delaySinceExposureMs??null};
-mem.attemptLedger.push(entry);apply(entry);
+attemptIds.add(attemptId);mem.attemptLedger.push(entry);apply(entry);
 if(first&&entry.outcome!=='timeout')Object.keys(mem.reveals).forEach(function(key){var r=mem.reveals[key];if(r.itemId!==id&&!r.intervening.includes(id))r.intervening.push(id);});
-if(mem.errorLog.length>500)mem.errorLog.splice(0,mem.errorLog.length-500);flush();return state(id);
+if(mem.errorLog.length>500)mem.errorLog.splice(0,mem.errorLog.length-500);if(!ev.deferSave)flush();return state(id);
 }
 function priority(s,name,now){var f=s.facets[name];if(!f)return null;var R=retrievability(f,now),p=Math.max(0,.9-R)*10+f.difficulty/10*1.5,conf=0,edges=s.confusionsByFacet[name]||{};Object.keys(edges).forEach(function(k){conf+=edges[k];});p+=Math.min(3,conf)*.8+(s.flags.leech?1.5:0);if(now-s.lastError<10*MIN)p+=4;if(now-s.lastSeen<MIN/2)p-=5;return {p:p,R:R};}
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
@@ -100,6 +102,6 @@ var out=unseen.slice(0,nNew).concat(weak.slice(0,nWeak).map(function(x){return x
 for(var i=0;out.length<size&&i<rest.length;i++)if(!out.includes(rest[i].id))out.push(rest[i].id);
 if(opts.interleave!==false)out.slice().forEach(function(id){var s=state(id);if(!s)return;var graph=s.confusionsByFacet[name]||{};Object.keys(graph).forEach(function(c){if(graph[c]>=1&&!out.includes(c)&&candidates.includes(c)&&out.length<size+3)out.push(c);});});return out;
 }
-root.Learner={ready:ready,state:state,record:record,recordExposure:recordExposure,assistanceFor:assistanceFor,beginSession:beginSession,mastery:mastery,retrievability:retrievability,selectRound:selectRound,shuffle:shuffle,recentErrors:function(n){return mem.errorLog.slice(-(n||20));},gameData:function(id){return mem.games[id]||(mem.games[id]={});},save:flush,flush:flush,all:function(){return mem.items;},attempts:function(){return mem.attemptLedger.slice();},exposures:function(){return mem.exposureLedger.slice();},persistenceStatus:function(){return Object.assign({},status);},subscribePersistence:function(fn){listeners.push(fn);fn(Object.assign({},status));return function(){listeners=listeners.filter(function(x){return x!==fn;});};},export:function(){return JSON.stringify(mem);},import:function(json){restore(JSON.parse(json));return flush();},reset:function(){mem=fresh();return flush();}};
+root.Learner={ready:ready,state:state,record:record,recordExposure:recordExposure,assistanceFor:assistanceFor,beginSession:beginSession,mastery:mastery,retrievability:retrievability,selectRound:selectRound,shuffle:shuffle,recentErrors:function(n){return mem.errorLog.slice(-(n||20));},gameData:function(id){return mem.games[id]||(mem.games[id]={});},save:flush,flush:flush,all:function(){return mem.items;},attempts:function(){return mem.attemptLedger.slice();},exposures:function(){return mem.exposureLedger.slice();},persistenceStatus:function(){return Object.assign({},status);},subscribePersistence:function(fn){listeners.push(fn);fn(Object.assign({},status));return function(){listeners=listeners.filter(function(x){return x!==fn;});};},export:function(){return JSON.stringify(mem);},import:function(json){restore(JSON.parse(json));return flush();},reset:function(){mem=fresh();attemptIds=new Set();exposureIds=new Set();return flush();}};
 if(root.addEventListener)root.addEventListener('pagehide',flush);
 })(typeof window!=='undefined'?window:globalThis);

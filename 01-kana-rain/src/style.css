@@ -29,7 +29,8 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .garden-scene { position:absolute; inset:0; z-index:-3; background:url('../assets/garden.webp') center bottom / cover no-repeat; }
 .garden-scene::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,#041e2422,transparent 35%,#021d1f1f); }
 .scene-vignette { position:absolute; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 50% 43%,transparent 29%,#031c1f40 100%),linear-gradient(0deg,#041c2555,transparent 26%); }
-.rain-lines { position:absolute; inset:-50px 0 0; pointer-events:none; opacity:.12; background:repeating-linear-gradient(99deg,transparent 0,transparent 119px,#bfe9ea 120px,transparent 121px); background-size:153px 56px; animation:rain 1.4s linear infinite; }
+.rain-lines { position:absolute; inset:-56px 0 0; pointer-events:none; opacity:.12; background:repeating-linear-gradient(99deg,transparent 0,transparent 119px,#bfe9ea 120px,transparent 121px); background-size:153px 56px; animation:rain 1.4s linear infinite; will-change:transform; }
+.is-menu .rain-lines,.game-paused .rain-lines { animation-play-state:paused; }
 .is-menu .scene-vignette { background:radial-gradient(ellipse at 50% 39%,#061f2530,transparent 55%,#031c1f30); }
 
 /* The warm, chamfered frames keep controls inside the illustrated world. */
@@ -226,7 +227,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .result-actions .menu-button { justify-content:center; min-height:55px; font-size:21px; }
 #resultReview { color:#bfceba; font-size:13px; line-height:1.7; }
 
-@keyframes rain { to { background-position:0 56px; } }
+@keyframes rain { to { transform:translateY(56px); } }
 @keyframes pop { to { opacity:0; scale:1.35; } }
 @keyframes effect { from { opacity:1; scale:.7; } to { opacity:0; scale:1.4; } }
 

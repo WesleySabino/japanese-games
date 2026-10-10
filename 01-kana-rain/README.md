@@ -18,6 +18,8 @@ The English translation of the original game specification is in [SPECIFICATION.
 
 The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
 
+The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.0. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
+
 ## Play locally
 
 Use **Node.js 22 or later** and **pnpm 11** (CI pins pnpm 11.25.0). From the project root:
@@ -67,7 +69,7 @@ Starting or resuming a session shows a skippable three-second countdown. The clo
 
 Pronunciations use only `kana-audio-bundle/manifest.json` and its MP3s. All 208 kana in the game have mappings, including combinations and separately recorded homophones. Hiragana and katakana use the bundle's shared pronunciation files. Audio plays on correct answers, corrections, misses, and lesson taps; it can be muted.
 
-Word mode plays a whole-word recording only when the bundle provides that exact word. Other words receive a reading and English meaning without fabricated whole-word audio. The bundle's provenance, licenses, and review metadata are preserved in its folder.
+Word mode plays a whole-word recording only when the bundle provides that exact word. Other words receive a reading and English meaning without fabricated whole-word audio. Gameplay reads a compact runtime lookup; the complete manifest, provenance, licenses, and review metadata are preserved in the bundle.
 
 All menu buttons and session selectors have short, gentle Web Audio interface tones. Start, confirmation, return, countdown, heart loss, streaks, records, and unlocks use distinct cues. These effects respect the saved sound toggle and lower their volume while a recorded pronunciation is playing. Browsers without Web Audio continue to work silently; kana pronunciations always use the supplied MP3s.
 

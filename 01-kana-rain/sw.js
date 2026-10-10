@@ -1,12 +1,15 @@
-const CACHE='kana-rain-v12-arcade-default';
+const CACHE='kana-rain-v13-performance';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
-const SHELL=['./','index.html','about.html','art.html','privacy.html','assets/nihongo-analytics.js','assets/nihongo-analytics.css','src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/manifest.json'];
+const SHELL=['./','index.html','about.html','art.html','privacy.html','assets/nihongo-analytics.js','assets/nihongo-analytics.css','src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/runtime-manifest.json'];
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE);
     await cache.addAll(SHELL.map(url));
-    const manifest=await (await cache.match(url('kana-audio-bundle/manifest.json'))).json();
+    // Source previews use separate scripts; production has one ordered runtime bundle.
+    const html=await (await cache.match(url('index.html'))).text();
+    if(html.includes('src="assets/game-runtime.js"'))await cache.add(url('assets/game-runtime.js'));
+    const manifest=await (await cache.match(url('kana-audio-bundle/runtime-manifest.json'))).json();
     const recordings=[...new Set(Object.values(manifest.byKana))];
     // Keep download concurrency bounded on mobile.
     for(let i=0;i<recordings.length;i+=8)await cache.addAll(recordings.slice(i,i+8).map(p=>url('kana-audio-bundle/'+p)));
