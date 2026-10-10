@@ -1,6 +1,6 @@
 # Kana Rain — performance audit
 
-10 October 2026. Version 1.3.0 preserves Arcade as the default, optional Steady practice, existing progress, approved audio and the learning evidence rules.
+10 October 2026. Version 1.3.1 preserves Arcade as the default, optional Steady practice, existing progress, approved audio and the learning evidence rules.
 
 ## Measured issues and fixes
 
@@ -15,12 +15,13 @@
 | Full audio provenance was loaded just to look up recordings | A 5,075-byte runtime lookup retains all 216 symbols and 112 unique recordings | The complete 193,261-byte manifest, licenses and provenance remain bundled |
 | Companion sprite used excess transfer bytes | Generate the same four-pose atlas at 512 pixels, WebP quality 82 | 103,104 → 59,134 bytes; source master preserved |
 | Playfield had an unsupported accessible label | Give the named playfield an explicit group role | Lighthouse/accessibility and production checks |
+| Public hosting redirects HTML paths; a cached redirected response failed offline navigation | Normalize redirected navigation responses when falling back to cache; preserve body, status and headers | Reproduced on the public domain, isolated cache normalization restored offline reload; four regression checks |
 
 The persistence benchmark with 10,000 attempts fell from 76.44 to 13.35 ms for journal-only saves. With a synchronous structured-clone IndexedDB double, it fell from 198.40 to 67.97 ms. These are Node CPU diagnostics, not measurements of real IndexedDB disk latency. No history is truncated, and each accepted game response still reaches its durable save immediately.
 
 ## Verification
 
-- 61 Node checks: content, learning, migration, save failure, analytics, runtime counters and production packaging.
+- 65 Node checks: content, learning, migration, save failure, analytics, runtime counters, production packaging and redirected offline navigation.
 - Complete Chrome arcade regression: desktop, seven phone sizes, input, pause/resume, resize, difficulty, progress, audio and offline use.
 - 14 focused improvement browser checks.
 - Production-bundle smoke test: inline styles, relative images, default Arcade, real answer input, compact audio lookup and offline shell with all 112 recordings.

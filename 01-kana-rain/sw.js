@@ -1,4 +1,4 @@
-const CACHE='kana-rain-v13-performance';
+const CACHE='kana-rain-v14-performance';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
 const SHELL=['./','index.html','about.html','art.html','privacy.html','assets/nihongo-analytics.js','assets/nihongo-analytics.css','src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/game.js','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/runtime-manifest.json'];
@@ -35,6 +35,14 @@ self.addEventListener('fetch',event=>{
       const response=await fetch(event.request);
       if(response.ok)await cache.put(target,response.clone());
       return response;
-    }catch(error){if(cached)return cached;throw error;}
+    }catch(error){
+      if(cached){
+        // Hosting may redirect index.html to /. Navigation cannot reuse a
+        // redirected Response, even when its successful body is in the cache.
+        if(event.request.mode==='navigate'&&cached.redirected)return new Response(cached.body,{status:cached.status,statusText:cached.statusText,headers:cached.headers});
+        return cached;
+      }
+      throw error;
+    }
   })());
 });

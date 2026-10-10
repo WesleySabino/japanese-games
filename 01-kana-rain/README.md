@@ -18,7 +18,7 @@ The English translation of the original game specification is in [SPECIFICATION.
 
 The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
 
-The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.0. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
+The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.1. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
 
 ## Play locally
 
