@@ -35,6 +35,11 @@ async function game(options={}){
   return {...m,nodes,el,document,listeners,app:m.context.KanaRain,advance,skip:()=>el('skipCountdown').onclick(),submit:text=>{el('answer').value=text;el('answerForm').onsubmit({preventDefault(){}});},type:text=>{el('answer').value=text;el('answer').oninput();},continue:()=>el('continueFeedbackBtn').onclick(),tick:()=>advance(16,true)};
 }
 const first=(id,extra={})=>({attemptId:id,firstAttempt:true,assistance:false,correct:true,responseFormat:'romaji',gameId:'kana-rain',...extra});
+function seedFamiliarReadings(L,D,ids=D.kana.map(k=>k.id).concat(D.words.map(w=>w.id))){
+  // Real independent answers over six spaced reviews, rather than mutating aggregates.
+  for(const id of ids)for(let review=0;review<6;review++)L.record(id,'form→sound',first(`familiar:${id}:${review}`,{now:1700000000000-(5-review)*7*86400000,deferSave:true}));
+  L.flush();
+}
 
 test('attempt IDs survive duplicate delivery and export/reload; timeout is not an invented wrong answer',async()=>{
   const m=await model();m.L.record('kana:あ','form→sound',first('a',{firstResponseMs:4000,inputActiveMs:300,displayActiveMs:4000,waitMs:3700}));m.L.record('kana:あ','form→sound',first('a'));
@@ -115,9 +120,63 @@ test('a deferred answer keeps the latest failure warning when an older IndexedDB
 });
 
 test('generated round owns its facet and format; kana and whole-word prompts cannot be copied as readings',async()=>{
-  const g=await game({prepare(L){L.record('kana:あ','form→sound',first('seed'));L.state('kana:あ').facets['form→sound'].stability=60;L.state('kana:あ').facets['form→sound'].independentFirstCorrect=2;}});
-  const round=g.app.generateRound({id:'kana:あ'});assert.equal(round.facet,'script→script');assert.equal(round.responseFormat,'katakana');assert.deepEqual(plain(g.app.accepted(round)),['ア']);assert.equal(g.app.score(round,{correct:true})[0].facet,'script→script');
+  const g=await game({prepare(L,D){seedFamiliarReadings(L,D,['kana:あ']);}});
+  assert.ok(g.L.mastery('kana:あ','form→sound')>=.75);assert.ok(g.L.state('kana:あ').facets['form→sound'].independentFirstCorrect>=2);
+  const round=g.app.generateRound({id:'kana:あ'});assert.equal(round.facet,'form→sound');assert.equal(round.responseFormat,'romaji');assert.equal(round.kanaOnly,false);assert.deepEqual(plain(g.app.accepted(round)),['a']);assert.equal(g.app.score(round,{correct:true})[0].facet,'form→sound');
   assert.ok(!g.app.accepted('kana:い',false).includes('い'));assert.ok(!g.app.accepted('w:ねこ').includes('ねこ'));assert.ok(g.app.accepted('w:すし').includes('susi'));
+});
+
+test('all familiar hiragana, katakana, mixed-script and word readings stay romaji; only explicit pairs use hiragana',async()=>{
+  const g=await game({explore:true,prepare(L,D){seedFamiliarReadings(L,D);L.gameData('kana-rain').featuresIntro=Object.fromEntries(D.features.map(feature=>[feature.id,true]));}});
+  for(const mode of ['hira','kata','mix','words','pair']){
+    g.el('mode').value=mode;g.el('mode').onchange();assert.equal(g.app.settings.mode,mode);
+    const ids=g.app.candidates();assert.ok(ids.length>0);
+    for(const id of ids){
+      assert.ok(g.L.mastery(id,'form→sound')>=.75,`${mode}: ${id} is familiar enough to have triggered the former automatic conversion`);
+      const round=g.app.generateRound({id}),expected=mode==='pair'?{format:'hiragana',facet:'script→script'}:{format:'romaji',facet:'form→sound'};
+      assert.equal(round.responseFormat,expected.format,`${mode}: ${id}`);assert.equal(round.facet,expected.facet,`${mode}: ${id}`);assert.equal(round.kanaOnly,mode==='pair');
+      const responses=g.app.accepted(round);
+      if(mode==='pair'){
+        const kana=g.D.kanaById[id];assert.equal(kana.script,'katakana');
+        assert.deepEqual(plain(responses),[g.D.kana.find(k=>k.pairId===kana.pairId&&k.script==='hiragana').char]);
+        assert.ok(!responses.includes(kana.romaji),'romaji is not an answer in the explicitly selected pair mode');
+      }else assert.ok(!responses.includes(id.slice(id.indexOf(':')+1)),`${mode}: copying the prompt is still rejected`);
+    }
+  }
+});
+
+test('normal and review sessions keep their selected response format through repeated answers and pause/resume',async()=>{
+  for(const mode of ['hira','kata','mix','words','pair']){
+    const g=await game({explore:true,prepare(L,D){seedFamiliarReadings(L,D);Object.assign(L.gameData('kana-rain'),{featuresIntro:Object.fromEntries(D.features.map(feature=>[feature.id,true])),scriptIntro:{hiragana:true}});}});
+    g.el('mode').value=mode;g.el('mode').onchange();const reviewIds=plain(g.app.candidates().slice(0,3)),format=mode==='pair'?'hiragana':'romaji',facet=mode==='pair'?'script→script':'form→sound';
+    for(const review of [false,true]){
+      g.app.start(review?{reviewIds}:{});g.skip();assert.equal(g.app.state.paused,false,`${mode}: session starts without an unexpected script introduction`);
+      assert.equal(g.app.state.reviewIds!==null,review);
+      const start=g.L.attempts().length;
+      for(let answer=0;answer<6;answer++){
+        if(!g.app.state.drops.length){g.app.state.sinceSpawn=99999;g.tick();}
+        const round=g.app.state.drops[0];assert.ok(round,`${mode}: next round available`);
+        assert.equal(round.responseFormat,format);assert.equal(round.facet,facet);
+        if(review)assert.ok(reviewIds.includes(round.id),`${mode}: review remains inside its selected collection`);
+        if(answer===2){g.app.pause(true);g.advance(2500);g.app.pause(false);g.skip();assert.equal(round.responseFormat,format);assert.equal(g.app.state.paused,false);}
+        g.submit(g.app.accepted(round)[0]);
+        assert.equal(g.app.state.countingDown,false);assert.equal(g.el('scriptDialog').open,false,'familiarity cannot introduce a new script midway through the session');
+        const event=g.L.attempts().at(-1);assert.equal(event.correct,true);assert.equal(event.responseFormat,format);assert.equal(event.facet,facet);
+      }
+      const attempts=g.L.attempts().slice(start);assert.equal(attempts.length,6);assert.deepEqual([...new Set(attempts.map(event=>event.responseFormat))],[format]);assert.deepEqual([...new Set(attempts.map(event=>event.facet))],[facet]);
+      g.app.end('Response-format regression complete');
+    }
+  }
+});
+
+test('a kana becoming familiar between drops cannot introduce script conversion into an ongoing reading review',async()=>{
+  const g=await game();g.app.start({reviewIds:['kana:あ']});g.skip();
+  assert.equal(g.app.state.drops[0].responseFormat,'romaji');assert.equal(g.L.mastery('kana:あ','form→sound'),0);
+  g.submit('a');seedFamiliarReadings(g.L,g.D,['kana:あ']);assert.ok(g.L.mastery('kana:あ','form→sound')>=.75);
+  g.app.state.sinceSpawn=99999;g.tick();const next=g.app.state.drops[0];assert.equal(next.id,'kana:あ');
+  assert.equal(next.responseFormat,'romaji');assert.equal(next.facet,'form→sound');assert.equal(next.kanaOnly,false);
+  assert.equal(g.el('scriptDialog').open,false);assert.equal(g.app.state.paused,false);
+  g.submit('a');assert.equal(g.L.attempts().at(-1).facet,'form→sound');assert.equal(g.L.attempts().at(-1).responseFormat,'romaji');
 });
 
 test('new and reset gardens default to arcade while a selected practice preference survives reload',async()=>{

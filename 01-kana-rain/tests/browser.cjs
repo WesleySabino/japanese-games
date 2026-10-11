@@ -99,7 +99,7 @@ async function assertPanelFits(page,id,close,label){
   await assertInViewport(page,'#'+id,label+' panel');
   if(close)await assertInViewport(page,'#'+close,label+' close control');
 }
-async function assertGameFits(page,label){
+async function assertGameFits(page,label,allowScrollingKeyboard=false){
   await assertWholeViewport(page,label);
   await assertHeartsVisible(page,label);
   await assertInViewport(page,'#answerDock',label+' input dock');
@@ -112,7 +112,21 @@ async function assertGameFits(page,label){
   assert.ok(fit.field.bottom<=fit.dock.top+1,label+' input must not cover falling drops');
   const keys=await page.locator('#keyboard [data-key]').evaluateAll(buttons=>buttons.map(b=>{const r=b.getBoundingClientRect();return {key:b.dataset.key,left:r.left,top:r.top,right:r.right,bottom:r.bottom};}));
   const size=page.viewportSize();
-  assert.ok(keys.every(k=>k.left>=-1&&k.top>=-1&&k.right<=size.width+1&&k.bottom<=size.height+1),label+' keyboard keys must remain usable: '+JSON.stringify(keys.filter(k=>k.left<-1||k.top<-1||k.right>size.width+1||k.bottom>size.height+1)));
+  if(allowScrollingKeyboard){
+    const keyboard=await page.locator('#keyboard').evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,overflowY:getComputedStyle(el).overflowY};});
+    assert.equal(keyboard.overflowY,'auto',label+' full kana keyboard explicitly scrolls vertically');
+    assert.ok(keyboard.clientHeight>0&&keyboard.scrollHeight>keyboard.clientHeight,label+' keyboard has bounded visible height and scrollable keys: '+JSON.stringify(keyboard));
+    assert.ok(keys.every(k=>k.left>=-1&&k.right<=size.width+1&&k.left>=keyboard.left-1&&k.right<=keyboard.right+1),label+' scrollable keys must fit horizontally: '+JSON.stringify(keys.filter(k=>k.left<-1||k.right>size.width+1||k.left<keyboard.left-1||k.right>keyboard.right+1)));
+    const last=page.locator('#keyboard [data-key]').last();
+    await last.evaluate(button=>button.scrollIntoView({block:'nearest',inline:'nearest'}));
+    await assertInViewport(page,'#keyboard [data-key]:last-child',label+' last scrollable key');
+    const reachable=await last.evaluate(button=>{const r=button.getBoundingClientRect(),k=document.querySelector('#keyboard').getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {top:r.top,bottom:r.bottom,keyboardTop:k.top,keyboardBottom:k.bottom,hit:hit===button||button.contains(hit)};});
+    assert.ok(reachable.top>=reachable.keyboardTop-1&&reachable.bottom<=reachable.keyboardBottom+1&&reachable.hit,label+' last key must be visible inside the keyboard and unobstructed after scrolling: '+JSON.stringify(reachable));
+    await page.locator('#keyboard').evaluate(el=>{el.scrollTop=0;});
+    await assertWholeViewport(page,label+' after keyboard scrolling');
+  }else{
+    assert.ok(keys.every(k=>k.left>=-1&&k.top>=-1&&k.right<=size.width+1&&k.bottom<=size.height+1),label+' keyboard keys must remain usable: '+JSON.stringify(keys.filter(k=>k.left<-1||k.top<-1||k.right>size.width+1||k.bottom>size.height+1)));
+  }
   const layers=await page.evaluate(()=>{const spirit=getComputedStyle(document.querySelector('#fieldSpirit')),field=getComputedStyle(document.querySelector('#field'));return {visible:spirit.display!=='none'&&spirit.visibility!=='hidden',spirit:Number(spirit.zIndex),field:Number(field.zIndex)};});
   assert.ok(!layers.visible||layers.spirit<layers.field,label+' mascot must remain behind falling kana: '+JSON.stringify(layers));
 }
@@ -153,11 +167,11 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
   }
   await context.close();
 }
-async function exerciseMixedKeyboard(errors){
+async function exerciseStableInput(errors){
   const context=await gameContext({viewport:{width:320,height:568},isMobile:true,hasTouch:true}),page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));
   for(const [width,height] of [[320,568],[568,320]]){
-    const label=width+'×'+height+' mixed input';
+    const label=width+'×'+height+' fixed answer formats';
     await page.setViewportSize({width,height});await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>window.KanaRain);
     await page.evaluate(()=>{
       Learner.reset();const gd=Learner.gameData('kana-rain');gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};
@@ -165,30 +179,80 @@ async function exerciseMixedKeyboard(errors){
       Learner.flush();
     });
     await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#difficultySelect').selectOption('easy');await page.locator('#startBtn').tap();await readyToPlay(page);
-    const ordinary=await page.evaluate(()=>({id:KanaRain.state.target.id,answer:KanaRain.accepted(KanaRain.state.target.id,false)[0]}));
+    assert.equal(await page.evaluate(()=>Learner.mastery('kana:あ','form→sound')>=.75&&Learner.state('kana:あ').facets['form→sound'].independentFirstCorrect>=2),true,'fixture reaches the former automatic script-change threshold');
+    const firstRound=await page.evaluate(()=>KanaRain.state.target.roundId);
     assert.equal(await page.evaluate(()=>KanaRain.state.target.kanaOnly),false);
-    await page.evaluate(()=>{KanaRain.state.queue.unshift({id:'kana:あ'});KanaRain.state.sinceSpawn=9999;});
-    await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:あ'&&d.kanaOnly));
-    assert.equal(await page.locator('#keyboardModeBtn').isVisible(),true,'a mature drop exposes the alternate keyboard even above a romaji target');
+    assert.match(await page.locator('#inputFormat').textContent(),/romaji/i);
     await page.locator('#answer').fill('partial');
-    await page.evaluate(()=>{const g=KanaRain.state;g.drops.forEach(d=>d.progress=d.kanaOnly?.15:0);});
-    await page.locator('#scriptDialog').waitFor({state:'visible'});await readyToPlay(page);
-    assert.equal(await page.locator('#answer').inputValue(),'','a script change clears an incompatible unfinished answer');
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
-    await assertGameFits(page,label+' kana keyboard');await assertInViewport(page,'#keyboardModeBtn',label+' format switch');
-    if(width===320)await screenshot(page,'smallest-portrait-mixed-keyboard');
-    if(width===568)await screenshot(page,'smallest-landscape-mixed-keyboard');
-    await page.locator('#answer').fill('ヌ');await page.locator('#keyboardModeBtn').tap();
-    assert.equal(await page.locator('#answer').inputValue(),'','ABC switch clears incompatible kana input');
+    await page.evaluate(()=>{KanaRain.state.queue.unshift({id:'kana:あ'});KanaRain.state.sinceSpawn=9999;});
+    await page.waitForFunction(first=>KanaRain.state.drops.some(d=>d.id==='kana:あ'&&d.roundId!==first),firstRound);
+    const matureRound=await page.evaluate(first=>KanaRain.state.drops.find(d=>d.id==='kana:あ'&&d.roundId!==first).roundId,firstRound);
+    await page.evaluate(round=>{KanaRain.state.drops.forEach(d=>d.progress=d.roundId===round ? .15 : 0);},matureRound);
+    await page.waitForFunction(round=>KanaRain.state.target.roundId===round,matureRound);
+    assert.equal(await page.locator('#answer').inputValue(),'partial','a familiar target keeps the unfinished romaji answer');
+    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>!d.kanaOnly&&d.facet==='form→sound'&&d.responseFormat==='romaji')),true);
+    assert.equal(await page.locator('#scriptDialog').isVisible(),false,'mature reading items do not introduce another script');
+    assert.equal(await page.locator('#keyboardModeBtn').isVisible(),false,'reading sessions expose no script-switch button');
     assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),true);
-    await assertGameFits(page,label+' ABC keyboard');
-    for(const key of ordinary.answer)await page.locator('#keyboard [data-key="'+key+'"]').tap();
+    await assertGameFits(page,label+' mature romaji keyboard');
+    await screenshot(page,width===320?'smallest-portrait-mature-romaji':'smallest-landscape-mature-romaji');
+    await page.locator('#answer').fill('');
+    const touchAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);
+    for(const key of touchAnswer)await page.locator('#keyboard [data-key="'+key+'"]').tap();
     await page.waitForFunction(()=>KanaRain.state.correct===1);
-    await page.locator('#keyboardModeBtn').tap();
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
-    const kana=page.locator('#keyboard [data-key="ア"]');await kana.focus();await kana.press(width===320?'Enter':'Space');
+    const physicalAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);
+    await page.locator('#answer').focus();await page.keyboard.type(physicalAnswer);
     await page.waitForFunction(()=>KanaRain.state.correct===2);
-    assert.equal(await page.evaluate(()=>KanaRain.state.attempts),2,'native kana key activation and touch romaji each submit once');
+    assert.equal(await page.evaluate(()=>KanaRain.state.attempts),2,'physical typing and touch romaji each submit once');
+    assert.match(await page.locator('#inputFormat').textContent(),/romaji/i);
+    assert.equal(await page.locator('#scriptDialog').isVisible(),false);
+    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),true);
+    await finishSession(page);
+
+    // Matching scripts is an explicit session choice, with hiragana throughout.
+    await page.goto('http://127.0.0.1:4180/?all');await page.waitForFunction(()=>window.KanaRain);
+    await page.locator('#mode').selectOption('pair');await page.locator('#startBtn').tap();
+    await page.locator('#scriptDialog').waitFor({state:'visible'});
+    assert.match(await page.locator('#scriptExplanation').textContent(),/matching hiragana/i);
+    await readyToPlay(page);
+    assert.equal(await page.evaluate(()=>KanaRain.state.mode),'pair');
+    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.kanaOnly&&d.responseFormat==='hiragana'&&JPData.kanaById[d.id].script==='katakana')),true);
+    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
+    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
+    await assertGameFits(page,label+' explicit hiragana keyboard',true);
+    await screenshot(page,width===320?'smallest-portrait-explicit-pair':'smallest-landscape-explicit-pair');
+    const pairAnswer=await page.evaluate(()=>{KanaRain.state.sinceSpawn=0;return KanaRain.accepted(KanaRain.state.target)[0];});
+    const kana=page.locator('#keyboard [data-key="'+pairAnswer+'"]');await kana.scrollIntoViewIfNeeded();await kana.focus();
+    assert.equal(await kana.evaluate(el=>el===document.activeElement),true,'the kana key receives native keyboard focus');
+    await page.keyboard.press(width===320?'Enter':'Space',{delay:50});
+    await page.waitForFunction(()=>KanaRain.state.correct===1);
+    assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),0,'the first pair answer leaves a gap before the next drop');
+    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i,'a gap without a target keeps the chosen answer format');
+    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
+    await page.evaluate(()=>{KanaRain.state.queue.unshift({id:'kana:イ'},{id:'kana:ウ'});KanaRain.state.sinceSpawn=9999;});
+    await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:イ'));
+    await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});
+    await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:ウ'));
+    await page.locator('#answer').fill('ん');
+    await page.evaluate(()=>{KanaRain.state.drops.forEach(d=>d.progress=d.id==='kana:ウ' ? .4 : 0);});
+    await page.waitForFunction(()=>KanaRain.state.target.id==='kana:ウ');
+    assert.equal(await page.locator('#answer').inputValue(),'ん','pair target changes preserve unfinished hiragana input');
+    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.kanaOnly&&d.facet==='script→script'&&d.responseFormat==='hiragana')),true);
+    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
+    assert.equal(await page.locator('#scriptDialog').isVisible(),false);
+    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
+    await page.locator('#answer').fill('');await page.locator('#keyboard [data-key="う"]').tap();
+    await page.waitForFunction(()=>KanaRain.state.correct===2);
+    await page.waitForFunction(()=>KanaRain.state.target&&KanaRain.state.drops.length>0);
+    const nextAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);
+    assert.match(nextAnswer,/^[ぁ-ゖ]+$/,'the next pair still requires hiragana');
+    const nextKana=page.locator('#keyboard [data-key="'+nextAnswer+'"]');await nextKana.scrollIntoViewIfNeeded();await nextKana.focus();
+    assert.equal(await nextKana.evaluate(el=>el===document.activeElement),true,'the next kana key receives native keyboard focus');
+    await page.keyboard.press(width===320?'Space':'Enter',{delay:50});
+    try{await page.waitForFunction(()=>KanaRain.state.correct===3,null,{timeout:3000});}
+    catch(error){console.error('Native kana activation state:',await page.evaluate(()=>({correct:KanaRain.state.correct,attempts:KanaRain.state.attempts,paused:KanaRain.state.paused,over:KanaRain.state.over,target:KanaRain.state.target?.id,drops:KanaRain.state.drops.map(d=>({id:d.id,progress:d.progress,format:d.responseFormat,accepted:KanaRain.accepted(d)})),input:document.querySelector('#answer').value,focus:document.activeElement?.dataset.key,dialog:document.querySelector('dialog[open]')?.id})));throw error;}
+    assert.equal(await page.evaluate(()=>KanaRain.state.attempts),3,'touch and native Enter/Space activate hiragana keys once each');
+    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
     await finishSession(page);
   }
   await context.close();
@@ -278,8 +342,8 @@ async function exerciseQuickWins(errors){
   const channel=process.env.PLAYWRIGHT_BROWSER_CHANNEL;
   browser=await chromium.launch({headless:true,...(channel?{channel}:{})});
   if(process.argv.includes('--quick-ui-only')){
-    const errors=[];await exerciseResponsiveMatrix(errors,[[320,568]]);await exerciseMixedKeyboard(errors);assert.deepEqual(errors,[]);
-    console.log('PASS: focused320portrait menu/game/dialogs, mascotbelowfield, mixedABC/kana touch + nativeEnter/Space, incompatibleinput reset, portrait/landscapekeyboardgeometry.');
+    const errors=[];await exerciseResponsiveMatrix(errors,[[320,568]]);await exerciseStableInput(errors);assert.deepEqual(errors,[]);
+    console.log('PASS: focused320portrait menu/game/dialogs, mascotbelowfield, stable romaji and explicit hiragana, touch/nativeEnter/Space, preserved partial input, portrait/landscape scrollable keyboard geometry.');
     await browser.close();server.kill();return;
   }
   const context=await gameContext({viewport:{width:1440,height:1000}});
@@ -578,9 +642,9 @@ async function exerciseQuickWins(errors){
   await difficultyContext.close();
   await exerciseQuickWins(errors);
   await exerciseResponsiveMatrix(errors);
-  await exerciseMixedKeyboard(errors);
+  await exerciseStableInput(errors);
   assert.deepEqual(errors,[]);
-  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, script introduction/guidance, protected feedback/streak/best celebrations, readiness/locked modes, native keyboard/SFX/mute, danger/heart cues, persistence/resize, Easy5/Normal3/Hard1/time acceleration, offline shell and 112 recordings.');
+  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, stable romaji for mature items, explicit katakana→hiragana with fixed answers and reachable scrollable keys, protected feedback/streak/best celebrations, readiness/locked modes, native keyboard/SFX/mute, danger/heart cues, persistence/resize, Easy5/Normal3/Hard1/time acceleration, offline shell and 112 recordings.');
   await browser.close();
   server.kill();
 })().catch(async e=>{console.error(e);if(browser)await browser.close();if(server)server.kill();process.exitCode=1;});

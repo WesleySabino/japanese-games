@@ -40,7 +40,7 @@ The rain garden fills the entire browser viewport. The main menu offers Enter th
 
 Opening a menu pauses the session. Closing a menu opened during play resumes it; closing a menu opened from Pause returns to Pause. Phone play opens the integrated touch keyboard automatically. Portrait, short landscape, safe areas, and native keyboard viewport resizing are supported without page scrolling.
 
-Starting or resuming a session shows a skippable three-second countdown. The clock, drop travel, acceleration, and answer reaction time remain frozen until play begins; partially typed answers survive pauses. A first-time script explanation introduces matching kana before advanced drops resume.
+Starting or resuming a session shows a skippable three-second countdown. The clock, drop travel, acceleration, and answer reaction time remain frozen until play begins; partially typed answers survive pauses. A first-time explanation introduces the optional Katakana → Hiragana mode before that session starts.
 
 ## Gameplay
 
@@ -55,15 +55,16 @@ Starting or resuming a session shows a skippable three-second countdown. The clo
 - Words require their kana and explicit introductions for small っ/ッ, the long-vowel mark ー and long vowels written with kana. The finite accepted romaji lists are composed from kana units; copying a displayed kana or word is not accepted as a reading.
 - Arcade errors stain and accelerate the affected drop without immediately taking a heart. Practice errors finish that opportunity after explicit acknowledgement. Both retain correction text across pauses.
 - Drops approaching the pond show an exclamation mark and stronger warning outline. The pond edge highlights imminent misses, and the final heart has a distinct visual state. A missed drop produces a heart-loss cue; all cues remain useful with sound muted.
-- The answer dock explicitly says whether to type romaji, hiragana, or katakana. Any visible drop can be answered; the highlighted drop is the priority for forced submissions and listening.
-- Strong kana move to producing the opposite script rather than romaji. Script pairing uses a full kana keyboard, avoiding multiple-choice guessing. Desktop Japanese IME and touch input are supported.
+- Hiragana, Katakana, Mixed scripts and Little words keep romaji answers throughout the session, including familiar kana and focused review. A familiar item never changes the answer format or opens a kana keyboard during reading play.
+- Choose **Katakana → Hiragana** before starting for a separate script-matching session. Every drop is katakana and every answer is hiragana, including the interval between drops. Its full kana keyboard and desktop Japanese IME support matching without multiple-choice guessing. Existing script-match history remains intact.
+- The answer dock shows the session's fixed format. Any visible drop can be answered; the highlighted drop is the priority for forced submissions and listening.
 - Personal confusions are revisited together, side by side. The shared scheduler targets review, weak, and new items with a bounded new-item count.
 - Pause with Escape or the Pause button. Leaving the tab pauses automatically. Finish preserves all answer evidence and displays session results.
 - Progress uses a localStorage journal and IndexedDB. Saved status follows completed writes, with a persistent export action when both fail. The newer compatible snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates on reload; v1 history retains unknown assistance and dated legacy errors.
 - My Kana Garden labels all four estimated familiarity states and shows first-answer readiness for every unlocked kana, including earlier rows. Results separate independent readings, script matches, helped answers and expired drops. Response, input and residence times are distinct exported fields; none is labelled pure reading speed.
 - Results include mistaken or missed items with reading and available pronunciation. **Review these kana** uses the chosen style: a focused 60-second Arcade round or eight Steady practice opportunities. Personal bests stay separate; existing arcade best keys are preserved.
 - Streaks of 5, 10, and 20 receive small celebrations. The title screen and HUD show the personal best for the selected mode, difficulty, and duration; beating an existing record receives its own announcement.
-- The touch keyboard supports taps, clicks, and native Enter/Space activation. An ABC/kana switch supports mixed answer formats on phones; changing formats clears incompatible partial text, while ordinary pauses preserve it. Reduced effects can be enabled in Settings and is saved on this device; the system's reduced-motion preference is also respected.
+- The touch keyboard supports taps, clicks, and native Enter/Space activation. Its layout follows the chosen session: romaji letters for reading, hiragana keys for script matching. Reading sessions stay playable on the physical keyboard. Ordinary pauses preserve partial text. Reduced effects can be enabled in Settings and is saved on this device; the system's reduced-motion preference is also respected.
 
 ## Audio and offline use
 

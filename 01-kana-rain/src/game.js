@@ -6,7 +6,7 @@
   let gd=L.gameData(GAME);
   gd.rows=gd.rows || {hiragana:1,katakana:1}; gd.best=gd.best || {}; gd.accuracy=gd.accuracy || {};
   const explore=new URLSearchParams(location.search).has('all');
-  let cfg={mode:'hira',duration:180,difficulty:R.profiles[gd.difficulty]?gd.difficulty:'normal',playStyle:gd.playStyle==='practice'?'practice':'arcade'}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, keyboardOverride=null, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
+  let cfg={mode:'hira',duration:180,difficulty:R.profiles[gd.difficulty]?gd.difficulty:'normal',playStyle:gd.playStyle==='practice'?'practice':'arcade'}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
   const panelOrigins=new Map();
@@ -47,7 +47,7 @@
     $('continueFeedbackBtn').classList.add('hidden');
     closeDialogs();$('welcome').classList.remove('hidden');$('gameHud').classList.add('hidden');$('answerDock').classList.add('hidden');
     document.body.classList.remove('is-playing');document.body.classList.add('is-menu');
-    keyboardOpen=false;keyboardOverride=null;keyboard();enableSetup(true);$('fieldSpirit').className='spirit idle';document.body.classList.remove('low-hearts','heart-hit');$('heartLoss').classList.add('hidden');$('startBtn').focus({preventScroll:true});
+    keyboardOpen=false;keyboard();enableSetup(true);$('fieldSpirit').className='spirit idle';document.body.classList.remove('low-hearts','heart-hit');$('heartLoss').classList.add('hidden');$('startBtn').focus({preventScroll:true});
     syncAnimationState();
     exposeLesson();
   }
@@ -67,7 +67,6 @@
     return D.words.filter(w=>D.splitKana(w.surface).every(c=>known.has(c)||['っ','ッ','ー'].includes(c)) && (includePending||D.wordRequirements(w).every(id=>gd.featuresIntro?.[id]))).map(w=>w.id);
   }
   function modeAvailable(mode){if(mode==='words')return candidates('words',true).length>=4;if(explore||mode==='hira')return true;return gd.rows.hiragana>=11;}
-  function mature(id){const f=L.state(id)?.facets[FACET];return id.startsWith('kana:') && f?.independentFirstCorrect>=2 && L.mastery(id,FACET)>=.75;}
   function accepted(id,kanaOnly=false){
     if(typeof id==='object'){kanaOnly=id.responseFormat!=='romaji';id=id.id;}
     if(id.startsWith('w:'))return D.words.find(w=>w.id===id)?.acceptedRomaji||D.romajiVariants(symbol(id));
@@ -126,11 +125,12 @@
   function renderBest(){const best=gd.best[bestKey()]||0;$('menuBest').textContent=best?`Personal best · ${best} points`:'Your first personal best is waiting';}
   function spirit(mood){clearTimeout(spiritTimer);$('fieldSpirit').className='spirit '+mood;spiritTimer=setTimeout(()=>$('fieldSpirit').className='spirit idle',900);}
   function renderMenu(){
-    const names={hira:'Hiragana',kata:'Katakana',mix:'Mixed scripts',pair:'Script pairs',words:'Little words'};
+    const names={hira:'Hiragana',kata:'Katakana',mix:'Mixed scripts',pair:'Katakana → Hiragana',words:'Little words'};
     for(const id of ['mode','settingsMode'])[...$(id).options].forEach(o=>{o.disabled=!modeAvailable(o.value);o.textContent=names[o.value]+(o.disabled?' · Locked':'');});
     $('modeLocks').innerHTML=['kata','mix','pair','words'].map(mode=>`<div class="mode-lock"><strong>${names[mode]}</strong><span>${modeAvailable(mode)?'Available':mode==='words'?`${candidates('words',true).length}/4 readable words · unlock more kana`:`Hiragana rows ${Math.min(11,gd.rows.hiragana)}/11 · unlock the basic rows`}</span></div>`).join('');
-    if(!modeAvailable(cfg.mode))cfg.mode='hira';$('mode').value=$('settingsMode').value=cfg.mode;
-    $('modeNote').textContent=cfg.mode==='pair'?'Produce the matching hiragana. No answer choices.':cfg.mode==='words'?'Read the whole word. Its meaning appears after an answer.':'Start with hiragana. Other modes grow with you.';
+    if(!running()&&!modeAvailable(cfg.mode))cfg.mode='hira';$('mode').value=$('settingsMode').value=cfg.mode;
+    $('modeNote').textContent=cfg.mode==='pair'?'A separate script-matching session: katakana drops, hiragana answers. Use your Japanese keyboard or the touch keyboard.':cfg.mode==='words'?'Type each whole word in romaji throughout the session. Its meaning appears after an answer.':'Type romaji throughout the session, even as kana become familiar. Mixed scripts changes the drops, not the answer format.';
+    $('menuHint').innerHTML=(cfg.mode==='pair'?'Hiragana':'Romaji')+' · <kbd>Enter</kbd> to begin';
     const active=running();$('difficultySelect').value=cfg.difficulty;$('durationSelect').value=cfg.duration;
     $('practiceSelect').value=$('settingsPracticeSelect').value=cfg.playStyle;
     for(const id of ['mode','settingsMode','difficultySelect','durationSelect','practiceSelect','settingsPracticeSelect'])$(id).disabled=!!active;
@@ -154,17 +154,17 @@
   }
   function enableSetup(value){for(const id of ['mode','settingsMode','difficultySelect','durationSelect','practiceSelect','settingsPracticeSelect'])$(id).disabled=!value;document.querySelectorAll('[data-difficulty],[data-duration]').forEach(b=>b.disabled=!value);$('startBtn').disabled=!value;if(value)renderMenu();}
   function cancelCountdown(){if(G)G.countingDown=false;$('countdownOverlay').classList.add('hidden');stopLoop();}
-  function scriptFormat(d){return d?.responseFormat||'romaji';}
+  function scriptFormat(d){return d?.responseFormat||(cfg.mode==='pair'?'hiragana':'romaji');}
   function needsScriptIntro(d){return d?.kanaOnly && !gd.scriptIntro?.[scriptFormat(d)];}
   function introduceScript(d){
     cancelCountdown();pause(true,false);const format=scriptFormat(d);G.introFormat=format;
     $('scriptExample').textContent=`${symbol(d.id)} → ${opposite(D.kanaById[d.id]).char}`;
-    $('scriptExplanation').textContent=`Type the matching ${format} for these familiar kana. The answer format is shown above your keyboard. Use the kana keys or your Japanese keyboard.`;
+    $('scriptExplanation').textContent=`You chose script matching. Read each katakana drop and type the matching ${format}. This answer format stays the same throughout the session. Use the kana keys or your Japanese keyboard.`;
     exposeReading(d.id,'script-introduction');
     closeDialogs();$('scriptDialog').showModal();$('continueScriptBtn').focus({preventScroll:true});
   }
   function acknowledgeScript(){
-    if(!running())return;gd.scriptIntro=gd.scriptIntro||{};gd.scriptIntro[G.introFormat]=true;L.flush();$('scriptDialog').close();beginCountdown('Ready for the new script?');
+    if(!running())return;gd.scriptIntro=gd.scriptIntro||{};gd.scriptIntro[G.introFormat]=true;L.flush();$('scriptDialog').close();beginCountdown('Ready to match the scripts?');
   }
   function beginCountdown(title='Ready for the rain?'){
     if(!running())return;
@@ -202,9 +202,9 @@
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
-    $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana',mix:'Mixed scripts',pair:'Script pairs',words:'Little words'}[cfg.mode]);
+    $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana',mix:'Mixed scripts',pair:'Katakana → Hiragana',words:'Little words'}[cfg.mode]);
     $('personalBest').textContent=(G.reviewIds?'Review best · ':'Best · ')+G.previousBest;
-    $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOverride=null;keyboardOpen=mobile();keyboard();focusAnswer();
+    $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();keyboard();focusAnswer();
     fitField();if(G.pendingFeatures.length)introduceFeature();else initializeRounds();syncAnimationState();wakeLoop();
   }
   function introduceFeature(){
@@ -229,7 +229,7 @@
     if(G.attempts)L.shuffle(plan);
     plan.forEach(id=>G.queue.push({id}));
   }
-  function generateRound(plan,rng=Math.random){const k=D.kanaById[plan.id],kanaOnly=!!k&&(cfg.mode==='pair'||mature(plan.id));return {id:plan.id,x:rng(),kanaOnly,facet:kanaOnly?PAIR:FACET,responseFormat:kanaOnly?opposite(k).script:'romaji'};}
+  function generateRound(plan,rng=Math.random){const k=D.kanaById[plan.id],kanaOnly=!!k&&cfg.mode==='pair';return {id:plan.id,x:rng(),kanaOnly,facet:kanaOnly?PAIR:FACET,responseFormat:kanaOnly?opposite(k).script:'romaji'};}
   function render(root,round){
     const id=round.id,k=D.kanaById[id],st=L.state(id),f=st?.facets[round.facet];
     const hint=!round.kanaOnly && (!f || f.correct===0);
@@ -292,7 +292,7 @@
   }
   function updateTarget(){
     const t=lowest();if(t===G.target)return;
-    G.target?.el.classList.remove('target');G.target=t;t?.el.classList.add('target');keyboardOverride=null;
+    G.target?.el.classList.remove('target');G.target=t;t?.el.classList.add('target');
     const format=scriptFormat(t),only=format!=='romaji';if(t)prepareAnswerFormat(format);
     $('answer').placeholder=only?'Type the matching '+format+'…':'Type the sound here…';
     $('inputScript').textContent=only?(format==='katakana'?'カ':'あ'):'a';
@@ -432,12 +432,9 @@
     $('keyboard').classList.toggle('hidden',!keyboardOpen);$('keyboardBtn').setAttribute('aria-expanded',keyboardOpen);
     document.body.dataset.keyboard=String(keyboardOpen);document.body.classList.toggle('has-keyboard',keyboardOpen);
     $('answer').inputMode=mobile()&&keyboardOpen?'none':'text';
-    const t=G?.target,kana=keyboardOverride==null?(!!t?.kanaOnly||cfg.mode==='pair'):keyboardOverride;
-    $('keyboardModeBtn').classList.toggle('hidden',!keyboardOpen||!G?.drops.some(d=>d.kanaOnly));
-    $('keyboardModeBtn').textContent=kana?'ABC':'かな';$('keyboardModeBtn').setAttribute('aria-label',kana?'Switch keyboard to romaji letters':'Switch keyboard to kana');
+    const kana=cfg.mode==='pair';
     if(!keyboardOpen)return;
-    const kanaTarget=t?.kanaOnly?t:G?.drops.find(d=>d.kanaOnly);
-    const pool=kana&&kanaTarget?unlocked(D.kanaById[kanaTarget.id].script==='hiragana'?'katakana':'hiragana').map(k=>k.char):[];
+    const pool=kana?unlocked('hiragana').map(k=>k.char):[];
     // Pair mode can use hiragana counterparts even when katakana has progressed farther.
     if(kana){candidates().forEach(id=>{const k=D.kanaById[id];if(k){const c=opposite(k).char;if(!pool.includes(c))pool.push(c);}});}
     $('keyboard').classList.toggle('letters',!kana);
@@ -470,7 +467,6 @@
   $('answerForm').onsubmit=e=>{e.preventDefault();onInput(true);};$('answer').oninput=()=>onInput();
   $('answer').oncompositionstart=()=>{composing=true;if(G?.inputStartedAt==null&&!G?.paused&&running()){G.inputStartedAt=performance.now();G.inputPausedMs=0;}};$('answer').oncompositionend=()=>{composing=false;onInput();};
   $('keyboardBtn').onclick=()=>{keyboardOpen=!keyboardOpen;keyboard();if(keyboardOpen)$('answer').blur();else focusAnswer();};
-  $('keyboardModeBtn').onclick=()=>{keyboardOverride=$('keyboard').classList.contains('letters');const t=G?.drops.find(d=>d.kanaOnly);prepareAnswerFormat(keyboardOverride?scriptFormat(t):'romaji');keyboard();};
   $('keyboard').onclick=e=>{const b=e.target.closest('[data-key]');if(!b)return;if(!G||G.over||G.paused)return;const key=b.dataset.key;if(key==='enter')onInput(true);else{$('answer').value=key==='backspace'?$('answer').value.slice(0,-1):$('answer').value+key;onInput();}};
   $('gardenBtn').onclick=$('progressBtn').onclick=$('pauseGardenBtn').onclick=()=>openPanel('progressDialog');
   $('closeGarden').onclick=$('returnGarden').onclick=()=>closePanel('progressDialog');
