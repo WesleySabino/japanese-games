@@ -1,0 +1,86 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+async function checkPrefixInput(browser, baseUrl, { baseline = false } = {}) {
+  const artifacts = path.join(__dirname, 'artifacts/input-prefix');
+  fs.mkdirSync(artifacts, { recursive: true });
+  const checks = [], errors = [];
+  for (const mobile of [false, true]) {
+    const context = await browser.newContext({ viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 }, isMobile: mobile, hasTouch: mobile });
+    await context.addCookies([{ name: 'ng_analytics_consent', value: 'denied', url: baseUrl, sameSite: 'Lax' }]);
+    const page = await context.newPage();
+    page.on('pageerror', error => errors.push(error.message));
+    try {
+      await page.goto(new URL('?all', baseUrl).href);
+      await page.waitForFunction(() => !!window.KanaRain);
+      async function fixture(char = 'ん', partner = 'ね') {
+        await page.evaluate(({ char, partner }) => {
+          if (KanaRain.state && !KanaRain.state.over) KanaRain.end('Input regression fixture');
+          const mode = document.getElementById('mode');
+          mode.value = char === 'ン' ? 'kata' : 'hira'; mode.onchange();
+          KanaRain.start({ reviewIds: ['kana:' + char] });
+          KanaRain.state.queue = partner ? [{ id: 'kana:' + partner }] : [];
+          KanaRain.state.sinceSpawn = partner ? 99999 : -99999;
+        }, { char, partner });
+        await page.locator('#skipCountdown').click();
+        if (partner) await page.waitForFunction(() => KanaRain.state.drops.length === 2);
+        await page.evaluate(() => { KanaRain.state.sinceSpawn = -99999; });
+      }
+      async function type(text) {
+        if (mobile) for (const key of text) await page.locator('#keyboard [data-key="' + key + '"]').click();
+        else await page.locator('#answer').pressSequentially(text, { delay: 40 });
+      }
+      await fixture();
+      await type('n');
+      if (baseline) {
+        await page.waitForTimeout(700);
+        assert.equal(await page.evaluate(() => KanaRain.state.correct), 0);
+        assert.equal(await page.locator('#answer').inputValue(), 'n');
+        await page.screenshot({ path: path.join(artifacts, `before-${mobile ? 'mobile' : 'desktop'}.png`) });
+        checks.push({ mobile, reproducedStuckN: true });
+        continue;
+      }
+      await page.waitForFunction(() => KanaRain.state.correct === 1, null, { timeout: 1500 });
+      assert.equal(await page.locator('#answer').inputValue(), '');
+      assert.deepEqual(await page.evaluate(() => KanaRain.state.events.map(e => e.itemId)), ['kana:ん']);
+      assert.equal(await page.locator('.drop[data-id="kana:ね"]').count(), 1);
+      await page.screenshot({ path: path.join(artifacts, `after-${mobile ? 'mobile' : 'desktop'}.png`) });
+
+      await fixture(); await type('ne');
+      await page.waitForFunction(() => KanaRain.state.correct === 1);
+      await page.waitForTimeout(400);
+      assert.deepEqual(await page.evaluate(() => KanaRain.state.events.map(e => e.itemId)), ['kana:ね']);
+      assert.equal(await page.locator('#answer').inputValue(), '');
+
+      await fixture(); await type('nn');
+      await page.waitForFunction(() => KanaRain.state.correct === 1);
+      await page.waitForTimeout(400);
+      assert.equal(await page.evaluate(() => KanaRain.state.events.length), 1);
+      assert.equal(await page.locator('#answer').inputValue(), '');
+
+      // Same mechanism accepts the katakana nasal; no storage migration is involved.
+      await fixture('ン', 'ネ'); await type('n');
+      await page.waitForFunction(() => KanaRain.state.correct === 1, null, { timeout: 1500 });
+      assert.deepEqual(await page.evaluate(() => KanaRain.state.events.map(e => e.itemId)), ['kana:ン']);
+      const recorded = await page.evaluate(async () => { await Learner.flush(); return Learner.attempts(); });
+      await page.reload(); await page.waitForFunction(() => !!window.KanaRain);
+      assert.deepEqual(await page.evaluate(() => Learner.attempts()), recorded);
+      checks.push({ mobile, nAuto: true, neNotConsumed: true, nnSingleHit: true, katakana: true, historySurvivesReload: true });
+    } finally { await context.close(); }
+  }
+  assert.deepEqual(errors, []);
+  const report = { verifiedAt: new Date().toISOString(), baseUrl, isolatedProfiles: true, baseline, checks, errors };
+  fs.writeFileSync(path.join(artifacts, baseline ? 'baseline.json' : new URL(baseUrl).hostname === '127.0.0.1' ? 'local.json' : 'production.json'), JSON.stringify(report, null, 2) + '\n');
+  console.log(JSON.stringify(report));
+}
+module.exports = { checkPrefixInput };
+
+if (require.main === module) {
+  (async () => {
+    const { chromium } = require('playwright');
+    const browser = await chromium.launch({ headless: true });
+    try { await checkPrefixInput(browser, process.env.KANA_RAIN_TEST_URL || 'http://127.0.0.1:4173/', { baseline: process.env.EXPECT_PREFIX_STALL === '1' }); }
+    finally { await browser.close(); }
+  })().catch(error => { console.error(error); process.exitCode = 1; });
+}

@@ -346,6 +346,7 @@ async function exerciseQuickWins(errors){
     console.log('PASS: focused320portrait menu/game/dialogs, mascotbelowfield, stable romaji and explicit hiragana, touch/nativeEnter/Space, preserved partial input, portrait/landscape scrollable keyboard geometry.');
     await browser.close();server.kill();return;
   }
+  await require('./input.browser.cjs').checkPrefixInput(browser,'http://127.0.0.1:4180/');
   const context=await gameContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));

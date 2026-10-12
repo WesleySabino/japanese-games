@@ -266,7 +266,10 @@
       wakeLoop();return;
     }
     if(!G.paused&&!G.awaitingFeedback){
-      if(G.playStyle==='arcade')G.t-=dt;G.elapsed+=dt;G.sinceSpawn+=dt*1000;if(G.playStyle==='arcade'&&G.t<=0){end('Session complete','timer_elapsed');return;}
+      if(G.playStyle==='arcade')G.t-=dt;G.elapsed+=dt;G.sinceSpawn+=dt*1000;if(G.playStyle==='arcade'&&G.t<=0){completePendingAnswer();end('Session complete','timer_elapsed');return;}
+      // Complete an exact prefix after a brief typing pause; active time freezes with play.
+      if(G.pendingAnswer){G.pendingAnswer.remaining-=dt;if(G.pendingAnswer.remaining<=0)completePendingAnswer();}
+      if(G.over||G.paused||G.awaitingFeedback)return;
       const weather=R.atTime(G.difficulty,G.elapsed,G.playStyle);G.speed=weather.speed;G.gap=weather.gap;
       if(!G.queue.length&&G.playStyle==='arcade')refill();
       const cap=G.playStyle==='practice'?1:Math.min(R.profiles[G.difficulty].maxDrops,2+Math.floor(G.correct/8));
@@ -277,7 +280,11 @@
       }
       const H=fieldSize.height;
       [...G.drops].forEach(d=>{if(G.over)return;d.progress+=G.speed*d.v*dt;
-        if(d.progress>=1){miss(d);return;}positionDrop(d,H);
+        if(d.progress>=1){
+          // A correct answer entered in time must not lose a heart to our ambiguity delay.
+          if(G.pendingAnswer?.drop===d)completePendingAnswer();
+          if(G.drops.includes(d))miss(d);return;
+        }positionDrop(d,H);
         const danger=d.progress>=.78;if(d.danger!==danger){d.danger=danger;d.el.classList.toggle('danger',danger);}
         if(danger&&!d.warned){d.warned=true;if(G.elapsed-G.lastWarning>=3){sfx('warning');G.lastWarning=G.elapsed;}}
       });
@@ -320,7 +327,7 @@
     L.flush();G.recent.push(correct?1:0);if(G.recent.length>12)G.recent.shift();return ev;
   }
   function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
-  function remove(d,pop=false){dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
+  function remove(d,pop=false){if(G.pendingAnswer?.drop===d)G.pendingAnswer=null;dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
   function hit(d){
     const ev=record(d,true,{response:d.submittedResponse,reason:'accepted'});G.streak=d.wrong?0:G.streak+1;G.score+=Math.round((ev.assistance?5:10)*(1+Math.min(G.streak,10)*.1)*(d.wrong?.3:1));
     G.bestStreak=Math.max(G.bestStreak,G.streak);
@@ -381,13 +388,24 @@
       }
     });
   }
+  function submitMatchedAnswer(drop,value){
+    G.pendingAnswer=null;drop.submittedResponse=value;$('answer').value='';hit(drop);
+  }
+  function completePendingAnswer(){
+    const pending=G.pendingAnswer;G.pendingAnswer=null;
+    if(pending&&!composing&&normalize($('answer').value)===pending.value&&G.drops.includes(pending.drop))submitMatchedAnswer(pending.drop,pending.value);
+  }
   function onInput(force=false){
+    if(G)G.pendingAnswer=null;
     if(!G||G.over||G.paused||G.awaitingFeedback||composing)return;const v=normalize($('answer').value);if(!v)return;
     if(G.inputStartedAt==null){G.inputStartedAt=performance.now();G.inputPausedMs=0;}
     const matches=[...G.drops].sort((a,b)=>b.y-a.y);const match=matches.find(d=>accepted(d).includes(v));
     const longer=G.drops.some(d=>accepted(d).some(a=>a.length>v.length&&a.startsWith(v)));
-    // n may be the start of na/ni/etc even when those kana are not currently falling.
-    if(match && (force||(!longer&&v!=='n'))){match.submittedResponse=v;$('answer').value='';hit(match);return;}
+    if(match){
+      if(force||!longer)submitMatchedAnswer(match,v);
+      else G.pendingAnswer={drop:match,value:v,remaining:.3};
+      return;
+    }
     if(force){const t=lowest();if(t)wrong(t,v);$('answer').value='';$('answer').classList.add('bad');setTimeout(()=>$('answer').classList.remove('bad'),300);}
   }
   function hud(){
@@ -409,7 +427,7 @@
     G.last=performance.now();
     if(value)stopLoop();syncAnimationState();
   }
-  function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}syncAnimationState();L.flush();}
+  function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.pendingAnswer=null;G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}syncAnimationState();L.flush();}
   function end(reason,completionReason='manual_finish'){
     if(!G||G.over)return;
     const key=G.bestKey,first=G.events.filter(e=>e.firstAttempt&&e.outcome!=='timeout'),independent=first.filter(e=>!e.assistance),independentCorrect=independent.filter(e=>e.correct),helpCorrect=G.events.filter(e=>e.correct&&e.assistance),expired=G.events.filter(e=>e.outcome==='timeout');
@@ -467,7 +485,7 @@
   $('reviewPracticeBtn').onclick=()=>start({reviewIds:lastReview});
   $('pauseBtn').onclick=()=>pause();$('resumeBtn').onclick=()=>pause(false);$('finishBtn').onclick=()=>end('Session finished');
   $('answerForm').onsubmit=e=>{e.preventDefault();onInput(true);};$('answer').oninput=()=>onInput();
-  $('answer').oncompositionstart=()=>{composing=true;if(G?.inputStartedAt==null&&!G?.paused&&running()){G.inputStartedAt=performance.now();G.inputPausedMs=0;}};$('answer').oncompositionend=()=>{composing=false;onInput();};
+  $('answer').oncompositionstart=()=>{composing=true;if(G)G.pendingAnswer=null;if(G?.inputStartedAt==null&&!G?.paused&&running()){G.inputStartedAt=performance.now();G.inputPausedMs=0;}};$('answer').oncompositionend=()=>{composing=false;onInput();};
   $('keyboardBtn').onclick=()=>{keyboardOpen=!keyboardOpen;keyboard();if(keyboardOpen)$('answer').blur();else focusAnswer();};
   $('keyboard').onclick=e=>{const b=e.target.closest('[data-key]');if(!b)return;if(!G||G.over||G.paused)return;const key=b.dataset.key;if(key==='enter')onInput(true);else{$('answer').value=key==='backspace'?$('answer').value.slice(0,-1):$('answer').value+key;onInput();}};
   $('gardenBtn').onclick=$('progressBtn').onclick=$('pauseGardenBtn').onclick=()=>openPanel('progressDialog');
