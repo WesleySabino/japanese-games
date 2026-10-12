@@ -260,7 +260,7 @@
     raf=0;
     if(!G||G.over)return;const dt=Math.min(.1,Math.max(0,(now-G.last)/1000));G.last=now;
     if(G.countingDown){
-      const remaining=Math.ceil((G.countdownEnd-now)/1000);
+      const remaining=Math.min(3,Math.ceil((G.countdownEnd-now)/1000));
       if(remaining<=0)completeCountdown();
       else if(remaining!==G.countdownValue){G.countdownValue=remaining;$('countdownNumber').textContent=remaining;sfx('tick');}
       wakeLoop();return;

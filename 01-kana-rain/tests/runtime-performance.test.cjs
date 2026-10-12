@@ -84,6 +84,21 @@ async function runtime(options = {}) {
   };
 }
 
+test('countdown stays at three when the first animation frame predates its start', async () => {
+  const g = await runtime(); g.app.start();
+  const before = { time: g.app.state.t, elapsed: g.app.state.elapsed, progress: g.app.state.drops[0].progress };
+  const callbacks = [...g.frames.values()]; g.frames.clear();
+  // A frame timestamp can precede performance.now() sampled while handling Start.
+  callbacks.forEach(callback => callback(999));
+  assert.equal(g.el('countdownNumber').textContent, '3');
+  assert.deepEqual({ time: g.app.state.t, elapsed: g.app.state.elapsed, progress: g.app.state.drops[0].progress }, before);
+  g.tick(1100); assert.equal(g.el('countdownNumber').textContent, '2');
+  g.tick(1000); assert.equal(g.el('countdownNumber').textContent, '1');
+  g.tick(900); assert.equal(g.app.state.countingDown, false);
+  assert.equal(g.app.state.paused, false);
+  assert.deepEqual({ time: g.app.state.t, elapsed: g.app.state.elapsed, progress: g.app.state.drops[0].progress }, before);
+});
+
 test('a paused or hidden session has no queued animation work, and resumes without adding paused time', async () => {
   const g = await runtime(); g.app.start();
   assert.equal(g.frames.size, 1, 'initial countdown is awake'); g.skip(); g.tick();
