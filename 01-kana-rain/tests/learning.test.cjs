@@ -12,7 +12,8 @@ async function model(options={}){
   class Clock extends Date{static now(){return now;}}
   const localStorage={getItem:k=>map.get(k)||null,setItem(k,v){if(options.denyStorage)throw new Error('denied');map.set(k,v);if(k==='jp-learner-v1')journalWrites.push(v);},removeItem:k=>map.delete(k)};
   const countedJSON=Object.create(JSON);countedJSON.stringify=(...args)=>{serialization.stringifies++;return JSON.stringify(...args);};countedJSON.parse=(...args)=>{serialization.parses++;return JSON.parse(...args);};
-  const context=vm.createContext({Date:Clock,Math,JSON:options.countJSON?countedJSON:JSON,console,localStorage,queueMicrotask});context.window=context;
+  const math=options.random?Object.assign(Object.create(Math),{random:options.random}):Math;
+  const context=vm.createContext({Date:Clock,Math:math,JSON:options.countJSON?countedJSON:JSON,console,localStorage,queueMicrotask});context.window=context;
   if(options.idb){context.indexedDB={open(){const request={};queueMicrotask(()=>{request.result={transaction(name,mode){const tx={};tx.objectStore=()=>({get(){const read={};queueMicrotask(()=>{read.result=options.idbSaved;read.onsuccess?.();});return read;},put(snapshot,key){writes.push({tx,snapshot,key});return {};}});return tx;}};request.onsuccess?.();});return request;}};}
   vm.runInContext(source('data'),context);vm.runInContext(source('learner'),context);await context.Learner.ready;
   return {context,D:context.JPData,L:context.Learner,map,writes,journalWrites,serialization,advance:ms=>now+=ms};
@@ -40,6 +41,72 @@ function seedFamiliarReadings(L,D,ids=D.kana.map(k=>k.id).concat(D.words.map(w=>
   for(const id of ids)for(let review=0;review<6;review++)L.record(id,'form→sound',first(`familiar:${id}:${review}`,{now:1700000000000-(5-review)*7*86400000,deferSave:true}));
   L.flush();
 }
+function seededRandom(seed=42){return ()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);}
+function nextDrop(g){
+  if(!g.app.state.drops.length){g.app.state.sinceSpawn=99999;g.tick();}
+  const drop=g.app.state.drops[0];assert.ok(drop,'an eligible drop is available');return drop;
+}
+function answerNext(g){const drop=nextDrop(g);g.submit(g.app.accepted(drop)[0]);return drop;}
+
+test('continuous assisted arcade answers unlock K and S without waiting for independent evidence',async()=>{
+  const g=await game({random:seededRandom()});g.app.start();g.skip();
+  const started=g.context.Date.now(),unlocks=[];
+  for(let answers=0;answers<160&&g.app.gameData.rows.hiragana<3;answers++){
+    const before=g.app.gameData.rows.hiragana;answerNext(g);
+    if(g.app.gameData.rows.hiragana!==before)unlocks.push(g.app.gameData.rows.hiragana);
+  }
+  assert.deepEqual(unlocks,[2,3],'a fresh garden can earn two successive rows through actual answers');
+  assert.ok(g.context.Date.now()-started<60000,'the whole run stays inside the assistance window');
+  const attempts=g.L.attempts();assert.ok(attempts.length>=20);
+  assert.ok(attempts.every(event=>event.correct&&event.firstAttempt&&event.assistance===true));
+  assert.ok(g.L.exposures().some(event=>event.reason==='answer-feedback'),'normal reading feedback is retained');
+  for(const k of g.D.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row))){
+    const f=g.L.state(k.id).facets['form→sound'];assert.ok(f.firstCorrect>=2,k.id);assert.equal(f.independentFirstCorrect,0,k.id);assert.equal(f.assistedCorrect,f.correct,k.id);
+  }
+  assert.equal(g.app.state.lives,3);assert.ok(g.app.state.streak>=20);
+  // Newly earned content must actually enter the ongoing rain, with its first-reading hint.
+  let introduced;
+  for(let n=0;n<8;n++){const drop=nextDrop(g);if(g.D.kanaById[drop.id].row==='s'){introduced=drop;break;}answerNext(g);}
+  assert.ok(introduced,'an S-row kana enters the next batch');assert.ok(introduced.el.children.some(child=>child.className==='hint'));
+});
+
+test('correcting a wrong first answer and timing out do not earn first-answer unlock successes',async()=>{
+  const g=await game({prepare(L,D){
+    for(const k of D.kana.filter(k=>k.script==='hiragana'&&k.row==='a'&&k.char!=='あ'))for(let n=0;n<2;n++)L.record(k.id,'form→sound',first(`ready:${k.id}:${n}`,{assistance:true}));
+  }});g.app.start({reviewIds:['kana:あ']});g.skip();
+  const wrongDrop=nextDrop(g);g.submit('not-an-answer');assert.equal(wrongDrop.v,1.45,'arcade mistake acceleration remains');g.submit('a');
+  let f=g.L.state('kana:あ').facets['form→sound'];assert.equal(f.correct,1);assert.equal(f.firstCorrect,0);assert.equal(f.firstAttempts,1);assert.equal(g.app.gameData.rows.hiragana,1);
+  const missed=nextDrop(g);missed.progress=1;g.tick();
+  f=g.L.state('kana:あ').facets['form→sound'];assert.equal(f.timeouts,1);assert.equal(f.firstCorrect,0);assert.equal(f.firstAttempts,1);assert.equal(g.app.state.lives,2);assert.equal(g.app.gameData.rows.hiragana,1);
+  answerNext(g);f=g.L.state('kana:あ').facets['form→sound'];assert.equal(f.correct,2);assert.equal(f.firstCorrect,1);assert.equal(g.app.gameData.rows.hiragana,1,'two total successes cannot substitute for two first-answer successes');
+});
+
+test('the 85 percent first-answer threshold still gates every earlier unlocked row',async()=>{
+  const g=await game({prepare(L,D){
+    L.gameData('kana-rain').rows={hiragana:2,katakana:1};
+    for(const k of D.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row)))for(let n=0;n<(k.char==='あ'?4:2);n++)L.record(k.id,'form→sound',first(`ready:${k.id}:${n}`,{assistance:true}));
+    L.record('kana:あ','form→sound',first('old-row-error',{correct:false,assistance:true}));
+    L.recordExposure('kana:あ','form→sound',{reason:'answer-feedback'});
+  }});g.app.start({reviewIds:['kana:あ']});g.skip();
+  let f=g.L.state('kana:あ').facets['form→sound'];assert.equal(f.firstCorrect/f.firstAttempts,.8);
+  answerNext(g);assert.equal(g.app.gameData.rows.hiragana,2,'5/6 in an earlier row still blocks S even when every K kana is ready');
+  answerNext(g);f=g.L.state('kana:あ').facets['form→sound'];assert.equal(f.firstCorrect,6);assert.equal(f.firstAttempts,7);assert.equal(f.independentFirstCorrect,0);assert.equal(g.app.gameData.rows.hiragana,3,'6/7 first answers pass 85 percent without rewriting independence');
+});
+
+test('assisted progress and existing records survive reload and unlock the next row on another hit',async()=>{
+  const original=await model(),gd=original.L.gameData('kana-rain');
+  Object.assign(gd,{rows:{hiragana:2,katakana:3},best:{'hira:normal:180':1981,'kata:normal:180':321},accuracy:{hira:{attempts:20,correct:20}},playStyle:'arcade',sound:false,featuresIntro:{sokuon:true}});
+  for(const k of original.D.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row)))for(let n=0;n<2;n++)original.L.record(k.id,'form→sound',first(`saved:${k.id}:${n}`,{assistance:true,assistanceReasons:['recent-answer-feedback']}));
+  original.L.recordExposure('kana:あ','form→sound',{exposureId:'saved-feedback',reason:'answer-feedback'});await original.L.flush();
+  const saved=JSON.parse(original.L.export()),g=await game({map:original.map});
+  assert.deepEqual(plain(g.L.attempts()),saved.attemptLedger);assert.deepEqual(plain(g.L.exposures().slice(0,saved.exposureLedger.length)),saved.exposureLedger);
+  assert.deepEqual(plain(g.app.gameData),saved.games['kana-rain']);
+  g.app.start({reviewIds:['kana:あ']});g.skip();answerNext(g);assert.equal(g.app.gameData.rows.hiragana,3);assert.equal(g.app.gameData.rows.katakana,3);assert.deepEqual(plain(g.app.gameData.best),saved.games['kana-rain'].best);
+  assert.deepEqual(plain(g.L.attempts().slice(0,saved.attemptLedger.length)),saved.attemptLedger,'old evidence is neither rewritten nor discarded');
+  const again=await model({map:g.map}),after=JSON.parse(again.L.export());
+  assert.equal(after.version,2);assert.deepEqual(after.games['kana-rain'].rows,{hiragana:3,katakana:3});assert.deepEqual(after.games['kana-rain'].best,saved.games['kana-rain'].best);assert.equal(after.attemptLedger.length,saved.attemptLedger.length+1);
+  for(const k of original.D.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row)))assert.equal(again.L.state(k.id).facets['form→sound'].independentFirstCorrect,0);
+});
 
 test('attempt IDs survive duplicate delivery and export/reload; timeout is not an invented wrong answer',async()=>{
   const m=await model();m.L.record('kana:あ','form→sound',first('a',{firstResponseMs:4000,inputActiveMs:300,displayActiveMs:4000,waitMs:3700}));m.L.record('kana:あ','form→sound',first('a'));
@@ -54,7 +121,9 @@ test('legacy export keeps earned rows, unknown assistance and dated legacy error
   const m=await model();const old={version:1,created:1,items:{'kana:あ':{itemId:'kana:あ',facets:{'form→sound':{correct:6,errors:1,unaided:5,stability:2,difficulty:5,lastReview:1,reps:7}},confusions:{'kana:い':2},flags:{},scaffold:{}}},games:{'kana-rain':{rows:{hiragana:8,katakana:4},best:{'hira:normal:180':22}}},errorLog:[{itemId:'kana:あ',confusedWith:'kana:い',at:5,gameId:'kana-rain'}]};
   await m.L.import(JSON.stringify(old));const exported=JSON.parse(m.L.export()),f=m.L.state('kana:あ').facets['form→sound'];
   assert.equal(f.correct,6);assert.equal(f.unknownCorrect,6);assert.equal(f.unaided,0);assert.equal(f.independentFirstCorrect,0);assert.equal(exported.attemptLedger.length,0);assert.equal(exported.legacyErrorLog[0].at,5);assert.equal(m.L.gameData('kana-rain').rows.hiragana,8);
-  const again=await model({map:m.map});assert.equal(again.L.state('kana:あ').facets['form→sound'].correct,6);assert.equal(again.L.state('kana:あ').facets['form→sound'].unaided,0);
+  const again=await game({map:m.map});assert.equal(again.L.state('kana:あ').facets['form→sound'].correct,6);assert.equal(again.L.state('kana:あ').facets['form→sound'].unaided,0);
+  assert.deepEqual(plain(again.app.gameData.rows),old.games['kana-rain'].rows);assert.deepEqual(plain(again.app.gameData.best),old.games['kana-rain'].best);assert.equal(again.L.state('kana:あ').facets['form→sound'].firstCorrect,0);assert.equal(again.L.attempts().length,0);
+  const migrated=JSON.parse(again.L.export());assert.deepEqual(migrated.legacyErrorLog,old.errorLog);assert.equal(migrated.items['kana:あ'].legacyFacets['form→sound'].correct,6);
 });
 
 test('revealed answers stay assisted across future rounds until time and distinct intervening opportunities both pass',async()=>{

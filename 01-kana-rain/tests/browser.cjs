@@ -381,7 +381,7 @@ async function exerciseQuickWins(errors){
   assert.ok(await page.locator('#masteryMap button').count()>100);
   assert.match(await page.locator('#unlockSummary').textContent(),/0\s*\/\s*5/);
   assert.equal(await page.locator('#unlockDetails .unlock-item').count(),5);
-  assert.match(await page.locator('#unlockNote').textContent(),/2 independent first.*85%.*independent first/);
+  assert.match(await page.locator('#unlockNote').textContent(),/2 correct first answers.*85% first-answer accuracy/);
   await assertWholeViewport(page,'Desktop progress menu');
   await page.locator('#closeGarden').click();
   assert.equal(await page.locator('#welcome').isVisible(),true);

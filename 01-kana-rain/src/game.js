@@ -113,14 +113,16 @@
   }
   const bestKey=(duration=cfg.duration,review=false)=>`${cfg.mode}:${cfg.difficulty}:${cfg.playStyle==='practice'?'practice:8':duration}${review?':review':''}`;
   function readiness(k){
-    const f=L.state(k.id)?.facets[FACET],unaided=f?.independentFirstCorrect||0,attempts=f?.independentFirstAttempts||0,accuracy=attempts?(unaided/attempts):0;
-    return {k,unaided,accuracy,attempts,ready:unaided>=2&&accuracy>=.85};
+    // Arcade progress rewards first-try hits; normal reading feedback must not block it.
+    // Independent recall remains separate evidence in the learner's unchanged history.
+    const f=L.state(k.id)?.facets[FACET],correct=f?.firstCorrect||0,attempts=f?.firstAttempts||0,accuracy=attempts?(correct/attempts):0;
+    return {k,correct,accuracy,attempts,ready:correct>=2&&accuracy>=.85};
   }
   function renderUnlocks(script){
     const count=gd.rows[script],next=D.rowsOrder[count],rows=unlocked(script).map(readiness),ready=rows.filter(x=>x.ready).length;
     $('unlockSummary').textContent=explore?'All rows available in exploration':!next?'All rows unlocked':`${ready} / ${rows.length} kana ready for the next row`;
     $('unlockBar').style.width=(rows.length?ready/rows.length*100:0)+'%';
-    $('unlockDetails').innerHTML=rows.map(({k,unaided,accuracy,attempts,ready})=>`<div class="unlock-item ${ready?'ready':'pending'}"><span lang="ja">${k.char}</span><span>${k.romaji}</span><small>${Math.min(2,unaided)}/2 independent first · ${attempts?Math.floor(accuracy*100)+'%':'No independent answers yet'}</small><span aria-label="${ready?'Ready':'Keep practicing'}">${ready?'✓':'○'}</span></div>`).join('');
+    $('unlockDetails').innerHTML=rows.map(({k,correct,accuracy,attempts,ready})=>`<div class="unlock-item ${ready?'ready':'pending'}"><span lang="ja">${k.char}</span><span>${k.romaji}</span><small>${Math.min(2,correct)}/2 first-try hits · ${attempts?Math.floor(accuracy*100)+'%':'No answers yet'}</small><span aria-label="${ready?'Ready':'Keep practicing'}">${ready?'✓':'○'}</span></div>`).join('');
   }
   function renderBest(){const best=gd.best[bestKey()]||0;$('menuBest').textContent=best?`Personal best · ${best} points`:'Your first personal best is waiting';}
   function spirit(mood){clearTimeout(spiritTimer);$('fieldSpirit').className='spirit '+mood;spiritTimer=setTimeout(()=>$('fieldSpirit').className='spirit idle',900);}
@@ -140,7 +142,7 @@
     const sc=mapScript, rows=unlocked(sc), count=explore?D.rowsOrder.length:gd.rows[sc], row=D.rowsOrder[count-1];
     const current=rows.filter(k=>k.row===row);$('rowName').textContent=rowNames[row]||row.toUpperCase()+'-row';
     $('lesson').innerHTML=current.map(k=>`<button data-kana="${k.char}" data-known="${L.mastery(k.id,FACET)>=.55}" aria-label="Listen to ${k.char}, ${k.romaji}">${k.char}<small>${k.romaji}</small></button>`).join('');
-    $('unlockNote').textContent=explore?'Exploration: all kana are available. Word features are introduced before use.':'Each unlocked kana needs 2 independent first-answer successes and at least 85% accuracy on independent first answers. Reference help stays marked until 60 seconds and two other items have passed. This is a practice estimate.';
+    $('unlockNote').textContent=explore?'Exploration: all kana are available. Word features are introduced before use.':'Each available kana needs 2 correct first answers and at least 85% first-answer accuracy. Reading hints and pronunciation do not block unlocks.';
     const next=D.rowsOrder[count];$('milestone').textContent=next?'Meet '+(rowNames[next]||next.toUpperCase()+'-row'):'Your whole kana garden';
     $('milestoneKana').textContent=next?D.kana.filter(k=>k.script===sc && k.row===next).map(k=>k.char).join(' '):'Keep your reading growing';
     invalidateProgress();renderBest();renderEffects();
