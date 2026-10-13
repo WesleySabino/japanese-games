@@ -61,7 +61,7 @@ async function runtime(options = {}) {
     unobserve(target) { this.targets.delete(target); }
   }
   const storage = new Map(), context = vm.createContext({
-    document, location: { search: options.explore ? '?all' : '' }, navigator: {}, performance: { now: () => now },
+    document, location: { hostname: '127.0.0.1', search: options.explore ? '?all' : '' }, navigator: {}, performance: { now: () => now },
     URL, URLSearchParams, Blob, console, queueMicrotask, ResizeObserver,
     innerWidth: options.mobile ? 390 : 1000, innerHeight: 800, matchMedia: () => ({ matches: !!options.mobile }),
     localStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
@@ -71,7 +71,7 @@ async function runtime(options = {}) {
     KanaAudio: { enabled: true, ready: Promise.resolve(), available: true, play: async () => false, stop() {}, hasRecording: () => false }
   });
   context.window = context;
-  for (const name of ['data', 'learner', 'difficulty', 'novelty', 'game']) {
+  for (const name of ['data', 'learner', 'difficulty', 'novelty', 'novelty-hud', 'game']) {
     await vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/' + name + '.js'), 'utf8'), context);
   }
   return {

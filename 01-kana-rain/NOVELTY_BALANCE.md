@@ -26,3 +26,14 @@ Every subsequent presentation and completed drop saves through the learner's exi
 Unit and game integration tests cover the 10-hit/2-timeout case, recovery, restart and reload, distinct completed drops, migration without rewriting evidence, familiar openings, starter vowels, queue refills, confusion partners, first presentation before an answer, and continued play after the budget is exhausted. Existing input, arcade difficulty, storage, offline and performance checks remain applicable.
 
 The private local-preview helper in `.release/` can seed a supplied progress export once per browser before the game starts. Its snapshot and routes are not part of the production build; later local progress is not replaced on reload.
+
+## Local HUD experiment — `codex/kana-rain-hud-test`
+
+The approved compact HUD sits alongside Score, Streak and Time. It is enabled only on `localhost`, `127.0.0.1` or `[::1]`; hosted pages retain their previous HUD. This branch is for local playtesting only, with no production deployment or merge to `main`.
+
+- **NEW KANA · OPEN / ON HOLD** reflects the saved admission brake. The actual recent sample size, first-try hits and expirations are shown below it on wider screens. An open pressure gate does not promise that the next drop is new.
+- **INTRODUCED n / 2** counts non-starter kana actually presented for the first time in this session, before an answer. Its caption distinguishes recovery, familiar-drop spacing, an active debut, starter-vowel exceptions and an exhausted budget.
+- The two indicators remain in the same row as the three statistics at all supported sizes. Small screens retain the status and count; the complete explanation remains available as the group's accessible description and native hover title. Word and script-matching modes do not display these kana-reading diagnostics.
+- `src/novelty-hud.js` derives a read-only snapshot. Rendering happens on session changes, completed answers and spawning, not on each animation frame. It never changes the learner, admission rules, rain speed, hearts, scoring or saved history.
+
+Run `npm run test:novelty-hud` for isolated browser checks of recovery, first presentation, spacing, limits, restart/reload, responsive geometry and the non-local hostname guard. Screenshots and verification data are written to the ignored `tests/artifacts/novelty-hud/` directory; no production profile is opened or changed.

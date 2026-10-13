@@ -7,6 +7,8 @@
   gd.rows=gd.rows || {hiragana:1,katakana:1}; gd.best=gd.best || {}; gd.accuracy=gd.accuracy || {};
   let novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});
   const explore=new URLSearchParams(location.search).has('all');
+  // This diagnostic HUD belongs to the local playtest branch, never the hosted game.
+  const localNoveltyHud=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
   let cfg={mode:'hira',duration:180,difficulty:R.profiles[gd.difficulty]?gd.difficulty:'normal',playStyle:gd.playStyle==='practice'?'practice':'arcade'}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
@@ -18,6 +20,11 @@
   function wakeLoop(){if(!raf&&running()&&!document.hidden&&(G.countingDown||(!G.paused&&!G.awaitingFeedback)))raf=requestAnimationFrame(loop);}
   function syncAnimationState(){document.body.classList.toggle('game-paused',document.hidden||!!(running()&&(G.paused||G.countingDown||G.awaitingFeedback)));}
   function textIfChanged(el,value){value=String(value);if(el.textContent!==value)el.textContent=value;}
+  function statText(id,value){
+    const el=$(id),text=String(value),chars=String(text.length);
+    if(el.dataset.hudChars!==chars){el.dataset.hudChars=chars;el.style.setProperty('--hud-stat-chars',chars);}
+    textIfChanged(el,text);
+  }
   function invalidateProgress(){progressDirty=true;renderProgress();}
   function renderProgress(force=false){if(force||progressDirty&&$('progressDialog').open){renderMap();renderUnlocks(mapScript);progressDirty=false;}}
   function focusAnswer(){if(!running() || G.paused || G.countingDown)return;$('answer').inputMode=mobile()&&keyboardOpen?'none':'text';$('answer').focus({preventScroll:true});}
@@ -281,7 +288,7 @@
     const d={...round,...view,hint:view.hint||prior.assisted,roundId:`${G.sessionId}:r:${++G.roundSerial}`,attemptCount:0,assistanceReasons:new Set([...(view.hint?['initial-reading']:[]),...(prior.assisted?prior.reasons:[])]),firstResponseMs:null,x,y:8,progress:0,w,h,wrong:0,v:1,born:performance.now(),pausedMs:0};
     d.isIntroduction=isIntroduction;
     if(isIntroduction){N.markSeen(novelty,d.id);if(!starter(d.id))G.newIds.add(d.id);G.familiarSinceIntroduction=0;}
-    G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);if(G.target)keyboard();return d;
+    G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);if(G.target)keyboard();renderNoveltyHud();return d;
   }
   function place(d){d.el.style.transform=`translate(${d.x}px,${d.y}px)`;}
   function positionDrop(d,H=fieldSize.height){
@@ -323,7 +330,7 @@
         if(danger&&!d.warned){d.warned=true;if(G.elapsed-G.lastWarning>=3){sfx('warning');G.lastWarning=G.elapsed;}}
       });
       const danger=G.drops.some(d=>d.progress>=.78);if(G.dangerActive!==danger){G.dangerActive=danger;$('field').querySelector('.waterline').classList.toggle('danger-active',danger);}
-      updateTarget();textIfChanged($('time'),G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t));
+      updateTarget();statText('time',G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t));
     }
     wakeLoop();
   }
@@ -446,12 +453,27 @@
     }
     if(force){const t=lowest();if(t)wrong(t,v);$('answer').value='';$('answer').classList.add('bad');setTimeout(()=>$('answer').classList.remove('bad'),300);}
   }
+  function renderNoveltyHud(){
+    const panel=$('noveltyHud');
+    const visible=localNoveltyHud&&G&&readingAdmission();
+    panel.classList.toggle('hidden',!visible);$('gameHud').classList.toggle('has-novelty',!!visible);
+    if(!visible)return;
+    const ids=G.reviewIds||candidates();
+    const state=window.KanaNoveltyHud.snapshot(novelty,G,{constants:N.constants,
+      knownAvailable:ids.some(id=>N.hasSeen(novelty,id)),starterAvailable:ids.some(id=>!N.hasSeen(novelty,id)&&starter(id))});
+    panel.dataset.gate=state.gate;panel.dataset.reason=state.reason;
+    textIfChanged($('noveltyGate'),state.gateLabel);textIfChanged($('noveltyRecent'),state.recentText);
+    textIfChanged($('noveltyIntroduced'),`${state.introduced} / ${state.maxNew}`);
+    textIfChanged($('noveltySession'),state.sessionText);textIfChanged($('noveltyDetails'),state.detail);
+    panel.title=state.detail;
+  }
   function hud(){
-    $('score').textContent=String(G.score).padStart(3,'0');$('streak').textContent=G.streak>1?'×'+G.streak:'—';
-    textIfChanged($('time'),G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t));
+    statText('score',String(G.score).padStart(3,'0'));statText('streak',G.streak>1?'×'+G.streak:'—');
+    statText('time',G.playStyle==='practice'?`${G.practiceCompleted}/${G.practiceTotal}`:fmt(G.t));
     const caption=$('time').parentElement?.querySelector('small');if(caption)caption.textContent=G.playStyle==='practice'?'ITEMS':'TIME';
     $('lives').classList.toggle('hidden',G.playStyle==='practice');$('lives').textContent=G.playStyle==='practice'?'':'♥ '.repeat(G.lives)+'♡ '.repeat(G.totalLives-G.lives);
     $('lives').setAttribute('aria-label',G.playStyle==='practice'?'Practice has no hearts':`${G.lives} of ${G.totalLives} hearts remaining`);document.body.classList.toggle('low-hearts',G.playStyle==='arcade'&&G.lives===1);
+    renderNoveltyHud();
   }
   function pause(value=(G?.countingDown||!G?.paused),showDialog=true){
     if(!running())return;

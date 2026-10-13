@@ -8,6 +8,7 @@
     "test": "node --test tests/*.test.cjs tests/*.test.mjs",
     "test:analytics": "node --test tests/analytics.test.mjs tests/analytics-game.test.mjs",
     "test:browser": "node tests/browser.cjs",
+    "test:novelty-hud": "node tests/novelty-hud.browser.cjs",
     "test:improvements": "node tests/improvements.browser.cjs",
     "test:performance": "node --test tests/runtime-performance.test.cjs tests/production-performance.test.cjs",
     "assets": "node scripts/prepare-assets.cjs",

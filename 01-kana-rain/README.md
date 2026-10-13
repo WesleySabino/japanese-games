@@ -20,6 +20,8 @@ The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the impleme
 
 The [local novelty-pacing prototype](./NOVELTY_BALANCE.md) documents the persistent pressure brake and gradual first presentations, including starter exceptions and preservation of existing progress.
 
+Branch `codex/kana-rain-hud-test` adds an experimental local-only HUD for these two rules, in the same row as Score, Streak and Time. It is a playtest branch, not a production release. Run `pnpm run test:novelty-hud` for its focused browser checks.
+
 The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.1. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
 
 ## Play locally

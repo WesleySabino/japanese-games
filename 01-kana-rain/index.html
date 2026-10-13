@@ -55,6 +55,7 @@
   <script defer src="src/sfx.js"></script>
   <script defer src="src/difficulty.js"></script>
   <script defer src="src/novelty.js"></script>
+  <script defer src="src/novelty-hud.js"></script>
   <script defer src="src/game.js"></script>
   <link rel="stylesheet" href="/assets/nihongo-analytics.css">
   <script defer src="/assets/nihongo-analytics.js" data-app="rain" data-measurement-id="G-F69S8JDW5M"></script>
@@ -82,11 +83,25 @@
     <header id="gameHud" class="game-hud hidden" aria-label="Game status">
       <div class="mode-plaque"><svg class="control-icon" aria-hidden="true"><use href="#icon-leaf"/></svg><span id="gameLabel">Normal · Hiragana</span></div>
       <span id="personalBest" class="personal-best">BEST 0</span>
+      <div class="hud-readouts">
       <div class="hud-stats">
         <div class="stat"><small>SCORE</small><b id="score">000</b></div>
         <div class="stat"><small>STREAK</small><b id="streak">—</b></div>
         <div class="stat"><small>TIME</small><b id="time">3:00</b></div>
         <span id="lives" class="lives" aria-label="3 hearts">♥ ♥ ♥</span>
+      </div>
+      <div id="noveltyHud" class="novelty-hud hidden" role="group" aria-label="New kana pacing" aria-describedby="noveltyDetails" tabindex="0">
+        <svg class="novelty-icon control-icon" aria-hidden="true"><use href="#icon-leaf"/></svg>
+        <div class="novelty-pressure">
+          <div class="novelty-heading"><span class="novelty-label">NEW KANA</span><span class="novelty-separator" aria-hidden="true">·</span><strong id="noveltyGate" role="status" aria-live="polite">OPEN</strong></div>
+          <small id="noveltyRecent" class="novelty-detail"></small>
+        </div>
+        <div class="novelty-session">
+          <div class="novelty-heading"><span class="novelty-label">INTRODUCED</span><strong id="noveltyIntroduced">0 / 2</strong></div>
+          <small class="novelty-detail"><span class="novelty-session-prefix">This session · </span><span id="noveltySession"></span></small>
+        </div>
+        <span id="noveltyDetails" class="sr-only"></span>
+      </div>
       </div>
       <div class="hud-actions">
         <button id="listenBtn" class="hud-button" aria-label="Listen to the target kana" title="Listen (assisted answer)"><svg class="control-icon" aria-hidden="true"><use href="#icon-sound"/></svg><span class="sr-only">Listen</span></button>

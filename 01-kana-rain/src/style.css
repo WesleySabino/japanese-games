@@ -34,7 +34,7 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .is-menu .scene-vignette { background:radial-gradient(ellipse at 50% 39%,#061f2530,transparent 55%,#031c1f30); }
 
 /* The warm, chamfered frames keep controls inside the illustrated world. */
-.menu-button,.session-selectors,.mode-plaque,.stat,.answer-bar,.utility-controls button,.hud-actions button,.touch-keyboard button {
+.menu-button,.session-selectors,.mode-plaque,.stat,.novelty-hud,.answer-bar,.utility-controls button,.hud-actions button,.touch-keyboard button {
   --frame-fill:#06252cdc; --cut:9px; border:1px solid var(--gold); color:var(--ivory);
   background:
     linear-gradient(135deg,transparent 5px,var(--gold) 5px 6px,transparent 6px) top left / 10px 10px no-repeat,
@@ -582,4 +582,92 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .session-selectors select { min-height:30px; }
   .feedback-stack { top:78px; }
 }
+
+/* Local playtest only. Both novelty indicators share the score row, never the falling lane. */
+.hud-readouts { display:contents; }
+.novelty-hud { display:flex; align-items:center; gap:14px; min-width:0; padding:10px 17px; --frame-fill:#06252ce5; pointer-events:auto; }
+.novelty-hud:focus-visible { outline:none; box-shadow:inset 0 0 0 2px var(--gold-bright); }
+.novelty-icon { flex:0 0 24px; color:var(--gold-bright); }
+.novelty-pressure { flex:1.55; min-width:0; }
+.novelty-session { flex:1; min-width:0; padding-left:16px; border-left:1px solid var(--gold); }
+.novelty-heading { display:flex; align-items:baseline; gap:7px; color:var(--ivory); font:700 13px/1.25 var(--display-font); letter-spacing:.35px; white-space:nowrap; }
+.novelty-heading strong { font:inherit; font-variant-numeric:tabular-nums; }
+.novelty-hud[data-gate="hold"] .novelty-pressure .novelty-heading { color:#f4c176; }
+.novelty-hud[data-gate="open"] #noveltyGate { color:#c9e2b1; }
+.novelty-detail { display:block; margin-top:4px; color:#d0d9c8; font:11px/1.35 "Segoe UI",Arial,sans-serif; }
+.has-novelty .hud-readouts { display:flex; align-items:stretch; gap:10px; }
+.has-novelty .hud-stats { position:relative; top:auto; left:auto; transform:none; width:auto; flex:none; gap:8px; }
+.has-novelty .stat { flex:none; min-width:0; max-width:none; container-type:inline-size; --hud-stat-size:32px; }
+.has-novelty .novelty-hud { flex:1; }
+@media (min-width:1200px) {
+  .game-hud.has-novelty { display:grid; grid-template-columns:minmax(150px,.7fr) minmax(0,3fr) 168px; gap:12px; align-items:start; padding-right:60px; }
+  .has-novelty .mode-plaque { width:100%; max-width:none; height:68px; min-height:0; padding:10px 14px; font-size:clamp(12px,1.03vw,16px); letter-spacing:.7px; gap:10px; }
+  .has-novelty .mode-plaque svg { flex:none; width:23px; height:23px; }
+  .has-novelty .hud-readouts { height:68px; }
+  .has-novelty .stat { width:clamp(68px,6.3vw,112px); padding:8px 6px; }
+  .has-novelty .stat { --hud-stat-size:32px; }
+  .has-novelty .hud-actions { position:static; gap:9px; }
+  .has-novelty .hud-actions button { width:50px; height:50px; }
+  .has-novelty .personal-best { top:75px; }
+}
+@media (min-width:1200px) and (max-width:1500px) {
+  .novelty-icon { display:none; }
+  .novelty-hud { gap:12px; padding:8px 12px; }
+  .novelty-heading { font-size:12px; gap:5px; }
+  .novelty-session { padding-left:12px; }
+  .novelty-session-prefix { display:none; }
+}
+@media (max-width:1199px) {
+  .has-novelty .hud-readouts { position:absolute; top:59px; left:0; right:0; height:58px; gap:8px; }
+  .has-novelty .hud-stats { gap:6px; }
+  .has-novelty .stat { width:clamp(55px,8vw,86px); padding:6px; }
+  .has-novelty .stat { --hud-stat-size:28px; }
+  .novelty-hud { padding:7px 12px; gap:10px; }
+  .novelty-icon { display:none; }
+  .novelty-session { padding-left:10px; }
+  .novelty-session-prefix { display:none; }
+  .game-world:has(.has-novelty) .playfield { top:158px; }
+  .game-world:has(.has-novelty) .feedback-stack { top:153px; }
+}
+@media (max-width:760px) {
+  .has-novelty .hud-readouts { height:53px; gap:5px; }
+  .has-novelty .hud-stats { gap:4px; }
+  .has-novelty .stat { width:clamp(39px,12.2vw,66px); padding:6px 2px; }
+  .has-novelty .stat small { font-size:8px; letter-spacing:.5px; }
+  .has-novelty .stat { --hud-stat-size:23px; }
+  .novelty-hud { padding:6px 8px; gap:7px; }
+  .novelty-pressure,.novelty-session { flex:1; }
+  .novelty-session { padding-left:7px; }
+  .novelty-heading { flex-direction:column; align-items:center; gap:3px; font-size:8px; letter-spacing:0; }
+  .novelty-heading strong { font-size:14px; line-height:1.35; }
+  .novelty-heading .novelty-separator,.novelty-detail { display:none; }
+  .game-world:has(.has-novelty) .playfield { top:145px; }
+  .game-world:has(.has-novelty) .feedback-stack { top:137px; }
+}
+@container game (min-width:480px) and (max-height:480px) {
+  .has-novelty .mode-plaque,.has-novelty .personal-best { display:none; }
+  .has-novelty .hud-readouts { top:0; right:204px; height:44px; gap:4px; }
+  .has-novelty .hud-stats { gap:3px; }
+  .has-novelty .stat { width:clamp(36px,7vw,66px); padding:4px 2px; }
+  .has-novelty .stat small { font-size:8px; letter-spacing:0; }
+  .has-novelty .stat { --hud-stat-size:21px; }
+  .novelty-hud { padding:4px 7px; gap:5px; }
+  .novelty-icon,.novelty-heading .novelty-separator,.novelty-detail { display:none; }
+  .novelty-pressure,.novelty-session { flex:1; }
+  .novelty-session { padding-left:5px; }
+  .novelty-heading { flex-direction:column; align-items:center; gap:2px; font-size:8px; letter-spacing:0; }
+  .novelty-heading strong { font-size:13px; line-height:1.35; }
+  .game-world:has(.has-novelty) .playfield { top:78px; }
+  .game-world:has(.has-novelty) .feedback-stack { top:78px; }
+}
+@container game (max-width:479px) and (max-height:700px) {
+  .has-novelty .personal-best { display:none; }
+  .has-novelty .hud-readouts { top:52px; }
+  .game-world:has(.has-novelty) .playfield { top:138px; }
+  .game-world:has(.has-novelty) .feedback-stack { top:137px; }
+}
+@container game (min-width:480px) and (max-height:360px) {
+  .has-novelty .hud-readouts { right:180px; }
+}
+.has-novelty .stat b { font-size:min(var(--hud-stat-size),calc(100cqw * 1.65 / var(--hud-stat-chars,3))); }
 
