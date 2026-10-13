@@ -233,15 +233,21 @@ async function exerciseStableInput(errors){
     await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:イ'));
     await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});
     await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:ウ'));
+    // Test typing across a target change with the touch keyboard collapsed: in the
+    // shortest landscape it can otherwise leave both drops at the same height
+    // until one expires, which now correctly clears the unfinished answer.
+    await page.locator('#keyboardBtn').tap();
+    await page.waitForFunction(()=>!document.body.classList.contains('has-keyboard'));
+    await page.evaluate(()=>{KanaRain.state.sinceSpawn=-100000;KanaRain.state.drops.forEach(d=>d.progress=0);});
     await page.locator('#answer').fill('ん');
     await page.evaluate(()=>{KanaRain.state.drops.forEach(d=>d.progress=d.id==='kana:ウ' ? .4 : 0);});
-    await page.waitForFunction(()=>KanaRain.state.target.id==='kana:ウ');
+    await page.waitForFunction(()=>KanaRain.state.target.id==='kana:ウ',null,{timeout:3000});
     assert.equal(await page.locator('#answer').inputValue(),'ん','pair target changes preserve unfinished hiragana input');
     assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.kanaOnly&&d.facet==='script→script'&&d.responseFormat==='hiragana')),true);
     assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
     assert.equal(await page.locator('#scriptDialog').isVisible(),false);
     assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
-    await page.locator('#answer').fill('');await page.locator('#keyboard [data-key="う"]').tap();
+    await page.locator('#answer').fill('');await page.locator('#keyboardBtn').tap();await page.locator('#keyboard [data-key="う"]').tap();
     await page.waitForFunction(()=>KanaRain.state.correct===2);
     await page.waitForFunction(()=>KanaRain.state.target&&KanaRain.state.drops.length>0);
     const nextAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);

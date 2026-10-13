@@ -1,11 +1,12 @@
 'use strict';
-// Local-only UI experiment. Every check uses synthetic history in isolated storage.
+// First-presentation rules stay active without a progress-counter UI.
+// Every check uses synthetic history in isolated storage, never a real profile.
 const fs=require('node:fs');
 const path=require('node:path');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
 const {chromium}=require('playwright');
-const root=path.resolve(__dirname,'..'),output=path.join(__dirname,'artifacts/novelty-hud');
+const root=path.resolve(__dirname,'..'),output=path.join(__dirname,'artifacts/novelty-presentation');
 const url='http://127.0.0.1:4186',checks=[],errors=[],contexts=[];
 let browser,server;
 
@@ -23,12 +24,12 @@ async function context(viewport={width:1920,height:1080},remoteName=false){
     else await route.abort();
   });
   await ctx.addInitScript(()=>{
-    if(localStorage.getItem('novelty-hud-fixture'))return;
+    if(localStorage.getItem('novelty-presentation-fixture'))return;
     const seen=Object.fromEntries(['あ','い','う','え','お'].map(char=>['kana:'+char,true]));
-    const recent=Array.from({length:30},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<25,timeout:i>=28}));
-    const saved={version:2,created:Date.now(),items:{},games:{'kana-rain':{rows:{hiragana:3,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,seen,recent,blocked:true}}}};
+    const recent=Array.from({length:60},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<55,timeout:i>=58}));
+    const saved={version:2,created:Date.now(),items:{},games:{'kana-rain':{rows:{hiragana:3,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,pace:'calm',seen,recent,blocked:true}}}};
     localStorage.setItem('jp-learner-v1',JSON.stringify(saved));
-    localStorage.setItem('novelty-hud-fixture','1');
+    localStorage.setItem('novelty-presentation-fixture','1');
   });
   const page=await ctx.newPage();
   page.on('pageerror',error=>errors.push(error.message));
@@ -50,18 +51,33 @@ async function start(page){await page.locator('#startBtn').click();await ready(p
 async function freezeScheduling(page){
   await page.evaluate(()=>{KanaRain.state.sinceSpawn=-100000;KanaRain.state.drops.forEach(drop=>drop.progress=0);});
 }
-async function spawnNext(page,id='kana:あ'){
-  assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),0,'controlled spawn starts with an empty field');
+async function noCounter(page){
+  assert.equal(await page.locator('#noveltyHud,#noveltyGate,#noveltyRecent,#noveltyIntroduced,#noveltySession,#noveltyDetails').count(),0,'presentation-counter DOM is removed');
+  assert.equal(await page.locator('#gameHud').evaluate(el=>el.classList.contains('has-novelty')),false,'HUD does not reserve space for the removed panel');
+  assert.doesNotMatch(await page.locator('#gameHud').textContent(),/NEW KANA|INTRODUCED|Familiar drops|first-try hits|ON HOLD/i,'live presentation counters are absent');
+}
+async function noveltyState(page){
+  return page.evaluate(()=>{
+    const novelty=KanaRain.gameData.novelty,g=KanaRain.state;
+    return {blocked:novelty.blocked,recent:novelty.recent,seen:novelty.seen,introduced:[...g.newIds],familiar:g.familiarSinceIntroduction,drops:g.drops.map(d=>({id:d.id,isIntroduction:d.isIntroduction}))};
+  });
+}
+async function spawnFromQueue(page,id){
+  const count=await page.evaluate(()=>KanaRain.state.drops.length);
   await page.evaluate(id=>{const g=KanaRain.state;g.queue=[{id}];g.sinceSpawn=100000;},id);
-  await page.waitForFunction(()=>KanaRain.state.drops.length>0);
+  await page.waitForFunction(count=>KanaRain.state.drops.length===count+1,count);
   await freezeScheduling(page);
 }
+async function spawnNext(page,id='kana:あ'){
+  assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),0,'controlled spawn starts with an empty field');
+  await spawnFromQueue(page,id);
+}
 async function answer(page){
-  const before=await page.evaluate(()=>KanaRain.state.correct);
+  const before=await page.evaluate(()=>({correct:KanaRain.state.correct,count:KanaRain.state.drops.length}));
   const text=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id,KanaRain.state.drops[0].kanaOnly)[0]);
   await page.locator('#answer').fill(text);
-  await page.waitForFunction(value=>KanaRain.state.correct===value,before+1);
-  assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),0,'answered drop leaves the field');
+  await page.waitForFunction(value=>KanaRain.state.correct===value,before.correct+1);
+  assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),before.count-1,'answered drop leaves the field');
 }
 async function familiar(page,count){for(let i=0;i<count;i++){await spawnNext(page);await answer(page);}}
 async function expire(page){
@@ -72,50 +88,55 @@ async function expire(page){
 async function screenshot(page,name){await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});}
 async function finish(page){await page.locator('#pauseBtn').click();await page.locator('#finishBtn').click();await page.locator('#results').waitFor({state:'visible'});}
 async function behavior(){
-  const page=await context();await start(page);
-  assert.equal(await page.locator('#noveltyHud').isVisible(),true);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD');
-  assert.equal(await page.locator('#noveltyIntroduced').textContent(),'0 / 2');
-  assert.equal(await page.locator('#noveltyRecent').textContent(),'Last 30 drops: 25 first-try hits · 2 expired');
-  assert.match(await page.locator('#noveltyDetails').textContent(),/Recovery needs 30 completed drops, at least 25 first-try hits and at most 1 expired/);
-  await screenshot(page,'01-held');
-  await answer(page);await familiar(page,27);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD','28 fresh hits still leave both expirations in the 30-drop window');
+  const page=await context();await start(page);await noCounter(page);
+  let state=await noveltyState(page);
+  assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
+  assert.equal(state.recent.length,60);assert.equal(state.recent.filter(e=>e.firstCorrect).length,55);assert.equal(state.recent.filter(e=>e.timeout).length,2);
+  await screenshot(page,'01-held-without-counter');
+  await answer(page);await familiar(page,57);
+  assert.equal((await noveltyState(page)).blocked,true,'58 fresh hits still leave both expirations in the 60-drop window');
   await familiar(page,1);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'OPEN');
+  assert.equal((await noveltyState(page)).blocked,false,'a full 60-drop window with enough first hits and only one expiration reopens admission');
   const correct=await page.evaluate(()=>KanaRain.state.correct);
-  await spawnNext(page,'kana:か');
-  assert.equal(await page.evaluate(()=>KanaRain.state.drops[0].id),'kana:か');
-  assert.equal(await page.evaluate(()=>KanaRain.state.correct),correct,'presentation updates counter before an answer');
-  assert.equal(await page.locator('#noveltyIntroduced').textContent(),'1 / 2');
-  assert.match(await page.locator('#noveltySession').textContent(),/screen/i);
-  await screenshot(page,'02-first-debut');await answer(page);
-  await familiar(page,3);await spawnNext(page,'kana:き');
-  assert.equal(await page.evaluate(()=>KanaRain.state.drops[0].id),'kana:き');
-  assert.equal(await page.locator('#noveltyIntroduced').textContent(),'2 / 2');
-  await answer(page);await familiar(page,3);await spawnNext(page,'kana:く');
-  assert.notEqual(await page.evaluate(()=>KanaRain.state.drops[0].id),'kana:く','third debut is replaced with familiar content');
-  assert.equal(await page.locator('#noveltyGate').textContent(),'OPEN','budget and pressure remain distinct');
-  assert.match(await page.locator('#noveltySession').textContent(),/limit/i);
-  await screenshot(page,'03-budget');await answer(page);
+  await spawnNext(page,'kana:か');state=await noveltyState(page);
+  assert.equal(state.drops[0].id,'kana:か');assert.equal(state.drops[0].isIntroduction,true);
+  assert.equal(state.seen['kana:か'],true,'presentation is saved before the answer');
+  assert.equal(await page.evaluate(()=>KanaRain.state.correct),correct,'presenting kana does not manufacture a correct answer');
+  assert.deepEqual(state.introduced,['kana:か']);assert.equal(state.familiar,0);
+  await spawnFromQueue(page,'kana:き');state=await noveltyState(page);
+  assert.equal(state.drops.filter(d=>d.isIntroduction).length,1,'only one debut may occupy the screen');
+  assert.equal(state.seen['kana:き'],undefined,'a deferred kana is not prematurely marked seen');
+  assert.deepEqual(state.introduced,['kana:か']);
+  await screenshot(page,'02-first-debut-without-counter');
+  await answer(page);await answer(page);
+  for(const expectedFamiliar of [2,3]){
+    await spawnNext(page,'kana:き');state=await noveltyState(page);
+    assert.notEqual(state.drops[0].id,'kana:き','new kana waits for three completed familiar drops');
+    await answer(page);assert.equal((await noveltyState(page)).familiar,expectedFamiliar);
+  }
+  await spawnNext(page,'kana:き');state=await noveltyState(page);
+  assert.equal(state.drops[0].id,'kana:き');assert.deepEqual(state.introduced,['kana:か','kana:き']);
+  await answer(page);await familiar(page,3);await spawnNext(page,'kana:く');state=await noveltyState(page);
+  assert.notEqual(state.drops[0].id,'kana:く','third debut is replaced with familiar content');
+  assert.equal(state.blocked,false,'session budget and recent-error pressure remain distinct');
+  assert.equal(state.seen['kana:く'],undefined);assert.equal(state.introduced.length,2);
+  await screenshot(page,'03-budget-without-counter');await answer(page);
   await expire(page);await expire(page);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD');
+  assert.equal((await noveltyState(page)).blocked,true,'two real expirations close admission');
   assert.equal(await page.evaluate(()=>KanaRain.state.lives),1,'real expirations retain the arcade heart cost');
   const snapshot=await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty));
   await finish(page);await page.locator('#againBtn').click();await ready(page);await freezeScheduling(page);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD');
-  assert.equal(await page.locator('#noveltyIntroduced').textContent(),'0 / 2');
+  state=await noveltyState(page);assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
   assert.equal(await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty)),snapshot,'restart retains the pressure window and seen content');
-  await page.reload();await page.waitForFunction(()=>!!window.KanaRain);await start(page);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD');
-  assert.equal(await page.locator('#noveltyIntroduced').textContent(),'0 / 2');
+  await page.reload();await page.waitForFunction(()=>!!window.KanaRain);await start(page);await noCounter(page);
+  state=await noveltyState(page);assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
   assert.equal(await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty)),snapshot,'reload preserves durable novelty state');
-  checks.push({check:'recovery, presentations before answers, spacing, budget, real expirations, restart and reload',pass:true});
+  checks.push({check:'recovery, first presentation before answers, one debut on screen, three familiar drops, two-kana budget, real expirations, restart and reload without counters',pass:true});
   await page.close();
 }
 async function responsive(){
   for(const [width,height] of [[1920,1080],[1366,768],[1200,768],[1024,768],[390,844],[320,568],[844,390],[640,360]]){
-    const page=await context({width,height});await start(page);
+    const page=await context({width,height});await start(page);await noCounter(page);
     const label=`${width}x${height}`;
     await screenshot(page,'layout-'+label);
     const layout=await page.evaluate(()=>{
@@ -125,39 +146,39 @@ async function responsive(){
         const ink=range.getBoundingClientRect(),parent=element.closest('.stat').getBoundingClientRect();
         return {id,text:element.textContent,ink:{left:ink.left,right:ink.right},parent:{left:parent.left,right:parent.right}};
       });
+      const controls=[...document.querySelectorAll('.hud-actions button,.utility-controls button')].map(el=>({id:el.id,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
       const travel=KanaRain.state.drops.map(drop=>({id:drop.id,height:drop.h,distance:Math.max(8,document.querySelector('#field').clientHeight-drop.h-27)-8}));
-      return {viewport:{width:innerWidth,height:innerHeight},document:{width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight},stats:rect('.hud-stats'),stat:rect('.hud-stats .stat'),novelty:rect('#noveltyHud'),mode:rect('.mode-plaque'),actions:rect('.hud-actions'),field:rect('#field'),dock:rect('#answerDock'),hearts:rect('#lives'),best:rect('#personalBest'),values,travel};
+      return {viewport:{width:innerWidth,height:innerHeight},document:{width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight},stats:rect('.hud-stats'),stat:rect('.hud-stats .stat'),mode:rect('.mode-plaque'),actions:rect('.hud-actions'),field:rect('#field'),dock:rect('#answerDock'),hearts:rect('#lives'),best:rect('#personalBest'),values,controls,travel};
     });
     assert.ok(layout.document.width<=width+1&&layout.document.height<=height+1,label+' must not create page scroll');
-    assert.ok(Math.abs(layout.stat.top-layout.novelty.top)<=2,label+' novelty and score share one row: '+JSON.stringify(layout));
-    assert.ok(layout.stats.right<=layout.novelty.left+1,label+' stats and novelty do not overlap');
-    if(layout.best.width&&layout.best.height)for(const key of ['stats','novelty']){
-      const a=layout.best,b=layout[key];
-      assert.ok(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom,label+' personal best must not overlap '+key);
+    if(layout.best.width&&layout.best.height){
+      const a=layout.best,b=layout.stats;
+      assert.ok(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom,label+' personal best must not overlap stats');
     }
     for(const value of layout.values)assert.ok(value.ink.left>=value.parent.left+2&&value.ink.right<=value.parent.right-2,label+' '+value.id+' glyphs fit their plaque: '+JSON.stringify(value));
-    for(const key of ['stats','novelty','mode','actions','hearts']){
-      const r=layout[key];assert.ok(r.left>=-1&&r.right<=width+1&&r.top>=-1&&r.bottom<=height+1,label+' '+key+' stays in viewport');
+    for(const key of ['stats','mode','actions','hearts']){
+      const r=layout[key];if(r.width&&r.height)assert.ok(r.left>=-1&&r.right<=width+1&&r.top>=-1&&r.bottom<=height+1,label+' '+key+' stays in viewport');
     }
-    assert.ok(layout.field.top>=Math.max(layout.stats.bottom,layout.novelty.bottom,layout.mode.bottom,layout.actions.bottom)-1,label+' HUD stays above falling kana');
+    for(const control of layout.controls)if(control.width&&control.height)assert.ok(control.width>=32&&control.width<=64&&control.height>=32&&control.height<=64,label+' '+control.id+' retains compact usable controls');
+    assert.ok(layout.field.top>=Math.max(layout.stats.bottom,layout.mode.bottom,layout.actions.bottom)-1,label+' HUD stays above falling kana');
     assert.ok(layout.field.bottom<=layout.dock.top+1&&layout.field.height>0,label+' input preserves positive playfield');
     assert.ok(layout.travel.every(drop=>drop.distance>0),label+' falling kana have positive travel, preserving urgency targeting: '+JSON.stringify(layout.travel));
     if(width>=1200){
-      assert.ok(Math.abs(layout.mode.top-layout.novelty.top)<=2&&Math.abs(layout.actions.top-layout.novelty.top)<=2,label+' desktop HUD shares its top row');
-      assert.ok(layout.mode.right<=layout.stats.left+1&&layout.novelty.right<=layout.actions.left+1,label+' desktop mode, stats, experiment and actions do not overlap');
+      assert.ok(Math.abs(layout.mode.top-layout.stat.top)<=2&&Math.abs(layout.actions.top-layout.stat.top)<=2,label+' desktop HUD shares its top row');
+      assert.ok(layout.mode.right<=layout.stats.left+1&&layout.stats.right<=layout.actions.left+1,label+' desktop mode, stats and actions do not overlap');
     }
     await page.evaluate(()=>{KanaRain.state.score=9876;KanaRain.state.streak=122;KanaRain.state.t=600;});
     await answer(page);
     assert.equal(await page.locator('#streak').textContent(),'×123');
     assert.equal(await page.locator('#time').textContent(),'10:00');
-    const longValues=await page.evaluate(()=>['score','streak','time','noveltyGate','noveltyIntroduced'].map(id=>{
+    const longValues=await page.evaluate(()=>['score','streak','time'].map(id=>{
       const element=document.getElementById(id),range=document.createRange();range.selectNodeContents(element);
-      const ink=range.getBoundingClientRect(),parent=element.closest('.stat')?.getBoundingClientRect()||element.getBoundingClientRect();
+      const ink=range.getBoundingClientRect(),parent=element.closest('.stat').getBoundingClientRect();
       return {id,text:element.textContent,ink:{left:ink.left,right:ink.right},parent:{left:parent.left,right:parent.right},font:getComputedStyle(element).fontSize};
     }));
     for(const value of longValues)assert.ok(value.ink.left>=value.parent.left-1&&value.ink.right<=value.parent.right+1,label+' long '+value.id+' text fits: '+JSON.stringify(value));
     await screenshot(page,'long-values-'+label);
-    checks.push({check:'same-row responsive geometry and long values',label,layout,longValues});await page.close();
+    checks.push({check:'responsive HUD geometry, compact controls and long values without novelty counters',label,layout,longValues});await page.close();
   }
 }
 async function smallScreenTarget(){
@@ -176,15 +197,12 @@ async function smallScreenTarget(){
 async function scope(){
   for(const mode of ['words','pair']){
     const page=await context({width:1366,height:768});await page.goto(url+'/?all');await page.waitForFunction(()=>!!window.KanaRain);
-    await page.locator('#mode').selectOption(mode);await start(page);
-    assert.equal(await page.locator('#noveltyHud').isVisible(),false,mode+' does not show kana reading pressure');
-    assert.equal(await page.locator('#gameHud').evaluate(el=>el.classList.contains('has-novelty')),false);
-    checks.push({check:'unsupported mode hidden',mode});await page.close();
+    await page.locator('#mode').selectOption(mode);await start(page);await noCounter(page);
+    assert.equal(await page.evaluate(()=>KanaRain.state.drops.some(d=>d.isIntroduction)),false,mode+' remains outside kana-reading admission');
+    checks.push({check:'unsupported mode has no presentation counter',mode});await page.close();
   }
-  const page=await context({width:1366,height:768},true);await start(page);
-  assert.equal(await page.locator('#noveltyHud').isVisible(),false,'non-loopback hostname cannot activate the experimental panel');
-  assert.equal(await page.locator('#gameHud').evaluate(el=>el.classList.contains('has-novelty')),false);
-  checks.push({check:'non-loopback hostname hidden without external network access',pass:true});await page.close();
+  const page=await context({width:1366,height:768},true);await start(page);await noCounter(page);
+  checks.push({check:'no presentation counter on a non-loopback hostname, without external network access',pass:true});await page.close();
 }
 (async()=>{
   fs.mkdirSync(output,{recursive:true});
@@ -194,7 +212,7 @@ async function scope(){
   browser=await chromium.launch({headless:true,...(channel?{channel}:{})});
   await behavior();await responsive();await smallScreenTarget();await scope();assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(output,'verification.json'),JSON.stringify({verifiedAt:new Date().toISOString(),syntheticProgress:true,productionAccess:false,checks,errors},null,2)+'\n');
-  console.log('PASS: novelty HUD; '+checks.length+' checks, zero page errors.');
+  console.log('PASS: novelty presentation rules without counters; '+checks.length+' checks, zero page errors.');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{
   for(const ctx of contexts)await ctx.close().catch(()=>{});
   if(browser)await browser.close();if(server)server.kill();

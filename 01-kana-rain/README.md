@@ -18,9 +18,9 @@ The English translation of the original game specification is in [SPECIFICATION.
 
 The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
 
-The [local novelty-pacing prototype](./NOVELTY_BALANCE.md) documents the persistent pressure brake and gradual first presentations, including starter exceptions and preservation of existing progress.
+The [new kana pacing rules](./NOVELTY_BALANCE.md) document the persistent pressure brake and gradual first presentations in version 1.4.0, including starter exceptions and preservation of existing progress.
 
-Branch `codex/kana-rain-hud-test` adds an experimental local-only HUD for these two rules, in the same row as Score, Streak and Time. It is a playtest branch, not a production release. Run `pnpm run test:novelty-hud` for its focused browser checks.
+Players can select Calm (55/60, the default), Balanced (25/30) or Bold (10/12) in New kana pace, independently of rain difficulty. Version 1.4.0 promotes the approved playtest rules to the release: admission operates in the background without a new-kana counter in the HUD. Expired drops clear partial answers and cancel pending automatic submissions; score, streak and time fit larger values within their cards. Existing learner records, unlocked rows, settings and personal bests are retained. Run `pnpm run test:novelty-presentation` and `pnpm run test:novelty-pace` for focused browser checks.
 
 The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.1. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
 
@@ -51,6 +51,7 @@ Starting or resuming a session shows a skippable three-second countdown. The clo
 - Start with the five hiragana vowels in **Arcade challenge**, the default session style. Choose your difficulty and session length in Settings; a saved choice of **Steady practice** is kept when you return.
 - In Arcade, Easy provides 5 hearts and gentler rain, Normal provides 3 hearts, and Hard provides 1 heart and faster rain. Session lengths are 1, 3, 5, or 10 minutes. Difficulty is saved and cannot change during a session.
 - In Arcade, each drop reaching the ground is removed and costs exactly one heart. Losing all hearts ends the session. Expiration is recorded separately from an incorrect submitted answer.
+- Any expired drop clears unfinished input and cancels a pending automatic answer, including in Steady practice. Ordinary pauses still preserve unfinished input.
 - Arcade speed increases with active session time, regardless of how many answers are correct. Starting fall times are 14 seconds on Easy, 10 on Normal, and 7 on Hard. Speed ramps linearly and is capped at 3×, 3.5×, and 4× respectively. Practice uses a constant 18-second fall. Pauses stop motion and correction visibility time.
 - Choose **Steady practice** in Settings for eight opportunities, one drop at a time, constant speed and no lost hearts. Errors and expired drops wait for **Continue practice**.
 - Read a kana and type its sound. Complete answers submit automatically; if an answer is also a prefix (such as `n` before `ne` or the alternate `nn`), it submits after 300 ms of active play without further typing. Continuing the answer cancels that pending match; Enter submits immediately. Pauses freeze the wait, and an exact answer entered before the waterline never loses a heart because of this delay. Common alternate romanizations are accepted.
@@ -64,6 +65,8 @@ Starting or resuming a session shows a skippable three-second countdown. The clo
 - Choose **Katakana → Hiragana** before starting for a separate script-matching session. Every drop is katakana and every answer is hiragana, including the interval between drops. Its full kana keyboard and desktop Japanese IME support matching without multiple-choice guessing. Existing script-match history remains intact.
 - The answer dock shows the session's fixed format. Any visible drop can be answered; the highlighted drop is the priority for forced submissions and listening.
 - Personal confusions are revisited together when admission allows. The shared scheduler targets review, weak, and new items; kana-reading sessions additionally limit first presentations across all queues and partners, using recent drop outcomes.
+- New kana pace is available for Hiragana, Katakana and Mixed scripts. Two expirations in the selected recent window pause first presentations. Calm resumes them with 55 first-try hits in 60 completed drops, Balanced with 25 in 30, and Bold with 10 in 12; recovery also requires no more than one expiration. The recovery target applies after a pause, not before every new kana. Assisted first-try hits count, while corrected answers do not. History continues across sessions and reloads.
+- First presentations wait for three completed familiar drops, with at most two new kana per session and one debut on screen. Each alphabet's five starter vowels bypass the pressure, spacing and two-debut budget so a new garden can begin. All unlocked kana remain eligible for review, and words and script matching keep their existing scheduling.
 - Pause with Escape or the Pause button. Leaving the tab pauses automatically. Finish preserves all answer evidence and displays session results.
 - Progress uses a localStorage journal and IndexedDB. Saved status follows completed writes, with a persistent export action when both fail. The newer compatible snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates on reload; v1 history retains unknown assistance and dated legacy errors.
 - My Kana Garden labels all four estimated familiarity states and shows first-answer readiness for every unlocked kana, including earlier rows. Results separate independent readings, script matches, helped answers and expired drops. Response, input and residence times are distinct exported fields; none is labelled pure reading speed.
@@ -141,7 +144,7 @@ The approved immersive screen concepts and their prompts are retained in `assets
 
 ## Structure and checks
 
-`src/data.js` is the shared kana/word catalogue; `src/learner.js` owns evidence and scheduling; `src/audio.js` resolves the supplied recordings; `src/sfx.js` supplies interface and game effect tones; `src/difficulty.js` defines hearts and the time-based rain curve; `src/game.js` owns Kana Rain. `window.KanaRain` exposes the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`) for integration into a future minigame shell. Sound recall and script pairing use separate learner facets.
+`src/data.js` is the shared kana/word catalogue; `src/learner.js` owns evidence and scheduling; `src/audio.js` resolves the supplied recordings; `src/sfx.js` supplies interface and game effect tones; `src/difficulty.js` defines hearts and the time-based rain curve; `src/novelty.js` owns the persistent first-presentation brake and pace profiles; `src/game.js` owns Kana Rain. `window.KanaRain` exposes the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`) for integration into a future minigame shell. Sound recall and script pairing use separate learner facets.
 
 Run the content, scheduler, storage, difficulty, consent, and analytics checks inside `01-kana-rain/`:
 
@@ -154,6 +157,9 @@ Install Playwright's Chromium browser before the first browser test run, then ru
 ```sh
 pnpm exec playwright install chromium
 pnpm test:browser
+pnpm test:improvements
+pnpm test:novelty-presentation
+pnpm test:novelty-pace
 ```
 
 `tests/browser.cjs` uses the installed Playwright package and starts its own temporary localhost server on port 4180. It checks full viewport coverage without page scrolling, desktop/portrait/landscape layouts, menu pause/resume behavior, automatic answers, corrections, session results, persistence, script pairs, words, touch input, row progression, all three difficulty levels, acceleration without answers, one heart per miss, loss at zero hearts, and offline audio. Resizing preserves each drop's normalized fall progress so changing screen orientation cannot cause an accidental miss. Generated screenshots are retained locally under `tests/` and excluded from Git.

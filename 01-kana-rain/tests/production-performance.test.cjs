@@ -16,6 +16,7 @@ test('production home removes render-blocking CSS requests and rebases images fo
   assert.doesNotMatch(html,/<script[^>]*src="src\//);
   assert.equal(new URL('assets/garden.webp','https://example.test/games/rain/').pathname,'/games/rain/assets/garden.webp');
   assert.match(html,/<div id="field"[^>]*role="group"[^>]*aria-label="Falling kana"/);
+  assert.doesNotMatch(html,/id="(?:noveltyHud|noveltyDetails|noveltyIntroduced)"/,'published layout must not include the removed diagnostic panel');
 });
 
 test('style inlining preserves literal CSS and external/data URLs',()=>{
@@ -36,8 +37,9 @@ test('compact audio lookup retains every approved mapping and complete provenanc
   assert.ok(fs.statSync(path.join(root,'kana-audio-bundle/runtime-manifest.json')).size<6000);
   const plan=productionPlan(),files=plan.entries.map(x=>x.file);
   const runtime=plan.entries.find(x=>x.file==='assets/game-runtime.js').generated;
-  const order=['data.js','learner.js','audio.js','sfx.js','difficulty.js','novelty.js','novelty-hud.js','game.js'].map(x=>runtime.indexOf('/* src/'+x+' */'));
+  const order=['data.js','learner.js','audio.js','sfx.js','difficulty.js','novelty.js','game.js'].map(x=>runtime.indexOf('/* src/'+x+' */'));
   assert.ok(order.every((x,i)=>x>=0&&(i===0||x>order[i-1])));
+  assert.doesNotMatch(runtime,/KanaNoveltyHud|renderNoveltyHud/,'the runtime retains admission rules without the removed renderer');
   for(const file of ['kana-audio-bundle/manifest.json','kana-audio-bundle/original-manifest.json','kana-audio-bundle/PROVENANCE.md','kana-audio-bundle/LICENSE-AUDIO.txt'])assert.ok(files.includes(file));
   assert.equal(plan.entries.find(x=>x.file==='index.html').bytes,Buffer.byteLength(productionHtml('index.html')));
 });

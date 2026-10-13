@@ -1,0 +1,123 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const Novelty=require('../src/novelty.js');
+
+const profiles=[['calm','Calm',60,55],['balanced','Balanced',30,25],['bold','Bold',12,10]];
+const finish=(state,id,extra={})=>Novelty.finish(state,{roundId:id,firstCorrect:true,timeout:false,...extra});
+const attempt=(id,extra={})=>({attemptId:id,roundId:id,itemId:'kana:あ',facet:'form→sound',gameId:'kana-rain',firstAttempt:true,outcome:'correct',correct:true,...extra});
+
+test('new kana pace profiles are fixed and default safely to Calm',()=>{
+  assert.equal(Object.isFrozen(Novelty.profiles),true);
+  for(const [id,label,windowSize,recoveryHits] of profiles){
+    assert.deepEqual(Novelty.profiles[id],{id,label,windowSize,recoveryHits});
+    assert.equal(Object.isFrozen(Novelty.profiles[id]),true);
+    assert.equal(Novelty.profile(id),Novelty.profiles[id]);
+    assert.equal(Novelty.profile({pace:id}),Novelty.profiles[id]);
+    assert.deepEqual(Novelty.constantsFor({pace:id}),{windowSize,recoveryHits,timeoutLimit:2,maxNew:2,warmup:3});
+  }
+  for(const invalid of [undefined,null,'unknown','constructor','__proto__',{}, {pace:'unknown'}]){
+    assert.equal(Novelty.profile(invalid),Novelty.profiles.calm);
+  }
+});
+
+for(const [pace,,windowSize,recoveryHits] of profiles){
+  test(`${pace} recovery requires ${recoveryHits} first-try hits in ${windowSize} actual completed drops`,()=>{
+    const state=Novelty.create({});Novelty.setPace(state,pace);
+    finish(state,'expired:1',{timeout:true});finish(state,'expired:2',{timeout:true});
+    assert.equal(state.blocked,true);
+    for(let i=0;i<60;i++)finish(state,'corrected:'+i,{firstCorrect:false});
+    assert.equal(state.blocked,true,'aging out all expirations does not erase the recovery requirement');
+    for(let i=0;i<recoveryHits-1;i++)finish(state,'hit:'+i);
+    assert.equal(state.blocked,true,'one hit below the selected threshold stays blocked');
+    finish(state,'threshold');assert.equal(state.blocked,false);
+    assert.equal(state.recent.length,60,'smaller selected windows retain the real 60-drop history');
+  });
+
+  test(`${pace} needs a full window and permits at most one expiry during recovery`,()=>{
+    const incomplete=Novelty.create({novelty:{version:1,pace,seen:{},recent:[],blocked:true}});
+    for(let i=0;i<windowSize-1;i++)finish(incomplete,'fresh:'+i);
+    assert.equal(incomplete.blocked,true,'enough first-try hits alone cannot replace the missing completion');
+    finish(incomplete,'fresh:full');assert.equal(incomplete.blocked,false);
+    const state=Novelty.create({});Novelty.setPace(state,pace);
+    finish(state,'expired:1',{timeout:true});finish(state,'expired:2',{timeout:true});
+    for(let i=0;i<windowSize-3;i++)finish(state,'hit:'+i);
+    assert.equal(state.recent.length,windowSize-1);
+    assert.equal(state.blocked,true,'an incomplete window cannot reopen admission');
+    finish(state,'full-window');
+    assert.equal(state.blocked,true,'two expirations block even with enough first-try hits');
+    finish(state,'one-expiry');
+    assert.equal(state.blocked,false,'a complete qualifying window with one expiry reopens admission');
+  });
+}
+
+test('switching pace evaluates the same real history without resetting hysteresis or seen kana',()=>{
+  const state=Novelty.create({});
+  Novelty.markSeen(state,'kana:び');
+  finish(state,'expired:1',{timeout:true});finish(state,'expired:2',{timeout:true});
+  for(let i=0;i<10;i++)finish(state,'hit:'+i);
+  assert.equal(state.blocked,true);
+  const recentBefore=JSON.stringify(state.recent),seenBefore=JSON.stringify(state.seen);
+  Novelty.setPace(state,'balanced');
+  assert.equal(state.pace,'balanced');assert.equal(state.blocked,true,'a new profile does not invent the missing samples');
+  Novelty.setPace(state,'bold');
+  assert.equal(state.blocked,true,'10 hits and two expirations still fail the 12-drop rule');
+  finish(state,'eleventh-hit');
+  assert.equal(state.blocked,false);
+  Novelty.setPace(state,'calm');
+  assert.equal(state.blocked,true,'switching back sees the two real expirations in the longer window');
+  Novelty.setPace(state,'bold');
+  assert.equal(state.blocked,false,'the same shorter qualifying tail can reopen immediately');
+  assert.equal(JSON.stringify(state.seen),seenBefore);
+  assert.equal(JSON.stringify(state.recent.slice(0,-1)),recentBefore,'changing profiles neither drops nor fabricates rounds');
+});
+
+test('Bold keeps 60 completed drops available when switching back to Calm',()=>{
+  const state=Novelty.create({});Novelty.setPace(state,'bold');
+  for(let i=0;i<65;i++)finish(state,'round:'+i);
+  assert.equal(state.recent.length,60);assert.equal(state.recent[0].roundId,'round:5');
+  assert.equal(state.recent.at(-1).roundId,'round:64');
+  const before=JSON.stringify(state.recent);Novelty.setPace(state,'calm');
+  assert.equal(JSON.stringify(state.recent),before);assert.equal(state.blocked,false);
+  finish(state,'round:64',{timeout:true});
+  assert.equal(JSON.stringify(state.recent),before,'a duplicate completion remains ignored after switching');
+});
+
+test('invalid choices cannot reset or reopen the saved gate',()=>{
+  const state=Novelty.create({});Novelty.setPace(state,'balanced');
+  finish(state,'expired:1',{timeout:true});finish(state,'expired:2',{timeout:true});
+  const before=JSON.stringify(state);
+  for(const invalid of [undefined,null,'unknown','constructor','__proto__']){
+    Novelty.setPace(state,invalid);assert.equal(JSON.stringify(state),before);
+  }
+});
+
+test('existing version 1 state acquires Calm without replaying evidence or resetting progress',()=>{
+  const recent=[{roundId:'old',firstCorrect:false,timeout:true}];
+  const saved={version:1,seen:{'kana:び':true},recent,blocked:true};
+  const gameData={rows:{hiragana:15,katakana:1},best:{hira:1981},novelty:saved};
+  const evidence={attempts:[attempt('should-not-replay')],exposures:[],items:{}};
+  const before=JSON.stringify(evidence),state=Novelty.create(gameData,evidence);
+  assert.equal(state,saved);assert.equal(state.pace,'calm');assert.equal(state.blocked,true);
+  assert.equal(state.recent,recent);assert.equal(state.recent.length,1);
+  assert.equal(state.seen['kana:び'],true);assert.equal(state.seen['kana:あ'],undefined);
+  assert.deepEqual(gameData.rows,{hiragana:15,katakana:1});assert.deepEqual(gameData.best,{hira:1981});
+  assert.equal(JSON.stringify(evidence),before);
+});
+
+test('selected pace and the shared evidence history survive save and reload',()=>{
+  const evidence={attempts:[attempt('hit'),attempt('timeout:1',{outcome:'timeout',correct:null}),attempt('timeout:2',{outcome:'timeout',correct:null})],exposures:[],items:{}};
+  const evidenceBefore=JSON.stringify(evidence);
+  const gameData={rows:{hiragana:15,katakana:1},best:{hira:1981}},state=Novelty.create(gameData,evidence);
+  Novelty.setPace(state,'bold');
+  const before=JSON.stringify(gameData),saved=JSON.parse(before),restored=Novelty.create(saved,{attempts:[attempt('do-not-replay')]});
+  assert.equal(restored.pace,'bold');assert.equal(restored.blocked,true);assert.equal(restored.recent.length,3);
+  assert.equal(JSON.stringify(saved),before);assert.equal(JSON.stringify(evidence),evidenceBefore);
+  assert.deepEqual(saved.rows,{hiragana:15,katakana:1});assert.deepEqual(saved.best,{hira:1981});
+});
+
+test('unknown persisted pace falls back to Calm without losing accumulated local evidence',()=>{
+  const saved={version:1,pace:'old-experiment',seen:{'kana:び':true},recent:[{roundId:'old',firstCorrect:false,timeout:false}],blocked:true};
+  const state=Novelty.create({novelty:saved});
+  assert.equal(state,saved);assert.equal(state.pace,'calm');assert.equal(state.blocked,true);
+  assert.deepEqual(state.seen,{'kana:び':true});assert.equal(state.recent[0].roundId,'old');
+});

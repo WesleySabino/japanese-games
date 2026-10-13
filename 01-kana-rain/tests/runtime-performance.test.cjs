@@ -71,7 +71,7 @@ async function runtime(options = {}) {
     KanaAudio: { enabled: true, ready: Promise.resolve(), available: true, play: async () => false, stop() {}, hasRecording: () => false }
   });
   context.window = context;
-  for (const name of ['data', 'learner', 'difficulty', 'novelty', 'novelty-hud', 'game']) {
+  for (const name of ['data', 'learner', 'difficulty', 'novelty', 'game']) {
     await vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/' + name + '.js'), 'utf8'), context);
   }
   return {
@@ -222,6 +222,48 @@ test('a correct pending answer reaching the waterline resolves before a life can
   assert.equal(g.app.state.lives, 3); assert.equal(g.app.state.missed.size, 0);
   assert.equal(g.learner.attempts().length, 1); assert.equal(g.learner.attempts()[0].correct, true);
   assert.equal(g.el('answer').value, '');
+});
+
+test('an expired drop clears an unfinished answer even when another drop was highlighted', async () => {
+  const g = await inputRain(['kana:ん', 'kana:ね']);
+  const expired = g.app.state.drops[1];
+  g.type('k'); play(g, 100);
+  assert.equal(g.app.state.target.id, 'kana:ん');
+  expired.progress = .999; g.tick(16);
+  assert.equal(g.el('answer').value, '');
+  assert.equal(g.app.state.lives, 2); assert.equal(g.app.state.correct, 0);
+  assert.equal(g.app.state.attempts, 0, 'clearing partial input does not submit it as a mistake');
+  assert.equal(g.app.state.inputStartedAt, null); assert.equal(g.app.state.inputPausedMs, 0);
+  const event = g.learner.attempts().at(-1);
+  assert.equal(event.itemId, expired.id); assert.equal(event.outcome, 'timeout');
+  assert.equal(event.inputActiveMs, 116, 'the timeout retains the elapsed partial-input timing');
+  g.type('n'); play(g, 350);
+  assert.equal(g.app.state.correct, 1, 'the next answer starts from an empty field');
+});
+
+test('an expiration cancels a delayed prefix answer for a different surviving drop', async () => {
+  const g = await inputRain(['kana:ん', 'kana:ね']);
+  g.type('n'); play(g, 100);
+  assert.ok(g.app.state.pendingAnswer);
+  g.app.state.drops[1].progress = .999; g.tick(16);
+  assert.equal(g.el('answer').value, ''); assert.equal(g.app.state.pendingAnswer, null);
+  play(g, 400);
+  assert.equal(g.app.state.correct, 0); assert.equal(g.app.state.attempts, 0);
+  assert.equal(g.app.state.lives, 2); assert.equal(g.learner.attempts().length, 1);
+  g.type('n'); play(g, 350);
+  assert.equal(g.app.state.correct, 1, 'only freshly typed input may score the surviving drop');
+});
+
+test('practice expiration clears partial input before feedback and the next opportunity', async () => {
+  const g = await runtime();
+  g.el('practiceSelect').value = 'practice'; g.el('practiceSelect').onchange();
+  g.app.start(); g.skip(); g.type('k');
+  g.app.state.drops[0].progress = 1; g.tick(16);
+  assert.equal(g.el('answer').value, ''); assert.equal(g.el('answer').disabled, true);
+  assert.equal(g.app.state.awaitingFeedback, true); assert.equal(g.app.state.attempts, 0);
+  assert.equal(g.app.state.practiceCompleted, 1);
+  g.el('continueFeedbackBtn').onclick(); g.skip();
+  assert.equal(g.el('answer').value, ''); assert.equal(g.app.state.awaitingFeedback, false);
 });
 
 test('the session clock accepts a correct answer already entered before time runs out', async () => {

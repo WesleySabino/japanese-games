@@ -55,7 +55,6 @@
   <script defer src="src/sfx.js"></script>
   <script defer src="src/difficulty.js"></script>
   <script defer src="src/novelty.js"></script>
-  <script defer src="src/novelty-hud.js"></script>
   <script defer src="src/game.js"></script>
   <link rel="stylesheet" href="/assets/nihongo-analytics.css">
   <script defer src="/assets/nihongo-analytics.js" data-app="rain" data-measurement-id="G-F69S8JDW5M"></script>
@@ -83,25 +82,11 @@
     <header id="gameHud" class="game-hud hidden" aria-label="Game status">
       <div class="mode-plaque"><svg class="control-icon" aria-hidden="true"><use href="#icon-leaf"/></svg><span id="gameLabel">Normal · Hiragana</span></div>
       <span id="personalBest" class="personal-best">BEST 0</span>
-      <div class="hud-readouts">
       <div class="hud-stats">
         <div class="stat"><small>SCORE</small><b id="score">000</b></div>
         <div class="stat"><small>STREAK</small><b id="streak">—</b></div>
         <div class="stat"><small>TIME</small><b id="time">3:00</b></div>
         <span id="lives" class="lives" aria-label="3 hearts">♥ ♥ ♥</span>
-      </div>
-      <div id="noveltyHud" class="novelty-hud hidden" role="group" aria-label="New kana pacing" aria-describedby="noveltyDetails" tabindex="0">
-        <svg class="novelty-icon control-icon" aria-hidden="true"><use href="#icon-leaf"/></svg>
-        <div class="novelty-pressure">
-          <div class="novelty-heading"><span class="novelty-label">NEW KANA</span><span class="novelty-separator" aria-hidden="true">·</span><strong id="noveltyGate" role="status" aria-live="polite">OPEN</strong></div>
-          <small id="noveltyRecent" class="novelty-detail"></small>
-        </div>
-        <div class="novelty-session">
-          <div class="novelty-heading"><span class="novelty-label">INTRODUCED</span><strong id="noveltyIntroduced">0 / 2</strong></div>
-          <small class="novelty-detail"><span class="novelty-session-prefix">This session · </span><span id="noveltySession"></span></small>
-        </div>
-        <span id="noveltyDetails" class="sr-only"></span>
-      </div>
       </div>
       <div class="hud-actions">
         <button id="listenBtn" class="hud-button" aria-label="Listen to the target kana" title="Listen (assisted answer)"><svg class="control-icon" aria-hidden="true"><use href="#icon-sound"/></svg><span class="sr-only">Listen</span></button>
@@ -125,6 +110,7 @@
         <label><span class="sr-only">Reading practice</span><select id="mode"><option value="hira">Hiragana</option><option value="kata">Katakana</option><option value="mix">Mixed scripts</option><option value="pair">Katakana → Hiragana</option><option value="words">Little words</option></select></label>
         <label><span class="sr-only">Difficulty</span><select id="difficultySelect"><option value="easy">Easy · 5 hearts</option><option value="normal" selected>Normal · 3 hearts</option><option value="hard">Hard · 1 heart</option></select></label>
         <label><span class="sr-only">Session duration</span><select id="durationSelect"><option value="60">1 min</option><option value="180" selected>3 min</option><option value="300">5 min</option><option value="600">10 min</option></select></label>
+        <label class="novelty-pace-select"><span class="sr-only">New kana pace</span><select id="noveltyPaceSelect"><option value="calm" selected>New kana · Calm</option><option value="balanced">New kana · Balanced</option><option value="bold">New kana · Bold</option></select></label>
       </div>
       <p id="menuBest" class="menu-best">Personal best · 0</p>
       <p id="menuHint" class="menu-hint">Romaji · <kbd>Enter</kbd> to begin</p>
@@ -171,8 +157,28 @@
       <label class="field-label" for="settingsMode">Reading practice</label><select id="settingsMode"><option value="hira">Hiragana</option><option value="kata">Katakana</option><option value="mix">Mixed scripts</option><option value="pair">Katakana → Hiragana</option><option value="words">Little words</option></select><p id="modeNote" class="field-note">Type romaji throughout the session, even as kana become familiar.</p>
       <div id="modeLocks" class="mode-locks" aria-label="Practice mode unlocks"></div>
       <label class="field-label" for="settingsPracticeSelect">Session style</label><select id="settingsPracticeSelect"><option value="arcade" selected>Arcade challenge</option><option value="practice">Steady practice</option></select><p class="field-note">Arcade is the main experience, with rising speed and hearts. Optional Steady practice keeps one drop at a time and no lost hearts. Read each correction, then continue.</p>
-      <fieldset aria-describedby="difficultyNote"><legend>Choose your difficulty</legend><div class="difficulty-options"><button data-difficulty="easy" class="difficulty" aria-pressed="false" aria-label="Easy, 5 hearts, gentler rain"><span class="difficulty-hearts" aria-hidden="true">♥ 5</span><strong>Easy</strong><small>Gentler rain</small></button><button data-difficulty="normal" class="difficulty selected" aria-pressed="true" aria-label="Normal, 3 hearts, steady rain"><span class="difficulty-hearts" aria-hidden="true">♥ 3</span><strong>Normal</strong><small>Steady rain</small></button><button data-difficulty="hard" class="difficulty" aria-pressed="false" aria-label="Hard, 1 heart, faster rain"><span class="difficulty-hearts" aria-hidden="true">♥ 1</span><strong>Hard</strong><small>Faster rain</small></button></div></fieldset>
+      <fieldset aria-describedby="difficultyNote"><legend>Rain difficulty</legend><div class="difficulty-options"><button data-difficulty="easy" class="difficulty" aria-pressed="false" aria-label="Easy, 5 hearts, gentler rain"><span class="difficulty-hearts" aria-hidden="true">♥ 5</span><strong>Easy</strong><small>Gentler rain</small></button><button data-difficulty="normal" class="difficulty selected" aria-pressed="true" aria-label="Normal, 3 hearts, steady rain"><span class="difficulty-hearts" aria-hidden="true">♥ 3</span><strong>Normal</strong><small>Steady rain</small></button><button data-difficulty="hard" class="difficulty" aria-pressed="false" aria-label="Hard, 1 heart, faster rain"><span class="difficulty-hearts" aria-hidden="true">♥ 1</span><strong>Hard</strong><small>Faster rain</small></button></div></fieldset>
       <p id="difficultyNote" class="field-note">Drops fall faster as session time passes. Each drop that reaches the ground costs one heart. Your session ends when no hearts remain.</p>
+      <fieldset id="noveltyPaceSettings" aria-describedby="noveltyPaceHelp noveltyPaceNote noveltyPaceScope">
+        <legend>New kana pace</legend>
+        <p id="noveltyPaceHelp" class="field-note novelty-pace-help">Choose when new kana return after a rough streak.</p>
+        <div id="noveltyPaceOptions" class="novelty-pace-options" role="group" aria-label="New kana pace">
+          <button type="button" data-novelty-pace="calm" class="novelty-pace selected" aria-pressed="true" aria-label="Calm, 55 first-try hits in the latest 60 drops">
+            <span class="novelty-pace-top"><span class="novelty-pace-mark" aria-hidden="true"></span><span class="novelty-pace-selected" aria-hidden="true">SELECTED</span></span>
+            <strong>Calm</strong><span class="novelty-pace-ratio">55 <span>/</span> 60</span><small>More breathing room</small>
+          </button>
+          <button type="button" data-novelty-pace="balanced" class="novelty-pace" aria-pressed="false" aria-label="Balanced, 25 first-try hits in the latest 30 drops">
+            <span class="novelty-pace-top"><span class="novelty-pace-mark" aria-hidden="true"></span><span class="novelty-pace-selected" aria-hidden="true">SELECTED</span></span>
+            <strong>Balanced</strong><span class="novelty-pace-ratio">25 <span>/</span> 30</span><small>A middle ground</small>
+          </button>
+          <button type="button" data-novelty-pace="bold" class="novelty-pace" aria-pressed="false" aria-label="Bold, 10 first-try hits in the latest 12 drops">
+            <span class="novelty-pace-top"><span class="novelty-pace-mark" aria-hidden="true"></span><span class="novelty-pace-selected" aria-hidden="true">SELECTED</span></span>
+            <strong>Bold</strong><span class="novelty-pace-ratio">10 <span>/</span> 12</span><small>New kana return sooner</small>
+          </button>
+        </div>
+        <p id="noveltyPaceNote" class="field-note novelty-pace-note" role="status" aria-live="polite">Calm: after new introductions pause, get 55 first-try hits in the latest 60 completed drops, with at most one expiry, to bring new kana back.</p>
+        <p id="noveltyPaceScope" class="field-note novelty-pace-scope">Drop speed and hearts still follow your rain difficulty.</p>
+      </fieldset>
       <fieldset><legend>Time for yourself</legend><div class="durations" aria-label="Session duration"><button data-duration="60">1 min</button><button data-duration="180" class="selected">3 min</button><button data-duration="300">5 min</button><button data-duration="600">10 min</button></div></fieldset><p id="settingsNote" class="field-note">Practice ends after its small set of items; arcade uses the time selected above. Saved progress stays on this device.</p>
       <button id="effectsBtn" class="effects-toggle" type="button" aria-pressed="false">Reduced effects <span class="effects-state">Off</span></button><p class="field-note effects-note">Calmer motion; gameplay stays the same.</p>
       <button class="text-button analytics-entry" type="button" data-analytics-settings>Analytics and privacy</button>
@@ -193,7 +199,7 @@
       <p>New kana briefly show their sound. Open My Kana Garden and tap a lesson tile to listen. A new row opens when each available kana has two correct first answers and at least 85% first-answer accuracy. Reading hints and pronunciation do not block unlocks. Wrong answers show the correct reading, stain the drop, and make it fall faster. Missed or mistaken kana return for practice.</p>
       <p>Romaji hints disappear as you learn. Hiragana, Katakana, Mixed scripts and Little words always use romaji answers throughout the session. For matching scripts, choose <b>Katakana → Hiragana</b> before starting: <b>カ → か</b>. That separate mode uses the touch keyboard or your Japanese keyboard. Words reveal their English meaning after an answer.</p>
       <p>An <b>!</b> badge warns that a drop is close to the ground. The heart counter shows how many misses you can afford. After a session, tap a review card to hear its kana, or choose <b>Review these kana</b> to practice your mistakes. My Kana Garden shows the exact readiness for your next row.</p>
-      <p>In kana reading sessions, new kana arrive after three familiar drops, at most two per session and one debut on screen. Two expired drops in the latest twelve pause new introductions; ten first-try hits and at most one expiry reopen them. This recent history continues between sessions. Each alphabet starts with its five vowels. All earned rows remain unlocked.</p>
+      <p>In kana reading sessions, new kana arrive after three familiar drops, at most two per session and one debut on screen. Choose <b>New kana pace</b> in Settings: <b>Calm</b> reopens new introductions with 55 first-try hits in the latest 60 completed drops, <b>Balanced</b> with 25 in 30, or <b>Bold</b> with 10 in 12. Two expired drops in your selected window pause new introductions; reopening also needs at most one expiry. This recent history continues between sessions. Each alphabet starts with its five vowels. All earned rows remain unlocked.</p>
       <p><kbd>Esc</kbd> pauses or returns from a menu. Leaving the tab pauses automatically. Every answer saves on this device.</p><button id="resetBtn" class="text-button danger">Reset saved progress</button>
     </div>
   </dialog>

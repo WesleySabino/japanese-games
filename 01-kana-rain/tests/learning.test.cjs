@@ -31,7 +31,7 @@ async function game(options={}){
   for(const id of ['scriptDialog','featureDialog','pauseOverlay','settingsDialog','progressDialog','helpDialog','results'])el(id);
   const document={body:new Element(),documentElement:new Element(),activeElement:null,hidden:false,getElementById:el,createElement:()=>new Element(),addEventListener:(k,v)=>listeners.set(k,v),querySelector:s=>s==='dialog[open]'?[...nodes.values()].find(x=>x.open):null,querySelectorAll:s=>s==='dialog.game-dialog[open]'?[...nodes.values()].filter(x=>x.open):s==='dialog.game-dialog'?[...nodes.values()].filter(x=>x.id.endsWith('Dialog')||['pauseOverlay','results'].includes(x.id)):[]};
   Object.assign(m.context,{document,location:{hostname:'127.0.0.1',search:options.explore?'?all':''},navigator:{},performance:{now:()=>now},URL,URLSearchParams,innerWidth:1000,innerHeight:800,matchMedia:()=>({matches:false}),ResizeObserver:class{observe(){}},requestAnimationFrame:fn=>{frame=fn;return 1;},cancelAnimationFrame:()=>frame=null,setTimeout:(fn,ms)=>{const id=++serial;timers.set(id,{fn,at:now+ms});return id;},clearTimeout:id=>timers.delete(id),confirm:()=>true,Blob,addEventListener:(k,v)=>listeners.set(k,v),KanaAudio:{enabled:true,ready:Promise.resolve(),available:true,play:async()=>false,stop(){},hasRecording:()=>false}});
-  vm.runInContext(source('difficulty'),m.context);vm.runInContext(source('novelty'),m.context);vm.runInContext(source('novelty-hud'),m.context);await vm.runInContext(source('game'),m.context);
+  vm.runInContext(source('difficulty'),m.context);vm.runInContext(source('novelty'),m.context);await vm.runInContext(source('game'),m.context);
   const advance=(ms,playFrame=false)=>{now+=ms;m.advance(ms);for(const [id,t] of [...timers])if(t.at<=now){timers.delete(id);t.fn();}if(playFrame)frame?.(now);};
   return {...m,nodes,el,document,listeners,app:m.context.KanaRain,advance,skip:()=>el('skipCountdown').onclick(),submit:text=>{el('answer').value=text;el('answerForm').onsubmit({preventDefault(){}});},type:text=>{el('answer').value=text;el('answer').oninput();},continue:()=>el('continueFeedbackBtn').onclick(),tick:()=>advance(16,true)};
 }
@@ -260,6 +260,23 @@ test('new and reset gardens default to arcade while a selected practice preferen
   const restored=await game({map:g.map});assert.equal(restored.app.settings.playStyle,'practice');assert.equal(restored.el('settingsPracticeSelect').value,'practice');restored.el('resetBtn').onclick();assert.equal(restored.app.settings.playStyle,'arcade');
 });
 
+test('new kana pace persists independently of rain settings and cannot change during active or paused play',async()=>{
+  const g=await game();assert.equal(g.app.settings.noveltyPace,'calm');
+  const settings=plain(g.app.settings),attempts=plain(g.L.attempts()),exposures=plain(g.L.exposures());
+  g.el('noveltyPaceSelect').value='balanced';g.el('noveltyPaceSelect').onchange();
+  assert.equal(g.app.settings.noveltyPace,'balanced');assert.equal(g.app.gameData.novelty.pace,'balanced');
+  assert.deepEqual(plain(g.app.settings),{...settings,noveltyPace:'balanced'});
+  assert.deepEqual(plain(g.L.attempts()),attempts);assert.deepEqual(plain(g.L.exposures()),exposures);
+  const restored=await game({map:g.map});
+  assert.equal(restored.app.settings.noveltyPace,'balanced');assert.equal(restored.el('noveltyPaceSelect').value,'balanced');
+  restored.app.start();restored.skip();assert.equal(restored.el('noveltyPaceSelect').disabled,true);
+  restored.el('noveltyPaceSelect').value='bold';restored.el('noveltyPaceSelect').onchange();
+  assert.equal(restored.app.settings.noveltyPace,'balanced');
+  restored.app.pause(true);restored.el('noveltyPaceOptions').onclick({target:{closest:()=>({dataset:{noveltyPace:'bold'}})}});
+  assert.equal(restored.app.settings.noveltyPace,'balanced');assert.equal(restored.app.gameData.novelty.pace,'balanced');
+  restored.el('resetBtn').onclick();assert.equal(restored.app.settings.noveltyPace,'calm');
+});
+
 test('selected finite practice holds correction through pause and ends after eight failed opportunities',async()=>{
   const g=await game({prepare(L){L.gameData('kana-rain').playStyle='practice';}});assert.equal(g.app.settings.playStyle,'practice');g.app.start();g.skip();const speed=g.app.state.speed;
   for(let i=0;i<8;i++){
@@ -368,10 +385,10 @@ test('completed-drop pressure persists across restart and reload, then recovers 
   g.app.end('Restart');const reloaded=await game({map:g.map});
   assert.deepEqual(plain(reloaded.app.gameData.novelty.recent),window);assert.deepEqual(plain(reloaded.L.attempts()),attempts);
   reloaded.app.start({reviewIds:['kana:あ']});reloaded.skip();
-  for(let i=0;i<28;i++)answerNext(reloaded);
-  assert.equal(reloaded.app.gameData.novelty.blocked,true,'28 correct with two expirations is still blocked');
+  for(let i=0;i<58;i++)answerNext(reloaded);
+  assert.equal(reloaded.app.gameData.novelty.blocked,true,'58 correct with two expirations is still blocked');
   answerNext(reloaded);assert.equal(reloaded.app.gameData.novelty.blocked,false);
-  assert.equal(reloaded.app.gameData.novelty.recent.length,30);assert.equal(reloaded.app.state.lives,3);
+  assert.equal(reloaded.app.gameData.novelty.recent.length,60);assert.equal(reloaded.app.state.lives,3);
 });
 
 test('multiple wrong submissions and their final correction or expiry each resolve just one drop',async()=>{

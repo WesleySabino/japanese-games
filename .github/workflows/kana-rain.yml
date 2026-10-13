@@ -64,5 +64,11 @@ jobs:
       - name: Run learning improvement browser checks
         run: pnpm run test:improvements
 
+      - name: Run gradual kana presentation browser checks
+        run: pnpm run test:novelty-presentation
+
+      - name: Run new kana pace browser checks
+        run: pnpm run test:novelty-pace
+
       - name: Build the static site
         run: pnpm build
