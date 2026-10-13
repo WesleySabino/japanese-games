@@ -71,7 +71,7 @@ async function runtime(options = {}) {
     KanaAudio: { enabled: true, ready: Promise.resolve(), available: true, play: async () => false, stop() {}, hasRecording: () => false }
   });
   context.window = context;
-  for (const name of ['data', 'learner', 'difficulty', 'game']) {
+  for (const name of ['data', 'learner', 'difficulty', 'novelty', 'game']) {
     await vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/' + name + '.js'), 'utf8'), context);
   }
   return {
@@ -92,6 +92,8 @@ function play(g, milliseconds) {
 
 async function inputRain(ids, mode = 'hira') {
   const g = await runtime({ explore: true });
+  // Input matching fixtures represent already introduced kana, independent of admission pacing.
+  for (const id of ids) g.app.gameData.novelty.seen[id] = true;
   g.el('mode').value = mode; g.el('mode').onchange();
   g.app.start({ reviewIds: [ids[0]] }); g.skip();
   // Spawn real rounds in a fixed order so the short answer is highlighted first.

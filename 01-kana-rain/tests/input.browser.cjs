@@ -19,6 +19,8 @@ async function checkPrefixInput(browser, baseUrl, { baseline = false } = {}) {
           if (KanaRain.state && !KanaRain.state.over) KanaRain.end('Input regression fixture');
           const mode = document.getElementById('mode');
           mode.value = char === 'ン' ? 'kata' : 'hira'; mode.onchange();
+          // This fixture tests typing ambiguity between kana that have already debuted.
+          if (KanaRain.gameData.novelty) for (const id of [char, partner].filter(Boolean)) KanaRain.gameData.novelty.seen['kana:' + id] = true;
           KanaRain.start({ reviewIds: ['kana:' + char] });
           KanaRain.state.queue = partner ? [{ id: 'kana:' + partner }] : [];
           KanaRain.state.sinceSpawn = partner ? 99999 : -99999;

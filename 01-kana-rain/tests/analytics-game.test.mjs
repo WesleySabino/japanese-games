@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-const files = await Promise.all(['data.js', 'difficulty.js', 'game.js'].map(name => readFile(new URL('../src/' + name, import.meta.url), 'utf8')));
+const files = await Promise.all(['data.js', 'difficulty.js', 'novelty.js', 'game.js'].map(name => readFile(new URL('../src/' + name, import.meta.url), 'utf8')));
 async function game() {
   const nodes = new Map(), events = [], listeners = new Map();
   let frame, now = 1000;
@@ -47,7 +47,7 @@ async function game() {
     setTimeout: () => 1, clearTimeout() {}, confirm: () => true
   });
   vm.runInContext(files[0], context); vm.runInContext(files[1], context);
-  await vm.runInContext(files[2], context);
+  vm.runInContext(files[2], context); await vm.runInContext(files[3], context);
   return {
     app: window.KanaRain, events, nodes,
     skip: () => element('skipCountdown').onclick(), finish: () => element('finishBtn').onclick(),

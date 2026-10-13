@@ -175,7 +175,7 @@ async function exerciseStableInput(errors){
     await page.setViewportSize({width,height});await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>window.KanaRain);
     await page.evaluate(()=>{
       Learner.reset();const gd=Learner.gameData('kana-rain');gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};
-      for(let i=0;i<6;i++)Learner.record('kana:あ','form→sound',{correct:true,rtMs:500,firstAttempt:true,assistance:false,responseFormat:'romaji',now:Date.now()-(5-i)*7*86400000});
+      for(let i=0;i<6;i++)Learner.record('kana:あ','form→sound',{gameId:'kana-rain',correct:true,rtMs:500,firstAttempt:true,assistance:false,responseFormat:'romaji',now:Date.now()-(5-i)*7*86400000});
       Learner.flush();
     });
     await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#difficultySelect').selectOption('easy');await page.locator('#startBtn').tap();await readyToPlay(page);

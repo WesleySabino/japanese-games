@@ -1,10 +1,11 @@
 (async function () {
   'use strict';
-  const D=window.JPData, L=window.Learner, A=window.KanaAudio, R=window.KanaDifficulty, FACET='form→sound', PAIR='script→script', GAME='kana-rain';
+  const D=window.JPData, L=window.Learner, A=window.KanaAudio, R=window.KanaDifficulty, N=window.KanaNovelty, FACET='form→sound', PAIR='script→script', GAME='kana-rain';
   const $=id=>document.getElementById(id), normalize=s=>s.trim().toLowerCase().normalize('NFKC');
   await L.ready;
   let gd=L.gameData(GAME);
   gd.rows=gd.rows || {hiragana:1,katakana:1}; gd.best=gd.best || {}; gd.accuracy=gd.accuracy || {};
+  let novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});
   const explore=new URLSearchParams(location.search).has('all');
   let cfg={mode:'hira',duration:180,difficulty:R.profiles[gd.difficulty]?gd.difficulty:'normal',playStyle:gd.playStyle==='practice'?'practice':'arcade'}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
   A.enabled=gd.sound!==false;
@@ -221,9 +222,37 @@
     if(G.pendingFeatures.length)introduceFeature();else initializeRounds();
   }
   function initializeRounds(){
+    G.familiarSinceIntroduction=0;
     G.pauseAt=performance.now();refill();if(G.playStyle==='practice'){const plan=G.queue.slice(0,8);G.queue=Array.from({length:8},(_,i)=>plan[i%plan.length]);}
     if(!G.queue.length||!G.queue[0]){end('No eligible items yet. Open the garden and unlock more kana.','manual_finish');return;}
-    spawn(G.queue.shift());updateTarget();if(!$('scriptDialog').open)beginCountdown();
+    if(!spawn(nextEntry())){end('No familiar items in this review yet. Start a regular rain first.','manual_finish');return;}
+    updateTarget();if(!$('scriptDialog').open)beginCountdown();
+  }
+  // Admission controls first presentations, never the unlocked repertoire or rain curve.
+  const readingAdmission=()=>['hira','kata','mix'].includes(cfg.mode);
+  const starter=id=>D.kanaById[id]?.row==='a';
+  function canPresent(id){
+    if(!readingAdmission())return true;
+    // Keep the debut identity until its drop leaves, even though it is now persisted as seen.
+    if(G.drops.some(d=>d.id===id&&d.isIntroduction))return false;
+    if(N.hasSeen(novelty,id))return true;
+    if(G.drops.some(d=>d.isIntroduction))return false;
+    // Each alphabet's five starter vowels bypass pressure/budget/warmup, one at a time.
+    if(starter(id))return true;
+    const known=(G.reviewIds||candidates()).some(id=>N.hasSeen(novelty,id));
+    return G.newIds.size<N.constants.maxNew&&!novelty.blocked&&(!known||G.familiarSinceIntroduction>=N.constants.warmup);
+  }
+  function nextEntry(){
+    if(!G.queue.length)refill();
+    let index=G.queue.findIndex(e=>canPresent(e.id));
+    if(index<0){
+      // A queued debut may become blocked after a miss. Keep it deferred and keep the rain going.
+      const known=(G.reviewIds||candidates()).filter(id=>N.hasSeen(novelty,id)&&canPresent(id));
+      const plan=L.selectRound(known,{facet:facet(),size:8,maxNew:8});
+      G.queue.push(...plan.map(id=>({id})));
+      index=G.queue.findIndex(e=>canPresent(e.id));
+    }
+    return index<0?null:G.queue.splice(index,1)[0];
   }
   function refill(){
     const plan=L.selectRound(G.reviewIds||candidates(),{facet:facet(),size:8,maxNew:cfg.mode==='words'?2:3});
@@ -242,14 +271,17 @@
     root.appendChild(el);return {el,hint};
   }
   function spawn(entry,xHint){
-    if(!entry)return;
+    if(!entry||!canPresent(entry.id))return;
+    const isIntroduction=readingAdmission()&&!N.hasSeen(novelty,entry.id);
     const round=generateRound(entry),view=render($('field'),round),w=view.el.offsetWidth,h=view.el.offsetHeight,W=fieldSize.width;
     let x=xHint;
     if(x==null){for(let tries=0;tries<10;tries++){x=12+Math.random()*Math.max(1,W-w-24);if(!G.drops.some(d=>d.y<110 && Math.abs(d.x-x)<w+8))break;}}
     x=Math.max(5,Math.min(W-w-5,x));
     const prior=L.assistanceFor?.(round.id,round.facet)||{assisted:false,reasons:[]};
     const d={...round,...view,hint:view.hint||prior.assisted,roundId:`${G.sessionId}:r:${++G.roundSerial}`,attemptCount:0,assistanceReasons:new Set([...(view.hint?['initial-reading']:[]),...(prior.assisted?prior.reasons:[])]),firstResponseMs:null,x,y:8,progress:0,w,h,wrong:0,v:1,born:performance.now(),pausedMs:0};
-    if(!L.state(d.id))G.newIds.add(d.id);G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');place(d);if(G.target)keyboard();return d;
+    d.isIntroduction=isIntroduction;
+    if(isIntroduction){N.markSeen(novelty,d.id);if(!starter(d.id))G.newIds.add(d.id);G.familiarSinceIntroduction=0;}
+    G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);if(G.target)keyboard();return d;
   }
   function place(d){d.el.style.transform=`translate(${d.x}px,${d.y}px)`;}
   function positionDrop(d,H=fieldSize.height){
@@ -274,9 +306,11 @@
       if(!G.queue.length&&G.playStyle==='arcade')refill();
       const cap=G.playStyle==='practice'?1:Math.min(R.profiles[G.difficulty].maxDrops,2+Math.floor(G.correct/8));
       if(G.drops.length<cap && G.sinceSpawn>G.gap && G.queue.length){
-        const e=G.queue.shift(),d=spawn(e);
-        if(e.partner && G.drops.length<cap){spawn({id:e.partner},d.x+d.w+8);}
-        G.sinceSpawn=0;
+        const e=nextEntry(),d=spawn(e);
+        if(d){
+          if(e.partner && G.drops.length<cap&&!spawn({id:e.partner},d.x+d.w+8))G.queue.push({id:e.partner});
+          G.sinceSpawn=0;
+        }
       }
       const H=fieldSize.height;
       [...G.drops].forEach(d=>{if(G.over)return;d.progress+=G.speed*d.v*dt;
@@ -324,6 +358,10 @@
     if(detail.outcome!=='timeout'){G.attempts++;if(correct){G.correct++;G.rts.push(displayActiveMs);}}
     const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
     if(detail.outcome!=='timeout'){stat.attempts++;if(correct)stat.correct++;}
+    if(readingAdmission()&&(correct||detail.outcome==='timeout'||G.playStyle==='practice')){
+      N.finish(novelty,{roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout'});
+      if(!d.isIntroduction)G.familiarSinceIntroduction++;
+    }
     L.flush();G.recent.push(correct?1:0);if(G.recent.length>12)G.recent.shift();return ev;
   }
   function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
@@ -377,7 +415,7 @@
   function continueFeedback(){
     if(!running()||!G.awaitingFeedback)return;G.awaitingFeedback=false;clearFeedback();
     if(G.practiceCompleted>=G.practiceTotal){end('Eight practice opportunities complete','practice_set_complete');return;}
-    G.sinceSpawn=0;spawn(G.queue.shift());updateTarget();beginCountdown('Ready for the next item?');
+    G.sinceSpawn=0;spawn(nextEntry());updateTarget();beginCountdown('Ready for the next item?');
   }
   function checkUnlock(){
     if(explore||cfg.mode==='words')return;
@@ -493,7 +531,7 @@
   $('settingsBtn').onclick=$('pauseSettingsBtn').onclick=()=>openPanel('settingsDialog');
   $('closeSettings').onclick=$('saveSettings').onclick=()=>closePanel('settingsDialog');
   $('helpBtn').onclick=$('pauseHelpBtn').onclick=()=>openPanel('helpDialog');$('closeHelp').onclick=()=>closePanel('helpDialog');
-  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};cfg.mode='hira';cfg.difficulty='normal';cfg.playStyle='arcade';L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
+  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};novelty=N.create(gd);cfg.mode='hira';cfg.difficulty='normal';cfg.playStyle='arcade';L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   document.querySelectorAll('dialog.game-dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='scriptDialog'){d.close();showPause();}else if(d.id==='featureDialog'){d.close();showPause();}else if(d.id==='results')showMenu();else closePanel(d.id);}));
   window.addEventListener('nihongo-analytics-settings-open',()=>{if(running())pause(true);});

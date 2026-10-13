@@ -31,7 +31,7 @@ async function game(options={}){
   for(const id of ['scriptDialog','featureDialog','pauseOverlay','settingsDialog','progressDialog','helpDialog','results'])el(id);
   const document={body:new Element(),documentElement:new Element(),activeElement:null,hidden:false,getElementById:el,createElement:()=>new Element(),addEventListener:(k,v)=>listeners.set(k,v),querySelector:s=>s==='dialog[open]'?[...nodes.values()].find(x=>x.open):null,querySelectorAll:s=>s==='dialog.game-dialog[open]'?[...nodes.values()].filter(x=>x.open):s==='dialog.game-dialog'?[...nodes.values()].filter(x=>x.id.endsWith('Dialog')||['pauseOverlay','results'].includes(x.id)):[]};
   Object.assign(m.context,{document,location:{search:options.explore?'?all':''},navigator:{},performance:{now:()=>now},URL,URLSearchParams,innerWidth:1000,innerHeight:800,matchMedia:()=>({matches:false}),ResizeObserver:class{observe(){}},requestAnimationFrame:fn=>{frame=fn;return 1;},cancelAnimationFrame:()=>frame=null,setTimeout:(fn,ms)=>{const id=++serial;timers.set(id,{fn,at:now+ms});return id;},clearTimeout:id=>timers.delete(id),confirm:()=>true,Blob,addEventListener:(k,v)=>listeners.set(k,v),KanaAudio:{enabled:true,ready:Promise.resolve(),available:true,play:async()=>false,stop(){},hasRecording:()=>false}});
-  vm.runInContext(source('difficulty'),m.context);await vm.runInContext(source('game'),m.context);
+  vm.runInContext(source('difficulty'),m.context);vm.runInContext(source('novelty'),m.context);await vm.runInContext(source('game'),m.context);
   const advance=(ms,playFrame=false)=>{now+=ms;m.advance(ms);for(const [id,t] of [...timers])if(t.at<=now){timers.delete(id);t.fn();}if(playFrame)frame?.(now);};
   return {...m,nodes,el,document,listeners,app:m.context.KanaRain,advance,skip:()=>el('skipCountdown').onclick(),submit:text=>{el('answer').value=text;el('answerForm').onsubmit({preventDefault(){}});},type:text=>{el('answer').value=text;el('answer').oninput();},continue:()=>el('continueFeedbackBtn').onclick(),tick:()=>advance(16,true)};
 }
@@ -48,12 +48,16 @@ function nextDrop(g){
 }
 function answerNext(g){const drop=nextDrop(g);g.submit(g.app.accepted(drop)[0]);return drop;}
 
-test('continuous assisted arcade answers unlock K and S without waiting for independent evidence',async()=>{
-  const g=await game({random:seededRandom()});g.app.start();g.skip();
+test('continuous assisted arcade answers unlock K and S across paced sessions without independent evidence',async()=>{
+  const g=await game({random:seededRandom()});
   const started=g.context.Date.now(),unlocks=[];
-  for(let answers=0;answers<160&&g.app.gameData.rows.hiragana<3;answers++){
-    const before=g.app.gameData.rows.hiragana;answerNext(g);
-    if(g.app.gameData.rows.hiragana!==before)unlocks.push(g.app.gameData.rows.hiragana);
+  for(let session=0;session<5&&g.app.gameData.rows.hiragana<3;session++){
+    if(g.app.state)g.app.end('Next rain');g.app.start();g.skip();
+    for(let answers=0;answers<100&&g.app.gameData.rows.hiragana<3;answers++){
+      const before=g.app.gameData.rows.hiragana;answerNext(g);
+      if(g.app.gameData.rows.hiragana!==before)unlocks.push(g.app.gameData.rows.hiragana);
+    }
+    assert.ok(g.app.state.newIds.size<=2,'the introduction budget survives every queue refill and unlock');
   }
   assert.deepEqual(unlocks,[2,3],'a fresh garden can earn two successive rows through actual answers');
   assert.ok(g.context.Date.now()-started<60000,'the whole run stays inside the assistance window');
@@ -63,10 +67,10 @@ test('continuous assisted arcade answers unlock K and S without waiting for inde
   for(const k of g.D.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row))){
     const f=g.L.state(k.id).facets['form→sound'];assert.ok(f.firstCorrect>=2,k.id);assert.equal(f.independentFirstCorrect,0,k.id);assert.equal(f.assistedCorrect,f.correct,k.id);
   }
-  assert.equal(g.app.state.lives,3);assert.ok(g.app.state.streak>=20);
+  assert.equal(g.app.state.lives,3);assert.ok(g.app.state.streak>0);
   // Newly earned content must actually enter the ongoing rain, with its first-reading hint.
   let introduced;
-  for(let n=0;n<8;n++){const drop=nextDrop(g);if(g.D.kanaById[drop.id].row==='s'){introduced=drop;break;}answerNext(g);}
+  for(let n=0;n<24;n++){const drop=nextDrop(g);if(g.D.kanaById[drop.id].row==='s'){introduced=drop;break;}answerNext(g);}
   assert.ok(introduced,'an S-row kana enters the next batch');assert.ok(introduced.el.children.some(child=>child.className==='hint'));
 });
 
@@ -100,7 +104,7 @@ test('assisted progress and existing records survive reload and unlock the next 
   original.L.recordExposure('kana:あ','form→sound',{exposureId:'saved-feedback',reason:'answer-feedback'});await original.L.flush();
   const saved=JSON.parse(original.L.export()),g=await game({map:original.map});
   assert.deepEqual(plain(g.L.attempts()),saved.attemptLedger);assert.deepEqual(plain(g.L.exposures().slice(0,saved.exposureLedger.length)),saved.exposureLedger);
-  assert.deepEqual(plain(g.app.gameData),saved.games['kana-rain']);
+  const {novelty,...preserved}=plain(g.app.gameData);assert.deepEqual(preserved,saved.games['kana-rain']);assert.equal(novelty.version,1);
   g.app.start({reviewIds:['kana:あ']});g.skip();answerNext(g);assert.equal(g.app.gameData.rows.hiragana,3);assert.equal(g.app.gameData.rows.katakana,3);assert.deepEqual(plain(g.app.gameData.best),saved.games['kana-rain'].best);
   assert.deepEqual(plain(g.L.attempts().slice(0,saved.attemptLedger.length)),saved.attemptLedger,'old evidence is neither rewritten nor discarded');
   const again=await model({map:g.map}),after=JSON.parse(again.L.export());
@@ -303,4 +307,105 @@ test('both storage failures keep gameplay and export available with truthful per
 
 test('opening analytics preferences while already paused never resumes the game',async()=>{
   const g=await game();g.app.start();g.skip();g.el('settingsBtn').onclick();assert.equal(g.app.state.paused,true);g.listeners.get('nihongo-analytics-settings-open')();assert.equal(g.app.state.paused,true);assert.equal(g.app.state.countingDown,false);
+});
+
+function pacingGarden(L,D){
+  L.gameData('kana-rain').rows={hiragana:3,katakana:1};
+  for(const k of D.kana.filter(k=>k.script==='hiragana'&&k.row==='a'))L.record(k.id,'form→sound',first('introduced:'+k.id));
+}
+
+test('familiar openings, spacing and two debuts survive many queues without reducing the known repertoire',async()=>{
+  const g=await game({random:seededRandom(27),prepare:pacingGarden});g.app.start();g.skip();
+  const debuts=[],seenKnown=new Set();let familiar=0;
+  for(let i=0;i<80;i++){
+    const d=nextDrop(g);
+    if(d.isIntroduction){assert.ok(familiar>=3,'three completed familiar drops precede every debut');debuts.push(d.id);familiar=0;}
+    else{familiar++;seenKnown.add(d.id);}
+    g.submit(g.app.accepted(d)[0]);
+  }
+  assert.equal(debuts.length,2);assert.equal(new Set(debuts).size,2);assert.equal(g.app.state.newIds.size,2);
+  assert.equal(g.app.candidates().length,15,'all three unlocked rows remain eligible');
+  assert.ok(seenKnown.size>=5);assert.equal(g.app.state.correct,80);assert.equal(g.app.state.lives,3);
+});
+
+test('only one debut is in flight, including unseen partners and repeated queued copies',async()=>{
+  const g=await game({prepare:pacingGarden});g.app.start();g.skip();
+  for(let i=0;i<3;i++)answerNext(g);
+  g.app.state.queue=[{id:'kana:か',partner:'kana:き'},{id:'kana:か'},{id:'kana:い'}];
+  nextDrop(g);
+  assert.equal(g.app.state.drops.filter(d=>d.isIntroduction).length,1);
+  assert.equal(g.app.state.newIds.size,1);
+  assert.equal(g.app.gameData.novelty.seen['kana:か'],true,'presentation is saved before any answer');
+  assert.equal(g.app.gameData.novelty.seen['kana:き'],undefined);
+  g.app.state.sinceSpawn=99999;g.tick();
+  assert.equal(g.app.state.drops.length,2,'familiar rain can continue alongside a debut');
+  assert.equal(g.app.state.drops.filter(d=>d.id==='kana:か').length,1);
+  assert.equal(g.app.state.drops.filter(d=>d.isIntroduction).length,1);
+  const reload=await game({map:g.map});
+  assert.equal(reload.app.gameData.novelty.seen['kana:か'],true);
+  assert.equal(reload.app.gameData.novelty.seen['kana:き'],undefined);
+});
+
+test('imported pressure blocks queued discoveries and real confusion partners but keeps familiar drops flowing',async()=>{
+  const g=await game({prepare(L,D){pacingGarden(L,D);for(let i=0;i<2;i++)L.record('kana:あ','form→sound',first('timeout:'+i,{outcome:'timeout',correct:null}));}});
+  g.app.start();g.skip();assert.equal(g.app.gameData.novelty.blocked,true);
+  const d=nextDrop(g);g.submit('ka');assert.equal(d.wrong,1);assert.ok(g.app.state.queue.some(e=>e.partner==='kana:か'));
+  g.submit(g.app.accepted(d)[0]);
+  const pair=g.app.state.queue.find(e=>e.partner==='kana:か');g.app.state.queue=[{id:'kana:き'},pair];
+  nextDrop(g);assert.ok(g.app.state.drops.every(d=>!d.isIntroduction));assert.equal(g.app.state.newIds.size,0);
+  assert.equal(g.app.gameData.novelty.seen['kana:か'],undefined);assert.equal(g.app.gameData.novelty.seen['kana:き'],undefined);
+  // Exhausting the visible plan cannot starve the field while new content is deferred.
+  g.app.state.queue=[{id:'kana:き'}];g.submit(g.app.accepted(g.app.state.drops[0])[0]);
+  assert.ok(nextDrop(g));assert.equal(g.app.gameData.novelty.blocked,true);
+  g.app.end('Restart');g.app.start();g.skip();assert.equal(g.app.state.newIds.size,0);assert.equal(nextDrop(g).isIntroduction,false);
+});
+
+test('completed-drop pressure persists across restart and reload, then recovers through actual hits',async()=>{
+  const g=await game({prepare:pacingGarden});g.app.start({reviewIds:['kana:あ']});g.skip();
+  for(let i=0;i<2;i++){nextDrop(g).progress=1;g.tick();}
+  assert.equal(g.app.gameData.novelty.blocked,true);assert.equal(g.app.state.lives,1);
+  const window=plain(g.app.gameData.novelty.recent),attempts=plain(g.L.attempts());
+  g.app.end('Restart');const reloaded=await game({map:g.map});
+  assert.deepEqual(plain(reloaded.app.gameData.novelty.recent),window);assert.deepEqual(plain(reloaded.L.attempts()),attempts);
+  reloaded.app.start({reviewIds:['kana:あ']});reloaded.skip();
+  for(let i=0;i<10;i++)answerNext(reloaded);
+  assert.equal(reloaded.app.gameData.novelty.blocked,true,'10 correct with two expirations is still blocked');
+  answerNext(reloaded);assert.equal(reloaded.app.gameData.novelty.blocked,false);
+  assert.equal(reloaded.app.gameData.novelty.recent.length,12);assert.equal(reloaded.app.state.lives,3);
+});
+
+test('multiple wrong submissions and their final correction or expiry each resolve just one drop',async()=>{
+  const g=await game({prepare:pacingGarden});g.app.start({reviewIds:['kana:あ']});g.skip();
+  const before=g.app.gameData.novelty.recent.length;g.submit('zzz');g.submit('zzz');
+  assert.equal(g.app.gameData.novelty.recent.length,before,'intermediate errors do not resolve a drop');
+  g.submit('a');assert.equal(g.app.gameData.novelty.recent.length,before+1);
+  assert.equal(g.app.gameData.novelty.recent.at(-1).firstCorrect,false);
+  const d=nextDrop(g);g.submit('zzz');d.progress=1;g.tick();
+  assert.equal(g.app.gameData.novelty.recent.length,before+2);
+  assert.equal(g.app.gameData.novelty.recent.at(-1).timeout,true);
+  assert.equal(g.L.state('kana:あ').facets['form→sound'].timeouts,1);
+});
+
+test('practice errors complete one opportunity and all eight opportunities remain playable under pressure',async()=>{
+  const g=await game({prepare(L,D){pacingGarden(L,D);L.gameData('kana-rain').playStyle='practice';}});
+  g.app.start({reviewIds:['kana:あ']});g.skip();const before=g.app.gameData.novelty.recent.length;
+  g.submit('zzz');assert.equal(g.app.gameData.novelty.recent.length,before+1);assert.equal(g.app.gameData.novelty.recent.at(-1).firstCorrect,false);
+  g.continue();g.skip();for(let i=0;i<7;i++)answerNext(g);
+  assert.equal(g.app.state.practiceCompleted,8);assert.equal(g.app.state.over,true);
+});
+
+test('starter vowels stay available under pressure, one debut at a time, without spending later-row slots',async()=>{
+  const g=await game({prepare(L){L.gameData('kana-rain').novelty={version:1,seen:{},recent:[],blocked:true};}});
+  g.app.start();g.skip();const starters=new Set();
+  for(let i=0;i<20;i++){
+    const d=nextDrop(g);if(d.isIntroduction&&g.D.kanaById[d.id].row==='a')starters.add(d.id);
+    g.app.state.sinceSpawn=99999;g.tick();assert.ok(g.app.state.drops.filter(d=>d.isIntroduction).length<=1);
+    g.submit(g.app.accepted(d)[0]);
+  }
+  assert.equal(starters.size,5);assert.ok(g.app.state.newIds.size<=2);assert.ok(g.app.state.correct>=20);
+});
+
+test('a programmatic all-unseen review under pressure ends instead of leaving an empty running field',async()=>{
+  const g=await game({prepare(L,D){pacingGarden(L,D);L.gameData('kana-rain').novelty={version:1,seen:{},recent:[],blocked:true};}});
+  g.app.start({reviewIds:['kana:か']});assert.equal(g.app.state.over,true);assert.equal(g.app.state.drops.length,0);
 });

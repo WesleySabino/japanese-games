@@ -18,6 +18,8 @@ The English translation of the original game specification is in [SPECIFICATION.
 
 The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
 
+The [local novelty-pacing prototype](./NOVELTY_BALANCE.md) documents the persistent pressure brake and gradual first presentations, including starter exceptions and preservation of existing progress.
+
 The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.1. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
 
 ## Play locally
@@ -59,7 +61,7 @@ Starting or resuming a session shows a skippable three-second countdown. The clo
 - Hiragana, Katakana, Mixed scripts and Little words keep romaji answers throughout the session, including familiar kana and focused review. A familiar item never changes the answer format or opens a kana keyboard during reading play.
 - Choose **Katakana → Hiragana** before starting for a separate script-matching session. Every drop is katakana and every answer is hiragana, including the interval between drops. Its full kana keyboard and desktop Japanese IME support matching without multiple-choice guessing. Existing script-match history remains intact.
 - The answer dock shows the session's fixed format. Any visible drop can be answered; the highlighted drop is the priority for forced submissions and listening.
-- Personal confusions are revisited together, side by side. The shared scheduler targets review, weak, and new items with a bounded new-item count.
+- Personal confusions are revisited together when admission allows. The shared scheduler targets review, weak, and new items; kana-reading sessions additionally limit first presentations across all queues and partners, using recent drop outcomes.
 - Pause with Escape or the Pause button. Leaving the tab pauses automatically. Finish preserves all answer evidence and displays session results.
 - Progress uses a localStorage journal and IndexedDB. Saved status follows completed writes, with a persistent export action when both fail. The newer compatible snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates on reload; v1 history retains unknown assistance and dated legacy errors.
 - My Kana Garden labels all four estimated familiarity states and shows first-answer readiness for every unlocked kana, including earlier rows. Results separate independent readings, script matches, helped answers and expired drops. Response, input and residence times are distinct exported fields; none is labelled pure reading speed.
