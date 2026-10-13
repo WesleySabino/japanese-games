@@ -1,6 +1,6 @@
 # Japanese Learning Minigames
 
-This project organizes the **34 games** from the [original brainstorm](./brainstorm-minijogos-japones.md), preserving the catalogue's IDs and order. Folders follow the format `NN-game-name`, with English names and IDs from `01` to `34`.
+This project organizes the **34 games** from the [original brainstorm](./planejamento/brainstorm-minijogos-japones.md), preserving the catalogue's IDs and order. Folders follow the format `NN-game-name`, with English names and IDs from `01` to `34`.
 
 **Kana Rain** is already implemented in `01-kana-rain/`. The other 33 games have design documentation and have not been implemented yet. The intended audience is English-speaking learners of Japanese: game names, instructions, explanations, specifications, and design reviews use English. Japanese characters, words, and sentences remain in the learning examples.
 

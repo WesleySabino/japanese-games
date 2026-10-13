@@ -26,6 +26,10 @@ playwright-report/
 test-results/
 **/tests/*.png
 **/tests/artifacts/
+**/artifacts/
+**/output/
+curriculum-atlas/qa/
+planejamento/site/qa/
 *.log
 kana-rain-progress*.json
 

@@ -45,4 +45,4 @@ The focused Chrome suite covers responsive layouts, corrections, persistence and
 
 The reviewed word corpus is a local test fixture, so checks work in a fresh repository checkout. CI runs both the arcade browser suite and the focused improvement checks. Browser reports and screenshots are generated under the ignored tests artifacts directory.
 
-See [README.md](./README.md) for local commands and current gameplay. [SPECIFICATION.md](./SPECIFICATION.md) and [REVIEW.md](./REVIEW.md) preserve the original catalogue and subsequent design rationale.
+See [README.md](./README.md) for local commands and current gameplay. [SPECIFICATION.md](./SPECIFICATION.md) and [REVIEW.md](./REVIEW.md) describe the current design; the [historical archive](../docs/history/kana-rain/README.md) preserves the original catalogue and earlier rationale.

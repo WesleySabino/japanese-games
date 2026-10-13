@@ -1,28 +1,31 @@
-# 01 — Kana Rain
+# 01 — Kana Rain: current specification
 
-**Catalogue ID:** 01.
-**Status:** implemented; see also [README.md](./README.md).
-**Source:** [original brainstorm](../planejamento/brainstorm-minijogos-japones.md), section 1, game 1.
+**Catalogue ID:** 01. **Status:** implemented. **Baseline:** version 1.4.0.
 
-The 14 fields below are an English translation of the complete original catalogue entry, including its examples, risks, and caveats. [REVIEW.md](./REVIEW.md) preserves the subsequent design review. The implementation was updated on 2026-10-09; see [README.md](./README.md) for current behavior and the [completed improvements](./LEARNING_IMPROVEMENTS.md) for verification.
+The [README](./README.md) records the complete current behavior and development commands. The [original catalogue translation](../docs/history/kana-rain/SPECIFICATION.md) is retained as historical design evidence; its proposed adaptive speed and automatic answer-format changes are not current requirements.
 
-This specification also depends on the brainstorm's shared guidelines: section 0 (principles), section 2 (curriculum), section 3 (learner model), section 5.2 (interface and data), and sections 5.4–5.7 (variation, scaffolding, errors, and progression). The [project index](../README.md) records the proposed shared implementation decisions.
+## Core game
 
-## Original catalogue entry — English translation
+Kana fall into a rain garden. The player types a reading, clears a drop and builds a score and streak. Any visible matching drop can be answered; a forced invalid submission belongs to the highlighted priority drop. Hiragana, Katakana, Mixed scripts and Little words keep romaji input. Katakana → Hiragana is an explicitly selected, separate matching mode.
 
-### 1. Kana Rain
+Arcade challenge is the default. Easy, Normal and Hard have five, three and one heart respectively. A drop expiring costs one heart; a wrong answer stains and accelerates that drop. Rain accelerates with active play time, regardless of accuracy. Steady practice is an optional eight-opportunity session with constant speed and explicit continuation after corrections. Menus pause gameplay clocks.
 
-1. **Name:** Kana Rain.
-2. **Concept:** kana fall from the top of the screen, and the player "breaks" them by typing or tapping the corresponding sound before they reach the ground.
-3. **How it works:** each drop is a DOM element animated with `transform: translateY` through CSS, or `requestAnimationFrame` with a single loop. The player types the sound (phases 0–1: romaji; later: selects the hiragana↔katakana counterpart on a kana keyboard, or types the reading of a whole word). Correct answers remove the drop; errors make it accelerate and "stain" the screen until it is answered correctly. Three drops hitting the ground end the game. Waves are assembled by the Scheduler: approximately 60% review items, 25% weak items, and 15% new items.
-4. **Action per round:** see the character → recall its sound → type → receive immediate feedback (on an error, the correct sound is displayed within 300 ms, alongside the character it was confused with).
-5. **Skill:** automatic kana→sound recognition (decoding), followed by katakana↔hiragana correspondence, then whole words in kana.
-6. **Why it helps:** automatic decoding is a prerequisite for reading; if each kana takes 500 ms, little working memory remains for meaning. The game trains *automaticity* (fluency) through active recall (producing the sound rather than choosing it), while the spacing between drops prompts a quick attempt without adjacent visual cues.
-7. **Level:** absolute beginner (phases 0–2), with a word mode extending into beginner level.
-8. **Example round:** か, き, さ, and ち fall. The player types `ka` ✓, `ki` ✓, then `chi` for the さ drop ✗ → feedback: "さ = sa (you typed chi → ち)". Both さ and ち reappear side by side in the next wave (deliberate interleaving). Word mode (phase 3): ねこ falls — type `neko`; a tooltip after the correct answer says *cat*.
-9. **Progression:** (a) adjust fall speed to maintain approximately 85% accuracy; (b) expand from one row (あいうえお) to the full gojūon; (c) add dakuten and combinations (ぎゃ, しょ); (d) mix hiragana and katakana; (e) use whole words; (f) introduce "acid rain": drops containing kana the player tends to confuse.
-10. **Shared data reuse:** uses `kana[]` and, in word mode, `words[]` filtered by `script = kana-only` and frequency; the confusion list comes from `learner.confusions`.
-11. **Complexity:** low.
-12. **Runtime cost:** very low (≤ 20 simultaneous DOM nodes, one animation loop).
-13. **Replayability:** high in the early phases (personal best per set, daily challenge); falls after kana are mastered, which is why the game transitions to word mode.
-14. **Risks:** (a) training romaji as a permanent intermediate step — mitigation: romaji disappears per item when the kana reaches mastery; the answer then uses kana or meaning; (b) guessing under pressure — speed only increases when accuracy is ≥ 85%; (c) focusing on isolated characters — word mode becomes mandatory from phase 1b.
+Complete readings submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play so longer answers remain possible; Enter submits immediately. Expiration clears partial input and cancels any pending automatic submission. Ordinary pauses retain partial input.
+
+## Progression and new kana
+
+Rows unlock when every available kana has two correct first answers and at least 85% accuracy on submitted first answers. Hints do not block those hits; corrected retries and expired drops do not satisfy the two-hit requirement. Independent recall remains a separate evidence label.
+
+The saved New kana pace preference is independent of rain difficulty: Calm uses 55/60, Balanced 25/30 and Bold 10/12. Two expirations in the selected rolling window pause first presentations. Recovery requires a full window, the profile's number of first-try hits and no more than one expiration. This is a recovery requirement after a pause, not a target before every debut.
+
+When familiar candidates exist, three completed familiar drops precede the first novelty and separate subsequent novelties. At most two non-starter new kana debut per session, with one debut on screen at a time. Each alphabet's starter vowels bypass the pressure, spacing and two-debut budget. A first presentation is persisted when its drop appears. All unlocked kana remain eligible; words and script matching keep their existing scheduling. See [NOVELTY_BALANCE.md](./NOVELTY_BALANCE.md) for precise admission rules and edge cases.
+
+## Feedback, access and data
+
+Reading hints, pronunciation, visible danger cues, corrections, streak celebrations, records and unlock announcements support the arcade loop. Touch and physical keyboard input remain available, with responsive menus and reduced-effects settings. Sound is optional.
+
+The shared catalogue, learner, scheduler, audio lookup and game module remain separate. Learner attempts and exposures, earned rows, best scores and preferences are stored in this browser through the existing localStorage/IndexedDB persistence. Progress can be exported; there is no account or cloud synchronization. Existing history and records are retained.
+
+The static release includes only the explicit production allowlist. The service worker supports offline play. Legacy prototypes, historical documentation, design mockups, private exports, tests and generated test artifacts are excluded from the game bundle.
+
+See the [current review](./REVIEW.md), [implementation history](./LEARNING_IMPROVEMENTS.md) and [project index](../README.md).

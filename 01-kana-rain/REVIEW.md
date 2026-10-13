@@ -1,37 +1,33 @@
-# 01 — Kana Rain Design Review
+# 01 — Kana Rain: current design review
 
-**Basis:** [translated specification](./SPECIFICATION.md), [brainstorm](../planejamento/brainstorm-minijogos-japones.md), [game documentation](./README.md), and the current code in `src/`.
-**Historical assessment:** the review below records the gaps and proposals before the implementation update.
+**Baseline:** version 1.4.0. **Sources:** [current specification](./SPECIFICATION.md), [game documentation](./README.md), [new-kana admission rules](./NOVELTY_BALANCE.md), and the implemented modules in `src/`.
 
-**Implementation update — 2026-10-09:** Arcade is the main experience and default at the user's request; Steady practice remains available in Settings, and the player's chosen style is remembered. Evidence separates first attempts, assistance and timeouts, and corrections remain available during pauses. See the [current game documentation](./README.md) and the [completed improvements and verification](./LEARNING_IMPROVEMENTS.md). The original review below retains the historical recommendation to start in steady practice; the user's subsequent product decision sets Arcade as the default.
+The [earlier review](../docs/history/kana-rain/REVIEW.md) is preserved as history. Its recommendation to default to Steady practice and its independent-recall readiness proposal have been superseded by the product decisions below.
 
-## What to keep
+## Design direction
 
-Reading, answering, and removing a drop form an easy-to-understand loop with an immediate visual consequence. Short sessions, words following isolated kana, and revisiting confusions all reuse the same mechanic. The current game already offers pause, a touch keyboard, IME support, persistent corrections, mistake review, and recording after every answer. These features address important gaps in the original text and do not need to be rebuilt.
+Arcade challenge is the main experience. Score, increasing rain pressure, hearts, streaks and the desire to improve a run drive replay. Learning evidence is recorded through play; the game retains reading and pronunciation feedback without making every mistake a mandatory lesson.
 
-## Gaps and differences
+Rain difficulty controls hearts and the time-based curve. New kana pace controls recovery of first presentations after recent expirations. Keeping these choices independent lets players retain an enjoyable arcade challenge while slowing new material. No active-repertoire subset removes already unlocked kana from play.
 
-- **Speed:** the catalogue proposes adjustment towards approximately 85% accuracy and makes increases conditional on accuracy. Currently, `src/difficulty.js` accelerates according to active play time, regardless of correct answers. This creates a predictable challenge but can also pressure players who are still learning.
-- **Lives:** three misses end the game in the brainstorm; currently Easy, Normal, and Hard provide five, three, and one life respectively. The original specification is a historical reference; the README records the implemented behavior.
-- **Drop identification:** the original example treats `chi` as an error for さ even while ち is visible. The code accepts an answer matching any visible drop; an invalid forced submission is assigned to the priority drop. This difference changes which confusions can be inferred.
-- **Evidence:** giving the wrong reading, missing a drop through delay, and answering correctly after hearing or seeing the answer are different situations. The code already reduces the weight of assisted responses, but a miss also records an incorrect answer. Typing time and keyboard search do not measure reading alone.
-- **Facets:** producing the other script trains hiragana–katakana correspondence. By itself, it does not demonstrate recall of the sound or understanding of a word.
+The diagnostic new-kana counter was intentionally removed from the HUD. Admission rules remain active in the background; the player-facing choice is in the menu and Settings. Partial text is cleared on expiration, while ordinary pauses retain it.
 
-## Priority improvements with low implementation cost
+## What to preserve
 
-1. **Offer steady practice as the initial option.** Reuse Easy with constant speed and few drops, leaving the rising curve for arcade play. Check whether players can practice new items without losing the session before reading the feedback.
-2. **Explain the existing selection rule.** Briefly state that any drop can be answered and that Enter acts on the priority drop. Do not record a confusion pair merely because another drop went unanswered.
-3. **Separate the reasons behind the evidence.** Record `wrong answer`, `time expired`, and `help used`, while retaining the consequence of losing a life in arcade play. Do not count an immediately copied correction as an unaided success.
-
-## Recommended simple scope
-
-Preserve the existing game: start with one hiragana row, answer using touch or a keyboard, keep feedback readable until the next action, and show a summary of mistaken items. One answer resolves one drop; the session ends at the selected time, when lives run out, or when the player leaves voluntarily, preserving evidence. In steady practice, a miss allows practice to continue. Recommending words should depend on readable words being available, without blocking all kana practice.
-
-Defer new effects, daily challenges, rankings, and additional modes. The main investment should be in answer clarity and pace calibration, using the screens and content that already exist.
+- Immediate typed-answer feedback, any-visible-drop matching and the highlighted priority for forced submissions.
+- Arcade acceleration, wrong-answer consequences, hearts, existing score rules and celebrations.
+- Optional Steady practice, focused mistake review and clear distinction between reading and script matching.
+- Touch controls, pause semantics, reduced effects, offline audio and explicit analytics consent.
+- Existing learning history, first-answer counters, independent evidence, unlocked rows and best scores.
 
 ## Validation criteria
 
-- With さ and ち visible, `chi` resolves ち; the instructions explain this behavior, and no confusion with さ is recorded automatically.
-- Wrong answers, timed-out drops, and assisted successes remain distinguishable in the records; only unaided successes count towards readiness.
-- The proposed practice mode maintains a steady pace; arcade play keeps its documented curve and pauses every clock when menus open.
-- A one-minute session ends with a summary and review accessible through touch and keyboard, without losing recorded responses.
+- Each pace profile survives reload and changes admission without changing rain difficulty or deleting history.
+- Two recent expirations close first presentations; a full qualifying recovery window reopens them. Corrected retries do not count as first-try hits.
+- Spacing, starter-vowel exceptions, per-session limits and one-debut-on-screen rules apply across normal queues, retries and confusion partners.
+- Familiar kana stay eligible while first presentations are paused; words and script matching retain their existing schedules.
+- An ambiguous reading can auto-submit without requiring a second key, and longer readings remain typeable.
+- Expiration clears partial text and pending automatic answers; pausing alone does neither.
+- Desktop, portrait and landscape play remain usable, and saving/reloading preserves learner evidence and records.
+
+The [README](./README.md#structure-and-checks) lists the automated unit and browser suites. Historical reports record technical verification, not measured learning gains or proof of long-term retention. Further balance changes should be guided by actual playtests.

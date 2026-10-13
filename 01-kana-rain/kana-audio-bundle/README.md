@@ -60,15 +60,22 @@ Review statuses are copied unchanged: approved entries have a provisional
 approval note, and ん remains pending after its repair. Checksums confirm
 integrity; extraction does not certify pronunciation.
 
-## Regenerate locally
+## Original extraction procedure (external source project)
 
-From the repository root with Node 24+ and PowerShell:
+The following commands were supplied with the original export. They refer to
+the source project's `destilacao-local/` workspace, which is not included in
+this repository; they are provenance, not commands for this checkout.
+That external extraction used Node 24+ and PowerShell:
 
 ```powershell
 node destilacao-local/exportar-audios.mjs
 Compress-Archive -LiteralPath destilacao-local/kana-audio-bundle -DestinationPath destilacao-local/kana-audio-bundle.zip -Force
 ```
 
-The generator reads the current live catalogue and served audio, rejects
-missing/mismatched files, and preserves their bytes. Rebuilding the ZIP is
-a separate command. This local extraction is not publication of the repository.
+The original generator read that source project's live catalogue and served
+audio, rejected missing/mismatched files, and preserved their bytes. Rebuilding
+its ZIP was a separate command. This repository serves the preserved bundle
+directly and does not ship a synthesis engine or the external export script.
+
+To validate this checkout's catalogue and bundled recordings, run `pnpm test`
+inside `01-kana-rain/`; development setup is in the [game README](../README.md).

@@ -1,6 +1,8 @@
 # Kana Rain
 
-Game 01 from `../planejamento/brainstorm-minijogos-japones.md`, implemented as a small HTML/CSS/JavaScript application. All game instructions, controls, and feedback are in English. Japanese is used for the learning content. The supplied standalone prototype is preserved; its kana catalogue and shared learner model form the basis of this implementation.
+Current package: **1.4.1**. See [release notes](CHANGELOG.md) for the feature release and the subsequent repository cleanup.
+
+Game 01 from `../planejamento/brainstorm-minijogos-japones.md`, implemented as a small HTML/CSS/JavaScript application. All game instructions, controls, and feedback are in English. Japanese is used for the learning content. The supplied standalone prototype is preserved as [non-executable historical source](../docs/history/kana-rain/prototypes/kana-rain-standalone.html.txt); its kana catalogue and shared learner model form the basis of this implementation.
 
 [Play Kana Rain](https://kana-rain.nihongogrove.top/) · [How to play](https://kana-rain.nihongogrove.top/about.html) · [Artwork](https://kana-rain.nihongogrove.top/art.html)
 
@@ -12,9 +14,9 @@ Optional Google Analytics 4 measures basic app usage only after explicit opt-in.
 You can play with analytics off. [Privacy and cookies](https://kana-rain.nihongogrove.top/privacy.html)
 explains the shared choice across Nihongo Grove, Japanese Core, and Kana Rain.
 
-Everything specific to this game is contained in `01-kana-rain/`: application files, artwork and concepts, the audio bundle, scripts, tests, and documentation. The shared brainstorm document is in the repository's `planejamento/` directory.
+The application, production artwork, audio bundle, scripts, tests and current documentation are in `01-kana-rain/`. Historical designs and the legacy prototype are in [docs/history/kana-rain](../docs/history/kana-rain/README.md); approval mockups and explanatory infographics are in [docs/design/kana-rain](../docs/design/kana-rain/README.md). The shared brainstorm document is in the repository's `planejamento/` directory.
 
-The English translation of the original game specification is in [SPECIFICATION.md](./SPECIFICATION.md). The design review and proposed improvements are in [REVIEW.md](./REVIEW.md). The numbered catalogue is in the [project index](../README.md).
+The [current specification](./SPECIFICATION.md) describes the implemented game; the [current review](./REVIEW.md) records its design direction and validation criteria. The [historical archive](../docs/history/kana-rain/README.md) preserves the original catalogue translation and earlier recommendations. The numbered catalogue is in the [project index](../README.md).
 
 The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
 
@@ -140,7 +142,7 @@ Open `art.html` for the English art gallery. Artwork was generated **before impl
 
 The complete prompts are in `assets/PROMPTS.md`. Kana glyphs remain real system-font text over the generated sprites.
 
-The approved immersive screen concepts and their prompts are retained in `assets/concepts/immersive-v1/`.
+The approved immersive screen concepts and their prompts are retained in [docs/design/kana-rain/immersive-v1](../docs/design/kana-rain/immersive-v1/PROMPTS.md), outside the runtime assets. Explanatory infographics and their prompts are indexed in the [design archive](../docs/design/kana-rain/README.md).
 
 ## Structure and checks
 
