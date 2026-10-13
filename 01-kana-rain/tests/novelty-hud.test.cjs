@@ -18,11 +18,13 @@ test('novelty HUD exposes the same read-only API in browser and CommonJS',()=>{
 test('pressure display keeps the actual persisted gate, including hysteresis',()=>{
   const state=Novelty.create({});
   finish(state,'t1',{timeout:true});finish(state,'t2',{timeout:true});
-  for(let i=0;i<12;i++)finish(state,`corrected:${i}`,{firstCorrect:false});
+  for(let i=0;i<30;i++)finish(state,`corrected:${i}`,{firstCorrect:false});
   const result=view(state);
   assert.equal(result.gateLabel,'ON HOLD');assert.equal(result.reason,'recovery');
-  assert.equal(result.expired,0);assert.equal(result.hits,0);assert.equal(result.sampleCount,12);
-  for(let i=0;i<10;i++)finish(state,`hit:${i}`);
+  assert.equal(result.expired,0);assert.equal(result.hits,0);assert.equal(result.sampleCount,30);
+  for(let i=0;i<24;i++)finish(state,`hit:${i}`);
+  assert.equal(view(state).gateLabel,'ON HOLD','24 first-try hits cannot reopen the gate');
+  finish(state,'hit:24');
   assert.equal(view(state).gateLabel,'OPEN');
 });
 
@@ -30,9 +32,10 @@ test('recent counters show actual completed samples instead of inventing a full 
   const state=Novelty.create({});
   finish(state,'first');finish(state,'corrected',{firstCorrect:false});finish(state,'expired',{timeout:true});
   const result=view(state);
-  assert.equal(result.sampleCount,3);assert.equal(result.windowSize,12);
+  assert.equal(result.sampleCount,3);assert.equal(result.windowSize,30);
   assert.equal(result.hits,1);assert.equal(result.expired,1);
-  assert.equal(result.recentText,'Last 3 / 12 drops: 1 first-try hits · 1 expired');
+  assert.equal(result.recentText,'Last 3 / 30 drops: 1 first-try hits · 1 expired');
+  assert.match(result.detail,/Recovery needs 30 completed drops, at least 25 first-try hits and at most 1 expired/);
   assert.equal(view(Novelty.create({})).sampleCount,0);
 });
 

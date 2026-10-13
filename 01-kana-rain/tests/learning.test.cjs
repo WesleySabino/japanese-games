@@ -368,10 +368,10 @@ test('completed-drop pressure persists across restart and reload, then recovers 
   g.app.end('Restart');const reloaded=await game({map:g.map});
   assert.deepEqual(plain(reloaded.app.gameData.novelty.recent),window);assert.deepEqual(plain(reloaded.L.attempts()),attempts);
   reloaded.app.start({reviewIds:['kana:あ']});reloaded.skip();
-  for(let i=0;i<10;i++)answerNext(reloaded);
-  assert.equal(reloaded.app.gameData.novelty.blocked,true,'10 correct with two expirations is still blocked');
+  for(let i=0;i<28;i++)answerNext(reloaded);
+  assert.equal(reloaded.app.gameData.novelty.blocked,true,'28 correct with two expirations is still blocked');
   answerNext(reloaded);assert.equal(reloaded.app.gameData.novelty.blocked,false);
-  assert.equal(reloaded.app.gameData.novelty.recent.length,12);assert.equal(reloaded.app.state.lives,3);
+  assert.equal(reloaded.app.gameData.novelty.recent.length,30);assert.equal(reloaded.app.state.lives,3);
 });
 
 test('multiple wrong submissions and their final correction or expiry each resolve just one drop',async()=>{

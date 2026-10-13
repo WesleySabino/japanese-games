@@ -1,7 +1,7 @@
 /* Admission pressure is separate from learning evidence and earned unlocks. */
 (function(root){
   'use strict';
-  const constants=Object.freeze({windowSize:12,timeoutLimit:2,recoveryHits:10,maxNew:2,warmup:3});
+  const constants=Object.freeze({windowSize:30,timeoutLimit:2,recoveryHits:25,maxNew:2,warmup:3});
   const GAME='kana-rain',FACET='form→sound';
   const isKana=id=>typeof id==='string'&&id.startsWith('kana:');
   function hasSeen(state,id){return state.seen[id]===true;}

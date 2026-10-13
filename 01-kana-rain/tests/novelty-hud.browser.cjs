@@ -25,7 +25,7 @@ async function context(viewport={width:1920,height:1080},remoteName=false){
   await ctx.addInitScript(()=>{
     if(localStorage.getItem('novelty-hud-fixture'))return;
     const seen=Object.fromEntries(['あ','い','う','え','お'].map(char=>['kana:'+char,true]));
-    const recent=Array.from({length:12},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<10,timeout:i>=10}));
+    const recent=Array.from({length:30},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<25,timeout:i>=28}));
     const saved={version:2,created:Date.now(),items:{},games:{'kana-rain':{rows:{hiragana:3,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,seen,recent,blocked:true}}}};
     localStorage.setItem('jp-learner-v1',JSON.stringify(saved));
     localStorage.setItem('novelty-hud-fixture','1');
@@ -76,10 +76,11 @@ async function behavior(){
   assert.equal(await page.locator('#noveltyHud').isVisible(),true);
   assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD');
   assert.equal(await page.locator('#noveltyIntroduced').textContent(),'0 / 2');
-  assert.match(await page.locator('#noveltyRecent').textContent(),/10.*2/);
+  assert.equal(await page.locator('#noveltyRecent').textContent(),'Last 30 drops: 25 first-try hits · 2 expired');
+  assert.match(await page.locator('#noveltyDetails').textContent(),/Recovery needs 30 completed drops, at least 25 first-try hits and at most 1 expired/);
   await screenshot(page,'01-held');
-  await answer(page);await familiar(page,9);
-  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD','ten fresh hits still leave both expirations in the window');
+  await answer(page);await familiar(page,27);
+  assert.equal(await page.locator('#noveltyGate').textContent(),'ON HOLD','28 fresh hits still leave both expirations in the 30-drop window');
   await familiar(page,1);
   assert.equal(await page.locator('#noveltyGate').textContent(),'OPEN');
   const correct=await page.evaluate(()=>KanaRain.state.correct);

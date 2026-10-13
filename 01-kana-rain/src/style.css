@@ -629,6 +629,9 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .game-world:has(.has-novelty) .playfield { top:158px; }
   .game-world:has(.has-novelty) .feedback-stack { top:153px; }
 }
+@media (min-width:761px) and (max-width:1199px) {
+  .has-novelty .personal-best { top:124px; }
+}
 @media (max-width:760px) {
   .has-novelty .hud-readouts { height:53px; gap:5px; }
   .has-novelty .hud-stats { gap:4px; }
