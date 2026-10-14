@@ -13,7 +13,7 @@ async function runtime(options = {}) {
     constructor(id = '') {
       this.id = id; this.value = ''; this.style = { setProperty() {} }; this.dataset = {}; this.children = [];
       this.open = false; this.width = 800; this.height = 600; this.spriteWidth = 65; this.spriteHeight = 85;
-      this.options = ['hira', 'kata', 'mix', 'pair', 'words'].map(value => ({ value }));
+      this.options = ['hira', 'kata'].map(value => ({ value }));
       const classes = new Set();
       this.classList = {
         add: (...values) => values.forEach(value => classes.add(value)),
@@ -132,25 +132,6 @@ test('n resolves with ne on screen, while continued typing still selects ne or n
   }
 });
 
-test('whole-word nasal aliases and different word prefixes also finish without Enter', async () => {
-  for (const response of ['hon', 'honn']) {
-    const g = await inputRain(['w:ほん'], 'words');
-    g.type('hon'); play(g, 100);
-    if (response === 'honn') g.type(response);
-    play(g, 400);
-    assert.equal(g.app.state.correct, 1); assert.equal(g.app.state.attempts, 1);
-    assert.equal(g.learner.attempts().at(-1).response, response);
-    assert.equal(g.el('answer').value, '');
-  }
-  for (const response of ['ashi', 'ashita']) {
-    const g = await inputRain(['w:あし', 'w:あした'], 'words');
-    g.type('ashi'); play(g, 100);
-    if (response === 'ashita') g.type(response);
-    play(g, 400);
-    assert.equal(g.app.state.correct, 1); assert.equal(g.app.state.attempts, 1);
-    assert.equal(g.learner.attempts().at(-1).itemId, response === 'ashi' ? 'w:あし' : 'w:あした');
-  }
-});
 
 test('Enter remains immediate and the touch keyboard also auto-submits n only once', async () => {
   const forced = await inputRain(['kana:ん', 'kana:ね']);
@@ -254,17 +235,6 @@ test('an expiration cancels a delayed prefix answer for a different surviving dr
   assert.equal(g.app.state.correct, 1, 'only freshly typed input may score the surviving drop');
 });
 
-test('practice expiration clears partial input before feedback and the next opportunity', async () => {
-  const g = await runtime();
-  g.el('practiceSelect').value = 'practice'; g.el('practiceSelect').onchange();
-  g.app.start(); g.skip(); g.type('k');
-  g.app.state.drops[0].progress = 1; g.tick(16);
-  assert.equal(g.el('answer').value, ''); assert.equal(g.el('answer').disabled, true);
-  assert.equal(g.app.state.awaitingFeedback, true); assert.equal(g.app.state.attempts, 0);
-  assert.equal(g.app.state.practiceCompleted, 1);
-  g.el('continueFeedbackBtn').onclick(); g.skip();
-  assert.equal(g.el('answer').value, ''); assert.equal(g.app.state.awaitingFeedback, false);
-});
 
 test('the session clock accepts a correct answer already entered before time runs out', async () => {
   const g = await inputRain(['kana:ん']);
@@ -303,14 +273,6 @@ test('a paused or hidden session has no queued animation work, and resumes witho
   g.app.dispose(); assert.equal(g.frames.size, 0);
 });
 
-test('practice correction suspends frames until acknowledgement starts the next countdown', async () => {
-  const g = await runtime(); g.el('practiceSelect').value = 'practice'; g.el('practiceSelect').onchange();
-  g.app.start(); g.skip(); g.answer('wrong');
-  assert.equal(g.app.state.awaitingFeedback, true); assert.equal(g.frames.size, 0);
-  assert.equal(g.document.body.classList.contains('game-paused'), true);
-  g.el('continueFeedbackBtn').onclick(); assert.equal(g.frames.size, 1); assert.equal(g.app.state.countingDown, true);
-  g.skip(); g.tick(); assert.equal(g.app.state.paused, false);
-});
 
 test('ordinary motion does not measure layout; observed field and sprite changes remain bounded', async () => {
   const g = await runtime(); g.app.start(); g.skip(); g.tick();

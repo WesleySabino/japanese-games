@@ -84,7 +84,7 @@ function productionHtml(file){
   return output;
 }
 function productionPlan(){
-  const audioManifest=JSON.parse(read('kana-audio-bundle/manifest.json'));
+  const audioManifest=JSON.parse(read('kana-audio-bundle/runtime-manifest.json'));
   if(!audioManifest.byKana||!Object.keys(audioManifest.byKana).length)throw new Error('Audio manifest has no recordings');
   const recordings=[...new Set(Object.values(audioManifest.byKana))].sort();
   for(const recording of recordings){
@@ -95,8 +95,8 @@ function productionPlan(){
   const allowed=new Set(files);
   if(allowed.size!==files.length)throw new Error('Duplicate production file in allowlist');
   const entries=files.map(file=>file===RUNTIME_FILE?{file,generated:runtime,bytes:Buffer.byteLength(runtime)}:{file,...sourceFile(file),...(file==='index.html'?{bytes:Buffer.byteLength(productionHtml(file))}:{})});
-  const runtimeManifest=JSON.parse(read('kana-audio-bundle/runtime-manifest.json'));
-  if(JSON.stringify(runtimeManifest.byKana)!==JSON.stringify(audioManifest.byKana))throw new Error('Runtime pronunciation lookup is stale');
+  const approvedLookup=require('./prepare-runtime-audio.cjs').runtimePlan();
+  if(JSON.stringify(approvedLookup.byKana)!==JSON.stringify(audioManifest.byKana))throw new Error('Runtime pronunciation lookup is stale');
   for(const file of ROOT_FILES.filter(file=>file.endsWith('.html')))validateHtml(file,allowed,productionHtml(file));
   for(const file of SOURCE_FILES.filter(file=>file.endsWith('.css')))validateCss(read(file),file,allowed);
   const manifest=JSON.parse(read('manifest.webmanifest'));

@@ -153,9 +153,13 @@ test('event allowlist rejects arbitrary names, values, and extra learner fields'
     ['app_open', { target_app: 'https://example.com' }], ['practice_start', null], ['constructor', {}]
   ]) assert.equal(b.api.track(name, params), false);
   assert.equal(b.events().length, before);
-  assert.equal(b.api.track('practice_start', { practice_mode: 'spaced_review' }), true);
+  for (const mode of ['mix','pair','words','spaced_review']) assert.equal(b.api.track('practice_start', { practice_mode: mode }), false);
+  assert.equal(b.api.track('practice_start', { practice_mode: 'review' }), true);
+  const core = browser({ host: 'kana.nihongogrove.top', app: 'core', cookie: 'ng_analytics_consent=accepted' });
+  assert.equal(core.api.track('practice_start', { practice_mode: 'spaced_review' }), true);
   assert.equal(b.api.track('practice_complete', { practice_mode: 'hira', completion_reason: 'timer_elapsed' }), true);
-  assert.equal(b.api.track('practice_complete', { practice_mode: 'hira', completion_reason: 'practice_set_complete' }), true);
+  assert.equal(b.api.track('practice_complete', { practice_mode: 'hira', completion_reason: 'practice_set_complete' }), false);
+  assert.equal(core.api.track('practice_complete', { practice_mode: 'reading', completion_reason: 'practice_set_complete' }), true);
   assert.equal(b.api.track('app_open', { target_app: 'core' }), true);
   const event = b.events().at(-1)[2];
   assert.equal(event.site_app, 'rain');

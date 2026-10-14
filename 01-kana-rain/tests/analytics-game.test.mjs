@@ -11,7 +11,7 @@ async function game() {
     constructor(id = '') {
       this.id = id; this.value = ''; this.style = { setProperty() {} }; this.dataset = {}; this.children = []; this.open = false;
       this.clientWidth = 800; this.clientHeight = 600; this.offsetWidth = 65; this.offsetHeight = 85;
-      this.options = ['hira', 'kata', 'mix', 'pair', 'words'].map(value => ({ value }));
+      this.options = ['hira', 'kata'].map(value => ({ value }));
       const classes = new Set();
       this.classList = { add: (...values) => values.forEach(v => classes.add(v)), remove: (...values) => values.forEach(v => classes.delete(v)), contains: v => classes.has(v), toggle: (value, on = !classes.has(value)) => { on ? classes.add(value) : classes.delete(value); return on; } };
     }

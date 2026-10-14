@@ -1,34 +1,18 @@
 # Kana Rain
 
-Current package: **1.4.1**. See [release notes](CHANGELOG.md) for the feature release and the subsequent repository cleanup.
+**Release baseline: 1.5.0 — 14 October 2026.** See [release history](CHANGELOG.md).
 
-Game 01 from `../planejamento/brainstorm-minijogos-japones.md`, implemented as a small HTML/CSS/JavaScript application. All game instructions, controls, and feedback are in English. Japanese is used for the learning content. The supplied standalone prototype is preserved as [non-executable historical source](../docs/history/kana-rain/prototypes/kana-rain-standalone.html.txt); its kana catalogue and shared learner model form the basis of this implementation.
+Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
-[Play Kana Rain](https://kana-rain.nihongogrove.top/) · [How to play](https://kana-rain.nihongogrove.top/about.html) · [Artwork](https://kana-rain.nihongogrove.top/art.html)
+The illustrated garden, score, streaks, accelerating rain, pronunciation audio, touch keyboard and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
 
-The game is public and requires no account. Learning progress and preferences are stored locally in the current browser, with no account or cloud synchronization. My Kana Garden lets players export their progress.
+The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens.
 
-**Arcade challenge** is the main experience and the default for new players: read falling kana, keep the rain clear, and build your score before time or hearts run out. **Steady practice** is an alternative in Settings. The game remembers the session style you choose.
-
-Optional Google Analytics 4 measures basic app usage only after explicit opt-in.
-You can play with analytics off. [Privacy and cookies](https://kana-rain.nihongogrove.top/privacy.html)
-explains the shared choice across Nihongo Grove, Japanese Core, and Kana Rain.
-
-The application, production artwork, audio bundle, scripts, tests and current documentation are in `01-kana-rain/`. Historical designs and the legacy prototype are in [docs/history/kana-rain](../docs/history/kana-rain/README.md); approval mockups and explanatory infographics are in [docs/design/kana-rain](../docs/design/kana-rain/README.md). The shared brainstorm document is in the repository's `planejamento/` directory.
-
-The [current specification](./SPECIFICATION.md) describes the implemented game; the [current review](./REVIEW.md) records its design direction and validation criteria. The [historical archive](../docs/history/kana-rain/README.md) preserves the original catalogue translation and earlier recommendations. The numbered catalogue is in the [project index](../README.md).
-
-The [learning and arcade update](./LEARNING_IMPROVEMENTS.md) records the implemented improvements and their verification.
-
-The [new kana pacing rules](./NOVELTY_BALANCE.md) document the persistent pressure brake and gradual first presentations in version 1.4.0, including starter exceptions and preservation of existing progress.
-
-Players can select Calm (55/60, the default), Balanced (25/30) or Bold (10/12) in New kana pace, independently of rain difficulty. Version 1.4.0 promotes the approved playtest rules to the release: admission operates in the background without a new-kana counter in the HUD. Expired drops clear partial answers and cancel pending automatic submissions; score, streak and time fit larger values within their cards. Existing learner records, unlocked rows, settings and personal bests are retained. Run `pnpm run test:novelty-presentation` and `pnpm run test:novelty-pace` for focused browser checks.
-
-The [performance audit](./PERFORMANCE.md) records the Lighthouse measurements, animation/storage fixes and production loading optimizations in version 1.3.1. Production combines the core scripts and embeds the styles needed for the first screen; development retains separate source files.
+[Production game](https://kana-rain.nihongogrove.top/) · [Local preview](http://127.0.0.1:4173/) · [Specification](SPECIFICATION.md) · [Design review](REVIEW.md) · [New-kana rules](NOVELTY_BALANCE.md)
 
 ## Play locally
 
-Use **Node.js 22 or later** and **pnpm 11** (CI pins pnpm 11.25.0). From the project root:
+Use Node.js 22 or later and pnpm 11; CI pins pnpm 11.25.0.
 
 ```sh
 cd 01-kana-rain
@@ -36,148 +20,75 @@ pnpm install --frozen-lockfile
 pnpm start
 ```
 
-Open [local Kana Rain](http://127.0.0.1:4173). No build is needed for local play. Use an HTTP server instead of opening `index.html` directly: the audio manifest, IndexedDB, and offline service worker need a web origin. A different port can be supplied through `PORT`.
+Open http://127.0.0.1:4173/. A different port can be supplied through `PORT`. No build or runtime framework is required. Use HTTP rather than opening `index.html` directly, because audio lookup, IndexedDB and offline caching require a web origin.
 
-The server serves this game folder. The application itself needs no runtime framework or external package. `pnpm install --frozen-lockfile` installs the pinned development tools for tests and asset preparation.
+## One arcade loop
 
-## The game screen
+- Regular runs last **three minutes**. Every run starts with **three hearts**, including the one-minute mistake-review shortcut.
+- All difficulty levels share the former Normal rain curve: a 10-second initial fall, accelerating with active play time and capped at 3.5×. Pauses freeze the clock, falling drops and automatic-submit delay. Accuracy does not control rain speed.
+- Each expired drop costs one heart, clears unfinished input and cancels any pending automatic answer. Losing all hearts ends the run. Wrong submissions stain and accelerate the affected drop without immediately taking a heart.
+- Type romaji in either alphabet. Any visible matching drop can be answered; forced invalid submissions and listening use the highlighted priority drop. Common alternate readings are accepted; copying the displayed kana is not a reading answer.
+- Complete answers submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play for another letter; stop typing to accept, or press Enter immediately. Continuing cancels the pending match. An exact answer entered before the waterline is protected during this short wait.
+- Start or resume with a skippable three-second countdown. Escape or the Pause button pauses; leaving the tab pauses automatically. Opening a menu during play pauses and closing it resumes; opening one from Pause returns to Pause. Ordinary pauses retain partial input.
+- A danger badge and pond cue warn of imminent expirations. Heart loss, streaks of 5/10/20, personal bests and row unlocks have visual cues and optional sounds. Reduced effects preserves gameplay while calming decorative motion.
+- Phone play opens the integrated letter keyboard automatically. Portrait, short landscape, safe areas and native keyboard viewport changes remain supported without page scrolling. Rotation preserves normalized drop progress.
 
-The rain garden fills the entire browser viewport. The main menu offers Enter the Garden, My Kana Garden, and Settings. During play, a floating HUD shows your score, streak, and time, while an answer dock sits over the pond. Session setup, progress, instructions, pause, and results are game menus over the same scene.
+## Difficulty means new-kana recovery
 
-Opening a menu pauses the session. Closing a menu opened during play resumes it; closing a menu opened from Pause returns to Pause. Phone play opens the integrated touch keyboard automatically. Portrait, short landscape, safe areas, and native keyboard viewport resizing are supported without page scrolling.
+There is one selector. It changes when new kana resume after a rough streak; it does not change hearts, rain speed, scoring or session length.
 
-Starting or resuming a session shows a skippable three-second countdown. The clock, drop travel, acceleration, and answer reaction time remain frozen until play begins; partially typed answers survive pauses. A first-time explanation introduces the optional Katakana → Hiragana mode before that session starts.
+| Difficulty | Recovery requirement after first presentations pause |
+|---|---|
+| Easy — default | 55 first-try hits in the latest 60 completed drops |
+| Normal | 25 first-try hits in the latest 30 completed drops |
+| Hard | 10 first-try hits in the latest 12 completed drops |
 
-## Gameplay
+Two expirations in the selected window pause first presentations. Recovery needs the entire window, the selected hit target and at most one expiration. These targets apply **after a pause**, not before every debut. Assisted first-try hits count; corrected retries do not. History continues across runs and reloads, retaining up to 60 completed drops.
 
-- Start with the five hiragana vowels in **Arcade challenge**, the default session style. Choose your difficulty and session length in Settings; a saved choice of **Steady practice** is kept when you return.
-- In Arcade, Easy provides 5 hearts and gentler rain, Normal provides 3 hearts, and Hard provides 1 heart and faster rain. Session lengths are 1, 3, 5, or 10 minutes. Difficulty is saved and cannot change during a session.
-- In Arcade, each drop reaching the ground is removed and costs exactly one heart. Losing all hearts ends the session. Expiration is recorded separately from an incorrect submitted answer.
-- Any expired drop clears unfinished input and cancels a pending automatic answer, including in Steady practice. Ordinary pauses still preserve unfinished input.
-- Arcade speed increases with active session time, regardless of how many answers are correct. Starting fall times are 14 seconds on Easy, 10 on Normal, and 7 on Hard. Speed ramps linearly and is capped at 3×, 3.5×, and 4× respectively. Practice uses a constant 18-second fall. Pauses stop motion and correction visibility time.
-- Choose **Steady practice** in Settings for eight opportunities, one drop at a time, constant speed and no lost hearts. Errors and expired drops wait for **Continue practice**.
-- Read a kana and type its sound. Complete answers submit automatically; if an answer is also a prefix (such as `n` before `ne` or the alternate `nn`), it submits after 300 ms of active play without further typing. Continuing the answer cancels that pending match; Enter submits immediately. Pauses freeze the wait, and an exact answer entered before the waterline never loses a heart because of this delay. Common alternate romanizations are accepted.
-- New items show an initial reading hint; the hint disappears after the first correct response. Reading hints and pronunciation feedback remain available and do not block row unlocks.
-- Rows unlock after every available kana has at least two correct first answers and 85% accuracy on submitted first answers. Corrected retries and expired drops do not count toward those two hits. Previously recorded first answers already contribute; earned rows, records and preferences remain intact without a new storage migration.
-- Independent recall remains a separate learning measure: a revealed answer stays assisted until at least 60 seconds and two other distinct assessed items have passed; a round born during that exposure stays assisted. These evidence labels no longer gate arcade progression, so continuous play can unlock new kana even in a small starting pool.
-- Words require their kana and explicit introductions for small っ/ッ, the long-vowel mark ー and long vowels written with kana. The finite accepted romaji lists are composed from kana units; copying a displayed kana or word is not accepted as a reading.
-- Arcade errors stain and accelerate the affected drop without immediately taking a heart. Practice errors finish that opportunity after explicit acknowledgement. Both retain correction text across pauses.
-- Drops approaching the pond show an exclamation mark and stronger warning outline. The pond edge highlights imminent misses, and the final heart has a distinct visual state. A missed drop produces a heart-loss cue; all cues remain useful with sound muted.
-- Hiragana, Katakana, Mixed scripts and Little words keep romaji answers throughout the session, including familiar kana and focused review. A familiar item never changes the answer format or opens a kana keyboard during reading play.
-- Choose **Katakana → Hiragana** before starting for a separate script-matching session. Every drop is katakana and every answer is hiragana, including the interval between drops. Its full kana keyboard and desktop Japanese IME support matching without multiple-choice guessing. Existing script-match history remains intact.
-- The answer dock shows the session's fixed format. Any visible drop can be answered; the highlighted drop is the priority for forced submissions and listening.
-- Personal confusions are revisited together when admission allows. The shared scheduler targets review, weak, and new items; kana-reading sessions additionally limit first presentations across all queues and partners, using recent drop outcomes.
-- New kana pace is available for Hiragana, Katakana and Mixed scripts. Two expirations in the selected recent window pause first presentations. Calm resumes them with 55 first-try hits in 60 completed drops, Balanced with 25 in 30, and Bold with 10 in 12; recovery also requires no more than one expiration. The recovery target applies after a pause, not before every new kana. Assisted first-try hits count, while corrected answers do not. History continues across sessions and reloads.
-- First presentations wait for three completed familiar drops, with at most two new kana per session and one debut on screen. Each alphabet's five starter vowels bypass the pressure, spacing and two-debut budget so a new garden can begin. All unlocked kana remain eligible for review, and words and script matching keep their existing scheduling.
-- Pause with Escape or the Pause button. Leaving the tab pauses automatically. Finish preserves all answer evidence and displays session results.
-- Progress uses a localStorage journal and IndexedDB. Saved status follows completed writes, with a persistent export action when both fail. The newer compatible snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates on reload; v1 history retains unknown assistance and dated legacy errors.
-- My Kana Garden labels all four estimated familiarity states and shows first-answer readiness for every unlocked kana, including earlier rows. Results separate independent readings, script matches, helped answers and expired drops. Response, input and residence times are distinct exported fields; none is labelled pure reading speed.
-- Results include mistaken or missed items with reading and available pronunciation. **Review these kana** uses the chosen style: a focused 60-second Arcade round or eight Steady practice opportunities. Personal bests stay separate; existing arcade best keys are preserved.
-- Streaks of 5, 10, and 20 receive small celebrations. The title screen and HUD show the personal best for the selected mode, difficulty, and duration; beating an existing record receives its own announcement.
-- The touch keyboard supports taps, clicks, and native Enter/Space activation. Its layout follows the chosen session: romaji letters for reading, hiragana keys for script matching. Reading sessions stay playable on the physical keyboard. Ordinary pauses preserve partial text. Reduced effects can be enabled in Settings and is saved on this device; the system's reduced-motion preference is also respected.
+Three familiar completions precede and separate nonstarter debuts. A run introduces at most two distinct nonstarter kana, with only one debut on screen. Each alphabet's five starter vowels bypass pressure, spacing and the two-debut budget, while retaining the one-debut-on-screen rule. All earned rows remain eligible for familiar play. See [exact rules and saved-data behavior](NOVELTY_BALANCE.md).
 
-## Audio and offline use
+## Progress and results
 
-Pronunciations use only `kana-audio-bundle/manifest.json` and its MP3s. All 208 kana in the game have mappings, including combinations and separately recorded homophones. Hiragana and katakana use the bundle's shared pronunciation files. Audio plays on correct answers, corrections, misses, and lesson taps; it can be muted.
+Rows open when every available kana has two correct first answers and at least 85% accuracy on submitted first answers. Hints and pronunciation do not block row unlocks; corrected retries and expired drops do not supply those two hits. Katakana becomes selectable after the basic Hiragana rows have opened.
 
-Word mode plays a whole-word recording only when the bundle provides that exact word. Other words receive a reading and English meaning without fabricated whole-word audio. Gameplay reads a compact runtime lookup; the complete manifest, provenance, licenses, and review metadata are preserved in the bundle.
+My Kana Garden retains its two script tabs, four estimated familiarity states, current-row audio tiles, exact row-readiness details and progress export. **Learning details** is collapsed by default and contains independent/assisted evidence. An exposed answer remains assisted until at least 60 seconds and two other distinct assessed items have passed; a round created during that exposure remains assisted. This evidence is separate from the arcade unlock rule and does not certify long-term retention.
 
-All menu buttons and session selectors have short, gentle Web Audio interface tones. Start, confirmation, return, countdown, heart loss, streaks, records, and unlocks use distinct cues. These effects respect the saved sound toggle and lower their volume while a recorded pronunciation is playing. Browsers without Web Audio continue to work silently; kana pronunciations always use the supplied MP3s.
+Results emphasize **points, best streak, first-try hits and expired drops**. Mistake cards keep readings and pronunciation; **Review these kana** starts a focused 60-second round with three hearts. New best scores use a separate ruleset so a changed rain curve cannot silently replace older records. Historical best scores and accuracy data remain in the saved game data and progress export.
 
-The service worker caches the application, optimized gameplay images, manifest, and all 112 MP3 recordings. The main menu confirms when this initial cache completes. Gameplay and sound then work offline. The separate art gallery includes full-resolution source images and is loaded on demand.
+Progress uses the existing localStorage journal (`jp-learner-v1`) and IndexedDB. Save status follows completed writes; if saving fails, a persistent warning and export action remain available. The compatible newer snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates; v1 history retains unknown assistance and dated legacy errors. No account or cloud synchronization is provided.
 
-## Optional analytics
+Old session selections normalize to supported choices without resetting attempts, exposures, earned rows, novelty pressure history or records. The shared learner keeps legacy evidence; retired game modes are not offered or executed by the current runtime.
 
-The local `assets/nihongo-analytics.js` client loads Google Analytics 4
-(`G-F69S8JDW5M`) only after you allow it, and only on the three production HTTPS
-hosts. Enhanced Measurement is disabled. DNT and Global Privacy Control keep
-analytics off. Local previews display the same settings interface without
-contacting Google. The functional `ng_analytics_consent` cookie stores the
-choice for 180 days across the root domain and both apps.
+## Audio, offline and privacy
 
-The game has **Analytics and privacy** inside Settings, clear of the answer dock. Other pages retain their analytics button. Turning
-analytics off disables future measurement, clears pending analytics commands,
-and deletes accessible Google Analytics cookies. This does not reload the
-game or erase learner progress. Open sibling sites check the shared preference
-before events, on focus/visibility changes, and with a one-second timer that
-background browsers may throttle. Opening analytics settings pauses active rain.
+Pronunciations use only the supplied `kana-audio-bundle/` recordings. All 208 kana map to 104 runtime MP3 files, with shared pronunciation files for the alphabets and separately recorded homophones. The source bundle retains its 112 recordings and full provenance; eight historical word examples are excluded from the game/offline build. Correct answers, corrections, expirations, lesson tiles and review cards retain audio. The complete manifest, licenses and provenance remain available; gameplay loads a compact lookup.
 
-The client sends one sanitized page view per page or virtual route. Query
-strings and fragments are excluded, titles use fixed values, and only known
-page paths are allowed. Hosting aliases such as `/privacy` normalize to the
-same fixed page as `/privacy.html`; duplicate alias page views are suppressed.
-Referrers include only the referring site's origin. Google signals and
-advertising personalization/storage are disabled. No answers, scores,
-accuracy, kana IDs, usernames, access keys, exports, or learner records are sent.
+The service worker caches the application, optimized gameplay images, audio lookup and recordings. Wait for **Your garden is ready offline** before relying on offline play. The art gallery loads source artwork separately on demand. Release cache changes do not reset learner storage.
 
-`practice_start` fires once when the first countdown finishes and gameplay
-begins. Pause/resume countdowns do not add starts. `practice_complete` fires
-once from the real end function, with an explicit `timer_elapsed`,
-`hearts_lost`, `practice_set_complete`, or `manual_finish` reason. Focused sessions use
-`practice_mode: review`; other modes are `hira`, `kata`, `mix`, `pair`, and
-`words`. These events describe activity, not learning or mastery. Tab closure,
-reset, disposal, and a countdown ended before play do not count as completion.
+Google Analytics 4 (`G-F69S8JDW5M`) loads only after explicit opt-in on the approved production HTTPS hosts. Local previews show the settings without contacting Google. DNT and Global Privacy Control keep analytics off. Analytics and privacy is inside Settings; opening it pauses active rain. No answers, scores, kana IDs or learner records are sent. The functional consent cookie stores the choice for 180 days across the approved sites. See [privacy](privacy.html) and the analytics tests for the full boundary.
 
-The client accepts only fixed event names, parameters, and enum values.
-Unknown fields reject the whole event. Activity before opt-in is discarded;
-it is never replayed. Opting in mid-session can produce a measured end without
-a measured start, so reports are an incomplete sample of consenting visitors.
-The service worker caches only local analytics interface assets and the privacy
-page; it does not cache Google's library or collection endpoints.
-
-`pnpm test` includes 13 tracking-boundary checks and five checks against the
-actual game lifecycle. Run only those checks with `pnpm test:analytics`.
-
-## Artwork
-
-Open `art.html` for the English art gallery. Artwork was generated **before implementation** with the built-in imagegen tool:
-
-- `assets/concepts/visual-development.png`: environment and droplet concept board.
-- `assets/concepts/garden-mood.png`: second full-scene concept.
-- `assets/garden-source.png` / `assets/garden.webp`: production environment.
-- `assets/spirit-atlas.png` / `assets/spirit.webp`: four transparent companion poses.
-- `assets/water-atlas.png`: normal drop, stained drop, success splash, and pond ripple.
-- `assets/drop.webp`, `drop-stained.webp`, `splash.webp`, `ripple.webp`: extracted gameplay sprites.
-- `assets/icon.png`: extracted application icon.
-
-The complete prompts are in `assets/PROMPTS.md`. Kana glyphs remain real system-font text over the generated sprites.
-
-The approved immersive screen concepts and their prompts are retained in [docs/design/kana-rain/immersive-v1](../docs/design/kana-rain/immersive-v1/PROMPTS.md), outside the runtime assets. Explanatory infographics and their prompts are indexed in the [design archive](../docs/design/kana-rain/README.md).
+Activity events still use the existing `practice_start` / `practice_complete` names. Regular activity is `hira` or `kata`, with `review` for a focused round; endings are timer elapsed, hearts lost or manual finish. Pause/resume does not duplicate events. Historical event enums can remain valid in the shared analytics client without offering those sessions in the game.
 
 ## Structure and checks
 
-`src/data.js` is the shared kana/word catalogue; `src/learner.js` owns evidence and scheduling; `src/audio.js` resolves the supplied recordings; `src/sfx.js` supplies interface and game effect tones; `src/difficulty.js` defines hearts and the time-based rain curve; `src/novelty.js` owns the persistent first-presentation brake and pace profiles; `src/game.js` owns Kana Rain. `window.KanaRain` exposes the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`) for integration into a future minigame shell. Sound recall and script pairing use separate learner facets.
-
-Run the content, scheduler, storage, difficulty, consent, and analytics checks inside `01-kana-rain/`:
+`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/difficulty.js` defines the common rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved.
 
 ```sh
 pnpm test
-```
-
-Install Playwright's Chromium browser before the first browser test run, then run the browser checks:
-
-```sh
 pnpm exec playwright install chromium
 pnpm test:browser
 pnpm test:improvements
 pnpm test:novelty-presentation
 pnpm test:novelty-pace
-```
-
-`tests/browser.cjs` uses the installed Playwright package and starts its own temporary localhost server on port 4180. It checks full viewport coverage without page scrolling, desktop/portrait/landscape layouts, menu pause/resume behavior, automatic answers, corrections, session results, persistence, script pairs, words, touch input, row progression, all three difficulty levels, acceleration without answers, one heart per miss, loss at zero hearts, and offline audio. Resizing preserves each drop's normalized fall progress so changing screen orientation cannot cause an accidental miss. Generated screenshots are retained locally under `tests/` and excluded from Git.
-
-The responsive browser checks cover 320×568, 360×640, 390×844, and 412×915 portrait screens, plus 568×320, 640×360, and 844×390 landscape screens. They exercise gameplay and each game menu, readable hearts, usable touch input, scrolling dialogs, and preserved drop progress on rotation. Quick-win checks cover frozen countdowns, partial-answer preservation, script introductions, protected corrections and unlock announcements, exact readiness, mistake review, separate review records, streak milestones, personal bests, native keyboard activation, menu sounds, and mute behavior.
-
-For reviewing later-stage modes without earning row unlocks, open `/?all`. This enables all content for that page without changing earned row counts; practice evidence still saves.
-
-## Release and discovery
-
-Inside `01-kana-rain/`, create the static production bundle:
-
-```sh
 pnpm build
 ```
 
-Deploy the contents of `dist/` to [kana-rain.nihongogrove.top](https://kana-rain.nihongogrove.top/). The release build includes the game and information pages, art gallery and its required images, scripts/styles, audio bundle and its existing license/provenance notices, web manifest, and service worker. It excludes development scripts, tests, specifications, and the preserved standalone prototype. HTTPS or localhost is required for offline service-worker support.
+Browser suites use isolated profiles and temporary localhost servers. They check the simplified choices, migration/history preservation, all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.
 
-`index.html` and `about.html` provide English descriptions, canonical URLs, social preview metadata, and structured data. `robots.txt` and `sitemap.xml` describe the public pages for search engines. If the production address changes, update these files together.
+For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. [Performance diagnostics](PERFORMANCE.md) documents earlier measurements and the preserved optimization strategy.
+
+## Artwork and release
+
+The garden, spirit poses and water sprites keep the established teal, ivory and gold presentation. The public `art.html` gallery, runtime WebP images, source masters and `assets/PROMPTS.md` remain. Earlier concepts and explanatory images are preserved in [the design archive](../docs/design/kana-rain/README.md). The original prototype is [non-executable historical source](../docs/history/kana-rain/prototypes/kana-rain-standalone.html.txt).
+
+`pnpm build` creates `dist/` from an explicit production allowlist. It excludes private exports, prototypes, development scripts, tests and design documents. A build does not perform publication; deployment uses the verified release package. HTTPS or localhost is required for the service worker. Index/about metadata, canonical URLs, sitemap and robots retain the production address.

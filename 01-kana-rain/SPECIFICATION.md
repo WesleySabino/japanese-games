@@ -1,31 +1,31 @@
-# 01 — Kana Rain: current specification
+# 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Status:** implemented. **Baseline:** version 1.4.0.
+**Catalogue ID:** 01. **Baseline:** release 1.5.0, 14 October 2026.
 
-The [README](./README.md) records the complete current behavior and development commands. The [original catalogue translation](../docs/history/kana-rain/SPECIFICATION.md) is retained as historical design evidence; its proposed adaptive speed and automatic answer-format changes are not current requirements.
+The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 
 ## Core game
 
-Kana fall into a rain garden. The player types a reading, clears a drop and builds a score and streak. Any visible matching drop can be answered; a forced invalid submission belongs to the highlighted priority drop. Hiragana, Katakana, Mixed scripts and Little words keep romaji input. Katakana → Hiragana is an explicitly selected, separate matching mode.
+The title screen offers exactly two choices: Hiragana/Katakana and Easy/Normal/Hard. Both alphabets always use romaji. Any visible matching drop can be cleared; forced invalid submissions belong to the highlighted drop. Katakana retains the existing basic-Hiragana unlock requirement.
 
-Arcade challenge is the default. Easy, Normal and Hard have five, three and one heart respectively. A drop expiring costs one heart; a wrong answer stains and accelerates that drop. Rain accelerates with active play time, regardless of accuracy. Steady practice is an optional eight-opportunity session with constant speed and explicit continuation after corrections. Menus pause gameplay clocks.
+Regular runs last three minutes, with three hearts on every difficulty. The existing Normal curve applies universally: 10-second initial falls, active-time acceleration capped at 3.5×. A drop expiring takes one heart and clears unfinished input; a wrong answer stains and accelerates its drop. Zero hearts ends the run. Score, streaks, pronunciation, celebrations, danger cues and reduced effects remain.
 
-Complete readings submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play so longer answers remain possible; Enter submits immediately. Expiration clears partial input and cancels any pending automatic submission. Ordinary pauses retain partial input.
+Complete readings submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play; Enter submits immediately. Pauses and countdowns freeze simulation and pending answer delays. Ordinary pauses preserve partial input. Touch input uses one romaji letter layout.
 
-## Progression and new kana
+## Difficulty and new kana
 
-Rows unlock when every available kana has two correct first answers and at least 85% accuracy on submitted first answers. Hints do not block those hits; corrected retries and expired drops do not satisfy the two-hit requirement. Independent recall remains a separate evidence label.
+Difficulty selects recovery of first presentations after a pressure pause: Easy 55/60 (default), Normal 25/30, Hard 10/12. Two expirations in the selected window pause never-presented kana. Recovery requires the full window, the first-try hit target and at most one expiration. This is not a prerequisite before every debut; hearts and rain speed are identical across levels.
 
-The saved New kana pace preference is independent of rain difficulty: Calm uses 55/60, Balanced 25/30 and Bold 10/12. Two expirations in the selected rolling window pause first presentations. Recovery requires a full window, the profile's number of first-try hits and no more than one expiration. This is a recovery requirement after a pause, not a target before every debut.
+Three completed familiar drops precede and separate nonstarter debuts. Each run allows at most two distinct nonstarter debuts and one debut on screen. Starter vowels bypass pressure, spacing and the two-debut budget but not the one-debut limit. First presentations and up to 60 completed outcomes persist across runs; earned rows remain eligible. See [exact admission rules](NOVELTY_BALANCE.md).
 
-When familiar candidates exist, three completed familiar drops precede the first novelty and separate subsequent novelties. At most two non-starter new kana debut per session, with one debut on screen at a time. Each alphabet's starter vowels bypass the pressure, spacing and two-debut budget. A first presentation is persisted when its drop appears. All unlocked kana remain eligible; words and script matching keep their existing scheduling. See [NOVELTY_BALANCE.md](./NOVELTY_BALANCE.md) for precise admission rules and edge cases.
+Rows unlock after every available kana has two correct first answers and at least 85% submitted first-answer accuracy. Hints are allowed. Corrected retries and expirations do not supply qualifying hits. Independent recall remains separately recorded evidence.
 
-## Feedback, access and data
+## Menus, results and compatibility
 
-Reading hints, pronunciation, visible danger cues, corrections, streak celebrations, records and unlock announcements support the arcade loop. Touch and physical keyboard input remain available, with responsive menus and reduced-effects settings. Sound is optional.
+Session preparation lives only on the title screen. Settings contains device effects and analytics/privacy. My Kana Garden retains familiarity, row audio, readiness, export and collapsed learning details. Results emphasize points, best streak, first-try hits and expirations, with audio mistake cards and a focused one-minute review shortcut. Review also starts with three hearts.
 
-The shared catalogue, learner, scheduler, audio lookup and game module remain separate. Learner attempts and exposures, earned rows, best scores and preferences are stored in this browser through the existing localStorage/IndexedDB persistence. Progress can be exported; there is no account or cloud synchronization. Existing history and records are retained.
+The title menu fits the viewport without internal scrolling. Alphabet/difficulty fields are centered; the entry and romaji hints follow the menu on separate lines. Limited-height and mobile layouts preserve those boundaries.
 
-The static release includes only the explicit production allowlist. The service worker supports offline play. Legacy prototypes, historical documentation, design mockups, private exports, tests and generated test artifacts are excluded from the game bundle.
+The shared learner storage key/schema and persistence architecture remain unchanged. Attempts, exposures, earned rows, previous record keys, accuracy and novelty pressure survive. Unsupported old selections normalize without deleting their history; new arcade records use their own ruleset. Historical design archives remain separate from active UI.
 
-See the [current review](./REVIEW.md), [implementation history](./LEARNING_IMPROVEMENTS.md) and [project index](../README.md).
+Offline caching, exact audio mappings, responsive menus, accessible controls and opt-in analytics remain. Production builds use an explicit allowlist and exclude private progress, test artifacts and design documents.

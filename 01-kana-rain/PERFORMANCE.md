@@ -1,12 +1,12 @@
 # Kana Rain — performance audit
 
-10 October 2026. Version 1.3.1 preserves Arcade as the default, optional Steady practice, existing progress, approved audio and the learning evidence rules.
+Historical measurements from 10 October 2026, version 1.3.1. Release 1.5.0 preserves these optimization strategies while simplifying game options. Counts below describe the measured release, not the smaller current audio/runtime bundle; see [README](README.md) for the current specification.
 
 ## Measured issues and fixes
 
 | Issue | Change | Evidence |
 |---|---|---|
-| Animation callbacks continued in pause | Suspend requestAnimationFrame in pause, hidden tabs, introductions and practice corrections; wake on countdown/resume | 192 callbacks during a 1.5-second pause became 0 |
+| Animation callbacks continued in pause | Suspend requestAnimationFrame when play is paused or the tab is hidden; wake on countdown/resume | 192 callbacks during a 1.5-second pause became 0 |
 | Layout dimensions were read every frame | Observe field/drop geometry outside the animation loop | Field reads in 5 seconds: 1,437 → 0; drop reads: 2,114 → 4 |
 | Hidden progress panels and unchanged keyboards were rebuilt | Render progress when opened and retain the keyboard when its format/pool is unchanged | Three answers: map/prerequisite rebuilds 3 → 0; keyboard rebuilds 4 → 0 |
 | Decorative rain repainted the viewport | Animate transform; freeze decoration in menu, pause and hidden tabs | Chrome verified the paused/running states and visual layouts |

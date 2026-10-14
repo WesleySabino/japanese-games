@@ -11,7 +11,7 @@
     const token = generation;
     await ready;
     if(!pack || token !== generation || !enabled) return false;
-    // Only recorded whole words are pronounced as words. Other words receive visual feedback.
+    // Resolve only supplied kana recordings; never fabricate a pronunciation.
     const file = pack.byKana[symbol];
     if(!file) return false;
     current = new Audio(new URL(file, manifestUrl).href);

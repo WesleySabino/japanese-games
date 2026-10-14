@@ -1,5 +1,15 @@
 # Kana Rain releases
 
+## 1.5.0 — 2026-10-14
+
+- Keep Hiragana and Katakana with romaji input; remove the other playable modes and the alternate session style from runtime and menus.
+- Replace separate rain and novelty selectors with Easy/Normal/Hard new-kana recovery: 55/60, 25/30 and 10/12. Preserve the two-expiration brake, spacing, starter exceptions and debut limits.
+- Use three hearts and the former Normal accelerating rain curve on every level. Fix regular runs at three minutes; keep focused mistake review at one minute with three hearts.
+- Prepare runs only on the title screen. Settings retains device effects and privacy; deeper learning evidence moves to a collapsed Garden section.
+- Highlight points, best streak, first-try hits and expirations in results. Preserve history, earned rows, accuracy, legacy records and export; isolate personal bests for the new rules.
+- Retain mobile input, pronunciation, celebrations, offline play and analytics consent.
+- Fit the title menu without internal scrolling, center the alphabet/difficulty fields and separate the footer hints. Responsive checks cover all 11 desktop/mobile viewports, including wide screens with limited height.
+
 ## 1.4.1 — 2026-10-13
 
 Repository organization only. The runtime, interface, input rules and learning data model are identical to 1.4.0. The service-worker cache name changes to identify the new release.

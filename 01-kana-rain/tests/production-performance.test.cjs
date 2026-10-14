@@ -28,12 +28,15 @@ test('style inlining preserves literal CSS and external/data URLs',()=>{
   assert.ok(result.includes('/* $& */'));
 });
 
-test('compact audio lookup retains every approved mapping and complete provenance remains bundled',()=>{
+test('compact audio lookup ships kana only while keeping complete source provenance',()=>{
   const complete=JSON.parse(fs.readFileSync(path.join(root,'kana-audio-bundle/manifest.json'),'utf8'));
   const compact=JSON.parse(fs.readFileSync(path.join(root,'kana-audio-bundle/runtime-manifest.json'),'utf8'));
-  assert.deepEqual(compact.byKana,complete.byKana);
+  const vm=require('node:vm'),context=vm.createContext({});vm.runInContext(fs.readFileSync(path.join(root,'src/data.js'),'utf8'),context);
+  assert.equal(Object.keys(compact.byKana).length,208);
+  for(const kana of context.JPData.kana)assert.equal(compact.byKana[kana.char],complete.byKana[kana.char],kana.char);
+  for(const char of Object.keys(compact.byKana))assert.ok(context.JPData.kanaByChar[char],char+' is an available kana');
   assert.deepEqual(compact.license,complete.license);
-  assert.equal(new Set(Object.values(compact.byKana)).size,112);
+  assert.equal(new Set(Object.values(compact.byKana)).size,104);
   assert.ok(fs.statSync(path.join(root,'kana-audio-bundle/runtime-manifest.json')).size<6000);
   const plan=productionPlan(),files=plan.entries.map(x=>x.file);
   const runtime=plan.entries.find(x=>x.file==='assets/game-runtime.js').generated;

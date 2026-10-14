@@ -1,5 +1,5 @@
 
-/* Shared content: kana + kana-only words. Reusable by every game.
+/* Kana catalogue and accepted readings. Reusable by kana games.
    Item shape follows spec §5.2 (Kana interface) + `alt` accepted romanizations + `confusables`. */
 (function (root) {
   'use strict';
@@ -60,69 +60,9 @@
   var ROWS = ['a','k','s','t','n','h','m','y','r','w','nn','g','z','d','b','p','ky','sy','ty','ny','hy','my','ry','gy','zy','by','py'];
   kana.forEach(function (k) { k.order = (k.script === 'katakana' ? 100 : 0) + ROWS.indexOf(k.row); });
 
-  // Kana-only words for "word mode" (spec Word interface subset). Frequency-ordered-ish beginner words.
-  var W = [
-    ['ねこ','cat'],['いぬ','dog'],['さかな','fish'],['すし','sushi'],['みず','water'],['あさ','morning'],['よる','night'],['うみ','sea'],['そら','sky'],['はな','flower / nose'],
-    ['て','hand'],['め','eye'],['くち','mouth'],['あし','foot / leg'],['いえ','house'],['なつ','summer'],['ふゆ','winter'],['あき','autumn'],['はる','spring'],['ほん','book'],
-    ['かさ','umbrella'],['くつ','shoes'],['たまご','egg'],['ごはん','rice / meal'],['おちゃ','tea'],['でんしゃ','train'],['きっぷ','ticket'],['がっこう','school'],['ともだち','friend'],['せんせい','teacher'],
-    ['いく','to go'],['くる','to come'],['たべる','to eat'],['のむ','to drink'],['みる','to see'],['ねる','to sleep'],['よむ','to read'],['かく','to write'],['あおい','blue'],['あかい','red'],
-    ['おおきい','big'],['ちいさい','small'],['あつい','hot'],['さむい','cold'],['しゃしん','photo'],['きょう','today'],['あした','tomorrow'],['じかん','time'],['りんご','apple'],['やま','mountain'],
-    ['コーヒー','coffee'],['パン','bread'],['テレビ','TV'],['カメラ','camera'],['ホテル','hotel'],['バス','bus'],['タクシー','taxi'],['ケーキ','cake'],['ピアノ','piano'],['メニュー','menu']
-  ];
-  var words = W.map(function (w, i) {
-    return { id: 'w:' + w[0], surface: w[0], reading: w[0], glossEn: [w[1]], pos: [], kanji: [], tags: ['kana-only'],
-             freqRank: i + 1, phase: 3, script: /[ァ-ヶー]/.test(w[0]) ? 'katakana' : 'hiragana' };
-  });
-
-  // Romanize kana string (Hepburn, accepts alternative spellings via `romajiVariants`)
-  function romanize(s, alternatives) {
-    var units = splitKana(s.normalize('NFC')), variants = [''], doubled = false;
-    units.forEach(function (unit, index) {
-      if (unit === 'っ' || unit === 'ッ') { doubled = true; return; }
-      if (unit === 'ー') {
-        variants = variants.map(function (value) { return value + (value.match(/[aiueo]$/) || [''])[0]; });
-        return;
-      }
-      var kanaUnit = byChar[unit], choices = kanaUnit ? [kanaUnit.romaji].concat(alternatives ? kanaUnit.alt : []) : [unit];
-      // Only the standalone nasal has an nn variant. Preserve its boundary before a vowel/y.
-      if (unit === 'ん' || unit === 'ン') {
-        var next = byChar[units[index + 1]], needsBoundary = next && /^[aiueoy]/.test(next.romaji);
-        choices = needsBoundary ? (alternatives ? ["n'", 'nn'] : ["n'"]) : (alternatives ? ['n', 'nn'] : ['n']);
-      }
-      if (doubled) {
-        choices = choices.map(function (reading) { return (reading.startsWith('ch') ? 't' : reading[0]) + reading; });
-        doubled = false;
-      }
-      var nextVariants = [];
-      variants.forEach(function (prefix) { choices.forEach(function (choice) { nextVariants.push(prefix + choice); }); });
-      variants = [...new Set(nextVariants)];
-    });
-    return variants;
-  }
-  function toRomaji(s) { return romanize(s, false)[0]; }
-  function romajiVariants(s) { return romanize(s, true); }
-  // Introductions explain the spelling used by this game's reading input, not IME keystrokes.
-  var features = [
-    { id:'sokuon', title:'Small っ: hold the consonant', explanation:'Small っ / ッ adds a beat before the next consonant. Do not read it as tsu. In this game, repeat that consonant in romaji.', example:'きっぷ', reading:'kippu', contrast:'つ / っ', contrastReading:'Full つ = tsu; small っ holds the next consonant.', source:'https://www.coelang.tufs.ac.jp/ja/en/pmod/practical/02-01-01.php' },
-    { id:'long-vowel-mark', title:'ー: keep the vowel long', explanation:'The katakana mark ー lengthens the preceding vowel. Hold that vowel for two beats. This game writes the extra vowel letter.', example:'コーヒー', reading:'koohii', contrast:'コ / コー', contrastReading:'ko / koo', source:'https://www.coelang.tufs.ac.jp/ja/en/pmod/practical/02-02-01.php' },
-    { id:'long-vowel-sequence', title:'Long vowels written with kana', explanation:'Hiragana can use a second vowel kana for a long vowel. おう often has a long o sound; えい often has a long e sound. Keep the written vowel letters in this game’s romaji.', example:'こう', reading:'kou', contrast:'こ / こう', contrastReading:'ko / kou', source:'https://www.coelang.tufs.ac.jp/ja/en/pmod/practical/02-02-01.php' }
-  ];
-  function wordRequirements(word) {
-    var surface = typeof word === 'string' ? word : word.surface, units = splitKana(surface), required = [];
-    if (/[っッ]/.test(surface)) required.push('sokuon');
-    if (surface.includes('ー')) required.push('long-vowel-mark');
-    if (units.some(function (unit, index) {
-      if (!index || !/^[あいうえおアイウエオ]$/.test(unit)) return false;
-      var previous = byChar[units[index - 1]], current = byChar[unit];
-      if (!previous || !current) return false;
-      var vowel = previous.romaji.slice(-1);
-      return vowel === current.romaji || vowel === 'o' && current.romaji === 'u' || vowel === 'e' && current.romaji === 'i';
-    })) required.push('long-vowel-sequence');
-    return required;
-  }
-  words.forEach(function (word) { word.features = wordRequirements(word); word.acceptedRomaji = romajiVariants(word.surface); });
+  // The input accepts one kana unit, including a compound such as きゃ.
+  function toRomaji(symbol) { var k = byChar[String(symbol).normalize('NFC')]; return k ? k.romaji : ''; }
+  function romajiVariants(symbol) { var k = byChar[String(symbol).normalize('NFC')]; return k ? [k.romaji].concat(k.alt) : []; }
   root.JPData = { kana: kana, kanaByChar: byChar, kanaById: kana.reduce(function (m, k) { m[k.id] = k; return m; }, {}),
-                  words: words, features: features, wordRequirements: wordRequirements, splitKana: splitKana, toRomaji: toRomaji, romajiVariants: romajiVariants, rowsOrder: ROWS };
+                  toRomaji: toRomaji, romajiVariants: romajiVariants, rowsOrder: ROWS };
 })(typeof window !== 'undefined' ? window : globalThis);
-
-

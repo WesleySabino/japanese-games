@@ -17,9 +17,10 @@ test('all kana resolve to the supplied audio files, including homophones and com
   for(const k of D.kana){assert.ok(pack.byKana[k.char],k.char);assert.ok(fs.existsSync(path.join(root,'kana-audio-bundle',pack.byKana[k.char])));}
   assert.notEqual(pack.byKana['じ'],pack.byKana['ぢ']);assert.notEqual(pack.byKana['ず'],pack.byKana['づ']);
 });
-test('word reading handles digraphs, gemination, and long vowels',()=>{
-  const {D}=model();assert.equal(D.toRomaji('きょう'),'kyou');assert.equal(D.toRomaji('きっぷ'),'kippu');assert.equal(D.toRomaji('コーヒー'),'koohii');assert.ok(D.romajiVariants('すし').includes('susi'));
+test('single-kana readings retain alternate romanizations and reject removed word content',()=>{
+  const {D}=model();assert.equal(D.toRomaji('きょ'),'kyo');assert.equal(D.toRomaji('キャ'),'kya');assert.ok(D.romajiVariants('し').includes('si'));assert.ok(D.romajiVariants('ん').includes('nn'));assert.equal(D.toRomaji('ねこ'),'');assert.deepEqual(Array.from(D.romajiVariants('ねこ')),[]);assert.equal(D.words,undefined);
 });
+
 test('each answer immediately persists evidence and keeps facets separate',()=>{
   const {L,map}=model();L.record('kana:あ','form→sound',{correct:true,rtMs:950,gameId:'kana-rain'});
   let saved=JSON.parse(map.get('jp-learner-v1'));assert.equal(saved.items['kana:あ'].facets['form→sound'].correct,1);
@@ -36,9 +37,9 @@ test('reset replaces saved evidence with an empty model',()=>{
   const {L,map}=model();L.record('kana:あ','form→sound',{correct:true});L.reset();assert.equal(Object.keys(L.all()).length,0);assert.equal(Object.keys(JSON.parse(map.get('jp-learner-v1')).items).length,0);
 });
 
-test('difficulty choices provide their advertised heart allowances and starting fall times',()=>{
+test('difficulty choices vary novelty recovery while sharing three hearts and Normal rain',()=>{
   assert.deepEqual(Object.keys(Difficulty.profiles).sort(),['easy','hard','normal']);
-  for(const [id,hearts,fallSeconds] of [['easy',5,14],['normal',3,10],['hard',1,7]]){
+  for(const [id,hearts,fallSeconds] of [['easy',3,10],['normal',3,10],['hard',3,10]]){
     assert.equal(Difficulty.profiles[id].hearts,hearts,id);
     const start=Difficulty.atTime(id,0);
     assert.equal(start.fallSeconds,fallSeconds,id);
@@ -47,7 +48,7 @@ test('difficulty choices provide their advertised heart allowances and starting 
 });
 
 test('active play time accelerates each difficulty and increases its spawn frequency',()=>{
-  for(const [id,rampSeconds] of [['easy',90],['normal',60],['hard',45]]){
+  for(const [id,rampSeconds] of [['easy',60],['normal',60],['hard',60]]){
     const initial=Difficulty.atTime(id,0),later=Difficulty.atTime(id,rampSeconds);
     assert.equal(later.fallSeconds,initial.fallSeconds/2,id+' doubles the fall speed after one ramp interval');
     assert.equal(later.speed,initial.speed*2,id);
@@ -56,7 +57,7 @@ test('active play time accelerates each difficulty and increases its spawn frequ
 });
 
 test('long sessions keep difficulty timing finite, monotonic, and within its speed and spawn limits',()=>{
-  for(const [id,maxMultiplier] of [['easy',3],['normal',3.5],['hard',4]]){
+  for(const [id,maxMultiplier] of [['easy',3.5],['normal',3.5],['hard',3.5]]){
     const p=Difficulty.profiles[id],atCap=Difficulty.atTime(id,(maxMultiplier-1)*p.rampSeconds),late=Difficulty.atTime(id,36000);
     assert.equal(atCap.fallSeconds,p.fallSeconds/maxMultiplier,id);
     assert.deepEqual(late,atCap,id+' stops accelerating at its maximum');

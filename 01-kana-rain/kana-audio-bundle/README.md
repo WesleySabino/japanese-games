@@ -1,13 +1,16 @@
 # Kana audio bundle
 
-216 app items mapped to 112 original served MP3s, including basic and voiced
-kana, yoon combinations, and the small-tsu/long-vowel example words.
+The supplied source bundle contains 216 mappings and 112 original MP3s.
+The current Kana Rain runtime uses only its 208 kana mappings and 104 MP3s:
+basic and voiced kana and yoon combinations. The eight example-word recordings
+are preserved as source provenance and excluded from the game build and offline cache.
 Hiragana and katakana share files for the same reading. Audio bytes are
 unchanged from the app, including the repaired standalone ん/ン recording.
 
 ## Files and lookup
 
 - `audio/`: the MP3s used by the app; no TTS engine or app dependencies required.
+- `runtime-manifest.json`: the approved subset for the current kana catalogue. Regenerate with `node scripts/prepare-runtime-audio.cjs` from the game directory.
 - `manifest.json`: portable UTF-8 JSON with relative paths and SHA-256 checksums.
 - `original-manifest.json`: byte-for-byte original provenance and review metadata.
 - `PROVENANCE.md`: original technical documentation, retained as a source snapshot.
@@ -23,7 +26,7 @@ All lookup values are file paths relative to the bundle root:
 | `byReading` | `a` | `audio/a.mp3` |
 | `byAudioId` | `a` | `audio/a.mp3` |
 
-`byKana` also accepts complete catalogue strings such as `きゃ`, `コーヒー`
+The complete source manifest's `byKana` also accepts strings such as `きゃ`, `コーヒー`
 and `がっこう`. It does not compose arbitrary strings or individual small kana.
 `byReading` uses the app's canonical readings (for example `gakkoo`, `koohii`,
 `di`, `du`, `wo`); accepted alternate spellings are in `items[].accepted`.

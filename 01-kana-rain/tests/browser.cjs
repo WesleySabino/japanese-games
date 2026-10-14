@@ -8,7 +8,7 @@ async function gameContext(options={}){
   const context=await browser.newContext(options);
   // Existing gameplay checks use an explicit decline; consent boundaries have their own suite.
   await context.addCookies([{name:'ng_analytics_consent',value:'denied',url:'http://127.0.0.1:4180/',sameSite:'Lax'}]);
-  // This suite exercises the arcade contract; default steady practice has a separate suite.
+  // Isolated progress; every run exercises the single arcade contract.
   await context.addInitScript(()=>{
     const key='jp-learner-v1';
     const saved=JSON.parse(localStorage.getItem(key)||'null')||{version:1,items:{},errorLog:[],games:{},created:Date.now()};
@@ -18,8 +18,6 @@ async function gameContext(options={}){
   return context;
 }
 async function readyToPlay(page){
-  for(let i=0;i<5&&await page.locator('#featureDialog').isVisible();i++)await page.locator('#continueFeatureBtn').click();
-  if(await page.locator('#scriptDialog').isVisible())await page.locator('#continueScriptBtn').click();
   if(await page.locator('#countdownOverlay').isVisible())await page.locator('#skipCountdown').click();
   await page.waitForFunction(()=>KanaRain.state&&!KanaRain.state.paused&&!KanaRain.state.countingDown);
 }
@@ -137,11 +135,11 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
     const label=width+'×'+height;
     await page.setViewportSize({width,height});await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>window.KanaRain);
     await assertWholeViewport(page,label+' menu');
-    for(const id of ['startBtn','gardenBtn','settingsBtn','mode','difficultySelect','durationSelect'])await assertInViewport(page,'#'+id,label+' menu '+id);
+    for(const id of ['startBtn','gardenBtn','settingsBtn','mode','difficultySelect'])await assertInViewport(page,'#'+id,label+' menu '+id);
     if(width===320)await screenshot(page,'smallest-portrait-menu');
     if(width===568)await screenshot(page,'smallest-landscape-menu');
     await page.locator('#settingsBtn').tap();await assertPanelFits(page,'settingsDialog','closeSettings',label+' settings');
-    await page.locator('[data-difficulty="easy"]').tap();await page.locator('[data-duration="60"]').tap();await page.locator('#saveSettings').tap();
+    assert.equal(await page.locator('#settingsMode,[data-difficulty],[data-duration],#practiceSelect,#noveltyPaceSelect').count(),0,'settings excludes removed setup controls');await page.locator('#saveSettings').tap();
     await page.locator('#gardenBtn').tap();await assertPanelFits(page,'progressDialog','closeGarden',label+' progress');await assertProgressHeading(page);
     if(width===320)await screenshot(page,'smallest-portrait-progress');
     await page.locator('#returnGarden').tap();
@@ -151,7 +149,7 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
     await assertGameFits(page,label+' playing');
     if(width===320)await screenshot(page,'smallest-portrait-playing');
     if(width===568)await screenshot(page,'smallest-landscape-playing');
-    const answer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]);
+    const answer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]);
     for(const key of answer)await page.locator('#keyboard [data-key="'+key+'"]').tap();
     await page.waitForFunction(()=>KanaRain.state.correct===1);
     assert.equal(await page.evaluate(()=>KanaRain.state.attempts),1,label+' touch keys submit exactly once');
@@ -181,7 +179,7 @@ async function exerciseStableInput(errors){
     await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#difficultySelect').selectOption('easy');await page.locator('#startBtn').tap();await readyToPlay(page);
     assert.equal(await page.evaluate(()=>Learner.mastery('kana:あ','form→sound')>=.75&&Learner.state('kana:あ').facets['form→sound'].independentFirstCorrect>=2),true,'fixture reaches the former automatic script-change threshold');
     const firstRound=await page.evaluate(()=>KanaRain.state.target.roundId);
-    assert.equal(await page.evaluate(()=>KanaRain.state.target.kanaOnly),false);
+    assert.equal(await page.evaluate(()=>KanaRain.state.target.responseFormat),'romaji');
     assert.match(await page.locator('#inputFormat').textContent(),/romaji/i);
     await page.locator('#answer').fill('partial');
     await page.evaluate(()=>{KanaRain.state.queue.unshift({id:'kana:あ'});KanaRain.state.sinceSpawn=9999;});
@@ -190,7 +188,7 @@ async function exerciseStableInput(errors){
     await page.evaluate(round=>{KanaRain.state.drops.forEach(d=>d.progress=d.roundId===round ? .15 : 0);},matureRound);
     await page.waitForFunction(round=>KanaRain.state.target.roundId===round,matureRound);
     assert.equal(await page.locator('#answer').inputValue(),'partial','a familiar target keeps the unfinished romaji answer');
-    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>!d.kanaOnly&&d.facet==='form→sound'&&d.responseFormat==='romaji')),true);
+    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.facet==='form→sound'&&d.responseFormat==='romaji')),true);
     assert.equal(await page.locator('#scriptDialog').isVisible(),false,'mature reading items do not introduce another script');
     assert.equal(await page.locator('#keyboardModeBtn').isVisible(),false,'reading sessions expose no script-switch button');
     assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),true);
@@ -209,57 +207,7 @@ async function exerciseStableInput(errors){
     assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),true);
     await finishSession(page);
 
-    // Matching scripts is an explicit session choice, with hiragana throughout.
-    await page.goto('http://127.0.0.1:4180/?all');await page.waitForFunction(()=>window.KanaRain);
-    await page.locator('#mode').selectOption('pair');await page.locator('#startBtn').tap();
-    await page.locator('#scriptDialog').waitFor({state:'visible'});
-    assert.match(await page.locator('#scriptExplanation').textContent(),/matching hiragana/i);
-    await readyToPlay(page);
-    assert.equal(await page.evaluate(()=>KanaRain.state.mode),'pair');
-    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.kanaOnly&&d.responseFormat==='hiragana'&&JPData.kanaById[d.id].script==='katakana')),true);
-    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
-    await assertGameFits(page,label+' explicit hiragana keyboard',true);
-    await screenshot(page,width===320?'smallest-portrait-explicit-pair':'smallest-landscape-explicit-pair');
-    const pairAnswer=await page.evaluate(()=>{KanaRain.state.sinceSpawn=0;return KanaRain.accepted(KanaRain.state.target)[0];});
-    const kana=page.locator('#keyboard [data-key="'+pairAnswer+'"]');await kana.scrollIntoViewIfNeeded();await kana.focus();
-    assert.equal(await kana.evaluate(el=>el===document.activeElement),true,'the kana key receives native keyboard focus');
-    await page.keyboard.press(width===320?'Enter':'Space',{delay:50});
-    await page.waitForFunction(()=>KanaRain.state.correct===1);
-    assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),0,'the first pair answer leaves a gap before the next drop');
-    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i,'a gap without a target keeps the chosen answer format');
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
-    await page.evaluate(()=>{KanaRain.state.queue.unshift({id:'kana:イ'},{id:'kana:ウ'});KanaRain.state.sinceSpawn=9999;});
-    await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:イ'));
-    await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});
-    await page.waitForFunction(()=>KanaRain.state.drops.some(d=>d.id==='kana:ウ'));
-    // Test typing across a target change with the touch keyboard collapsed: in the
-    // shortest landscape it can otherwise leave both drops at the same height
-    // until one expires, which now correctly clears the unfinished answer.
-    await page.locator('#keyboardBtn').tap();
-    await page.waitForFunction(()=>!document.body.classList.contains('has-keyboard'));
-    await page.evaluate(()=>{KanaRain.state.sinceSpawn=-100000;KanaRain.state.drops.forEach(d=>d.progress=0);});
-    await page.locator('#answer').fill('ん');
-    await page.evaluate(()=>{KanaRain.state.drops.forEach(d=>d.progress=d.id==='kana:ウ' ? .4 : 0);});
-    await page.waitForFunction(()=>KanaRain.state.target.id==='kana:ウ',null,{timeout:3000});
-    assert.equal(await page.locator('#answer').inputValue(),'ん','pair target changes preserve unfinished hiragana input');
-    assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.kanaOnly&&d.facet==='script→script'&&d.responseFormat==='hiragana')),true);
-    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
-    assert.equal(await page.locator('#scriptDialog').isVisible(),false);
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),false);
-    await page.locator('#answer').fill('');await page.locator('#keyboardBtn').tap();await page.locator('#keyboard [data-key="う"]').tap();
-    await page.waitForFunction(()=>KanaRain.state.correct===2);
-    await page.waitForFunction(()=>KanaRain.state.target&&KanaRain.state.drops.length>0);
-    const nextAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);
-    assert.match(nextAnswer,/^[ぁ-ゖ]+$/,'the next pair still requires hiragana');
-    const nextKana=page.locator('#keyboard [data-key="'+nextAnswer+'"]');await nextKana.scrollIntoViewIfNeeded();await nextKana.focus();
-    assert.equal(await nextKana.evaluate(el=>el===document.activeElement),true,'the next kana key receives native keyboard focus');
-    await page.keyboard.press(width===320?'Space':'Enter',{delay:50});
-    try{await page.waitForFunction(()=>KanaRain.state.correct===3,null,{timeout:3000});}
-    catch(error){console.error('Native kana activation state:',await page.evaluate(()=>({correct:KanaRain.state.correct,attempts:KanaRain.state.attempts,paused:KanaRain.state.paused,over:KanaRain.state.over,target:KanaRain.state.target?.id,drops:KanaRain.state.drops.map(d=>({id:d.id,progress:d.progress,format:d.responseFormat,accepted:KanaRain.accepted(d)})),input:document.querySelector('#answer').value,focus:document.activeElement?.dataset.key,dialog:document.querySelector('dialog[open]')?.id})));throw error;}
-    assert.equal(await page.evaluate(()=>KanaRain.state.attempts),3,'touch and native Enter/Space activate hiragana keys once each');
-    assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
-    await finishSession(page);
+
   }
   await context.close();
 }
@@ -290,7 +238,7 @@ async function exerciseQuickWins(errors){
   // Keyboard buttons activate through their native click behavior for Enter and Space.
   for(const [index,keyName] of ['Enter','Space'].entries()){
     await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
-    const answer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]);
+    const answer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]);
     assert.equal(answer.length,1);
     const key=page.locator('#keyboard [data-key="'+answer+'"]');await key.focus();await key.press(keyName);
     await page.waitForFunction(n=>KanaRain.state.correct===n,index+1);
@@ -299,19 +247,19 @@ async function exerciseQuickWins(errors){
   await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await page.waitForFunction(()=>KanaRain.state.drops.length>0);
   await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');
   const errorText=await page.locator('#feedback').textContent();
-  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]));
+  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]));
   await page.waitForFunction(()=>KanaRain.state.correct===3);
   assert.equal(await page.locator('#feedback').textContent(),errorText,'success cannot replace the protected correction');
   for(const streak of [5,10,20]){
     await page.evaluate(streak=>{KanaRain.state.streak=streak-1;KanaRain.state.sinceSpawn=9999;},streak);
     await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
-    await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]));
+    await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]));
     assert.match(await page.locator('#milestoneFeedback').textContent(),new RegExp('^'+streak+' in a row'));
     assert.equal(await page.locator('#feedback').textContent(),errorText,'streak celebration uses its separate channel');
   }
   await page.evaluate(()=>{const g=KanaRain.state;g.previousBest=g.score+1;g.bestBeaten=false;g.sinceSpawn=9999;});
   await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
-  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]));
+  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]));
   assert.match(await page.locator('#milestoneFeedback').textContent(),/personal best/i);
   assert.match(await page.locator('#personalBest').textContent(),/Best.*\d/);
   await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
@@ -337,7 +285,7 @@ async function exerciseQuickWins(errors){
   assert.match(await page.locator('#unlockDetails .pending').textContent(),/あ/,'the pending item comes from the earlier vowel row');
   await page.locator('#closeGarden').click();await page.locator('#startBtn').click();await readyToPlay(page);
   await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await page.waitForFunction(()=>KanaRain.state.drops.length>=2);await readyToPlay(page);
-  const other=await page.evaluate(()=>{const d=KanaRain.state.drops.find(d=>d.id!=='kana:あ');return {id:d.id,answer:KanaRain.accepted(d.id,d.kanaOnly)[0]};});
+  const other=await page.evaluate(()=>{const d=KanaRain.state.drops.find(d=>d.id!=='kana:あ');return {id:d.id,answer:KanaRain.accepted(d.id)[0]};});
   await page.locator('#answer').fill(other.answer);
   assert.equal(await page.evaluate(()=>KanaRain.gameData.rows.hiragana),2,'practicing another kana cannot bypass earlier-row readiness');
   await finishSession(page);await context.close();
@@ -349,7 +297,7 @@ async function exerciseQuickWins(errors){
   browser=await chromium.launch({headless:true,...(channel?{channel}:{})});
   if(process.argv.includes('--quick-ui-only')){
     const errors=[];await exerciseResponsiveMatrix(errors,[[320,568]]);await exerciseStableInput(errors);assert.deepEqual(errors,[]);
-    console.log('PASS: focused320portrait menu/game/dialogs, mascotbelowfield, stable romaji and explicit hiragana, touch/nativeEnter/Space, preserved partial input, portrait/landscape scrollable keyboard geometry.');
+    console.log('PASS: focused mobile menu/game/dialogs, mascot behind field, stable romaji, touch/native Enter/Space and preserved partial input.');
     await browser.close();server.kill();return;
   }
   await require('./input.browser.cjs').checkPrefixInput(browser,'http://127.0.0.1:4180/');
@@ -361,24 +309,15 @@ async function exerciseQuickWins(errors){
   await assertWholeViewport(page,'Desktop title');
   await screenshot(page,'desktop');
   assert.equal(await page.locator('#welcome').isVisible(),true);
-  assert.equal(await page.locator('#mode option:disabled').count(),4);
+  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
   assert.equal(await page.locator('#difficultySelect option:disabled').count(),0);
-  assert.equal(await page.locator('#difficultySelect').inputValue(),'normal');
-  // Title overlays configure a session without revealing a second page or losing the title screen.
+  assert.equal(await page.locator('#difficultySelect').inputValue(),'easy');
   await page.locator('#settingsBtn').click();
   assert.equal(await page.locator('#settingsDialog').isVisible(),true);
-  assert.equal(await page.locator('#settingsMode option:disabled').count(),4);
-  assert.equal(await page.locator('#modeLocks .mode-lock').count(),4);
-  assert.match(await page.locator('#modeLocks').textContent(),/Hiragana rows.*1\/11/);
-  await page.locator('[data-duration="300"]').click();
-  await page.locator('[data-difficulty="easy"]').click();
+  assert.equal(await page.locator('#settingsMode,[data-difficulty],[data-duration],#practiceSelect,#noveltyPaceSelect').count(),0);
   await page.locator('#saveSettings').click();
   assert.equal(await page.locator('#settingsDialog').isVisible(),false);
-  assert.equal(await page.evaluate(()=>KanaRain.settings.duration),300);
-  assert.equal(await page.locator('#durationSelect').inputValue(),'300');
-  assert.equal(await page.evaluate(()=>KanaRain.settings.difficulty),'easy');
-  assert.equal(await page.locator('#difficultySelect').inputValue(),'easy');
-  await page.locator('#durationSelect').selectOption('180');
+  assert.equal(await page.evaluate(()=>KanaRain.settings.duration),180);
   await page.locator('#difficultySelect').selectOption('normal');
   await page.locator('#settingsBtn').click();await page.keyboard.press('Escape');
   assert.equal(await page.locator('#settingsDialog').isVisible(),false);
@@ -412,7 +351,7 @@ async function exerciseQuickWins(errors){
   const answer=await page.evaluate(id=>JPData.kanaById[id].romaji,first);
   await page.locator('#answer').fill(answer);
   await page.waitForFunction(()=>KanaRain.state.correct===1);
-  assert.ok(await page.evaluate(()=>KanaRain.state.rts[0]<1000),'the initial countdown must not count toward reaction time');
+  assert.ok(await page.evaluate(()=>Learner.attempts().at(-1).firstResponseMs<1000),'the initial countdown must not count toward reaction time');
   const persisted=await page.evaluate(id=>JSON.parse(localStorage.getItem('jp-learner-v1')).items[id].facets['form→sound'].correct,first);
   assert.equal(persisted,1);
   await page.waitForFunction(()=>KanaRain.state.drops.length>0);
@@ -445,8 +384,8 @@ async function exerciseQuickWins(errors){
   await page.locator('#pauseSettingsBtn').click();
   assert.equal(await page.locator('#settingsDialog').isVisible(),true);
   await assertFrozen(page);await assertWholeViewport(page,'Desktop paused settings');
-  assert.equal(await page.locator('[data-difficulty]:disabled').count(),3,'difficulty cannot change during a session');
-  assert.equal(await page.locator('#settingsMode').isDisabled(),true);
+  assert.equal(await page.locator('#difficultySelect').isDisabled(),true,'difficulty cannot change during a session');
+  assert.equal(await page.locator('#mode').isDisabled(),true);
   await page.locator('#closeSettings').click();
   assert.equal(await page.locator('#pauseOverlay').isVisible(),true);
   assert.equal(await page.evaluate(()=>KanaRain.state.paused),true);
@@ -480,7 +419,7 @@ async function exerciseQuickWins(errors){
   assert.equal(await page.evaluate(id=>KanaRain.state.reviewIds.includes(id),typo.id),true);
   assert.equal(await page.evaluate(()=>KanaRain.state.drops.concat(KanaRain.state.queue).every(d=>KanaRain.state.reviewIds.includes(d.id))),true);
   await page.evaluate(score=>{KanaRain.state.score=score+100;},normalSession.best);
-  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id,KanaRain.state.drops[0].kanaOnly)[0]));
+  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id)[0]));
   await page.waitForFunction(()=>KanaRain.state.correct===1);
   await finishSession(page);
   assert.equal(await page.evaluate(key=>KanaRain.gameData.best[key],normalSession.key),normalSession.best,'review scores do not replace the normal personal best');
@@ -491,28 +430,16 @@ async function exerciseQuickWins(errors){
   assert.equal(await page.locator('#reviewPracticeBtn').isVisible(),false,'a session with no mistakes cannot start an empty review');
   await page.reload();await page.waitForFunction(()=>window.KanaRain);
   assert.equal(await page.evaluate(id=>Learner.state(id).facets['form→sound'].correct,first),1);
-  // Explore mode tests all content without modifying the earned row unlocks.
+  // Explore mode cannot revive retired modes, but keeps Katakana available for QA.
   await page.goto('http://127.0.0.1:4180/?all');await page.waitForFunction(()=>window.KanaRain);
-  await page.locator('#mode').selectOption('pair');await page.locator('#startBtn').click();
-  await page.locator('#scriptDialog').waitFor({state:'visible'});
-  assert.match(await page.locator('#scriptExplanation').textContent(),/matching hiragana/i);
-  await readyToPlay(page);
-  await page.waitForFunction(()=>KanaRain.state.drops.length>0);
-  assert.match(await page.locator('#inputFormat').textContent(),/hiragana/i);
-  const pairAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id,true)[0]);
-  await page.locator('#answer').fill(pairAnswer);await page.waitForFunction(()=>KanaRain.state.correct===1);
-  assert.equal(await page.locator('#keyboard').isVisible(),true);
-  await finishSession(page);await page.locator('#backBtn').click();
-  await page.locator('#mode').selectOption('words');await page.locator('#startBtn').click();
-  await readyToPlay(page);
-  const word=await page.evaluate(()=>KanaRain.state.drops[0].id);
-  await page.locator('#answer').fill(await page.evaluate(id=>JPData.toRomaji(id.slice(2)),word));
-  await page.waitForFunction(()=>KanaRain.state.correct===1);
-  assert.match(await page.locator('#feedback').textContent(),/·/);
+  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
+  await page.locator('#mode').selectOption('kata');await page.locator('#startBtn').click();await readyToPlay(page);
+  assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='romaji'&&JPData.kanaById[d.id].script==='katakana')),true);
+  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]));await page.waitForFunction(()=>KanaRain.state.correct===1);
   await finishSession(page);
   await page.waitForFunction(()=>document.querySelector('#offlineStatus').textContent.includes('ready offline'));
   const cacheCount=await page.evaluate(async()=>{const key=(await caches.keys()).find(k=>k.startsWith('kana-rain-'));const c=await caches.open(key);return (await c.keys()).filter(r=>r.url.endsWith('.mp3')).length;});
-  assert.equal(cacheCount,112);
+  assert.equal(cacheCount,104);
   // An artwork navigation must never overwrite the separately cached offline game shell.
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.goto('http://127.0.0.1:4180/art.html',{waitUntil:'domcontentloaded'});
@@ -532,7 +459,7 @@ async function exerciseQuickWins(errors){
   await mobile.locator('#returnGarden').tap();
   await mobile.locator('#difficultySelect').selectOption('easy');
   await mobile.locator('#startBtn').tap();await readyToPlay(mobile);await mobile.waitForFunction(()=>KanaRain.state.drops.length>0);
-  assert.equal(await mobile.evaluate(()=>KanaRain.state.totalLives),5);
+  assert.equal(await mobile.evaluate(()=>KanaRain.state.totalLives),3);
   await assertHeartsVisible(mobile,'Mobile');
   if(!await mobile.locator('#keyboard').isVisible())await mobile.locator('#keyboardBtn').tap();
   const touch=await mobile.evaluate(()=>JPData.kanaById[KanaRain.state.drops[0].id].romaji);
@@ -573,10 +500,10 @@ async function exerciseQuickWins(errors){
   await mobile.locator('#resumeBtn').tap();
   await readyToPlay(mobile);
   await mobileContext.close();
-  // Every selectable difficulty accelerates with elapsed play time, even without correct answers.
-  // Passing the pond removes exactly one heart; each chosen allowance determines the loss boundary.
+  // Every novelty difficulty shares a rain curve that accelerates with active time.
+  // Each expiration removes one of the universal three hearts.
   const difficultyContext=await gameContext();
-  for(const [difficulty,hearts] of [['easy',5],['normal',3],['hard',1]]){
+  for(const [difficulty,hearts] of [['easy',3],['normal',3],['hard',3]]){
     const level=await difficultyContext.newPage();level.on('pageerror',e=>errors.push(e.message));
     await level.goto('http://127.0.0.1:4180');await level.waitForFunction(()=>window.KanaRain);
     await level.locator('#difficultySelect').selectOption(difficulty);await level.locator('#startBtn').click();
@@ -644,14 +571,14 @@ async function exerciseQuickWins(errors){
   await grow.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('A new row is growing'),{},{timeout:5000});
   const unlockMessage=await grow.locator('#feedback').textContent();
   await grow.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await grow.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(grow);
-  await grow.locator('#answer').fill(await grow.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id,KanaRain.state.target.kanaOnly)[0]));
+  await grow.locator('#answer').fill(await grow.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]));
   assert.equal(await grow.locator('#feedback').textContent(),unlockMessage,'success does not replace a protected unlock announcement');
   await difficultyContext.close();
   await exerciseQuickWins(errors);
   await exerciseResponsiveMatrix(errors);
   await exerciseStableInput(errors);
   assert.deepEqual(errors,[]);
-  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, stable romaji for mature items, explicit katakana→hiragana with fixed answers and reachable scrollable keys, protected feedback/streak/best celebrations, readiness/locked modes, native keyboard/SFX/mute, danger/heart cues, persistence/resize, Easy5/Normal3/Hard1/time acceleration, offline shell and 112 recordings.');
+  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, stable romaji for mature items, protected feedback/streak/best celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common time acceleration, offline shell and 104 kana recordings.');
   await browser.close();
   server.kill();
 })().catch(async e=>{console.error(e);if(browser)await browser.close();if(server)server.kill();process.exitCode=1;});

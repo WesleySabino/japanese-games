@@ -1,33 +1,33 @@
-# 01 — Kana Rain: current design review
+# 01 — Kana Rain: simplified design review
 
-**Baseline:** version 1.4.0. **Sources:** [current specification](./SPECIFICATION.md), [game documentation](./README.md), [new-kana admission rules](./NOVELTY_BALANCE.md), and the implemented modules in `src/`.
+**Baseline:** release 1.5.0, 14 October 2026. Sources: [specification](SPECIFICATION.md), [game documentation](README.md), [admission rules](NOVELTY_BALANCE.md).
 
-The [earlier review](../docs/history/kana-rain/REVIEW.md) is preserved as history. Its recommendation to default to Steady practice and its independent-recall readiness proposal have been superseded by the product decisions below.
+## Direction
 
-## Design direction
+One arcade loop drives play: read falling kana, build a score, protect three hearts and try to improve the next run. Alphabet and difficulty are the only pre-run decisions. Difficulty controls how cautiously new kana resume after missed drops; the rain curve, hearts and three-minute duration stay consistent.
 
-Arcade challenge is the main experience. Score, increasing rain pressure, hearts, streaks and the desire to improve a run drive replay. Learning evidence is recorded through play; the game retains reading and pronunciation feedback without making every mistake a mandatory lesson.
+The established garden, typography, mobile keyboard, audio, pressure, wrong-answer acceleration, records, streak celebrations and row rewards remain. New-kana admission operates in the background without a diagnostic HUD. Results foreground game outcomes; deeper independent/assisted evidence remains in a collapsed Garden section.
 
-Rain difficulty controls hearts and the time-based curve. New kana pace controls recovery of first presentations after recent expirations. Keeping these choices independent lets players retain an enjoyable arcade challenge while slowing new material. No active-repertoire subset removes already unlocked kana from play.
+## Accepted simplification
 
-The diagnostic new-kana counter was intentionally removed from the HUD. Admission rules remain active in the background; the player-facing choice is in the menu and Settings. Partial text is cleared on expiration, while ordinary pauses retain it.
+- Keep only Hiragana and Katakana, both answered in romaji.
+- Use one Easy/Normal/Hard selector; Easy defaults to the approved 55/60 recovery rule, Normal to 25/30 and Hard to 10/12.
+- Give every run three hearts and the former Normal active-time rain curve.
+- Fix regular runs at three minutes; keep focused mistake review at one minute.
+- Prepare sessions only on the title screen. Keep device effects and privacy in Settings.
+- Preserve evidence and legacy records while isolating new-rule personal bests.
 
-## What to preserve
+## Validation
 
-- Immediate typed-answer feedback, any-visible-drop matching and the highlighted priority for forced submissions.
-- Arcade acceleration, wrong-answer consequences, hearts, existing score rules and celebrations.
-- Optional Steady practice, focused mistake review and clear distinction between reading and script matching.
-- Touch controls, pause semantics, reduced effects, offline audio and explicit analytics consent.
-- Existing learning history, first-answer counters, independent evidence, unlocked rows and best scores.
+- Supported alphabet and difficulty choices survive reload; unsupported legacy selections recover safely.
+- Three hearts, identical acceleration and fixed duration apply to all levels, including review's three hearts.
+- Two expirations close first presentations; full profile recovery reopens them. No per-debut threshold is introduced.
+- Spacing, starter exceptions, session limits and one-debut-on-screen rules hold across normal queues, retries and confusion partners.
+- Familiar earned content remains available while first presentations pause.
+- Prefix answers auto-submit; longer answers remain typeable. Expiration clears partial input; an ordinary pause preserves it.
+- Results report points, best streak, first-try hits and expirations accurately; retained learning details remain accessible but collapsed.
+- Portrait/landscape layouts, touch play, audio, countdowns, menus, row unlocks and offline caching remain usable.
+- All 11 title-menu viewport checks confirm centered fields, separated footer hints and no internal scrolling, including wide screens with limited height.
+- Existing attempts, exposures, earned rows, records, accuracy and export remain intact.
 
-## Validation criteria
-
-- Each pace profile survives reload and changes admission without changing rain difficulty or deleting history.
-- Two recent expirations close first presentations; a full qualifying recovery window reopens them. Corrected retries do not count as first-try hits.
-- Spacing, starter-vowel exceptions, per-session limits and one-debut-on-screen rules apply across normal queues, retries and confusion partners.
-- Familiar kana stay eligible while first presentations are paused; words and script matching retain their existing schedules.
-- An ambiguous reading can auto-submit without requiring a second key, and longer readings remain typeable.
-- Expiration clears partial text and pending automatic answers; pausing alone does neither.
-- Desktop, portrait and landscape play remain usable, and saving/reloading preserves learner evidence and records.
-
-The [README](./README.md#structure-and-checks) lists the automated unit and browser suites. Historical reports record technical verification, not measured learning gains or proof of long-term retention. Further balance changes should be guided by actual playtests.
+Automated checks establish technical behavior. They do not demonstrate an optimal learning threshold or long-term retention. Continued playtesting should evaluate challenge, novelty pace and retention after the simplification. Earlier proposals remain in [the historical archive](../docs/history/kana-rain/README.md).

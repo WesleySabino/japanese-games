@@ -15,11 +15,12 @@
     rain: { '/': 'Kana Rain', '/about.html': 'Kana Rain | About', '/art.html': 'Kana Rain | Artwork', '/privacy.html': 'Kana Rain | Privacy' },
     core: { '/': 'Japanese Core', '/practice': 'Japanese Core | Practice', '/progress': 'Japanese Core | Progress', '/settings': 'Japanese Core | Settings', '/privacy.html': 'Japanese Core | Privacy' }
   };
-  const modes = ['hira', 'kata', 'mix', 'pair', 'words', 'review', 'reading', 'listening', 'writing', 'spaced_review'];
+  const modes = app === 'rain' ? ['hira', 'kata', 'review'] : ['reading', 'listening', 'writing', 'spaced_review'];
+  const completionReasons = app === 'rain' ? ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed'] : ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed', 'practice_set_complete'];
   const schemas = {
     app_open: { target_app: ['core', 'rain'] },
     practice_start: { practice_mode: modes },
-    practice_complete: { practice_mode: modes, completion_reason: ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed', 'practice_set_complete'] }
+    practice_complete: { practice_mode: modes, completion_reason: completionReasons }
   };
   let choice = 'unknown', active = false, tag = null, configured = false, currentPath = safePath(location.pathname), lastPath = null;
   let dialog, status, allow, decline, close, returnFocus;

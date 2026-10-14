@@ -39,8 +39,6 @@ async function context(viewport={width:1920,height:1080},remoteName=false){
 }
 async function ready(page){
   for(let i=0;i<12;i++){
-    if(await page.locator('#featureDialog').isVisible()){await page.locator('#continueFeatureBtn').click();continue;}
-    if(await page.locator('#scriptDialog').isVisible()){await page.locator('#continueScriptBtn').click();continue;}
     if(await page.locator('#countdownOverlay').isVisible())await page.locator('#skipCountdown').click();
     if(await page.evaluate(()=>KanaRain.state&&!KanaRain.state.paused&&!KanaRain.state.countingDown))return;
     await page.waitForTimeout(30);
@@ -74,7 +72,7 @@ async function spawnNext(page,id='kana:あ'){
 }
 async function answer(page){
   const before=await page.evaluate(()=>({correct:KanaRain.state.correct,count:KanaRain.state.drops.length}));
-  const text=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id,KanaRain.state.drops[0].kanaOnly)[0]);
+  const text=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id)[0]);
   await page.locator('#answer').fill(text);
   await page.waitForFunction(value=>KanaRain.state.correct===value,before.correct+1);
   assert.equal(await page.evaluate(()=>KanaRain.state.drops.length),before.count-1,'answered drop leaves the field');
@@ -195,12 +193,6 @@ async function smallScreenTarget(){
   checks.push({check:'small portrait retains positive rain travel and switches to the lower target',pass:true});await page.close();
 }
 async function scope(){
-  for(const mode of ['words','pair']){
-    const page=await context({width:1366,height:768});await page.goto(url+'/?all');await page.waitForFunction(()=>!!window.KanaRain);
-    await page.locator('#mode').selectOption(mode);await start(page);await noCounter(page);
-    assert.equal(await page.evaluate(()=>KanaRain.state.drops.some(d=>d.isIntroduction)),false,mode+' remains outside kana-reading admission');
-    checks.push({check:'unsupported mode has no presentation counter',mode});await page.close();
-  }
   const page=await context({width:1366,height:768},true);await start(page);await noCounter(page);
   checks.push({check:'no presentation counter on a non-loopback hostname, without external network access',pass:true});await page.close();
 }

@@ -103,7 +103,7 @@
     if (button.id === 'resetBtn' || button.classList.contains('danger')) return 'warning';
     if (button.classList.contains('dialog-close') ||
       /^(close|back|return|cancel)/i.test(button.id)) return 'back';
-    if (button.matches('[data-difficulty], [data-duration], [data-script]')) {
+    if (button.matches('[data-script]')) {
       return button.getAttribute('aria-pressed') === 'true' || button.classList.contains('selected') ? 'menu' : 'confirm';
     }
     if (['resumeBtn', 'saveSettings', 'finishBtn', 'exportBtn', 'submitBtn'].includes(button.id)) return 'confirm';
