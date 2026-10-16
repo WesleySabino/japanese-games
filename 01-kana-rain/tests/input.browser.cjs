@@ -29,9 +29,12 @@ async function checkPrefixInput(browser, baseUrl, { baseline = false } = {}) {
         if (partner) await page.waitForFunction(() => KanaRain.state.drops.length === 2);
         await page.evaluate(() => { KanaRain.state.sinceSpawn = -99999; });
       }
+      // Phones compose n and ne on the sound pad; the typed-only spelling nn goes through the text field.
       async function type(text) {
-        if (mobile) for (const key of text) await page.locator('#keyboard [data-key="' + key + '"]').click();
-        else await page.locator('#answer').pressSequentially(text, { delay: 40 });
+        if (mobile && text !== 'nn') {
+          await page.waitForTimeout(90); await page.locator('#keyboard [data-family="n"]').tap();
+          await page.waitForTimeout(90); await page.locator('#keyboard [data-slot="' + (text === 'n' ? 'n' : text.slice(1)) + '"]').tap();
+        } else await page.locator('#answer').pressSequentially(text, { delay: 40 });
       }
       await fixture();
       await type('n');

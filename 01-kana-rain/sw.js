@@ -1,4 +1,4 @@
-const CACHE='kana-rain-v24-release-1.5.0';
+const CACHE='kana-rain-v25-release-1.6.0';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
 const SHELL=['./','index.html','about.html','art.html','privacy.html','assets/nihongo-analytics.js','assets/nihongo-analytics.css','src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/novelty.js','src/game.js','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/runtime-manifest.json'];

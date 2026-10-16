@@ -70,6 +70,7 @@
     <symbol id="icon-gear" viewBox="0 0 24 24"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 3-1 2 3 3-1 1-3 3-1 2-3-2-2 1-3-3-2-3 1-2-3Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="11" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
     <symbol id="icon-return" viewBox="0 0 24 24"><path d="M8 5 3 10l5 5m-5-5h12a5 5 0 0 1 0 10h-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="icon-keyboard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 9h1m3 0h1m3 0h1m3 0h1M6 12h1m3 0h1m3 0h1m3 0h1M7 16h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="icon-pad" viewBox="0 0 24 24"><path d="M3 4h5v4H3Zm6.5 0h5v4h-5ZM16 4h5v4h-5ZM3 10h5v4H3Zm6.5 0h5v4h-5ZM16 10h5v4h-5ZM3 16h5v4H3Zm6.5 0h5v4h-5ZM16 16h5v4h-5Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
   </svg>
   <main class="game-world" aria-label="Kana Rain">
     <div class="garden-scene" aria-hidden="true"></div>
@@ -120,9 +121,9 @@
         <span id="inputScript" class="input-symbol" aria-hidden="true">a</span>
         <input id="answer" disabled aria-label="Answer the falling kana" aria-describedby="inputFormat targetHint" placeholder="Type the sound…" inputmode="none" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
         <button id="submitBtn" class="dock-button" disabled type="submit" aria-label="Submit answer">↵</button>
-        <button id="keyboardBtn" class="dock-button" type="button" aria-expanded="false" aria-label="Show touch keyboard"><svg class="control-icon" aria-hidden="true"><use href="#icon-keyboard"/></svg></button>
+        <button id="keyboardBtn" class="dock-button" type="button" aria-expanded="false" aria-label="Show the sound pad"><svg class="control-icon" aria-hidden="true"><use href="#icon-pad"/></svg></button>
       </form>
-      <div id="keyboard" class="touch-keyboard hidden" aria-label="Touch keyboard"></div>
+      <div id="keyboard" class="touch-keyboard sound-pad hidden" role="group" aria-label="Sound pad: choose a family, then a sound" data-stage="family"></div>
       <p id="inputNote" class="input-note">Enter to submit · Esc to pause</p>
     </div>
     <div class="feedback-stack"><div id="feedback" class="feedback" role="status" aria-live="polite"></div></div>
@@ -169,7 +170,7 @@
       <p>Choose <b>Hiragana</b> or <b>Katakana</b> and your difficulty on the main menu. Each session begins with a short countdown; choose <b>Skip countdown</b> when you are ready. You can answer any visible drop; the highlighted drop is the priority.</p>
       <p>Clear the rain, build your score, and protect your <b>three hearts</b>. A regular run lasts <b>three minutes</b>. Rain accelerates with time on every difficulty. Every drop that reaches the ground costs one heart and clears any unfinished answer; losing all hearts ends the run.</p>
       <p>New kana briefly show their sound. Open My Kana Garden and tap a lesson tile to listen. A new row opens when each available kana has two correct first answers and at least 85% first-answer accuracy. Reading hints and pronunciation do not block unlocks. Wrong answers show the correct reading, stain the drop, and make it fall faster. Missed or mistaken kana return for practice.</p>
-      <p>Romaji hints disappear as you learn. Both alphabets always use romaji answers and the same letter keyboard. Use the keyboard button for touch controls.</p>
+      <p>Romaji hints disappear as you learn. Both alphabets always use romaji answers. On a touch screen, the <b>sound pad</b> builds them in two taps: choose the sound family, then the sound — <b>し → S/SH → shi</b>, <b>しゃ → S/SH → sha</b>, <b>ん → N → n</b>. The pad keeps the same places for every kana; ‹ goes back. The keyboard button switches between the pad and your device keyboard.</p>
       <p>An <b>!</b> badge warns that a drop is close to the ground. After a run, tap a review card to hear its kana, or choose <b>Review these kana</b> for a focused <b>one-minute</b> round with three hearts. My Kana Garden shows next-row readiness and optional learning details.</p>
       <p><b>Difficulty controls new kana, not rain speed.</b> Two expired drops in the recent window pause new introductions. <b>Easy</b> brings them back with 55 first-try hits in the latest 60 completed drops, <b>Normal</b> with 25 in 30, or <b>Hard</b> with 10 in 12; recovery also needs at most one expiration. These are recovery targets after a pause, not requirements before every new kana. Recent history continues between sessions.</p>
       <p>New kana arrive after three familiar completions, at most two per run and one debut on screen. Each alphabet's five starter vowels bypass the recovery, spacing and two-debut limits. All earned rows remain unlocked.</p>

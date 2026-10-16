@@ -1,10 +1,10 @@
 # Kana Rain
 
-**Release baseline: 1.5.0 — 14 October 2026.** See [release history](CHANGELOG.md).
+**Release baseline: 1.6.0 — 16 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
-The illustrated garden, score, streaks, accelerating rain, pronunciation audio, touch keyboard and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
+The illustrated garden, score, streaks, accelerating rain, pronunciation audio, touch sound pad and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
 
 The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens.
 
@@ -31,7 +31,8 @@ Open http://127.0.0.1:4173/. A different port can be supplied through `PORT`. No
 - Complete answers submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play for another letter; stop typing to accept, or press Enter immediately. Continuing cancels the pending match. An exact answer entered before the waterline is protected during this short wait.
 - Start or resume with a skippable three-second countdown. Escape or the Pause button pauses; leaving the tab pauses automatically. Opening a menu during play pauses and closing it resumes; opening one from Pause returns to Pause. Ordinary pauses retain partial input.
 - A danger badge and pond cue warn of imminent expirations. Heart loss, streaks of 5/10/20, personal bests and row unlocks have visual cues and optional sounds. Reduced effects preserves gameplay while calming decorative motion.
-- Phone play opens the integrated letter keyboard automatically. Portrait, short landscape, safe areas and native keyboard viewport changes remain supported without page scrolling. Rotation preserves normalized drop progress.
+- Phone play opens the **sound pad** automatically: tap one of 15 fixed sound families (Vowels, K, S/SH, T/CH/TS, N, H/F, M, Y, R, W, G, Z/J, D, B, P), then the sound, which replaces the families in the same box — し is S/SH → shi, しゃ is S/SH → sha, ん is N → n. Every one of the 208 forms takes two taps. Slots never move and never depend on the falling kana. A composition submits at once (no `n` wait); one that matches no drop is a mistake for the drop highlighted when it began. The exact cell settles homophones (じ/ぢ, ず/づ, お/を), while the same sound still answers a lone homophone, as typing does. ‹ Back cancels a family; a drop expiring clears an unfinished composition; pausing keeps it.
+- In portrait the pad sits under the rain; in short landscape it sits beside it. On a phone the answer field is never focused while the pad is open, so the native keyboard opens only through the keyboard button. Physical keyboards keep working everywhere, and desktop starts with typing (the pad stays available). Safe areas and rotation are preserved without page scrolling; rotation keeps normalized drop progress.
 
 ## Difficulty means new-kana recovery
 
@@ -55,7 +56,7 @@ My Kana Garden retains its two script tabs, four estimated familiarity states, c
 
 Results emphasize **points, best streak, first-try hits and expired drops**. Mistake cards keep readings and pronunciation; **Review these kana** starts a focused 60-second round with three hearts. New best scores use a separate ruleset so a changed rain curve cannot silently replace older records. Historical best scores and accuracy data remain in the saved game data and progress export.
 
-Progress uses the existing localStorage journal (`jp-learner-v1`) and IndexedDB. Save status follows completed writes; if saving fails, a persistent warning and export action remain available. The compatible newer snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates; v1 history retains unknown assistance and dated legacy errors. No account or cloud synchronization is provided.
+Progress uses the existing localStorage journal (`jp-learner-v1`) and IndexedDB. Save status follows completed writes; if saving fails, a persistent warning and export action remain available. The compatible newer snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates; v1 history retains unknown assistance and dated legacy errors. New submitted answers also record `inputMethod` (`composer` or `typing`); earlier events keep their exact shape and are not reclassified. Composed and typed answers follow the same reading, unlock and record rules. No account or cloud synchronization is provided.
 
 Old session selections normalize to supported choices without resetting attempts, exposures, earned rows, novelty pressure history or records. The shared learner keeps legacy evidence; retired game modes are not offered or executed by the current runtime.
 
@@ -80,10 +81,11 @@ pnpm test:browser
 pnpm test:improvements
 pnpm test:novelty-presentation
 pnpm test:novelty-pace
+pnpm test:sound-pad
 pnpm build
 ```
 
-Browser suites use isolated profiles and temporary localhost servers. They check the simplified choices, migration/history preservation, all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.
+Browser suites use isolated profiles and temporary localhost servers. The sound-pad suite measures fall distance, dock size and touch targets at eight phone sizes, and checks quick taps, ignored bounces, cancelled slides, stable slots, correction and evidence labels. They check the simplified choices, migration/history preservation, all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.
 
 For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. [Performance diagnostics](PERFORMANCE.md) documents earlier measurements and the preserved optimization strategy.
 

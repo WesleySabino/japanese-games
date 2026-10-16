@@ -97,34 +97,30 @@ async function assertPanelFits(page,id,close,label){
   await assertInViewport(page,'#'+id,label+' panel');
   if(close)await assertInViewport(page,'#'+close,label+' close control');
 }
-async function assertGameFits(page,label,allowScrollingKeyboard=false){
+// Rectangles that only touch at an edge do not overlap.
+const apart=(a,b)=>a.right<=b.left+1||a.left>=b.right-1||a.bottom<=b.top+1||a.top>=b.bottom-1;
+// Compose a kana on the sound pad with two real taps; the pause keeps them apart from a bounce.
+async function tapCompose(page,id){
+  const path=await page.evaluate(id=>KanaRain.padPath(id),id);
+  await page.waitForTimeout(90);await page.locator('#keyboard [data-family="'+path.family+'"]').tap();
+  await page.waitForTimeout(90);await page.locator('#keyboard [data-slot="'+path.slot+'"]').tap();
+}
+async function assertGameFits(page,label){
   await assertWholeViewport(page,label);
   await assertHeartsVisible(page,label);
   await assertInViewport(page,'#answerDock',label+' input dock');
-  await assertInViewport(page,'#keyboard',label+' touch keyboard');
+  await assertInViewport(page,'#keyboard',label+' sound pad');
   const fit=await page.evaluate(()=>{
-    const field=document.querySelector('#field').getBoundingClientRect(),dock=document.querySelector('#answerDock').getBoundingClientRect(),drop=KanaRain.state.drops[0]?.el.getBoundingClientRect();
-    return {field:{top:field.top,bottom:field.bottom,height:field.height},dock:{top:dock.top},drop:drop&&{top:drop.top,bottom:drop.bottom,height:drop.height}};
+    const box=el=>{const r=el.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
+    const drop=KanaRain.state.drops[0]?.el;
+    return {field:box(document.querySelector('#field')),dock:box(document.querySelector('#answerDock')),drop:drop&&box(drop),keys:[...document.querySelectorAll('#keyboard button')].filter(b=>b.offsetParent).map(box)};
   });
   assert.ok(fit.drop&&fit.field.height>=fit.drop.height&&fit.drop.top>=fit.field.top-1&&fit.drop.bottom<=fit.field.bottom+1,label+' live drop must fit: '+JSON.stringify(fit));
-  assert.ok(fit.field.bottom<=fit.dock.top+1,label+' input must not cover falling drops');
-  const keys=await page.locator('#keyboard [data-key]').evaluateAll(buttons=>buttons.map(b=>{const r=b.getBoundingClientRect();return {key:b.dataset.key,left:r.left,top:r.top,right:r.right,bottom:r.bottom};}));
+  assert.ok(apart(fit.field,fit.dock),label+' input must not cover falling drops: '+JSON.stringify({field:fit.field,dock:fit.dock}));
   const size=page.viewportSize();
-  if(allowScrollingKeyboard){
-    const keyboard=await page.locator('#keyboard').evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,clientHeight:el.clientHeight,scrollHeight:el.scrollHeight,overflowY:getComputedStyle(el).overflowY};});
-    assert.equal(keyboard.overflowY,'auto',label+' full kana keyboard explicitly scrolls vertically');
-    assert.ok(keyboard.clientHeight>0&&keyboard.scrollHeight>keyboard.clientHeight,label+' keyboard has bounded visible height and scrollable keys: '+JSON.stringify(keyboard));
-    assert.ok(keys.every(k=>k.left>=-1&&k.right<=size.width+1&&k.left>=keyboard.left-1&&k.right<=keyboard.right+1),label+' scrollable keys must fit horizontally: '+JSON.stringify(keys.filter(k=>k.left<-1||k.right>size.width+1||k.left<keyboard.left-1||k.right>keyboard.right+1)));
-    const last=page.locator('#keyboard [data-key]').last();
-    await last.evaluate(button=>button.scrollIntoView({block:'nearest',inline:'nearest'}));
-    await assertInViewport(page,'#keyboard [data-key]:last-child',label+' last scrollable key');
-    const reachable=await last.evaluate(button=>{const r=button.getBoundingClientRect(),k=document.querySelector('#keyboard').getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {top:r.top,bottom:r.bottom,keyboardTop:k.top,keyboardBottom:k.bottom,hit:hit===button||button.contains(hit)};});
-    assert.ok(reachable.top>=reachable.keyboardTop-1&&reachable.bottom<=reachable.keyboardBottom+1&&reachable.hit,label+' last key must be visible inside the keyboard and unobstructed after scrolling: '+JSON.stringify(reachable));
-    await page.locator('#keyboard').evaluate(el=>{el.scrollTop=0;});
-    await assertWholeViewport(page,label+' after keyboard scrolling');
-  }else{
-    assert.ok(keys.every(k=>k.left>=-1&&k.top>=-1&&k.right<=size.width+1&&k.bottom<=size.height+1),label+' keyboard keys must remain usable: '+JSON.stringify(keys.filter(k=>k.left<-1||k.top<-1||k.right>size.width+1||k.bottom>size.height+1)));
-  }
+  assert.equal(fit.keys.length,15,label+' shows the fifteen sound families');
+  assert.ok(fit.keys.every(k=>k.left>=-1&&k.top>=-1&&k.right<=size.width+1&&k.bottom<=size.height+1),label+' pad keys must remain usable: '+JSON.stringify(fit.keys));
+  assert.ok(fit.keys.every(k=>k.width>=36&&k.height>=36),label+' pad keys keep comfortable touch targets: '+JSON.stringify(fit.keys.map(k=>[k.width,k.height])));
   const layers=await page.evaluate(()=>{const spirit=getComputedStyle(document.querySelector('#fieldSpirit')),field=getComputedStyle(document.querySelector('#field'));return {visible:spirit.display!=='none'&&spirit.visibility!=='hidden',spirit:Number(spirit.zIndex),field:Number(field.zIndex)};});
   assert.ok(!layers.visible||layers.spirit<layers.field,label+' mascot must remain behind falling kana: '+JSON.stringify(layers));
 }
@@ -149,10 +145,9 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
     await assertGameFits(page,label+' playing');
     if(width===320)await screenshot(page,'smallest-portrait-playing');
     if(width===568)await screenshot(page,'smallest-landscape-playing');
-    const answer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]);
-    for(const key of answer)await page.locator('#keyboard [data-key="'+key+'"]').tap();
+    await tapCompose(page,await page.evaluate(()=>KanaRain.state.target.id));
     await page.waitForFunction(()=>KanaRain.state.correct===1);
-    assert.equal(await page.evaluate(()=>KanaRain.state.attempts),1,label+' touch keys submit exactly once');
+    assert.equal(await page.evaluate(()=>KanaRain.state.attempts),1,label+' a two-tap composition submits exactly once');
     await page.locator('#pauseBtn').tap();await assertPanelFits(page,'pauseOverlay',null,label+' pause');await assertFrozen(page);
     await page.locator('#pauseGardenBtn').tap();await assertPanelFits(page,'progressDialog','closeGarden',label+' paused progress');
     await page.locator('#closeGarden').tap();assert.equal(await page.locator('#pauseOverlay').isVisible(),true);
@@ -191,12 +186,11 @@ async function exerciseStableInput(errors){
     assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.facet==='form→sound'&&d.responseFormat==='romaji')),true);
     assert.equal(await page.locator('#scriptDialog').isVisible(),false,'mature reading items do not introduce another script');
     assert.equal(await page.locator('#keyboardModeBtn').isVisible(),false,'reading sessions expose no script-switch button');
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),true);
-    await assertGameFits(page,label+' mature romaji keyboard');
+    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('sound-pad')),true);
+    await assertGameFits(page,label+' mature romaji sound pad');
     await screenshot(page,width===320?'smallest-portrait-mature-romaji':'smallest-landscape-mature-romaji');
     await page.locator('#answer').fill('');
-    const touchAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);
-    for(const key of touchAnswer)await page.locator('#keyboard [data-key="'+key+'"]').tap();
+    await tapCompose(page,await page.evaluate(()=>KanaRain.state.target.id));
     await page.waitForFunction(()=>KanaRain.state.correct===1);
     const physicalAnswer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]);
     await page.locator('#answer').focus();await page.keyboard.type(physicalAnswer);
@@ -204,7 +198,7 @@ async function exerciseStableInput(errors){
     assert.equal(await page.evaluate(()=>KanaRain.state.attempts),2,'physical typing and touch romaji each submit once');
     assert.match(await page.locator('#inputFormat').textContent(),/romaji/i);
     assert.equal(await page.locator('#scriptDialog').isVisible(),false);
-    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('letters')),true);
+    assert.equal(await page.locator('#keyboard').evaluate(el=>el.classList.contains('sound-pad')),true);
     await finishSession(page);
 
 
@@ -235,12 +229,11 @@ async function exerciseQuickWins(errors){
   assert.equal(await page.evaluate(()=>KanaAudio.enabled),true);
   await page.locator('#startBtn').click();await readyToPlay(page);
   await page.locator('#keyboardBtn').click();
-  // Keyboard buttons activate through their native click behavior for Enter and Space.
+  // Sound pad buttons activate through their native click behavior for Enter and Space.
   for(const [index,keyName] of ['Enter','Space'].entries()){
     await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
-    const answer=await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]);
-    assert.equal(answer.length,1);
-    const key=page.locator('#keyboard [data-key="'+answer+'"]');await key.focus();await key.press(keyName);
+    const path=await page.evaluate(()=>KanaRain.padPath(KanaRain.state.target.id));
+    for(const selector of ['[data-family="'+path.family+'"]','[data-slot="'+path.slot+'"]']){const key=page.locator('#keyboard '+selector);await key.focus();await key.press(keyName);}
     await page.waitForFunction(n=>KanaRain.state.correct===n,index+1);
     assert.equal(await page.evaluate(()=>KanaRain.state.attempts),index+1,'native key activation submits once');
   }
@@ -462,10 +455,9 @@ async function exerciseQuickWins(errors){
   assert.equal(await mobile.evaluate(()=>KanaRain.state.totalLives),3);
   await assertHeartsVisible(mobile,'Mobile');
   if(!await mobile.locator('#keyboard').isVisible())await mobile.locator('#keyboardBtn').tap();
-  const touch=await mobile.evaluate(()=>JPData.kanaById[KanaRain.state.drops[0].id].romaji);
-  for(const c of touch)await mobile.locator('#keyboard [data-key="'+c+'"]').tap();
-  assert.equal(await mobile.evaluate(()=>KanaRain.state.correct),1);
-  await assertWholeViewport(mobile,'Mobile gameplay with touch keyboard');
+  await tapCompose(mobile,await mobile.evaluate(()=>KanaRain.state.drops[0].id));
+  await mobile.waitForFunction(()=>KanaRain.state.correct===1);
+  await assertWholeViewport(mobile,'Mobile gameplay with the sound pad');
   await mobile.waitForFunction(()=>KanaRain.state.drops.length>0);
   await screenshot(mobile,'mobile-playing');
   await mobile.locator('#progressBtn').tap();await assertFrozen(mobile);
@@ -488,7 +480,8 @@ async function exerciseQuickWins(errors){
   const dock=await mobile.locator('#answerDock').boundingBox(),field=await mobile.locator('#field').boundingBox();
   await screenshot(mobile,'landscape-playing');
   assert.ok(dock&&field&&dock.y>=0&&dock.y+dock.height<=390+1,'Landscape input dock must remain in the viewport');
-  assert.ok(field.height>=80&&field.y+field.height<=dock.y+1,'Landscape drops must have visible room above the input dock: '+JSON.stringify({field,dock}));
+  const box=r=>({left:r.x,top:r.y,right:r.x+r.width,bottom:r.y+r.height});
+  assert.ok(field.height>=80&&apart(box(field),box(dock)),'Landscape drops must have visible room beside the sound pad: '+JSON.stringify({field,dock}));
   const dropFit=await mobile.evaluate(()=>{
     const field=document.querySelector('#field').getBoundingClientRect(),d=KanaRain.state.drops[0],rect=d.el.getBoundingClientRect();
     return {field:{top:field.top,bottom:field.bottom,height:field.height},drop:{top:rect.top,bottom:rect.bottom,height:rect.height}};

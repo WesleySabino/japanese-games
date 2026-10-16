@@ -1,5 +1,14 @@
 # Kana Rain releases
 
+## 1.6.0 — 2026-10-16
+
+- Replace the three-row touch QWERTY with the sound pad: 15 fixed sound families, then that family's sounds in the same box. All 208 forms take two taps; yōon and final n have their own slots; homophones resolve to the chosen row.
+- Compositions submit immediately, without the `n` wait. Unmatched compositions are mistakes for the drop highlighted when they began. Short pointer bounces after a stage change are ignored; sliding off a button cancels it.
+- Shrink the touch dock from about 260–290 px to 160–192 px in portrait and move it beside the rain in short landscape. Measured fall distance: 320×568 2 → 118 px, 390×844 197 → 326 px, 568×320 5 → 135 px, 844×390 3 → 187 px.
+- Never focus the answer field on a phone while the pad is open; the keyboard button opts into the device keyboard. Physical typing, Enter, the 300 ms `n` wait for typing, pause, audio, offline play, hearts, timer and rain curve are unchanged.
+- Record `inputMethod` (`composer`/`typing`) on new attempts only. Earlier history, rows, records and novelty state are untouched.
+- The service-worker cache name changes to identify the release; learner storage is not reset.
+
 ## 1.5.0 — 2026-10-14
 
 - Keep Hiragana and Katakana with romaji input; remove the other playable modes and the alternate session style from runtime and menus.

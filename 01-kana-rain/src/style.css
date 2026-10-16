@@ -123,16 +123,22 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .answer-bar #keyboardBtn { flex-basis:35px; border-color:transparent; background:transparent; color:#d2c697; font-size:23px; }
 .input-note { margin:14px 0 0; text-align:center; color:#eee0be; font-size:11px; line-height:1.4; letter-spacing:1px; text-shadow:0 2px 8px #062027; }
 .input-note::before,.input-note::after { content:""; display:inline-block; height:1px; width:27px; margin:0 12px 3px; background:#c9ac7170; }
-.touch-keyboard { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; max-height:220px; overflow-y:auto; padding:12px 0 0; overscroll-behavior:contain; }
-.touch-keyboard.letters { display:flex; flex-direction:column; gap:7px; }
-.keyboard-row { display:flex; justify-content:center; gap:7px; }
-.keyboard-row button { flex:0 1 calc((100% - 63px) / 10); min-width:0; }
-.keyboard-actions { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:0 3%; }
-.touch-keyboard.letters .keyboard-actions button { grid-column:auto; font-family:var(--display-font); font-size:21px; }
-.touch-keyboard button { min-height:43px; padding:7px 1px; font-family:var(--kana-font); font-size:23px; --frame-fill:#082a31e8; }
-.touch-keyboard.letters button { font-family:var(--display-font); font-size:23px; }
-.touch-keyboard .wide { grid-column:span 2; font:14px "Segoe UI",sans-serif; }
-.touch-keyboard.letters .wide { grid-column:span 5; }
+/* Sound pad: three fixed rows of families; the chosen family's sounds replace them in the same box. */
+.touch-keyboard { --pad-key:48px; --pad-gap:6px; padding-top:8px; container:pad / inline-size; touch-action:manipulation; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.pad-families,.pad-sounds { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:var(--pad-gap); }
+.pad-families { grid-template-rows:repeat(3,var(--pad-key)); }
+.pad-sounds { grid-template-rows:repeat(2,calc((3 * var(--pad-key) + var(--pad-gap)) / 2)); }
+.sound-pad[data-stage="family"] .pad-sounds,.sound-pad[data-stage="sound"] .pad-families { display:none; }
+/* Type scales with the pad width, so the same labels fit a 250px landscape pad and a 650px desktop one. */
+.touch-keyboard button { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; min-height:0; padding:2px; font-family:var(--display-font); font-size:min(21px,7.4cqw); line-height:1.05; letter-spacing:.3px; --frame-fill:#082a31e8; touch-action:manipulation; }
+.pad-main { font-size:min(21px,7.4cqw); line-height:1; }
+.pad-alt { margin-top:2px; color:#e4d4aa; font:600 min(11px,4cqw)/1 "Segoe UI",sans-serif; letter-spacing:.6px; }
+.pad-word { font-size:min(15px,4.9cqw); letter-spacing:.2px; }
+.pad-sounds .vowel { font-size:min(27px,8cqw); --frame-fill:#0e3a40f0; }
+.pad-sounds .yoon,.pad-sounds .final-n { font-size:min(21px,6.6cqw); }
+.pad-sounds .pad-back { color:var(--gold-bright); font:600 min(13px,4.6cqw) "Segoe UI",sans-serif; letter-spacing:.3px; --frame-fill:#05222ad8; }
+.touch-keyboard button:disabled { opacity:.2; cursor:default; }
+.touch-keyboard button:active:not(:disabled) { --frame-fill:#1f5a60f2; border-color:var(--gold-bright); color:#fff8e4; }
 .world-status { position:absolute; z-index:7; left:max(22px,env(safe-area-inset-left)); bottom:max(18px,env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:5px; color:#c7d4bb; font-size:10px; line-height:1.4; text-shadow:0 1px 6px #00212e; }
 .world-status .status::before { content:""; width:5px; height:5px; display:inline-block; margin-right:7px; border-radius:50%; background:#b5c78d; }
 .world-status p { margin:0; }
@@ -273,10 +279,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .answer-bar input::placeholder { font-size:18px; } .input-symbol { flex-basis:25px; font-size:23px; }
   .answer-bar button { min-height:46px; flex-basis:46px; font-size:26px; } .answer-bar #keyboardBtn { flex-basis:26px; font-size:21px; }
   .input-note { font-size:9px; margin-top:10px; letter-spacing:.4px; } .input-note::before,.input-note::after { display:none; }
-  .touch-keyboard { gap:5px; max-height:195px; padding-top:9px; } .touch-keyboard button { min-height:39px; font-size:21px; }
-  .touch-keyboard.letters button { font-size:19px; } .touch-keyboard .wide,.touch-keyboard.letters .wide { font-size:12px; }
-.touch-keyboard.letters { gap:5px; } .keyboard-row { gap:5px; } .keyboard-row button { flex-basis:calc((100% - 45px) / 10); }
-.keyboard-actions { gap:14px; } .touch-keyboard.letters .keyboard-actions button { font-size:19px; }
+  .touch-keyboard { --pad-key:46px; --pad-gap:5px; padding-top:6px; }
   .game-dialog { width:calc(100% - 28px); max-height:calc(var(--viewport-height) - 34px); }
   .dialog-panel { padding:29px 21px 23px; max-height:calc(var(--viewport-height) - 36px); } .panel-heading h2,.garden-dialog .panel-heading h2 { font-size:31px; }
   .dialog-close { right:-10px; top:-9px; } .mastery-map { gap:6px; max-height:min(33dvh,280px); }
@@ -294,7 +297,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .mode-plaque svg,.mode-plaque > span:first-child:not(#gameLabel) { display:none; }
   .utility-controls button,.hud-actions button { width:35px; } .hud-actions { right:42px; gap:6px; }
   .answer-bar input { font-size:18px; padding:7px; } .answer-bar input::placeholder { font-size:16px; }
-  .touch-keyboard.letters { gap:4px; } .touch-keyboard.letters button { font-size:17px; }
+  .touch-keyboard { --pad-gap:4px; }
 }
 @media (max-height:660px) and (min-width:761px) {
   .main-menu { width:370px; }
@@ -330,13 +333,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .answer-bar button { min-height:34px; flex-basis:40px; font-size:23px; }
   .answer-bar #keyboardBtn { flex-basis:25px; }
   .input-symbol { flex-basis:25px; font-size:21px; }
-  .touch-keyboard { padding-top:6px; gap:4px; max-height:140px; }
-  .touch-keyboard.letters { gap:4px; }
-  .keyboard-row { gap:4px; }
-  .keyboard-row button { flex-basis:calc((100% - 36px) / 10); }
-  .touch-keyboard button,.touch-keyboard.letters button { min-height:28px; padding:3px 1px; font-size:17px; line-height:20px; }
-  .touch-keyboard.letters .keyboard-actions button { min-height:30px; font-size:17px; line-height:20px; }
-  .has-keyboard .playfield { bottom:calc(var(--dock-height) + 12px); }
+  .touch-keyboard { --pad-key:36px; --pad-gap:4px; padding-top:4px; }
   .has-keyboard .drop { width:52px; height:64px; font-size:24px; padding-top:14px; }
   .has-keyboard .drop .hint { font-size:8px; margin-top:3px; }
 }
@@ -443,18 +440,15 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .session-selectors { min-height:50px; margin-top:18px; padding:8px 3px; }
   .menu-best { margin-top:10px; }
   .menu-hint { bottom:55px; font-size:11px; }
-  .has-keyboard .playfield { top:138px; bottom:calc(var(--dock-height) + 32px); }
+  .has-keyboard .playfield { top:138px; }
   .is-playing.has-keyboard #fieldSpirit { width:72px; height:72px; left:3%; bottom:calc(var(--dock-height) + 22px); }
   .has-keyboard .drop { width:90px; height:112px; font-size:33px; padding-top:24px; }
-  .has-keyboard .touch-keyboard { gap:4px; padding-top:8px; max-height:160px; }
-  .has-keyboard .keyboard-row { gap:4px; }
-  .has-keyboard .touch-keyboard button { min-height:33px; padding:4px 1px; font-size:18px; line-height:22px; }
-  .has-keyboard .touch-keyboard.letters .keyboard-actions button { min-height:38px; font-size:18px; }
-  .has-keyboard .answer-bar input { height:40px; font-size:18px; }
-  .has-keyboard .answer-bar button { min-height:40px; }
+  .touch-keyboard { --pad-key:42px; --pad-gap:4px; padding-top:5px; }
 }
 @container game (max-width:760px) and (max-height:600px) {
-  .has-keyboard .drop { width:80px; height:100px; font-size:30px; padding-top:22px; }
+  .has-keyboard .drop { width:72px; height:90px; font-size:28px; padding-top:20px; }
+  .has-keyboard .drop .hint { font-size:11px; margin-top:5px; }
+  .touch-keyboard { --pad-key:40px; }
 }
 @container game (max-height:480px) {
   .answer-guidance { position:absolute; bottom:calc(100% + 4px); left:0; width:100%; min-height:17px; margin:0; }
@@ -471,7 +465,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 @container game (min-width:740px) and (max-height:480px) {
   .drop,.has-keyboard .drop { width:66px; height:82px; font-size:28px; padding-top:18px; }
 }
-/* Short landscape puts the keyboard beside the answer, preserving a falling lane. */
+/* Short landscape keeps a compact HUD; the sound pad moves beside the rain (see the end of this file). */
 @container game (min-width:480px) and (max-height:360px) {
   .title-screen { padding-top:16px; padding-bottom:12px; }
   .game-title { font-size:39px; }
@@ -493,18 +487,6 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .playfield,.has-keyboard .playfield { top:78px; bottom:calc(var(--dock-height) + 12px); }
   .drop,.has-keyboard .drop { width:52px; height:64px; font-size:24px; padding-top:14px; }
   .drop .hint { font-size:8px; margin-top:3px; }
-  .has-keyboard .answer-dock { display:grid; grid-template-columns:minmax(165px,.7fr) minmax(0,1.3fr); gap:8px; align-items:center; }
-  .has-keyboard .answer-bar { grid-column:1; grid-row:1; padding:5px; gap:5px; }
-  .has-keyboard .answer-bar input { height:34px; font-size:17px; padding:4px 5px; }
-  .has-keyboard .answer-bar input::placeholder { font-size:14px; }
-  .has-keyboard .answer-bar button { min-height:34px; flex-basis:31px; font-size:21px; }
-  .has-keyboard .answer-bar #keyboardBtn { flex-basis:24px; }
-  .has-keyboard .input-symbol { display:none; }
-  .has-keyboard .touch-keyboard { grid-column:2; grid-row:1; padding-top:0; max-height:134px; gap:4px; }
-  .has-keyboard .keyboard-row { gap:4px; }
-  .has-keyboard .touch-keyboard button { min-height:28px; padding:3px 1px; font-size:17px; line-height:20px; }
-  .has-keyboard .touch-keyboard.letters .keyboard-actions button { min-height:30px; font-size:17px; }
-  .has-keyboard .input-note { display:none; }
   .feedback { top:78px; }
   .milestone-feedback { top:auto; bottom:calc(var(--dock-height) + 28px); }
 }
@@ -557,4 +539,32 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 @container game (max-width:350px) {
   .game-title { font-size:40px; white-space:nowrap; }
   .title-subtitle { font-size:12px; }
+}
+
+/* Sound pad dock: one slim answer line above the pad, with the rain reaching down to it. */
+@container game (max-width:760px) or (max-height:480px) {
+  .has-keyboard .answer-guidance,.has-keyboard .input-note,.has-keyboard .input-symbol,.has-keyboard #submitBtn { display:none; }
+  .has-keyboard .answer-dock { bottom:max(10px,env(safe-area-inset-bottom)); }
+  .has-keyboard .answer-bar { padding:4px 4px 4px 6px; gap:4px; }
+  .has-keyboard .answer-bar input { height:30px; padding:2px 8px; font-size:16px; text-overflow:ellipsis; }
+  .has-keyboard .answer-bar input::placeholder { font-size:13px; letter-spacing:.2px; }
+  .has-keyboard .answer-bar button { min-height:30px; }
+  .has-keyboard .answer-bar #keyboardBtn { flex-basis:40px; }
+  .has-keyboard .answer-bar #keyboardBtn svg { width:21px; height:21px; }
+  .has-keyboard .playfield { bottom:calc(var(--dock-height) + max(10px,env(safe-area-inset-bottom)) + 4px); }
+}
+/* Short landscape: the same pad sits beside the rain, so drops keep nearly the full height. */
+@container game (min-width:480px) and (max-height:480px) {
+  .has-keyboard .answer-dock { left:auto; right:max(12px,env(safe-area-inset-right)); bottom:max(8px,env(safe-area-inset-bottom)); width:min(46cqw,340px); transform:none; }
+  .has-keyboard .playfield { left:max(12px,env(safe-area-inset-left)); right:calc(min(46cqw,340px) + max(12px,env(safe-area-inset-right)) + 10px); bottom:max(8px,env(safe-area-inset-bottom)); }
+  .touch-keyboard { --pad-key:40px; --pad-gap:4px; padding-top:5px; }
+}
+/* Very short portrait (a small phone with browser toolbars): a compact HUD and pad keep a visible fall. */
+@container game (max-width:479px) and (max-height:520px) {
+  .stat { padding-top:3px; padding-bottom:3px; --hud-stat-size:22px; } .stat small { font-size:9px; }
+  .has-keyboard .playfield { top:116px; }
+  .touch-keyboard { --pad-key:36px; --pad-gap:4px; padding-top:4px; }
+  .has-keyboard .drop { width:54px; height:66px; font-size:24px; padding-top:14px; }
+  .has-keyboard .drop .hint { font-size:8px; margin-top:3px; }
+  .is-playing.has-keyboard #fieldSpirit { display:none; }
 }

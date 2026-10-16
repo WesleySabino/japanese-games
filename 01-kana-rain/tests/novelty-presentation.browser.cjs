@@ -159,7 +159,8 @@ async function responsive(){
     }
     for(const control of layout.controls)if(control.width&&control.height)assert.ok(control.width>=32&&control.width<=64&&control.height>=32&&control.height<=64,label+' '+control.id+' retains compact usable controls');
     assert.ok(layout.field.top>=Math.max(layout.stats.bottom,layout.mode.bottom,layout.actions.bottom)-1,label+' HUD stays above falling kana');
-    assert.ok(layout.field.bottom<=layout.dock.top+1&&layout.field.height>0,label+' input preserves positive playfield');
+    const a=layout.field,b=layout.dock;
+    assert.ok((a.right<=b.left+1||a.left>=b.right-1||a.bottom<=b.top+1||a.top>=b.bottom-1)&&a.height>0,label+' input preserves positive playfield');
     assert.ok(layout.travel.every(drop=>drop.distance>0),label+' falling kana have positive travel, preserving urgency targeting: '+JSON.stringify(layout.travel));
     if(width>=1200){
       assert.ok(Math.abs(layout.mode.top-layout.stat.top)<=2&&Math.abs(layout.actions.top-layout.stat.top)<=2,label+' desktop HUD shares its top row');

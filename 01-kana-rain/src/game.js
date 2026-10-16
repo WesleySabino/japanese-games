@@ -10,6 +10,16 @@
   // The saved novelty pace is authoritative: old rain difficulty must not change it.
   const difficultyForPace=id=>Object.keys(R.profiles).find(key=>R.profiles[key].pace===id)||'easy';
   let cfg={mode:'hira',duration:180,difficulty:difficultyForPace(N.profile(novelty).id),playStyle:'arcade',noveltyPace:N.profile(novelty).id}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
+  // Sound pad: a fixed grid of consonant families, replaced in place by that family's sounds.
+  // Cells come from the catalogue, so each of the 104 readings per script has exactly one two-tap path.
+  // [family, name, main letter, other spellings in the row]
+  const PAD_FAMILIES=[['a','Vowels'],['k','K'],['s','S/SH','S','SH'],['t','T/CH/TS','T','CH TS'],['n','N'],['h','H/F','H','F'],['m','M'],['y','Y'],['r','R'],['w','W'],['g','G'],['z','Z/J','Z','J'],['d','D'],['b','B'],['p','P']];
+  const PAD_SLOTS=['a','i','u','e','o','ya','yu','yo','n'],PAD_BOUNCE_MS=70;
+  const padKey=k=>k.row==='nn'?['n','n']:k.kind==='yoon'?[k.row[0],'y'+k.col]:[k.row,k.col];
+  const padCells={};
+  D.kana.filter(k=>k.script==='hiragana').forEach(k=>{const [family,slot]=padKey(k);(padCells[family]||(padCells[family]={}))[slot]={family,slot,reading:k.romaji,row:k.row,col:k.col};});
+  function padPath(id){const k=D.kanaById[id]||D.kanaByChar[id];if(!k)return null;const [family,slot]=padKey(k);return padCells[family]?.[slot]||null;}
+  let padFamily=null,padTarget=null,padChangedAt=-Infinity;
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
   const panelOrigins=new Map();
@@ -27,7 +37,12 @@
   }
   function invalidateProgress(){progressDirty=true;renderProgress();}
   function renderProgress(force=false){if(force||progressDirty&&$('progressDialog').open){renderMap();renderUnlocks(mapScript);renderLearningStats();progressDirty=false;}}
-  function focusAnswer(){if(!running() || G.paused || G.countingDown)return;$('answer').inputMode=mobile()&&keyboardOpen?'none':'text';$('answer').focus({preventScroll:true});}
+  function focusAnswer(){
+    if(!running() || G.paused || G.countingDown)return;
+    // With the sound pad open on a phone, never focus the field: no native keyboard can open unasked.
+    if(mobile()&&keyboardOpen){$('answer').inputMode='none';$('answer').blur();return;}
+    $('answer').inputMode='text';$('answer').focus({preventScroll:true});
+  }
   function closeDialogs(){document.querySelectorAll('dialog.game-dialog[open]').forEach(d=>d.close());}
   function openPanel(id){
     const current=document.querySelector('dialog[open]');
@@ -194,7 +209,7 @@
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
     $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana'}[cfg.mode]);
     $('personalBest').textContent=(G.reviewIds?'Review best · ':'Best · ')+G.previousBest;
-    $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();keyboard();focusAnswer();
+    $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();resetPad();keyboard();focusAnswer();
     fitField();initializeRounds();syncAnimationState();wakeLoop();
   }
   function initializeRounds(){
@@ -255,7 +270,7 @@
     const d={...round,...view,hint:view.hint||prior.assisted,roundId:`${G.sessionId}:r:${++G.roundSerial}`,attemptCount:0,assistanceReasons:new Set([...(view.hint?['initial-reading']:[]),...(prior.assisted?prior.reasons:[])]),firstResponseMs:null,x,y:8,progress:0,w,h,wrong:0,v:1,born:performance.now(),pausedMs:0};
     d.isIntroduction=isIntroduction;
     if(isIntroduction){N.markSeen(novelty,d.id);if(!starter(d.id))G.newIds.add(d.id);G.familiarSinceIntroduction=0;}
-    G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);if(G.target)keyboard();return d;
+    G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);return d;
   }
   function place(d){d.el.style.transform=`translate(${d.x}px,${d.y}px)`;}
   function positionDrop(d,H=fieldSize.height){
@@ -305,11 +320,12 @@
   function updateTarget(){
     const t=lowest();if(t===G.target)return;
     G.target?.el.classList.remove('target');G.target=t;t?.el.classList.add('target');
-    $('answer').placeholder='Type the sound here…';
+    // The pad never changes with the drops; only the shared guidance is refreshed.
+    renderPadPrompt();
     $('inputScript').textContent='a';
     $('inputFormat').textContent='Type romaji';
     $('targetHint').textContent='Any drop · highlighted first';
-    $('inputNote').textContent='Answers flow automatically. Enter to submit.';keyboard();
+    $('inputNote').textContent='Answers flow automatically. Enter to submit.';
   }
   function score(round,response){return [{...response,itemId:round.id,facet:round.facet||FACET,responseFormat:round.responseFormat||'romaji',gameId:GAME}];}
   function record(d,correct,detail={}){
@@ -333,7 +349,7 @@
   function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
   function remove(d,pop=false){if(G.pendingAnswer?.drop===d)G.pendingAnswer=null;dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
   function hit(d){
-    const ev=record(d,true,{response:d.submittedResponse,reason:'accepted'});G.streak=d.wrong?0:G.streak+1;G.score+=Math.round((ev.assistance?5:10)*(1+Math.min(G.streak,10)*.1)*(d.wrong?.3:1));
+    const ev=record(d,true,{response:d.submittedResponse,reason:'accepted',inputMethod:d.submittedMethod});G.streak=d.wrong?0:G.streak+1;G.score+=Math.round((ev.assistance?5:10)*(1+Math.min(G.streak,10)*.1)*(d.wrong?.3:1));
     G.bestStreak=Math.max(G.bestStreak,G.streak);
     playReading(d.id,'answer-feedback');
     flash(`${symbol(d.id)} · ${D.kanaById[d.id].romaji} ✓`,false,1000,0,()=>exposeReading(d.id,'answer-feedback'));
@@ -347,16 +363,16 @@
     const k=D.kanaById[d.id],options=D.kana.filter(x=>x.script===k.script&&x.id!==d.id&&[x.romaji,...x.alt].includes(text));
     return {chosenItemId:options.length===1?options[0].id:null,candidateItemIds:options.map(x=>x.id),reason:options.length>1?'ambiguous-reading':options.length?'different-item':/[ぁ-ヿ]/.test(text)?'wrong-response-format':'unrecognized-response'};
   }
-  function wrong(d,text){
+  function wrong(d,text,method='typing'){
     const k=D.kanaById[d.id],detail=confusionFor(d,text),chosen=D.kanaById[detail.chosenItemId];
-    record(d,false,{...detail,response:text});G.mistakes.add(d.id);d.wrong++;d.v=Math.min(2.2,d.v*1.45);d.el.classList.add('stained');G.streak=0;spirit('worried');
-    flash(`${symbol(d.id)} = ${k.romaji}. You typed ${text}${chosen?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
+    record(d,false,{...detail,response:text,inputMethod:method});G.mistakes.add(d.id);d.wrong++;d.v=Math.min(2.2,d.v*1.45);d.el.classList.add('stained');G.streak=0;spirit('worried');
+    flash(`${symbol(d.id)} = ${k.romaji}. You ${method==='composer'?'chose':'typed'} ${text}${chosen?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
     if(chosen && (G.reviewIds||candidates()).includes(chosen.id)){G.confs.add(d.id+'|'+chosen.id);G.queue=G.queue.filter(e=>e.id!==d.id && e.id!==chosen.id);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id,partner:chosen.id});}
     else G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
   }
   function miss(d){
     if(G.over||!G.drops.includes(d))return;record(d,null,{outcome:'timeout',reason:'timeout'});G.missed.add(d.id);G.lives--;G.streak=0;
-    G.pendingAnswer=null;$('answer').value='';
+    G.pendingAnswer=null;$('answer').value='';resetPad();
     flash(`Lost a heart. ${symbol(d.id)} = ${D.kanaById[d.id].romaji}.`,true,3500,4,()=>exposeReading(d.id,'timeout-feedback'));
     playReading(d.id,'timeout-feedback');
     clearTimeout(heartTimer);document.body.classList.remove('heart-hit');void $('heartLoss').offsetWidth;document.body.classList.add('heart-hit');$('heartLoss').classList.remove('hidden');
@@ -373,9 +389,26 @@
       }
     });
   }
-  function submitMatchedAnswer(drop,value){
-    G.pendingAnswer=null;drop.submittedResponse=value;$('answer').value='';hit(drop);
+  function submitMatchedAnswer(drop,value,method='typing'){
+    G.pendingAnswer=null;drop.submittedResponse=value;drop.submittedMethod=method;$('answer').value='';hit(drop);
   }
+  // A completed composition is a deliberate answer, like Enter: it never waits for a longer reading.
+  function submitComposed(cell){
+    const v=cell.reading,ordered=[...G.drops].sort((a,b)=>b.y-a.y);
+    // The exact cell settles homophones (じ/ぢ, ず/づ, お/を); any drop with the same accepted sound still counts.
+    const match=ordered.find(d=>{const k=D.kanaById[d.id];return k.row===cell.row&&k.col===cell.col;})||ordered.find(d=>accepted(d).includes(v));
+    const target=padTarget&&G.drops.includes(padTarget)?padTarget:lowest();
+    resetPad();G.pendingAnswer=null;$('answer').value='';
+    if(match)submitMatchedAnswer(match,v,'composer');
+    else if(target)wrong(target,v,'composer');
+  }
+  function choosePadFamily(id){
+    if(!padCells[id])return;
+    if(G.inputStartedAt==null){G.inputStartedAt=performance.now();G.inputPausedMs=0;}
+    // An unmatched composition belongs to the drop that was highlighted when it began.
+    padFamily=id;padTarget=G.target;padChangedAt=performance.now();renderPad();
+  }
+  function resetPad(){if(padFamily)padChangedAt=performance.now();padFamily=null;padTarget=null;renderPad();}
   function completePendingAnswer(){
     const pending=G.pendingAnswer;G.pendingAnswer=null;
     if(pending&&!composing&&normalize($('answer').value)===pending.value&&G.drops.includes(pending.drop))submitMatchedAnswer(pending.drop,pending.value);
@@ -391,7 +424,7 @@
       else G.pendingAnswer={drop:match,value:v,remaining:.3};
       return;
     }
-    if(force){const t=lowest();if(t)wrong(t,v);$('answer').value='';$('answer').classList.add('bad');setTimeout(()=>$('answer').classList.remove('bad'),300);}
+    if(force){const t=lowest();if(t)wrong(t,v,'typing');$('answer').value='';$('answer').classList.add('bad');setTimeout(()=>$('answer').classList.remove('bad'),300);}
   }
   function hud(){
     statText('score',String(G.score).padStart(3,'0'));statText('streak',G.streak>1?'×'+G.streak:'—');
@@ -411,7 +444,7 @@
     G.last=performance.now();
     if(value)stopLoop();syncAnimationState();
   }
-  function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.pendingAnswer=null;G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}syncAnimationState();L.flush();}
+  function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.pendingAnswer=null;G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}resetPad();syncAnimationState();L.flush();}
   function end(reason,completionReason='manual_finish'){
     if(!G||G.over)return;
     const key=G.bestKey,firstCorrect=G.events.filter(e=>e.firstAttempt&&e.correct),expired=G.events.filter(e=>e.outcome==='timeout');
@@ -433,16 +466,30 @@
   }
   function keyboard(){
     $('keyboard').classList.toggle('hidden',!keyboardOpen);$('keyboardBtn').setAttribute('aria-expanded',keyboardOpen);
+    $('keyboardBtn').setAttribute('aria-label',keyboardOpen?'Use the device keyboard':'Show the sound pad');
+    $('keyboardBtn').querySelector('use')?.setAttribute('href',keyboardOpen?'#icon-keyboard':'#icon-pad');
     document.body.dataset.keyboard=String(keyboardOpen);document.body.classList.toggle('has-keyboard',keyboardOpen);
     $('answer').inputMode=mobile()&&keyboardOpen?'none':'text';
-    if(!keyboardOpen)return;
-    $('keyboard').classList.add('letters');
-    if(keyboardSignature==='romaji')return;keyboardSignature='romaji';
-    const activeKey=$('keyboard').contains(document.activeElement)?document.activeElement.dataset.key:null;
-    const key=c=>`<button type="button" data-key="${escapeText(c)}">${escapeText(c)}</button>`;
-    const actions='<button type="button" class="wide" data-key="backspace">Delete</button><button type="button" class="wide" data-key="enter">Enter ↵</button>';
-    $('keyboard').innerHTML=['qwertyuiop','asdfghjkl',"zxcvbnm'"].map(row=>'<div class="keyboard-row">'+row.split('').map(key).join('')+'</div>').join('')+'<div class="keyboard-actions">'+actions+'</div>';
-    if(activeKey)[...$('keyboard').querySelectorAll('[data-key]')].find(b=>b.dataset.key===activeKey)?.focus({preventScroll:true});
+    if(keyboardOpen&&keyboardSignature!=='sound-pad'){
+      // Built once: both stages keep fixed positions and never depend on the falling kana.
+      keyboardSignature='sound-pad';
+      const face=([,name,main,alt])=>main?`<span class="pad-main">${main}</span><span class="pad-alt">${alt}</span>`:name.length>1?`<span class="pad-word">${name}</span>`:`<span class="pad-main">${name}</span>`;
+      const families=PAD_FAMILIES.map(f=>`<button type="button" data-family="${f[0]}" aria-label="${f[1]} family">${face(f)}</button>`).join('');
+      const slots=PAD_SLOTS.map(slot=>`<button type="button" data-slot="${slot}" class="${slot==='n'?'final-n':slot.length>1?'yoon':'vowel'}" disabled aria-hidden="true"></button>`).join('');
+      $('keyboard').innerHTML=`<div class="pad-families" role="group" aria-label="Sound families">${families}</div><div class="pad-sounds" role="group" aria-label="Sounds in the chosen family">${slots}<button type="button" class="pad-back" data-pad="back" aria-label="Back to the sound families">‹ Back</button></div>`;
+    }
+    renderPad();
+  }
+  function renderPadPrompt(){
+    const label=PAD_FAMILIES.find(f=>f[0]===padFamily)?.[1];
+    $('answer').placeholder=!keyboardOpen?'Type the sound here…':label?label+' → choose the sound':'Family → sound · any drop';
+  }
+  function renderPad(){
+    renderPadPrompt();
+    const pad=$('keyboard');pad.dataset.stage=padFamily?'sound':'family';
+    if(keyboardSignature!=='sound-pad')return;
+    const cells=padCells[padFamily]||{};
+    pad.querySelectorAll('[data-slot]').forEach(b=>{const cell=cells[b.dataset.slot];textIfChanged(b,cell?cell.reading:'');b.disabled=!cell;b.setAttribute('aria-hidden',String(!cell));});
   }
   function renderEffects(){document.body.classList.toggle('reduce-effects',!!gd.reducedEffects);$('effectsBtn').setAttribute('aria-pressed',!!gd.reducedEffects);$('effectsBtn').textContent='Reduced effects: '+(gd.reducedEffects?'On':'Off');}
   $('startBtn').onclick=$('againBtn').onclick=start;
@@ -461,8 +508,17 @@
   $('pauseBtn').onclick=()=>pause();$('resumeBtn').onclick=()=>pause(false);$('finishBtn').onclick=()=>end('Session finished');
   $('answerForm').onsubmit=e=>{e.preventDefault();onInput(true);};$('answer').oninput=()=>onInput();
   $('answer').oncompositionstart=()=>{composing=true;if(G)G.pendingAnswer=null;if(G?.inputStartedAt==null&&!G?.paused&&running()){G.inputStartedAt=performance.now();G.inputPausedMs=0;}};$('answer').oncompositionend=()=>{composing=false;onInput();};
-  $('keyboardBtn').onclick=()=>{keyboardOpen=!keyboardOpen;keyboard();if(keyboardOpen)$('answer').blur();else focusAnswer();};
-  $('keyboard').onclick=e=>{const b=e.target.closest('[data-key]');if(!b)return;if(!G||G.over||G.paused)return;const key=b.dataset.key;if(key==='enter')onInput(true);else{$('answer').value=key==='backspace'?$('answer').value.slice(0,-1):$('answer').value+key;onInput();}};
+  $('keyboardBtn').onclick=()=>{keyboardOpen=!keyboardOpen;if(!keyboardOpen)resetPad();keyboard();if(keyboardOpen)$('answer').blur();else focusAnswer();};
+  $('keyboard').onclick=e=>{
+    const b=e.target.closest('[data-family],[data-slot],[data-pad]');
+    if(!b||b.disabled||!running()||G.paused||G.countingDown)return;
+    // A pointer click a few frames after the stage changed is a bounce or ghost tap, not a choice.
+    if(e.detail>0&&performance.now()-padChangedAt<PAD_BOUNCE_MS)return;
+    // Each press only acts in its own stage, so a stale press can never skip a step.
+    if(b.dataset.family){if(!padFamily)choosePadFamily(b.dataset.family);}
+    else if(b.dataset.slot){const cell=padCells[padFamily]?.[b.dataset.slot];if(cell)submitComposed(cell);}
+    else if(b.dataset.pad==='back'&&padFamily)resetPad();
+  };
   $('gardenBtn').onclick=$('progressBtn').onclick=$('pauseGardenBtn').onclick=()=>openPanel('progressDialog');
   $('closeGarden').onclick=$('returnGarden').onclick=()=>closePanel('progressDialog');
   $('settingsBtn').onclick=$('pauseSettingsBtn').onclick=()=>openPanel('settingsDialog');
@@ -512,5 +568,5 @@
   }).catch(()=>$('offlineStatus').textContent='Offline setup unavailable in this browser.');}
   else $('offlineStatus').textContent='Offline setup is unavailable in this browser.';
   // Public module boundary for the future minigame shell and meaningful integration tests.
-  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','touch'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,difficultyProfiles:R.profiles,get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
+  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},difficultyProfiles:R.profiles,get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
 })();

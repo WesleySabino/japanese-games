@@ -70,5 +70,8 @@ jobs:
       - name: Run new kana pace browser checks
         run: pnpm run test:novelty-pace
 
+      - name: Run sound pad browser checks
+        run: pnpm run test:sound-pad
+
       - name: Build the static site
         run: pnpm build
