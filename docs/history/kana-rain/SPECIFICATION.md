@@ -2,7 +2,7 @@
 
 **Catalogue ID:** 01.
 **Status:** implemented; see also [README.md](../../../01-kana-rain/README.md).
-**Source:** [original brainstorm](../../../planejamento/brainstorm-minijogos-japones.md), section 1, game 1.
+**Source:** original brainstorm (`planejamento/brainstorm-minijogos-japones.md`, section 1, game 1). It was removed from this repository on 2026-10-15 and is available in the git history.
 
 The 14 fields below are an English translation of the complete original catalogue entry, including its examples, risks, and caveats. [REVIEW.md](./REVIEW.md) preserves the subsequent design review. The implementation was updated on 2026-10-09; see [README.md](../../../01-kana-rain/README.md) for current behavior and the [completed improvements](../../../01-kana-rain/LEARNING_IMPROVEMENTS.md) for verification.
 

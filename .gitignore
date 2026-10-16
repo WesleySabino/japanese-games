@@ -28,8 +28,6 @@ test-results/
 **/tests/artifacts/
 **/artifacts/
 **/output/
-curriculum-atlas/qa/
-planejamento/site/qa/
 *.log
 kana-rain-progress*.json
 

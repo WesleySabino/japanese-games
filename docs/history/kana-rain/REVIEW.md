@@ -1,6 +1,6 @@
 # 01 — Kana Rain Design Review
 
-**Basis:** [translated specification](./SPECIFICATION.md), [brainstorm](../../../planejamento/brainstorm-minijogos-japones.md), [game documentation](../../../01-kana-rain/README.md), and the current code in `src/`.
+**Basis:** [translated specification](./SPECIFICATION.md), the original brainstorm (`planejamento/`, removed on 2026-10-15 and kept in the git history), [game documentation](../../../01-kana-rain/README.md), and the current code in `src/`.
 **Historical assessment:** the review below records the gaps and proposals before the implementation update.
 
 **Implementation update — 2026-10-09:** Arcade is the main experience and default at the user's request; Steady practice remains available in Settings, and the player's chosen style is remembered. Evidence separates first attempts, assistance and timeouts, and corrections remain available during pauses. See the [current game documentation](../../../01-kana-rain/README.md) and the [completed improvements and verification](../../../01-kana-rain/LEARNING_IMPROVEMENTS.md). The original review below retains the historical recommendation to start in steady practice; the user's subsequent product decision sets Arcade as the default.
