@@ -22,7 +22,8 @@ async function context(viewport={width:1920,height:1080},pace){
   await ctx.addInitScript(({pace})=>{
     if(localStorage.getItem('new-kana-pace-fixture'))return;
     const at=1700000000000,chars=['あ','い','う','え','お'];
-    const recent=Array.from({length:60},(_,i)=>({roundId:'pace-seed:'+i,firstCorrect:i>=5,timeout:i<2}));
+    // Two expirations and four corrected rounds: only the corrections count as misses, closing Easy's 60-drop window.
+    const recent=Array.from({length:60},(_,i)=>({roundId:'pace-seed:'+i,firstCorrect:i>=6,timeout:i<2}));
     const attempts=recent.map((round,i)=>({attemptId:'pace-attempt:'+i,roundId:round.roundId,itemId:'kana:'+chars[i%5],facet:'form→sound',gameId:'kana-rain',at:at+i*1000,firstAttempt:true,assistance:false,correct:round.timeout?null:round.firstCorrect,outcome:round.timeout?'timeout':round.firstCorrect?'correct':'incorrect',reason:'synthetic-fixture'}));
     const exposures=chars.map((char,i)=>({exposureId:'pace-exposure:'+i,itemId:'kana:'+char,facet:'form→sound',gameId:'kana-rain',at:at+i,reason:'initial-reading'}));
     const novelty={version:1,seen:Object.fromEntries(chars.map(char=>['kana:'+char,true])),recent,blocked:!pace||pace==='calm'};

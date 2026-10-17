@@ -143,7 +143,7 @@
   function spirit(mood){clearTimeout(spiritTimer);$('fieldSpirit').className='spirit '+mood;spiritTimer=setTimeout(()=>$('fieldSpirit').className='spirit idle',900);}
   function renderDifficulty(){
     $('difficultySelect').value=cfg.difficulty;$('difficultySelect').disabled=!!running();
-    $('difficultyNote').textContent={easy:'New kana return more cautiously after missed drops.',normal:'A balanced return of new kana after missed drops.',hard:'New kana return sooner after missed drops.'}[cfg.difficulty];
+    $('difficultyNote').textContent={easy:'New kana return more cautiously after misreadings.',normal:'A balanced return of new kana after misreadings.',hard:'New kana return sooner after misreadings.'}[cfg.difficulty];
   }
   function changeDifficulty(id){
     if(running()||!Object.hasOwn(R.profiles,id))return;
@@ -203,7 +203,7 @@
     const reviewIds=Array.isArray(options.reviewIds)?[...new Set(options.reviewIds)].filter(id=>candidates().includes(id)):null;
     const sessionDuration=reviewIds?.length?60:cfg.duration,sessionBestKey=bestKey(sessionDuration,!!reviewIds?.length),now=performance.now();
     gd.difficulty=cfg.difficulty;L.flush();
-    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,bestKey:sessionBestKey,previousBest:gd.best[sessionBestKey]||0,bestBeaten:false,elapsed:0,lives:3,score:0,streak:0,bestStreak:0,correct:0,attempts:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
+    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,bestKey:sessionBestKey,previousBest:gd.best[sessionBestKey]||0,bestBeaten:false,elapsed:0,lives:3,score:0,streak:0,bestStreak:0,correct:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
@@ -291,7 +291,7 @@
       // Complete an exact prefix after a brief typing pause; active time freezes with play.
       if(G.pendingAnswer){G.pendingAnswer.remaining-=dt;if(G.pendingAnswer.remaining<=0)completePendingAnswer();}
       if(G.over||G.paused)return;
-      const weather=R.atTime(G.difficulty,G.elapsed);G.speed=weather.speed;G.gap=weather.gap;
+      const weather=R.atTime(G.difficulty,rainSeconds());G.speed=weather.speed;G.gap=weather.gap;
       if(!G.queue.length)refill();
       const cap=Math.min(R.profiles[G.difficulty].maxDrops,2+Math.floor(G.correct/8));
       if(G.drops.length<cap && G.sinceSpawn>G.gap && G.queue.length){
@@ -316,6 +316,10 @@
     }
     wakeLoop();
   }
+  // Adaptive rain: the shared curve reads an effective time that each correct answer advances
+  // and each expiration steps back, so the pace follows the player instead of the clock.
+  const RAIN_SECONDS_PER_HIT=1.6,RAIN_SECONDS_PER_EXPIRATION=20;
+  function rainSeconds(){return Math.max(0,G.correct*RAIN_SECONDS_PER_HIT-G.expirations*RAIN_SECONDS_PER_EXPIRATION);}
   function lowest(){return G?.drops.reduce((a,b)=>!a||b.y>a.y?b:a,null);}
   function updateTarget(){
     const t=lowest();if(t===G.target)return;
@@ -341,7 +345,8 @@
     const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
     if(detail.outcome!=='timeout'){stat.attempts++;if(correct)stat.correct++;}
     if(correct||detail.outcome==='timeout'){
-      N.finish(novelty,{roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout'});
+      // Earlier wrong answers make this a reading miss, unless the drop was the kana's debut.
+      N.finish(novelty,{roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout',miss:!d.isIntroduction&&!firstAttempt});
       if(!d.isIntroduction)G.familiarSinceIntroduction++;
     }
     L.flush();return ev;
@@ -371,7 +376,7 @@
     else G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
   }
   function miss(d){
-    if(G.over||!G.drops.includes(d))return;record(d,null,{outcome:'timeout',reason:'timeout'});G.missed.add(d.id);G.lives--;G.streak=0;
+    if(G.over||!G.drops.includes(d))return;record(d,null,{outcome:'timeout',reason:'timeout'});G.missed.add(d.id);G.lives--;G.expirations++;G.streak=0;
     G.pendingAnswer=null;$('answer').value='';resetPad();
     flash(`Lost a heart. ${symbol(d.id)} = ${D.kanaById[d.id].romaji}.`,true,3500,4,()=>exposeReading(d.id,'timeout-feedback'));
     playReading(d.id,'timeout-feedback');

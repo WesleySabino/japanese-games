@@ -1,6 +1,6 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** release 1.6.0, 16 October 2026.
+**Catalogue ID:** 01. **Baseline:** release 1.7.0, 17 October 2026.
 
 The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 
@@ -8,7 +8,7 @@ The [README](README.md) gives setup and current behavior. Original catalogue pro
 
 The title screen offers exactly two choices: Hiragana/Katakana and Easy/Normal/Hard. Both alphabets always use romaji. Any visible matching drop can be cleared; forced invalid submissions belong to the highlighted drop. Katakana retains the existing basic-Hiragana unlock requirement.
 
-Regular runs last three minutes, with three hearts on every difficulty. The existing Normal curve applies universally: 10-second initial falls, active-time acceleration capped at 3.5×. A drop expiring takes one heart and clears unfinished input; a wrong answer stains and accelerates its drop. Zero hearts ends the run. Score, streaks, pronunciation, celebrations, danger cues and reduced effects remain.
+Regular runs last three minutes, with three hearts on every difficulty. The existing Normal curve applies universally: 10-second initial falls, acceleration capped at 3.5×. The curve reads an effective time, not the clock: +1.6 seconds per correct answer, −20 seconds per expiration, never below zero. A drop expiring takes one heart and clears unfinished input; a wrong answer stains and accelerates its drop. Zero hearts ends the run. Score, streaks, pronunciation, celebrations, danger cues and reduced effects remain.
 
 Complete readings submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play; Enter submits immediately. Pauses and countdowns freeze simulation and pending answer delays. Ordinary pauses preserve partial input.
 
@@ -16,7 +16,7 @@ Touch input uses the sound pad: a fixed grid of 15 consonant families, then that
 
 ## Difficulty and new kana
 
-Difficulty selects recovery of first presentations after a pressure pause: Easy 55/60 (default), Normal 25/30, Hard 10/12. Two expirations in the selected window pause never-presented kana. Recovery requires the full window, the first-try hit target and at most one expiration. This is not a prerequisite before every debut; hearts and rain speed are identical across levels.
+Difficulty selects recovery of first presentations after a pressure pause: Easy 55/60 (default), Normal 25/30, Hard 10/12. Four misses — wrong first answers on kana seen before that drop — in the selected window pause never-presented kana; expirations alone do not. Recovery requires the full window, the first-try hit target and fewer than four misses. This is not a prerequisite before every debut; hearts and rain speed are identical across levels.
 
 Three completed familiar drops precede and separate nonstarter debuts. Each run allows at most two distinct nonstarter debuts and one debut on screen. Starter vowels bypass pressure, spacing and the two-debut budget but not the one-debut limit. First presentations and up to 60 completed outcomes persist across runs; earned rows remain eligible. See [exact admission rules](NOVELTY_BALANCE.md).
 

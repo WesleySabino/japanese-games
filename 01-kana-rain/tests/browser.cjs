@@ -493,7 +493,7 @@ async function exerciseQuickWins(errors){
   await mobile.locator('#resumeBtn').tap();
   await readyToPlay(mobile);
   await mobileContext.close();
-  // Every novelty difficulty shares a rain curve that accelerates with active time.
+  // Every novelty difficulty shares a rain curve that accelerates with correct answers, not active time.
   // Each expiration removes one of the universal three hearts.
   const difficultyContext=await gameContext();
   for(const [difficulty,hearts] of [['easy',3],['normal',3],['hard',3]]){
@@ -511,10 +511,13 @@ async function exerciseQuickWins(errors){
     const initial=await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap}));
     await level.evaluate(()=>{KanaRain.state.elapsed=90;});
     await level.waitForFunction(()=>KanaRain.state.elapsed>90);
-    const faster=await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap,correct:KanaRain.state.correct}));
-    assert.ok(faster.speed>initial.speed,difficulty+' accelerates without answers');
-    assert.ok(faster.gap<initial.gap,difficulty+' shortens the spawn interval over time');
-    assert.equal(faster.correct,0);
+    assert.deepEqual(await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap})),initial,difficulty+' does not accelerate with time alone');
+    await level.evaluate(()=>{KanaRain.state.correct=56;});
+    await level.waitForFunction(speed=>KanaRain.state.speed>speed,initial.speed);
+    const faster=await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap,expected:KanaDifficulty.atTime(KanaRain.state.difficulty,56*1.6)}));
+    assert.equal(faster.speed,faster.expected.speed,difficulty+' reads 56 correct answers as 89.6 s of the shared curve');assert.equal(faster.gap,faster.expected.gap);
+    assert.ok(faster.gap<initial.gap,difficulty+' shortens the spawn interval as answers accumulate');
+    await level.evaluate(()=>{KanaRain.state.correct=0;});
     for(let i=0;i<hearts;i++){
       await level.waitForFunction(()=>KanaRain.state.drops.length>0);
       await level.locator('#pauseBtn').click();
@@ -571,7 +574,7 @@ async function exerciseQuickWins(errors){
   await exerciseResponsiveMatrix(errors);
   await exerciseStableInput(errors);
   assert.deepEqual(errors,[]);
-  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, stable romaji for mature items, protected feedback/streak/best celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common time acceleration, offline shell and 104 kana recordings.');
+  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, stable romaji for mature items, protected feedback/streak/best celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common answer-driven acceleration, offline shell and 104 kana recordings.');
   await browser.close();
   server.kill();
 })().catch(async e=>{console.error(e);if(browser)await browser.close();if(server)server.kill();process.exitCode=1;});

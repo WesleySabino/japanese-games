@@ -1,6 +1,6 @@
 # Kana Rain
 
-**Release baseline: 1.6.0 — 16 October 2026.** See [release history](CHANGELOG.md).
+**Release baseline: 1.7.0 — 17 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
@@ -25,7 +25,7 @@ Open http://127.0.0.1:4173/. A different port can be supplied through `PORT`. No
 ## One arcade loop
 
 - Regular runs last **three minutes**. Every run starts with **three hearts**, including the one-minute mistake-review shortcut.
-- All difficulty levels share the former Normal rain curve: a 10-second initial fall, accelerating with active play time and capped at 3.5×. Pauses freeze the clock, falling drops and automatic-submit delay. Accuracy does not control rain speed.
+- All difficulty levels share the former Normal rain curve: a 10-second initial fall, capped at 3.5×. The curve follows the player, not the clock: each correct answer advances it by 1.6 seconds and each expiration steps it back 20 seconds, never below the opening pace. Pauses freeze the clock, falling drops and automatic-submit delay.
 - Each expired drop costs one heart, clears unfinished input and cancels any pending automatic answer. Losing all hearts ends the run. Wrong submissions stain and accelerate the affected drop without immediately taking a heart.
 - Type romaji in either alphabet. Any visible matching drop can be answered; forced invalid submissions and listening use the highlighted priority drop. Common alternate readings are accepted; copying the displayed kana is not a reading answer.
 - Complete answers submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play for another letter; stop typing to accept, or press Enter immediately. Continuing cancels the pending match. An exact answer entered before the waterline is protected during this short wait.
@@ -44,7 +44,7 @@ There is one selector. It changes when new kana resume after a rough streak; it 
 | Normal | 25 first-try hits in the latest 30 completed drops |
 | Hard | 10 first-try hits in the latest 12 completed drops |
 
-Two expirations in the selected window pause first presentations. Recovery needs the entire window, the selected hit target and at most one expiration. These targets apply **after a pause**, not before every debut. Assisted first-try hits count; corrected retries do not. History continues across runs and reloads, retaining up to 60 completed drops.
+Four misses in the selected window pause first presentations. A miss is a wrong first answer on a kana already seen before that drop; expirations alone never pause them. Recovery needs the entire window, the selected hit target and fewer than four misses. These targets apply **after a pause**, not before every debut. Assisted first-try hits count; corrected retries do not. History continues across runs and reloads, retaining up to 60 completed drops.
 
 Three familiar completions precede and separate nonstarter debuts. A run introduces at most two distinct nonstarter kana, with only one debut on screen. Each alphabet's five starter vowels bypass pressure, spacing and the two-debut budget, while retaining the one-debut-on-screen rule. All earned rows remain eligible for familiar play. See [exact rules and saved-data behavior](NOVELTY_BALANCE.md).
 

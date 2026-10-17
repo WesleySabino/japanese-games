@@ -47,7 +47,7 @@ test('difficulty choices vary novelty recovery while sharing three hearts and No
   }
 });
 
-test('active play time accelerates each difficulty and increases its spawn frequency',()=>{
+test('the shared curve accelerates each difficulty and increases its spawn frequency',()=>{
   for(const [id,rampSeconds] of [['easy',60],['normal',60],['hard',60]]){
     const initial=Difficulty.atTime(id,0),later=Difficulty.atTime(id,rampSeconds);
     assert.equal(later.fallSeconds,initial.fallSeconds/2,id+' doubles the fall speed after one ramp interval');

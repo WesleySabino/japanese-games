@@ -26,7 +26,7 @@ async function context(viewport={width:1920,height:1080},remoteName=false){
   await ctx.addInitScript(()=>{
     if(localStorage.getItem('novelty-presentation-fixture'))return;
     const seen=Object.fromEntries(['あ','い','う','え','お'].map(char=>['kana:'+char,true]));
-    const recent=Array.from({length:60},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<55,timeout:i>=58}));
+    const recent=Array.from({length:60},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<54,timeout:i>=58}));
     const saved={version:2,created:Date.now(),items:{},games:{'kana-rain':{rows:{hiragana:3,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,pace:'calm',seen,recent,blocked:true}}}};
     localStorage.setItem('jp-learner-v1',JSON.stringify(saved));
     localStorage.setItem('novelty-presentation-fixture','1');
@@ -83,18 +83,26 @@ async function expire(page){
   await page.evaluate(()=>{KanaRain.state.drops[0].progress=1;});
   await page.waitForFunction(()=>KanaRain.state.drops.length===0);
 }
+async function misread(page){
+  await spawnNext(page);
+  const attempts=await page.evaluate(()=>KanaRain.state.attempts);
+  await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');
+  await page.waitForFunction(value=>KanaRain.state.attempts===value+1,attempts);
+  await answer(page);
+}
 async function screenshot(page,name){await page.screenshot({path:path.join(output,name+'.png'),fullPage:true});}
 async function finish(page){await page.locator('#pauseBtn').click();await page.locator('#finishBtn').click();await page.locator('#results').waitFor({state:'visible'});}
 async function behavior(){
   const page=await context();await start(page);await noCounter(page);
   let state=await noveltyState(page);
   assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
-  assert.equal(state.recent.length,60);assert.equal(state.recent.filter(e=>e.firstCorrect).length,55);assert.equal(state.recent.filter(e=>e.timeout).length,2);
+  assert.equal(state.recent.length,60);assert.equal(state.recent.filter(e=>e.firstCorrect).length,54);assert.equal(state.recent.filter(e=>e.timeout).length,2);
   await screenshot(page,'01-held-without-counter');
-  await answer(page);await familiar(page,57);
-  assert.equal((await noveltyState(page)).blocked,true,'58 fresh hits still leave both expirations in the 60-drop window');
+  // The saved window holds four corrected rounds (saved before misses were flagged) and two expirations.
+  await answer(page);await familiar(page,53);
+  assert.equal((await noveltyState(page)).blocked,true,'54 fresh hits still leave the four saved corrections in the 60-drop window');
   await familiar(page,1);
-  assert.equal((await noveltyState(page)).blocked,false,'a full 60-drop window with enough first hits and only one expiration reopens admission');
+  assert.equal((await noveltyState(page)).blocked,false,'three misses and two expirations with 55 first hits reopen admission');
   const correct=await page.evaluate(()=>KanaRain.state.correct);
   await spawnNext(page,'kana:か');state=await noveltyState(page);
   assert.equal(state.drops[0].id,'kana:か');assert.equal(state.drops[0].isIntroduction,true);
@@ -120,8 +128,15 @@ async function behavior(){
   assert.equal(state.seen['kana:く'],undefined);assert.equal(state.introduced.length,2);
   await screenshot(page,'03-budget-without-counter');await answer(page);
   await expire(page);await expire(page);
-  assert.equal((await noveltyState(page)).blocked,true,'two real expirations close admission');
+  assert.equal((await noveltyState(page)).blocked,false,'real expirations no longer close admission');
   assert.equal(await page.evaluate(()=>KanaRain.state.lives),1,'real expirations retain the arcade heart cost');
+  for(let i=0;i<3;i++)await misread(page);
+  assert.equal((await noveltyState(page)).blocked,false,'three misreadings leave admission open');
+  await misread(page);
+  state=await noveltyState(page);
+  assert.equal(state.blocked,true,'four wrong first answers on familiar kana close admission');
+  assert.deepEqual(state.recent.slice(-6).map(e=>[e.timeout,e.miss]),[[true,false],[true,false],[false,true],[false,true],[false,true],[false,true]]);
+  assert.equal(await page.evaluate(()=>KanaRain.state.lives),1,'wrong answers do not cost hearts');
   const snapshot=await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty));
   await finish(page);await page.locator('#againBtn').click();await ready(page);await freezeScheduling(page);
   state=await noveltyState(page);assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
@@ -129,7 +144,7 @@ async function behavior(){
   await page.reload();await page.waitForFunction(()=>!!window.KanaRain);await start(page);await noCounter(page);
   state=await noveltyState(page);assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
   assert.equal(await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty)),snapshot,'reload preserves durable novelty state');
-  checks.push({check:'recovery, first presentation before answers, one debut on screen, three familiar drops, two-kana budget, real expirations, restart and reload without counters',pass:true});
+  checks.push({check:'recovery, first presentation before answers, one debut on screen, three familiar drops, two-kana budget, expirations that cost hearts but not admission, four misreadings that close it, restart and reload without counters',pass:true});
   await page.close();
 }
 async function responsive(){

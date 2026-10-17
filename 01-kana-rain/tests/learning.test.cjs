@@ -312,7 +312,7 @@ test('only one debut is in flight, including unseen partners and repeated queued
 });
 
 test('imported pressure blocks queued discoveries and real confusion partners but keeps familiar drops flowing',async()=>{
-  const g=await game({prepare(L,D){pacingGarden(L,D);for(let i=0;i<2;i++)L.record('kana:あ','form→sound',first('timeout:'+i,{outcome:'timeout',correct:null}));}});
+  const g=await game({prepare(L,D){pacingGarden(L,D);for(let i=0;i<4;i++){L.record('kana:あ','form→sound',first('miss:'+i+':1',{roundId:'miss:'+i,correct:false}));L.record('kana:あ','form→sound',first('miss:'+i+':2',{roundId:'miss:'+i,firstAttempt:false}));}}});
   g.app.start();g.skip();assert.equal(g.app.gameData.novelty.blocked,true);
   const d=nextDrop(g);g.submit('ka');assert.equal(d.wrong,1);assert.ok(g.app.state.queue.some(e=>e.partner==='kana:か'));
   g.submit(g.app.accepted(d)[0]);
@@ -328,14 +328,19 @@ test('imported pressure blocks queued discoveries and real confusion partners bu
 test('completed-drop pressure persists across restart and reload, then recovers through actual hits',async()=>{
   const g=await game({prepare:pacingGarden});g.app.start({reviewIds:['kana:あ']});g.skip();
   for(let i=0;i<2;i++){nextDrop(g).progress=1;g.tick();}
-  assert.equal(g.app.gameData.novelty.blocked,true);assert.equal(g.app.state.lives,1);
+  assert.equal(g.app.gameData.novelty.blocked,false,'expirations cost hearts but do not close admission');assert.equal(g.app.state.lives,1);
+  for(let i=0;i<3;i++){const d=nextDrop(g);g.submit('zzz');g.submit(g.app.accepted(d)[0]);}
+  assert.equal(g.app.gameData.novelty.blocked,false,'three wrong first answers leave admission open');
+  const d=nextDrop(g);g.submit('zzz');g.submit(g.app.accepted(d)[0]);
+  assert.equal(g.app.gameData.novelty.blocked,true,'four wrong first answers on a familiar kana close admission');assert.equal(g.app.state.lives,1);
   const window=plain(g.app.gameData.novelty.recent),attempts=plain(g.L.attempts());
   g.app.end('Restart');const reloaded=await game({map:g.map});
   assert.deepEqual(plain(reloaded.app.gameData.novelty.recent),window);assert.deepEqual(plain(reloaded.L.attempts()),attempts);
   reloaded.app.start({reviewIds:['kana:あ']});reloaded.skip();
-  for(let i=0;i<58;i++)answerNext(reloaded);
-  assert.equal(reloaded.app.gameData.novelty.blocked,true,'58 correct with two expirations is still blocked');
-  answerNext(reloaded);assert.equal(reloaded.app.gameData.novelty.blocked,false);
+  // Five starter hits, two expirations and four misses precede the fresh hits.
+  for(let i=0;i<56;i++)answerNext(reloaded);
+  assert.equal(reloaded.app.gameData.novelty.blocked,true,'56 correct with four misses still in the window is still blocked');
+  answerNext(reloaded);assert.equal(reloaded.app.gameData.novelty.blocked,false,'57 first-try hits and three misses reopen admission');
   assert.equal(reloaded.app.gameData.novelty.recent.length,60);assert.equal(reloaded.app.state.lives,3);
 });
 
@@ -345,10 +350,26 @@ test('multiple wrong submissions and their final correction or expiry each resol
   assert.equal(g.app.gameData.novelty.recent.length,before,'intermediate errors do not resolve a drop');
   g.submit('a');assert.equal(g.app.gameData.novelty.recent.length,before+1);
   assert.equal(g.app.gameData.novelty.recent.at(-1).firstCorrect,false);
+  assert.equal(g.app.gameData.novelty.recent.at(-1).miss,true,'a corrected familiar drop is one reading miss');
   const d=nextDrop(g);g.submit('zzz');d.progress=1;g.tick();
   assert.equal(g.app.gameData.novelty.recent.length,before+2);
   assert.equal(g.app.gameData.novelty.recent.at(-1).timeout,true);
-  assert.equal(g.L.state('kana:あ').facets['form→sound'].timeouts,1);
+  assert.equal(g.app.gameData.novelty.recent.at(-1).miss,true,'a wrong first answer still counts when the drop then expires');
+  nextDrop(g).progress=1;g.tick();
+  assert.equal(g.app.gameData.novelty.recent.at(-1).timeout,true);
+  assert.equal(g.app.gameData.novelty.recent.at(-1).miss,false,'an untouched expiration is not a reading miss');
+  assert.equal(g.L.state('kana:あ').facets['form→sound'].timeouts,2);
+});
+
+test('a wrong first answer on a debut is not a reading miss',async()=>{
+  const g=await game({prepare:pacingGarden});g.app.start();g.skip();
+  for(let i=0;i<3;i++)answerNext(g);
+  g.app.state.queue=[{id:'kana:か'}];const d=nextDrop(g);assert.equal(d.isIntroduction,true);
+  g.submit('zzz');g.submit(g.app.accepted(d)[0]);
+  assert.deepEqual(plain(g.app.gameData.novelty.recent.at(-1)),{roundId:d.roundId,firstCorrect:false,timeout:false,miss:false});
+  g.app.state.queue=[{id:'kana:か'}];const again=nextDrop(g);assert.equal(again.isIntroduction,false);
+  g.submit('zzz');g.submit(g.app.accepted(again)[0]);
+  assert.equal(g.app.gameData.novelty.recent.at(-1).miss,true,'the same kana counts once it has been seen');
 });
 
 

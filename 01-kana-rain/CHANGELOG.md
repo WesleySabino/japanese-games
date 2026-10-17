@@ -1,5 +1,13 @@
 # Kana Rain releases
 
+## 1.7.0 — 2026-10-17
+
+- New kana pause after four wrong first answers on already-seen kana in the difficulty's recent window (60/30/12), instead of after two expirations. Expirations still cost a heart but no longer close the brake; misses on a kana's debut drop don't count. Recovery targets are unchanged: 55/60, 25/30, 10/12.
+- The rain follows the player. Each correct answer advances the shared curve by 1.6 s and each expiration steps it back 20 s, never below the opening pace. The 10-second opening fall and the 3.5× ceiling are unchanged on every difficulty.
+- Saved novelty state stays version 1 and loads unchanged. Earlier corrected rounds count as misses; earlier expirations don't. Learner key, schema, history, earned rows and personal bests (`arcade-v2`) are unchanged.
+- Help, About, difficulty hints and docs describe the new rules. NOVELTY_BALANCE.md records the simulator check behind the four-miss limit.
+- The service-worker cache name changes to identify the release; learner storage is not reset.
+
 ## 1.6.0 — 2026-10-16
 
 - Replace the three-row touch QWERTY with the sound pad: 15 fixed sound families, then that family's sounds in the same box. All 208 forms take two taps; yōon and final n have their own slots; homophones resolve to the chosen row.

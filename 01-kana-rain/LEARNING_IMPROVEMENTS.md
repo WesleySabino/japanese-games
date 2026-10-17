@@ -16,13 +16,13 @@
 
 Since the 12 October progression correction, every available kana needs two correct first answers and at least 85% submitted first-answer accuracy. Continuous successful play can unlock rows with normal hints and pronunciation active. Corrected retries and expirations do not supply qualifying hits. Earlier unlocked rows still participate in readiness.
 
-Independence is evidence, not a row-unlock requirement. Existing counters already contribute, and a qualifying hit triggers the normal in-session announcement. The [new-kana admission brake](NOVELTY_BALANCE.md) controls first presentations after recent expirations separately from earned row availability.
+Independence is evidence, not a row-unlock requirement. Existing counters already contribute, and a qualifying hit triggers the normal in-session announcement. The [new-kana admission brake](NOVELTY_BALANCE.md) controls first presentations after recent misreadings separately from earned row availability.
 
 ## Arcade simplification
 
-Only Hiragana and Katakana remain playable, both with romaji. Every run begins with three hearts; regular runs last three minutes and focused mistake review lasts one minute. All levels share time-based acceleration and the existing wrong-answer stain/acceleration. Corrections give feedback without a mandatory acknowledgement stage.
+Only Hiragana and Katakana remain playable, both with romaji. Every run begins with three hearts; regular runs last three minutes and focused mistake review lasts one minute. All levels share answer-driven acceleration (correct answers advance the curve, expirations step it back) and the existing wrong-answer stain/acceleration. Corrections give feedback without a mandatory acknowledgement stage.
 
-Difficulty is now the single selector for recovery of new kana: Easy 55/60, Normal 25/30, Hard 10/12. The two-expiration brake, familiar spacing, starter exceptions and session debut limits remain. Mobile controls, streak/record/unlock celebrations, offline audio, analytics consent and expiration-clears-input behavior remain.
+Difficulty is now the single selector for recovery of new kana: Easy 55/60, Normal 25/30, Hard 10/12. The brake now closes on four first-answer misses on seen kana instead of two expirations; familiar spacing, starter exceptions and session debut limits remain. Mobile controls, streak/record/unlock celebrations, offline audio, analytics consent and expiration-clears-input behavior remain.
 
 Legacy game-mode evidence and records stay in saved data for compatibility. Unsupported old selections normalize without resetting learning; new rules use separate best-score keys. Historical specifications, reviews and prototypes remain in [the historical archive](../docs/history/kana-rain/README.md).
 
