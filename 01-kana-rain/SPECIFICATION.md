@@ -1,6 +1,6 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** release 1.7.0, 17 October 2026.
+**Catalogue ID:** 01. **Baseline:** release 1.8.0, 18 October 2026.
 
 The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 

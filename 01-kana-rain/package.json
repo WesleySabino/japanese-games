@@ -1,6 +1,6 @@
 {
   "name": "kana-rain",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "private": true,
   "description": "An offline-first kana arcade with three hearts and selectable new-kana difficulty",
   "scripts": {

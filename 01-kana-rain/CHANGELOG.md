@@ -1,9 +1,10 @@
 # Kana Rain releases
 
-## Unreleased
+## 1.8.0 — 2026-10-18
 
 - Results name the next row ("Next: K-row · 1 / 5 kana ready") and list up to four unready kana with the consecutive first-try hits each still needs, closest first. The count uses the existing unlock rule (2 first-try hits and 85% first-try accuracy); nothing about unlocking changes. Hidden in exploration and once every row is open.
 - Help mentions the new results line. No storage, records or novelty state change.
+- The service-worker cache identifies release 1.8.0; saved progress is retained.
 
 ## 1.7.0 — 2026-10-17
 
