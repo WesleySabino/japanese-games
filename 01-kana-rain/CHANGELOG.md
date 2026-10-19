@@ -1,5 +1,13 @@
 # Kana Rain releases
 
+## 1.9.0 — 2026-10-19
+
+- Replace visible points and record comparisons with correct-answer, wrong-answer and expiration totals in results. During play, show only correct answers and time around larger central hearts; wrong-answer and expiration totals stay in the final summary. Streak feedback remains.
+- Count every accepted correct answer (including corrections) and each submitted wrong answer; keep expirations separate without inventing another error. Results retain first-try hits, corrections and best streak as secondary details.
+- Retire numeric point scoring and new point-record writes. Preserve every historical best key/value, learner ledger, accuracy, earned row and novelty cooldown without conversion or reset.
+- Keep adaptive rain, hearts, unlock criteria, sound pad, review mode and next-row guidance. Advance the service-worker cache to release 1.9.0 without changing learner storage.
+- Compact the phone HUD into one status row with a secondary session label. Move listen, garden and sound controls to the answer line; use two sound-family rows when all targets fit at 36 px or larger. Reduce phone drop dimensions by 40% and expand their usable falling path without changing timing or progression.
+
 ## 1.8.1 — 2026-10-19
 
 - Restore the two-expiration novelty brake alongside the four familiar first-answer miss brake. Recovery requires a full difficulty window, the existing hit target, at most one expiration and fewer than four misses.

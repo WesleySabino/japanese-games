@@ -174,51 +174,57 @@ async function safeguards(){
   const empty=await context(undefined,false,'empty');await start(empty);const boot=await noveltyState(empty);assert.equal(boot.drops[0].isIntroduction,true);assert.equal(boot.drops[0].id,'kana:あ');assert.equal(boot.cooldown,10);checks.push({check:'starter vowels bootstrap only an alphabet without familiar content and otherwise obey both brakes',pass:true});await empty.close();
 }
 async function responsive(){
-  for(const [width,height] of [[1920,1080],[1366,768],[1200,768],[1024,768],[390,844],[320,568],[844,390],[640,360]]){
+  for(const [width,height] of [[1920,1080],[1440,900],[1366,768],[1200,768],[1024,768],[910,864],[830,768],[800,768],[761,768],[390,844],[320,568],[844,390],[640,360],[568,320]]){
     const page=await context({width,height});await start(page);await noCounter(page);
+    // Stress the longest run label, including widths between phone and desktop layouts.
+    await page.locator('#gameLabel').evaluate(el=>{el.textContent='Review · Normal · Katakana';});
     const label=`${width}x${height}`;
     await screenshot(page,'layout-'+label);
     const layout=await page.evaluate(()=>{
       const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height};};
-      const values=['score','streak','time'].map(id=>{
+      const values=['correctCount','time'].map(id=>{
         const element=document.getElementById(id),range=document.createRange();range.selectNodeContents(element);
         const ink=range.getBoundingClientRect(),parent=element.closest('.stat').getBoundingClientRect();
         return {id,text:element.textContent,ink:{left:ink.left,right:ink.right},parent:{left:parent.left,right:parent.right}};
       });
       const controls=[...document.querySelectorAll('.hud-actions button,.utility-controls button')].map(el=>({id:el.id,width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
       const travel=KanaRain.state.drops.map(drop=>({id:drop.id,height:drop.h,distance:Math.max(8,document.querySelector('#field').clientHeight-drop.h-27)-8}));
-      return {viewport:{width:innerWidth,height:innerHeight},document:{width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight},stats:rect('.hud-stats'),stat:rect('.hud-stats .stat'),mode:rect('.mode-plaque'),actions:rect('.hud-actions'),field:rect('#field'),dock:rect('#answerDock'),hearts:rect('#lives'),best:rect('#personalBest'),values,controls,travel};
+      const lives=document.querySelector('#lives'),range=document.createRange();range.selectNodeContents(lives);const ink=range.getBoundingClientRect();
+      return {viewport:{width:innerWidth,height:innerHeight},document:{width:document.documentElement.scrollWidth,height:document.documentElement.scrollHeight},stats:rect('.hud-stats'),stat:rect('.hud-stats .stat'),mode:rect('.mode-plaque'),actions:rect('.hud-actions'),field:rect('#field'),dock:rect('#answerDock'),hearts:rect('#lives'),heartPanel:rect('.heart-display'),heartFont:parseFloat(getComputedStyle(lives).fontSize),heartInk:{left:ink.left,right:ink.right,top:ink.top,bottom:ink.bottom},streak:rect('#runStreak'),values,controls,travel};
     });
     assert.ok(layout.document.width<=width+1&&layout.document.height<=height+1,label+' must not create page scroll');
-    if(layout.best.width&&layout.best.height){
-      const a=layout.best,b=layout.stats;
-      assert.ok(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom,label+' personal best must not overlap stats');
-    }
+    assert.deepEqual(await page.locator('.hud-stats .stat small').allTextContents(),['CORRECT','TIME']);assert.equal(await page.locator('.heart-display small').textContent(),'HEARTS');
+    assert.equal(await page.locator('#score,#personalBest,#menuBest,#errorCount,#expirationCount').count(),0);
+    assert.ok(layout.streak.top>=layout.heartPanel.bottom-1,label+' streak stays below the prominent heart panel');assert.ok(layout.heartFont>=(width<=760||height<=480?22:28),label+' hearts are prominent');assert.ok(layout.heartInk.left>=layout.heartPanel.left+1&&layout.heartInk.right<=layout.heartPanel.right-1,label+' heart glyphs fit their frame');
     for(const value of layout.values)assert.ok(value.ink.left>=value.parent.left+2&&value.ink.right<=value.parent.right-2,label+' '+value.id+' glyphs fit their plaque: '+JSON.stringify(value));
-    for(const key of ['stats','mode','actions','hearts']){
+    for(const key of ['stats','mode','actions','hearts','heartPanel','streak']){
       const r=layout[key];if(r.width&&r.height)assert.ok(r.left>=-1&&r.right<=width+1&&r.top>=-1&&r.bottom<=height+1,label+' '+key+' stays in viewport');
     }
     for(const control of layout.controls)if(control.width&&control.height)assert.ok(control.width>=32&&control.width<=64&&control.height>=32&&control.height<=64,label+' '+control.id+' retains compact usable controls');
-    assert.ok(layout.field.top>=Math.max(layout.stats.bottom,layout.mode.bottom,layout.actions.bottom)-1,label+' HUD stays above falling kana');
+    assert.ok(layout.field.top>=Math.max(layout.stats.bottom,layout.mode.bottom,layout.actions.bottom,layout.hearts.bottom,layout.streak.bottom)-1,label+' HUD and its secondary line stay above falling kana');
     const a=layout.field,b=layout.dock;
     assert.ok((a.right<=b.left+1||a.left>=b.right-1||a.bottom<=b.top+1||a.top>=b.bottom-1)&&a.height>0,label+' input preserves positive playfield');
     assert.ok(layout.travel.every(drop=>drop.distance>0),label+' falling kana have positive travel, preserving urgency targeting: '+JSON.stringify(layout.travel));
+    const apart=(a,b)=>a.right<=b.left+1||a.left>=b.right-1||a.bottom<=b.top+1||a.top>=b.bottom-1;
+    assert.ok(apart(layout.mode,layout.stats)&&apart(layout.stats,layout.actions),label+' review label, counters and actions do not overlap');
     if(width>=1200){
       assert.ok(Math.abs(layout.mode.top-layout.stat.top)<=2&&Math.abs(layout.actions.top-layout.stat.top)<=2,label+' desktop HUD shares its top row');
       assert.ok(layout.mode.right<=layout.stats.left+1&&layout.stats.right<=layout.actions.left+1,label+' desktop mode, stats and actions do not overlap');
     }
-    await page.evaluate(()=>{KanaRain.state.score=9876;KanaRain.state.streak=122;KanaRain.state.t=600;});
+    await page.evaluate(()=>{KanaRain.state.correct=9876;KanaRain.state.errors=1234;KanaRain.state.expirations=9999;KanaRain.state.streak=122;KanaRain.state.t=600;});
     await answer(page);
     assert.equal(await page.locator('#streak').textContent(),'×123');
     assert.equal(await page.locator('#time').textContent(),'10:00');
-    const longValues=await page.evaluate(()=>['score','streak','time'].map(id=>{
+    assert.equal(await page.locator('#correctCount').textContent(),'9877');assert.equal(await page.evaluate(()=>KanaRain.state.errors),1234);assert.equal(await page.evaluate(()=>KanaRain.state.expirations),9999);assert.equal(await page.locator('#errorCount,#expirationCount').count(),0);
+    const longValues=await page.evaluate(()=>['correctCount','time'].map(id=>{
       const element=document.getElementById(id),range=document.createRange();range.selectNodeContents(element);
       const ink=range.getBoundingClientRect(),parent=element.closest('.stat').getBoundingClientRect();
       return {id,text:element.textContent,ink:{left:ink.left,right:ink.right},parent:{left:parent.left,right:parent.right},font:getComputedStyle(element).fontSize};
     }));
     for(const value of longValues)assert.ok(value.ink.left>=value.parent.left-1&&value.ink.right<=value.parent.right+1,label+' long '+value.id+' text fits: '+JSON.stringify(value));
     await screenshot(page,'long-values-'+label);
-    checks.push({check:'responsive HUD geometry, compact controls and long values without novelty counters',label,layout,longValues});await page.close();
+    const secondary=await page.evaluate(()=>{const a=document.querySelector('#runStreak').getBoundingClientRect(),b=document.querySelector('.heart-display').getBoundingClientRect(),field=document.querySelector('#field').getBoundingClientRect();return {streakTop:a.top,heartsBottom:b.bottom,bottom:Math.max(a.bottom,b.bottom),fieldTop:field.top};});assert.ok(secondary.streakTop>=secondary.heartsBottom-1&&secondary.bottom<=secondary.fieldTop+1,label+' long streak stays below hearts without covering rain');
+    checks.push({check:'correct/time tiles with large central hearts and secondary streak fit above rain; errors/expirations remain in results',label,layout,longValues});await page.close();
   }
 }
 async function smallScreenTarget(){

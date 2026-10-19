@@ -408,7 +408,7 @@ test('legacy practice and retired-mode evidence survive simplification, export a
     assert.deepEqual(after.exposureLedger.slice(0,before.exposureLedger.length),before.exposureLedger);
     for(const key of ['rows','best','accuracy','featuresIntro','scriptIntro'])assert.deepEqual(after.games['kana-rain'][key],before.games['kana-rain'][key],key+' survives removed modes');
     assert.equal(current.app.settings.playStyle,'arcade');assert.equal(current.app.settings.duration,180);assert.equal(current.app.settings.difficulty,'normal','old novelty pace takes precedence over old rain difficulty');
-    current.app.start();current.skip();assert.ok(current.app.state.bestKey.startsWith('arcade-v2:'));assert.equal(current.app.state.previousBest,0,'legacy scores do not compete under new rules');assert.equal(current.app.state.totalLives,3);assert.equal(current.app.state.t,180);
+    current.app.start();current.skip();assert.equal(current.app.state.score,undefined,'point scoring is retired');assert.equal(current.app.state.bestKey,undefined,'counts never compete with historical point records');assert.equal(current.app.state.totalLives,3);assert.equal(current.app.state.t,180);
     current.app.end('Migration check');
   }
 });
@@ -452,7 +452,7 @@ test('retired modes cannot be revived programmatically and focused review keeps 
   g.el('mode').value='hira';g.el('mode').onchange();g.app.gameData.novelty.seen['kana:あ']=true;
   g.app.start({reviewIds:['w:ねこ','kana:あ']});g.skip();assert.deepEqual(plain(g.app.state.reviewIds),['kana:あ']);assert.equal(g.app.state.sessionDuration,60);assert.equal(g.app.state.totalLives,3);assert.ok(g.app.state.drops.every(drop=>drop.id==='kana:あ'));
   g.submit('zzz');g.submit('a');g.app.end('Result check');
-  assert.match(g.el('resultStats').innerHTML,/POINTS/);assert.match(g.el('resultStats').innerHTML,/STREAK/);assert.match(g.el('resultStats').innerHTML,/FIRST/);assert.match(g.el('resultStats').innerHTML,/EXPIRED/);assert.doesNotMatch(g.el('resultStats').innerHTML,/INDEPENDENT|WITH HELP/);
+  assert.match(g.el('resultStats').innerHTML,/CORRECT ANSWERS/);assert.match(g.el('resultStats').innerHTML,/WRONG ANSWERS/);assert.match(g.el('resultStats').innerHTML,/EXPIRED DROPS/);assert.doesNotMatch(g.el('resultStats').innerHTML,/POINTS|STREAK|FIRST|INDEPENDENT|WITH HELP/);assert.match(g.el('resultDetails').textContent,/first-try.*after correction.*Best streak/);
   g.el('gardenBtn').onclick();assert.match(g.el('learningStats').innerHTML,/independent|with help/i);
 });
 

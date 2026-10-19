@@ -48,7 +48,7 @@ The thresholds are conservative design choices based on the reported overload, n
 
 ## Shared adaptive rain
 
-Difficulty does not alter hearts, the rain curve, score or run length. Every run has three hearts and the former Normal curve: 10-second initial falls, acceleration capped at 3.5×. **The curve reads an effective time instead of the clock:** `max(0, correct × 1.6 − expirations × 20)` seconds, where `correct` counts the run's correct answers (corrections included) and `expirations` its expired drops. `rainSeconds()` in `src/game.js` computes it; `src/difficulty.js` and its frozen curve are unchanged.
+Difficulty does not alter hearts, the rain curve, answer counting or run length. Every run has three hearts and the former Normal curve: 10-second initial falls, acceleration capped at 3.5×. **The curve reads an effective time instead of the clock:** `max(0, correct × 1.6 − expirations × 20)` seconds, where `correct` counts the run's correct answers (corrections included) and `expirations` its expired drops. `rainSeconds()` in `src/game.js` computes it; `src/difficulty.js` and its frozen curve are unchanged.
 
 So 50 correct answers reach the pace that 80 seconds of play used to, and the 3.5× ceiling arrives after about 94 net correct answers. Each expiration steps the pace back 20 seconds, which 12½ correct answers repay; the pace never drops below the opening one. Time alone no longer speeds the rain; pauses and countdowns change nothing. Every run starts from the opening pace.
 

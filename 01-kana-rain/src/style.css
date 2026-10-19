@@ -34,7 +34,7 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .is-menu .scene-vignette { background:radial-gradient(ellipse at 50% 39%,#061f2530,transparent 55%,#031c1f30); }
 
 /* The warm, chamfered frames keep controls inside the illustrated world. */
-.menu-button,.session-selectors,.mode-plaque,.stat,.answer-bar,.utility-controls button,.hud-actions button,.touch-keyboard button {
+.menu-button,.session-selectors,.mode-plaque,.stat,.heart-display,.answer-bar,.utility-controls button,.hud-actions button,.touch-keyboard button {
   --frame-fill:#06252cdc; --cut:9px; border:1px solid var(--gold); color:var(--ivory);
   background:
     linear-gradient(135deg,transparent 5px,var(--gold) 5px 6px,transparent 6px) top left / 10px 10px no-repeat,
@@ -82,14 +82,20 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .is-playing #helpBtn { display:none; }
 .game-hud { position:absolute; top:max(18px,env(safe-area-inset-top)); left:max(22px,env(safe-area-inset-left)); right:max(22px,env(safe-area-inset-right)); z-index:10; height:82px; pointer-events:none; }
 .game-hud button { pointer-events:auto; }
-.mode-plaque { display:flex; align-items:center; gap:14px; width:fit-content; max-width:310px; min-height:50px; padding:12px 20px; font-family:var(--display-font); font-size:16px; text-transform:uppercase; letter-spacing:1.2px; }
+.mode-plaque { display:flex; align-items:center; gap:14px; width:fit-content; max-width:min(310px,calc((100% - 336px)/2 - 16px)); min-height:50px; padding:12px 20px; font-family:var(--display-font); font-size:16px; text-transform:uppercase; letter-spacing:1.2px; }
+.mode-plaque #gameLabel { min-width:0; }
 .mode-plaque svg,.mode-plaque > span:first-child:not(#gameLabel) { color:var(--gold-bright); width:27px; height:27px; font-size:24px; }
-.hud-stats { position:absolute; left:50%; top:0; transform:translateX(-50%); display:flex; gap:10px; }
-.stat { width:112px; min-width:112px; padding:8px 22px 7px; text-align:center; container-type:inline-size; --hud-stat-size:33px; --frame-fill:#06252ce5; }
+.hud-stats { position:absolute; left:50%; top:0; transform:translateX(-50%); display:flex; gap:8px; }
+.stat { width:96px; min-width:96px; padding:8px 14px 7px; text-align:center; container-type:inline-size; --hud-stat-size:33px; --frame-fill:#06252ce5; }
 .stat small { display:block; color:#e4d4aa; font-family:var(--display-font); font-size:12px; letter-spacing:1.5px; margin-bottom:1px; }
 .stat b { display:block; color:#fff1d0; font-family:var(--display-font); font-size:min(var(--hud-stat-size),calc(100cqw * 1.65 / var(--hud-stat-chars,3))); font-weight:400; line-height:1.1; font-variant-numeric:tabular-nums; }
+.heart-display { flex:0 0 128px; width:128px; min-width:0; padding:8px 8px 7px; text-align:center; border-color:var(--gold-bright); --frame-fill:#0c363dec; }
+.heart-display small { display:block; color:#f3dfac; font:12px/1.2 var(--display-font); letter-spacing:1.5px; margin-bottom:1px; }
+.heart-display .lives { display:block; position:relative; top:auto; right:auto; color:var(--gold-bright); font-family:"Segoe UI Symbol","Segoe UI",sans-serif; font-size:32px; line-height:1.05; letter-spacing:0; word-spacing:-1px; white-space:nowrap; text-shadow:0 1px 7px #031d25; }
 .hud-actions { position:absolute; right:60px; top:0; display:flex; gap:9px; }
-.lives { display:block; position:absolute; top:calc(100% + 6px); right:0; font-family:"Segoe UI Symbol","Segoe UI",sans-serif; font-size:13px; line-height:1; letter-spacing:2px; white-space:nowrap; color:var(--gold-bright); text-shadow:0 1px 5px #031d25; pointer-events:none; }
+.lives { pointer-events:none; }
+.run-streak { position:absolute; top:calc(100% + 5px); left:0; color:#c6d2bd; font:11px/1.2 "Segoe UI",sans-serif; letter-spacing:.2px; white-space:nowrap; }
+.run-streak b { color:#eee2bf; font-weight:600; font-variant-numeric:tabular-nums; }
 .playfield { position:absolute; top:122px; left:clamp(12px,17vw,330px); right:clamp(12px,17vw,330px); bottom:calc(var(--dock-height) + 75px + env(safe-area-inset-bottom)); z-index:2; overflow:hidden; touch-action:none; }
 .waterline { position:absolute; bottom:26px; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,#89d6c726,transparent); pointer-events:none; }
 .spirit { background:url('../assets/spirit.webp') 0 0 / 200% 200% no-repeat; pointer-events:none; }
@@ -212,10 +218,14 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .help-dialog p { font-size:13px; }
 kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; border:1px solid #c1c6a63b; border-radius:2px; background:#cedbb510; color:inherit; }
 .results-dialog { text-align:center; }
-.result-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:23px 0; }
-.result-stats b { display:block; color:#f9e9c4; font-family:var(--display-font); font-size:36px; font-weight:400; }
-.result-stats small { display:block; margin-top:5px; color:#bdc8ad; font-size:9px; letter-spacing:1px; }
-.result-next { margin:-6px 0 20px; padding:11px 14px; border:1px solid #a6b49030; border-radius:3px; background:#08252c; color:#e7dfbb; font-size:13px; line-height:1.5; }
+.result-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:23px 0 12px; }
+.result-stats > div { min-width:0; container-type:inline-size; }
+.result-stats b { display:block; color:#f9e9c4; font-family:var(--display-font); font-size:min(36px,32cqw); font-weight:400; line-height:1.1; font-variant-numeric:tabular-nums; }
+.result-stats small { display:block; margin-top:5px; color:#bdc8ad; font-size:9px; letter-spacing:.6px; line-height:1.5; }
+#resultDetails { margin:0 0 7px; color:#c1cdb8; font-size:11px; line-height:1.7; }
+#resultDetails b { color:#e2dec2; font-weight:600; font-variant-numeric:tabular-nums; }
+#resultCountingNote { max-width:48ch; margin:0 auto 20px; color:#aabfae; font-size:11px; line-height:1.55; }
+.result-next { margin:0 0 20px; padding:11px 14px; border:1px solid #a6b49030; border-radius:3px; background:#08252c; color:#e7dfbb; font-size:13px; line-height:1.5; }
 .result-next p { margin:0; }
 .result-next b { color:#f9e9c4; font-weight:600; }
 .result-next .next-needs { display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:4px 12px; margin-top:6px; color:#c4ceb4; font-size:12px; }
@@ -248,7 +258,8 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 }
 @media (max-width:1120px) {
   .game-hud { left:17px; right:17px; }
-  .mode-plaque { max-width:245px; font-size:12px; padding:12px; gap:9px; }
+  /* Reserve the centered 310px counters and a gap, even for longer review labels. */
+  .mode-plaque { max-width:min(245px,calc((100% - 310px)/2 - 14px)); font-size:12px; padding:12px; gap:9px; }
   .stat { width:84px; min-width:84px; padding:8px 12px; --hud-stat-size:29px; } .hud-stats { gap:7px; }
   .utility-controls { right:17px; }
   .utility-controls button,.hud-actions button { width:43px; height:46px; padding:9px; }
@@ -354,8 +365,8 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .feedback { top:78px; }
 }
 /* Session guidance and rewards remain separate from answer corrections. */
-.menu-best { margin:15px 0 0; color:#d9cfac; font:12px var(--display-font); letter-spacing:.8px; }
-.personal-best { position:absolute; top:58px; left:0; color:#d6d8b8; font-size:10px; letter-spacing:1.1px; text-shadow:0 1px 6px #04232c; }
+.menu-counts { margin:15px 0 0; color:#d9cfac; font:12px var(--display-font); letter-spacing:.8px; }
+
 .answer-guidance { display:flex; align-items:center; justify-content:center; gap:12px; min-height:23px; margin-bottom:6px; font-size:11px; line-height:1.3; text-shadow:0 1px 5px #031d25; }
 .input-format { flex-shrink:0; color:#fff1ce; font-weight:600; letter-spacing:.4px; }
 .target-hint { color:#c5d0b9; font-size:10px; }
@@ -365,7 +376,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .heart-loss-icon { font:43px "Segoe UI Symbol","Segoe UI",sans-serif; line-height:1; color:#f3c095; }
 .heart-hit .game-world::after { content:""; position:absolute; z-index:14; inset:0; border:5px solid #f0b89c7a; box-shadow:inset 0 0 40px #d5887055; pointer-events:none; animation:heartImpact .65s ease-out; }
 .low-hearts .lives { color:#ffd2b4; font-weight:600; }
-.low-hearts .lives::before { content:"!"; position:absolute; right:calc(100% + 6px); top:-1px; display:grid; place-items:center; width:14px; height:14px; border:1px solid currentColor; border-radius:50%; font:700 10px "Segoe UI",sans-serif; letter-spacing:0; }
+.low-hearts .heart-display { border-color:#ffd2b4; --frame-fill:#3c2b31ed; box-shadow:inset 0 0 18px #f0b89c18; }
 .drop.target { filter:drop-shadow(0 0 11px #d4fff6a6) drop-shadow(0 0 3px #efffef); }
 .drop.target::before { content:"⌄"; position:absolute; top:-5px; left:50%; transform:translateX(-50%); color:#fff0bd; font:27px "Segoe UI",sans-serif; line-height:1; text-shadow:0 1px 4px #09262d; }
 .drop.danger::after { content:"!"; position:absolute; right:6%; bottom:4%; display:grid; place-items:center; width:24px; height:24px; color:#173035; background:#ffe3aa; border:2px solid #fff6d7; border-radius:50%; font:700 16px "Segoe UI",sans-serif; line-height:1; text-shadow:none; }
@@ -423,8 +434,8 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .mode-plaque { max-width:calc(100% - 206px); padding:9px 8px; font-size:9px; }
 }
 @media (max-width:760px) {
-  .menu-best { margin-top:13px; font-size:11px; }
-  .personal-best { top:47px; font-size:9px; letter-spacing:.6px; }
+  .menu-counts { margin-top:13px; font-size:11px; }
+
   .answer-guidance { gap:8px; min-height:20px; margin-bottom:5px; font-size:10px; }
   .target-hint { font-size:9px; }
   .milestone-feedback { top:191px; font-size:14px; padding:7px 12px; }
@@ -436,7 +447,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .unlock-list { grid-template-columns:repeat(3,minmax(0,1fr)); max-height:220px; }
   .result-review { grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:7px; }
   .review-grid { gap:7px; }
-  .result-stats { grid-template-columns:repeat(2,1fr); gap:15px; }
+  .result-stats { gap:8px; margin-top:20px; }
 }
 @container game (max-width:760px) and (max-height:700px) {
   .title-screen { padding:64px 18px 86px; }
@@ -445,7 +456,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .main-menu { gap:8px; width:min(365px,100%); }
   .main-menu .menu-button { min-height:48px; padding:9px 18px; font-size:20px; }
   .session-selectors { min-height:50px; margin-top:18px; padding:8px 3px; }
-  .menu-best { margin-top:10px; }
+  .menu-counts { margin-top:10px; }
   .menu-hint { bottom:55px; font-size:11px; }
   .has-keyboard .playfield { top:138px; }
   .is-playing.has-keyboard #fieldSpirit { width:72px; height:72px; left:3%; bottom:calc(var(--dock-height) + 22px); }
@@ -459,7 +470,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 }
 @container game (max-height:480px) {
   .answer-guidance { position:absolute; bottom:calc(100% + 4px); left:0; width:100%; min-height:17px; margin:0; }
-  .menu-best { margin-top:8px; font-size:10px; }
+  .menu-counts { margin-top:8px; font-size:10px; }
   .countdown-overlay h2 { font-size:24px; }
   .countdown-number { font-size:72px; margin-top:9px; }
   .countdown-overlay.ready .countdown-number { font-size:60px; }
@@ -490,7 +501,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .hud-stats { top:0; width:auto; gap:6px; }
   .stat { width:auto; min-width:61px; padding:5px 9px; --hud-stat-size:22px; }
   .stat small { font-size:8px; letter-spacing:.6px; }
-  .personal-best { top:46px; }
+
   .playfield,.has-keyboard .playfield { top:78px; bottom:calc(var(--dock-height) + 12px); }
   .drop,.has-keyboard .drop { width:52px; height:64px; font-size:24px; padding-top:14px; }
   .drop .hint { font-size:8px; margin-top:3px; }
@@ -540,7 +551,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .session-selectors label { gap:2px; } .setup-label { font-size:8px; }
   .difficulty-note { margin-top:5px; font-size:10px; }
   .session-summary { margin-top:3px; font-size:9px; }
-  .menu-best { margin-top:6px; }
+  .menu-counts { margin-top:6px; }
   .feedback-stack { top:78px; }
 }
 @container game (max-width:350px) {
@@ -574,4 +585,128 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .has-keyboard .drop { width:54px; height:66px; font-size:24px; padding-top:14px; }
   .has-keyboard .drop .hint { font-size:8px; margin-top:3px; }
   .is-playing.has-keyboard #fieldSpirit { display:none; }
+}
+
+/* Remaining hearts lead the HUD between correct answers and time. */
+@media (max-width:760px) {
+  .hud-stats { gap:5px; }
+  .stat { padding:4px 7px; --hud-stat-size:24px; }
+  .stat small { font-size:8px; letter-spacing:.4px; }
+  .heart-display { flex-basis:112px; width:112px; padding:4px 7px; }
+  .heart-display small { font-size:8px; letter-spacing:.6px; }
+  .heart-display .lives { font-size:26px; }
+  .run-streak { font-size:10px; }
+}
+@container game (min-width:740px) and (max-height:480px) {
+  .mode-plaque { max-width:calc((100% - 390px)/2); }
+  .mode-plaque #gameLabel { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .playfield,.has-keyboard .playfield { top:95px; }
+  .heart-display { flex-basis:120px; width:120px; padding:4px 7px; }
+  .heart-display small { font-size:10px; }
+  .heart-display .lives { font-size:28px; }
+}
+@container game (min-width:480px) and (max-height:360px) {
+  .stat { min-width:61px; }
+  .heart-display { flex-basis:100px; width:100px; padding:4px 5px; }
+  .heart-display small { font-size:8px; }
+  .heart-display .lives { font-size:22px; }
+  .run-streak { top:calc(100% + 4px); font-size:9px; }
+}
+@container game (min-width:480px) and (max-width:620px) and (max-height:480px) {
+  .mode-plaque { max-width:120px; }
+  .mode-plaque #gameLabel { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hud-stats { top:0; left:134px; transform:none; width:calc(100% - 320px); gap:4px; }
+  .stat { flex:1; width:auto; min-width:0; padding:4px 5px; --hud-stat-size:22px; }
+  .stat small { font-size:7px; letter-spacing:.15px; }
+  .heart-display { flex-basis:100px; width:100px; padding:4px 5px; }
+  .heart-display small { font-size:7px; letter-spacing:.3px; }
+  .heart-display .lives { font-size:22px; }
+  .run-streak { top:calc(100% + 4px); font-size:9px; }
+  .lives { top:calc(100% + 4px); font-size:11px; }
+  .playfield,.has-keyboard .playfield { top:93px; }
+}
+@container game (min-width:480px) and (max-width:550px) and (max-height:480px) {
+  .mode-plaque { max-width:90px; }
+  .hud-stats { left:105px; width:calc(100% - 285px); }
+  .heart-display { flex-basis:82px; width:82px; }
+  .heart-display .lives { letter-spacing:-.3px; word-spacing:-2px; }
+}
+@container game (max-width:479px) and (max-height:520px) {
+  .hud-stats { top:41px; }
+  .stat { padding:3px 7px; --hud-stat-size:22px; }
+  .heart-display { flex-basis:106px; width:106px; padding:3px 6px; }
+  .heart-display small { font-size:7px; }
+  .heart-display .lives { font-size:22px; }
+}
+
+/* Phone portrait: one status row; the secondary tools share the answer line. */
+@media (max-width:479px), (max-width:760px) and (orientation:portrait) {
+  .game-world { --phone-dock-left:max(8px,env(safe-area-inset-left)); --phone-dock-right:max(8px,env(safe-area-inset-right)); }
+  .is-playing .game-hud { top:max(8px,env(safe-area-inset-top)); left:max(8px,env(safe-area-inset-left)); right:max(8px,env(safe-area-inset-right)); height:56px; }
+  .is-playing .hud-stats { top:0; left:0; transform:none; width:calc(100% - 46px); height:40px; gap:4px; }
+  .is-playing .stat { flex:1; width:auto; min-width:0; max-width:none; height:40px; padding:2px 6px; --hud-stat-size:23px; }
+  .is-playing .stat small { font-size:7px; letter-spacing:.4px; margin-bottom:0; }
+  .is-playing .heart-display { flex:0 0 96px; width:96px; height:40px; padding:1px 5px; }
+  .is-playing .heart-display small { font-size:7px; letter-spacing:.5px; margin-bottom:0; }
+  .is-playing .heart-display .lives { font-size:24px; line-height:1.05; }
+  .is-playing .mode-plaque { position:absolute; top:44px; left:0; display:block; width:calc(100% - 140px); max-width:none; min-height:0; height:12px; padding:0; border:0; clip-path:none; background:none; box-shadow:none; font-size:8px; line-height:12px; letter-spacing:.2px; }
+  .is-playing .mode-plaque .control-icon { display:none; }
+  .is-playing .mode-plaque #gameLabel { display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .is-playing .run-streak { top:44px; left:auto; right:0; font-size:9px; line-height:12px; }
+  .is-playing .hud-actions { top:0; right:0; gap:0; }
+  .is-playing .hud-actions #pauseBtn { width:40px; height:40px; padding:9px; }
+  .is-playing .answer-dock { left:var(--phone-dock-left); right:var(--phone-dock-right); width:calc(100% - var(--phone-dock-left) - var(--phone-dock-right)); transform:none; bottom:max(8px,env(safe-area-inset-bottom)); }
+  .is-playing .answer-guidance,.is-playing .input-note,.is-playing .input-symbol { display:none; }
+  .is-playing .answer-bar { height:40px; padding:2px 164px 2px 4px; gap:4px; }
+  .is-playing .answer-bar input { height:34px; padding:2px 5px; font-size:16px; }
+  .is-playing .answer-bar input::placeholder { font-size:12px; }
+  .is-playing .answer-bar #submitBtn { flex-basis:36px; min-height:36px; height:36px; font-size:22px; }
+  .is-playing .answer-bar #keyboardBtn { position:absolute; right:4px; top:1px; width:36px; min-height:36px; height:36px; padding:7px; }
+  .is-playing #listenBtn,.is-playing #progressBtn,.is-playing #soundBtn { position:fixed; top:auto; bottom:calc(var(--dock-height) + max(8px,env(safe-area-inset-bottom)) - 38px); width:36px; height:36px; padding:7px; }
+  .is-playing #listenBtn { right:calc(var(--phone-dock-right) + 124px); }
+  .is-playing #progressBtn { right:calc(var(--phone-dock-right) + 84px); }
+  .is-playing #soundBtn { right:calc(var(--phone-dock-right) + 44px); }
+  .is-playing #listenBtn svg,.is-playing #progressBtn svg,.is-playing #soundBtn svg { width:21px; height:21px; }
+  .is-playing .playfield,.is-playing.has-keyboard .playfield { top:calc(max(8px,env(safe-area-inset-top)) + 62px); left:max(8px,env(safe-area-inset-left)); right:max(8px,env(safe-area-inset-right)); bottom:calc(var(--dock-height) + max(8px,env(safe-area-inset-bottom)) + 4px); }
+  .is-playing .feedback-stack { top:calc(max(8px,env(safe-area-inset-top)) + 62px); }
+  .is-playing .milestone-feedback { top:calc(max(8px,env(safe-area-inset-top)) + 80px); }
+  .is-playing #fieldSpirit { width:64px; height:64px; bottom:calc(var(--dock-height) + 20px); }
+  .touch-keyboard { --pad-key:36px; --pad-gap:4px; padding-top:4px; }
+}
+/* Wider phones fit the same fifteen families in two rows without smaller touch targets. */
+@media (max-width:479px), (max-width:760px) and (orientation:portrait) {
+ @container pad (min-width:316px) {
+  .pad-families { grid-template-columns:repeat(8,minmax(0,1fr)); grid-template-rows:repeat(2,var(--pad-key)); }
+  .pad-sounds { grid-template-rows:repeat(2,var(--pad-key)); }
+  .pad-main { font-size:18px; }
+  .pad-word { font-size:min(11px,3.2cqw); }
+  .pad-alt { font-size:9px; letter-spacing:.2px; }
+ }
+}
+/* Actual sprite boxes are 60% of their previous phone dimensions; progress stays normalized. */
+@media (max-width:760px) {
+  .drop,.has-keyboard .drop { width:62.4px; height:79.2px; font-size:26px; padding-top:14px; }
+  .drop .hint,.has-keyboard .drop .hint { font-size:11px; line-height:1.1; margin-top:2px; }
+  .drop.danger::after { width:15px; height:15px; right:1px; bottom:1px; border-width:1px; font-size:10px; }
+  .drop.target::before { font-size:17px; top:-3px; }
+  .effect { width:87px; height:63px; }
+}
+@container game (max-width:760px) and (max-height:700px) {
+  .drop,.has-keyboard .drop { width:54px; height:67.2px; font-size:23px; padding-top:12px; }
+  .drop .hint,.has-keyboard .drop .hint { font-size:10px; }
+}
+@container game (max-width:760px) and (max-height:600px) {
+  .drop,.has-keyboard .drop { width:43.2px; height:54px; font-size:20px; padding-top:8px; }
+}
+@container game (max-width:479px) and (max-height:520px) {
+  .drop,.has-keyboard .drop { width:32.4px; height:39.6px; font-size:16px; padding-top:5px; }
+  .drop .hint,.has-keyboard .drop .hint { font-size:9px; margin-top:1px; }
+}
+@container game (min-width:480px) and (max-width:960px) and (max-height:480px) {
+  .has-keyboard .answer-bar #keyboardBtn { min-height:36px; height:36px; }
+  .drop,.has-keyboard .drop { width:31.2px; height:38.4px; font-size:15px; padding-top:5px; }
+  .drop .hint,.has-keyboard .drop .hint { font-size:8px; margin-top:1px; }
+}
+@container game (min-width:740px) and (max-width:960px) and (max-height:480px) {
+  .drop,.has-keyboard .drop { width:39.6px; height:49.2px; font-size:18px; padding-top:8px; }
 }

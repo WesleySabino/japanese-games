@@ -67,6 +67,9 @@ async function assertProgressHeading(page){
 }
 async function assertHeartsVisible(page,label){
   assert.equal(await page.locator('#lives').isVisible(),true,label+' heart counter exists');
+  assert.equal(await page.locator('.heart-display small').textContent(),'HEARTS');
+  const prominent=await page.locator('#lives').evaluate(el=>{const panel=el.closest('.heart-display'),range=document.createRange();range.selectNodeContents(el);const ink=range.getBoundingClientRect(),box=panel.getBoundingClientRect(),small=innerWidth<=760||innerHeight<=480;return {font:parseFloat(getComputedStyle(el).fontSize),minimum:small?22:28,ink:{left:ink.left,right:ink.right,top:ink.top,bottom:ink.bottom},panel:{left:box.left,right:box.right,top:box.top,bottom:box.bottom}};});
+  assert.ok(prominent.font>=prominent.minimum,label+' hearts remain prominent');assert.ok(prominent.ink.left>=prominent.panel.left+1&&prominent.ink.right<=prominent.panel.right-1&&prominent.ink.top>=prominent.panel.top-1&&prominent.ink.bottom<=prominent.panel.bottom+1,label+' large heart glyphs fit their central frame: '+JSON.stringify(prominent));
   const clipped=await page.locator('#lives').evaluate(el=>{
     const r=el.getBoundingClientRect(),issues=[];
     if(r.left<0||r.top<0||r.right>innerWidth+1||r.bottom>innerHeight+1)issues.push({parent:'viewport',counter:{left:r.left,top:r.top,right:r.right,bottom:r.bottom}});
@@ -154,6 +157,9 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
     await page.locator('#pauseHelpBtn').tap();await assertPanelFits(page,'helpDialog','closeHelp',label+' paused help');await page.locator('#closeHelp').tap();
     await page.locator('#resumeBtn').tap();await readyToPlay(page);
     await finishSession(page);await assertPanelFits(page,'results',null,label+' results');
+    assert.deepEqual(await page.locator('#resultStats small').allTextContents(),['CORRECT ANSWERS','WRONG ANSWERS','EXPIRED DROPS']);
+    for(const id of ['againBtn','backBtn']){await page.locator('#'+id).scrollIntoViewIfNeeded();await assertInViewport(page,'#'+id,label+' results '+id);}
+    await page.locator('#results .dialog-panel').evaluate(panel=>panel.scrollTop=0);
     if(width===320)await screenshot(page,'smallest-portrait-results');
     if(width===568)await screenshot(page,'smallest-landscape-results');
     await page.locator('#backBtn').tap();await assertWholeViewport(page,label+' returned menu');
@@ -250,11 +256,8 @@ async function exerciseQuickWins(errors){
     assert.match(await page.locator('#milestoneFeedback').textContent(),new RegExp('^'+streak+' in a row'));
     assert.equal(await page.locator('#feedback').textContent(),errorText,'streak celebration uses its separate channel');
   }
-  await page.evaluate(()=>{const g=KanaRain.state;g.previousBest=g.score+1;g.bestBeaten=false;g.sinceSpawn=9999;});
-  await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
-  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target.id)[0]));
-  assert.match(await page.locator('#milestoneFeedback').textContent(),/personal best/i);
-  assert.match(await page.locator('#personalBest').textContent(),/Best.*\d/);
+  assert.equal(await page.locator('#personalBest,#score').count(),0,'HUD presents run counts');
+  assert.equal(await page.locator('#correctCount').textContent(),String(await page.evaluate(()=>KanaRain.state.correct)));
   await page.evaluate(()=>{KanaRain.state.sinceSpawn=9999;});await page.waitForFunction(()=>KanaRain.state.drops.length>0);await readyToPlay(page);
   await page.evaluate(()=>{KanaRain.state.drops[0].progress=.8;});
   await page.waitForFunction(()=>document.querySelector('.drop.danger'));
@@ -283,6 +286,28 @@ async function exerciseQuickWins(errors){
   await page.locator('#answer').fill(other.answer);
   assert.equal(await page.evaluate(()=>KanaRain.gameData.rows.hiragana),2,'practicing another kana cannot bypass earlier-row readiness');
   await finishSession(page);await context.close();
+}
+async function exerciseRunCounts(errors){
+  const context=await gameContext({viewport:{width:1440,height:900},serviceWorkers:'block'});
+  await context.route('**/*',route=>{const url=new URL(route.request().url());return url.origin==='http://127.0.0.1:4180'||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
+  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>!!window.KanaRain);
+  const legacyBest=await page.evaluate(()=>{KanaRain.gameData.best['arcade-v2:hira:easy:180']=321;return {...KanaRain.gameData.best};});
+  await page.evaluate(()=>KanaRain.start({reviewIds:['kana:あ']}));await readyToPlay(page);
+  const pin=()=>page.evaluate(()=>{KanaRain.state.sinceSpawn=-100000;KanaRain.state.drops.forEach(d=>d.progress=0);});
+  const next=async()=>{await page.evaluate(()=>{KanaRain.state.queue=[{id:'kana:あ'}];KanaRain.state.sinceSpawn=99999;});await page.waitForFunction(()=>KanaRain.state.drops.length>0);await pin();};
+  await pin();await page.locator('#answer').fill('a');await page.waitForFunction(()=>KanaRain.state.correct===1);
+  await next();for(let n=1;n<=2;n++){await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');await page.waitForFunction(n=>KanaRain.state.errors===n,n);}
+  assert.equal(await page.evaluate(()=>KanaRain.state.correct),1);assert.equal(await page.locator('#errorCount,#expirationCount').count(),0,'mistakes and expired totals are reserved for results');
+  await page.locator('#answer').fill('a');await page.waitForFunction(()=>KanaRain.state.correct===2);
+  await next();await page.evaluate(()=>KanaRain.state.drops[0].progress=1);await page.waitForFunction(()=>KanaRain.state.expirations===1);
+  assert.deepEqual(await page.evaluate(()=>({correct:KanaRain.state.correct,errors:KanaRain.state.errors,expirations:KanaRain.state.expirations,lives:KanaRain.state.lives})),{correct:2,errors:2,expirations:1,lives:2});
+  assert.deepEqual(await page.locator('.hud-stats .stat b').allTextContents(),['2',await page.locator('#time').textContent()]);await assertHeartsVisible(page,'counting run');assert.equal(await page.locator('#lives').getAttribute('aria-label'),'2 of 3 hearts remaining');
+  await finishSession(page);assert.deepEqual(await page.locator('#resultStats b').allTextContents(),['2','2','1']);assert.deepEqual(await page.locator('#resultStats small').allTextContents(),['CORRECT ANSWERS','WRONG ANSWERS','EXPIRED DROPS']);
+  assert.match(await page.locator('#resultDetails').textContent(),/1 first-try.*1 after correction.*Best streak 1/);assert.ok((await page.locator('#resultCountingNote').textContent()).trim().length>0);
+  assert.deepEqual(await page.evaluate(()=>KanaRain.gameData.best),legacyBest,'counting a run leaves every historical point record unchanged');
+  assert.equal(await page.evaluate(()=>['score','previousBest','bestKey','bestBeaten'].some(key=>Object.hasOwn(KanaRain.state,key))),false);
+  await screenshot(page,'counts-first-try-two-mistakes-correction-expiration');await context.close();
 }
 (async()=>{
   server=spawn(process.execPath,[path.join(__dirname,'../scripts/serve.cjs')],{env:{...process.env,PORT:'4180'},windowsHide:true,stdio:['ignore','pipe','pipe']});
@@ -405,18 +430,17 @@ async function exerciseQuickWins(errors){
   await reviewCard.click();
   assert.equal(await page.locator('#results').isVisible(),true,'review audio keeps the results open');
   await screenshot(page,'results-review');
-  const normalSession=await page.evaluate(()=>({settings:KanaRain.settings,key:KanaRain.state.bestKey,best:KanaRain.gameData.best[KanaRain.state.bestKey]}));
+  const normalSession=await page.evaluate(()=>({settings:KanaRain.settings,best:{...KanaRain.gameData.best}}));
   await page.locator('#reviewPracticeBtn').click();await readyToPlay(page);
   assert.equal(await page.evaluate(()=>KanaRain.state.sessionDuration),60);
   assert.equal(await page.evaluate(()=>KanaRain.state.difficulty),normalSession.settings.difficulty);
   assert.deepEqual(await page.evaluate(()=>KanaRain.settings),normalSession.settings,'focused review preserves the user session settings');
   assert.equal(await page.evaluate(id=>KanaRain.state.reviewIds.includes(id),typo.id),true);
   assert.equal(await page.evaluate(()=>KanaRain.state.drops.concat(KanaRain.state.queue).every(d=>KanaRain.state.reviewIds.includes(d.id))),true);
-  await page.evaluate(score=>{KanaRain.state.score=score+100;},normalSession.best);
   await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.drops[0].id)[0]));
   await page.waitForFunction(()=>KanaRain.state.correct===1);
   await finishSession(page);
-  assert.equal(await page.evaluate(key=>KanaRain.gameData.best[key],normalSession.key),normalSession.best,'review scores do not replace the normal personal best');
+  assert.deepEqual(await page.evaluate(()=>KanaRain.gameData.best),normalSession.best,'review leaves all legacy personal bests intact');
   await page.locator('#backBtn').click();await page.locator('#startBtn').click();await readyToPlay(page);
   assert.equal(await page.evaluate(()=>KanaRain.state.reviewIds),null);
   assert.equal(await page.evaluate(()=>KanaRain.state.sessionDuration),normalSession.settings.duration);
@@ -535,6 +559,7 @@ async function exerciseQuickWins(errors){
       assert.equal(await level.evaluate(()=>KanaRain.state.over),remaining===0,difficulty+' ends only after its final heart');
       assert.equal(await level.locator('#results').isVisible(),remaining===0);
       assert.equal(await level.evaluate(()=>document.body.classList.contains('low-hearts')),remaining===1);
+      if(remaining>0)await assertHeartsVisible(level,difficulty+' '+remaining+' hearts remaining');
       if(remaining>0){
         assert.equal(await level.evaluate(()=>document.body.classList.contains('heart-hit')),true);
         assert.equal(await level.locator('#heartLoss').isVisible(),true);
@@ -572,10 +597,11 @@ async function exerciseQuickWins(errors){
   assert.equal(await grow.locator('#feedback').textContent(),unlockMessage,'success does not replace a protected unlock announcement');
   await difficultyContext.close();
   await exerciseQuickWins(errors);
+  await exerciseRunCounts(errors);
   await exerciseResponsiveMatrix(errors);
   await exerciseStableInput(errors);
   assert.deepEqual(errors,[]);
-  console.log('PASS: desktop and 7 mobile sizes, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio/best separation, stable romaji for mature items, protected feedback/streak/best celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common answer-driven acceleration, offline shell and 104 kana recordings.');
+  console.log('PASS: desktop and 7 mobile sizes, count/timer HUD, exact first-try/correction/wrong/expiration results, legacy records preserved, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio, stable romaji for mature items, protected feedback/streak celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common answer-driven acceleration, offline shell and 104 kana recordings.');
   await browser.close();
   server.kill();
 })().catch(async e=>{console.error(e);if(browser)await browser.close();if(server)server.kill();process.exitCode=1;});

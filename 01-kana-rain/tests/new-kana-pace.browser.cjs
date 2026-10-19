@@ -83,8 +83,9 @@ async function profileRulesAndLocks(){
   for(const [pace,rules] of Object.entries(profiles)){
     const page=await context({width:1366,height:768},pace);await selected(page,pace);await start(page);
     assert.equal(await page.locator('#difficultySelect').isDisabled(),true);assert.equal(await page.locator('#mode').isDisabled(),true);
-    const session=await page.evaluate(()=>({rules:KanaNovelty.constantsFor(KanaRain.gameData.novelty),blocked:KanaRain.gameData.novelty.blocked,hearts:KanaRain.state.totalLives,duration:KanaRain.state.sessionDuration,speed:KanaRain.state.speed,gap:KanaRain.state.gap,key:KanaRain.state.bestKey,previousBest:KanaRain.state.previousBest}));
-    assert.equal(session.rules.windowSize,rules.size);assert.equal(session.rules.recoveryHits,rules.hits);assert.equal(session.rules.timeoutLimit,2);assert.equal(session.rules.cooldownHits,10);assert.equal(session.blocked,pace==='calm');assert.equal(session.hearts,3);assert.equal(session.duration,180);assert.ok(session.key.startsWith('arcade-v2:'));assert.equal(session.previousBest,0);
+    assert.deepEqual(await page.locator('.hud-stats .stat small').allTextContents(),['CORRECT','TIME']);assert.equal(await page.locator('.heart-display small').textContent(),'HEARTS');assert.equal(await page.locator('#errorCount,#expirationCount').count(),0);
+    const session=await page.evaluate(()=>({rules:KanaNovelty.constantsFor(KanaRain.gameData.novelty),blocked:KanaRain.gameData.novelty.blocked,hearts:KanaRain.state.totalLives,duration:KanaRain.state.sessionDuration,speed:KanaRain.state.speed,gap:KanaRain.state.gap,hasScore:Object.hasOwn(KanaRain.state,'score'),hasBestKey:Object.hasOwn(KanaRain.state,'bestKey')}));
+    assert.equal(session.rules.windowSize,rules.size);assert.equal(session.rules.recoveryHits,rules.hits);assert.equal(session.rules.timeoutLimit,2);assert.equal(session.rules.cooldownHits,10);assert.equal(session.blocked,pace==='calm');assert.equal(session.hearts,3);assert.equal(session.duration,180);assert.equal(session.hasScore,false);assert.equal(session.hasBestKey,false);
     assert.ok(Math.abs(session.speed-.1)<.005,'initial rain speed stays close to the common Normal curve');assert.ok(Math.abs(session.gap-2400)<120);
     assert.deepEqual(await page.evaluate(()=>['easy','normal','hard'].map(id=>KanaDifficulty.atTime(id,60))),Array.from({length:3},()=>({speed:.2,fallSeconds:5,gap:2400/Math.sqrt(2)})));
     await page.locator('#difficultySelect').evaluate(el=>{el.value='hard';el.dispatchEvent(new Event('change'));});assert.equal(await page.evaluate(()=>KanaRain.gameData.novelty.pace),pace);
@@ -92,9 +93,9 @@ async function profileRulesAndLocks(){
     assert.equal(await page.locator('#settingsDialog select,#settingsDialog [data-difficulty],#settingsDialog [data-novelty-pace]').count(),0,'settings has no duplicated setup');
     const before=await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty));await page.locator('#difficultySelect').evaluate(el=>{el.value='easy';el.dispatchEvent(new Event('change'));});assert.equal(await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty)),before);
     await page.locator('#closeSettings').click();await page.locator('#finishBtn').click();await page.locator('#results').waitFor({state:'visible'});
-    assert.doesNotMatch(await page.locator('#resultStats').textContent(),/independent|with help/i);assert.match(await page.locator('#resultStats').textContent(),/streak/i);
+    assert.deepEqual(await page.locator('#resultStats small').allTextContents(),['CORRECT ANSWERS','WRONG ANSWERS','EXPIRED DROPS']);assert.match(await page.locator('#resultDetails').textContent(),/streak/i);
     await page.locator('#backBtn').click();assert.equal(await page.locator('#difficultySelect').isEnabled(),true);
-    checks.push({check:'profile thresholds, shared three hearts and rain, fresh record namespace, active/paused locks',pace,pass:true});await page.close();
+    checks.push({check:'profile thresholds, shared three hearts and rain, count-only runtime, active/paused locks',pace,pass:true});await page.close();
   }
 }
 async function scope(){
@@ -117,7 +118,7 @@ async function menuGeometry(page,label){
     const scroll={width:welcome.scrollWidth,height:welcome.scrollHeight,clientWidth:welcome.clientWidth,clientHeight:welcome.clientHeight,top:welcome.scrollTop,left:welcome.scrollLeft};
     welcome.scrollTop=0;welcome.scrollLeft=0;
     return {welcome:rect(welcome),panel:rect(panel),scroll,
-      flow:['.title-lockup','.main-menu','.session-selectors','#difficultyNote','.session-summary','#menuBest','#menuHint'].map(visible).filter(Boolean),
+      flow:['.title-lockup','.main-menu','.session-selectors','#difficultyNote','.session-summary','#menuCounts','#menuHint'].map(visible).filter(Boolean),
       selects:[...panel.querySelectorAll('select')].map(el=>{const style=getComputedStyle(el);return {id:el.id,select:rect(el),label:rect(el.closest('label')),caption:rect(el.closest('label').querySelector('.setup-label')),textAlign:style.textAlign,textAlignLast:style.textAlignLast,paddingLeft:parseFloat(style.paddingLeft),paddingRight:parseFloat(style.paddingRight)};})};
   });
   const {welcome,panel,scroll}=layout;

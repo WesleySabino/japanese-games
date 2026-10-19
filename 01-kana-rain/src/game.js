@@ -125,8 +125,6 @@
     clearTimeout(milestoneTimer);$('milestoneFeedback').textContent=text;$('milestoneFeedback').className='milestone-feedback show';
     sfx(kind);milestoneTimer=setTimeout(()=>$('milestoneFeedback').className='milestone-feedback',2200);
   }
-  // Retain legacy bests while keeping scores under the new universal rain rules separate.
-  const bestKey=(duration=cfg.duration,review=false)=>`arcade-v2:${cfg.mode}:${cfg.difficulty}:${duration}${review?':review':''}`;
   function readiness(k){
     // Arcade progress rewards first-try hits; normal reading feedback must not block it.
     // Independent recall remains separate evidence in the learner's unchanged history.
@@ -150,7 +148,6 @@
     $('unlockBar').style.width=(rows.length?ready/rows.length*100:0)+'%';
     $('unlockDetails').innerHTML=rows.map(({k,correct,accuracy,attempts,ready})=>`<div class="unlock-item ${ready?'ready':'pending'}"><span lang="ja">${k.char}</span><span>${k.romaji}</span><small>${Math.min(2,correct)}/2 first-try hits · ${attempts?Math.floor(accuracy*100)+'%':'No answers yet'}</small><span aria-label="${ready?'Ready':'Keep practicing'}">${ready?'✓':'○'}</span></div>`).join('');
   }
-  function renderBest(){const best=gd.best[bestKey()]||0;$('menuBest').textContent=best?`Personal best · ${best} points`:'Your first personal best is waiting';}
   function spirit(mood){clearTimeout(spiritTimer);$('fieldSpirit').className='spirit '+mood;spiritTimer=setTimeout(()=>$('fieldSpirit').className='spirit idle',900);}
   function renderDifficulty(){
     $('difficultySelect').value=cfg.difficulty;$('difficultySelect').disabled=!!running();
@@ -172,7 +169,7 @@
     $('unlockNote').textContent=explore?'Exploration: all kana are available.':'Each available kana needs 2 correct first answers and at least 85% first-answer accuracy. Reading hints and pronunciation do not block unlocks.';
     const next=D.rowsOrder[count];$('milestone').textContent=next?'Meet '+(rowNames[next]||next.toUpperCase()+'-row'):'Your whole kana garden';
     $('milestoneKana').textContent=next?D.kana.filter(k=>k.script===sc && k.row===next).map(k=>k.char).join(' '):'Keep your reading growing';
-    invalidateProgress();renderBest();renderEffects();
+    invalidateProgress();renderEffects();
   }
   function renderMap(){
     const items=D.kana.filter(k=>k.script===mapScript), available=new Set(unlocked(mapScript).map(k=>k.id));
@@ -212,14 +209,13 @@
     $('feedback').className='feedback';$('milestoneFeedback').className='milestone-feedback';$('heartLoss').classList.add('hidden');document.body.classList.remove('heart-hit');$('field').querySelectorAll('.drop,.effect').forEach(e=>e.remove());
     const profile=R.profiles[cfg.difficulty],weather=R.atTime(cfg.difficulty,0);
     const reviewIds=Array.isArray(options.reviewIds)?[...new Set(options.reviewIds)].filter(id=>candidates().includes(id)):null;
-    const sessionDuration=reviewIds?.length?60:cfg.duration,sessionBestKey=bestKey(sessionDuration,!!reviewIds?.length),now=performance.now();
+    const sessionDuration=reviewIds?.length?60:cfg.duration,now=performance.now();
     gd.difficulty=cfg.difficulty;L.flush();
-    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,bestKey:sessionBestKey,previousBest:gd.best[sessionBestKey]||0,bestBeaten:false,elapsed:0,lives:3,score:0,streak:0,bestStreak:0,correct:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
+    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
     $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana'}[cfg.mode]);
-    $('personalBest').textContent=(G.reviewIds?'Review best · ':'Best · ')+G.previousBest;
     $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();resetPad();keyboard();focusAnswer();
     fitField();initializeRounds();syncAnimationState();wakeLoop();
   }
@@ -354,7 +350,8 @@
     if(d.wrong)reasons.push('previous-incorrect-attempt');
     const ev=score(d,{...detail,deferSave:true,correct,sessionId:G.sessionId,roundId:d.roundId,attemptId:`${d.roundId}:a:${++d.attemptCount}`,firstAttempt,assistance:reasons.length>0,assistanceReasons:[...new Set(reasons)],firstResponseMs:d.firstResponseMs,inputActiveMs,displayActiveMs,waitMs:inputActiveMs==null?null:Math.max(0,displayActiveMs-inputActiveMs),delaySinceExposureMs:prior.delaySinceExposureMs})[0];
     L.record(ev.itemId,ev.facet,ev);G.events.push(ev);G.inputStartedAt=null;G.inputPausedMs=0;
-    if(detail.outcome!=='timeout'){G.attempts++;if(correct)G.correct++;}
+    // Count submitted answers, not keystrokes or unique kana. Expirations are separate.
+    if(detail.outcome!=='timeout'){G.attempts++;if(correct===true)G.correct++;else if(correct===false)G.errors++;}
     const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
     if(detail.outcome!=='timeout'){stat.attempts++;if(correct)stat.correct++;}
     if(correct===false){N.pause(novelty);G.familiarSinceIntroduction=0;}
@@ -369,13 +366,11 @@
   function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
   function remove(d,pop=false){if(G.pendingAnswer?.drop===d)G.pendingAnswer=null;dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
   function hit(d){
-    const ev=record(d,true,{response:d.submittedResponse,reason:'accepted',inputMethod:d.submittedMethod});G.streak=d.wrong?0:G.streak+1;G.score+=Math.round((ev.assistance?5:10)*(1+Math.min(G.streak,10)*.1)*(d.wrong?.3:1));
+    record(d,true,{response:d.submittedResponse,reason:'accepted',inputMethod:d.submittedMethod});G.streak=d.wrong?0:G.streak+1;
     G.bestStreak=Math.max(G.bestStreak,G.streak);
     playReading(d.id,'answer-feedback');
     flash(`${symbol(d.id)} · ${D.kanaById[d.id].romaji} ✓`,false,1000,0,()=>exposeReading(d.id,'answer-feedback'));
-    if(!G.bestBeaten&&G.previousBest>0&&G.score>G.previousBest){G.bestBeaten=true;celebrate('New personal best!','record');}
-    else if([5,10,20].includes(G.streak))celebrate(`${G.streak} in a row!`);
-    $('personalBest').textContent=(G.reviewIds?'Review best · ':'Best · ')+Math.max(G.previousBest,G.score);
+    if([5,10,20].includes(G.streak))celebrate(`${G.streak} in a row!`);
     effect(d,'splash');spirit('happy');remove(d,true);checkUnlock();hud();invalidateProgress();updateTarget();
   }
   function confusionFor(d,text){
@@ -447,7 +442,8 @@
     if(force){const t=lowest();if(t)wrong(t,v,'typing');$('answer').value='';$('answer').classList.add('bad');setTimeout(()=>$('answer').classList.remove('bad'),300);}
   }
   function hud(){
-    statText('score',String(G.score).padStart(3,'0'));statText('streak',G.streak>1?'×'+G.streak:'—');
+    statText('correctCount',G.correct);
+    statText('streak',G.streak>1?'×'+G.streak:'—');
     statText('time',fmt(G.t));
     $('lives').textContent='♥ '.repeat(G.lives)+'♡ '.repeat(G.totalLives-G.lives);
     $('lives').setAttribute('aria-label',`${G.lives} of 3 hearts remaining`);document.body.classList.toggle('low-hearts',G.lives===1);
@@ -467,13 +463,15 @@
   function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.pendingAnswer=null;G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}resetPad();syncAnimationState();L.flush();}
   function end(reason,completionReason='manual_finish'){
     if(!G||G.over)return;
-    const key=G.bestKey,firstCorrect=G.events.filter(e=>e.firstAttempt&&e.correct),expired=G.events.filter(e=>e.outcome==='timeout');
-    const old=gd.best[key]||0;gd.best[key]=Math.max(old,G.score);gd.sessions=(gd.sessions||0)+1;L.flush();
-    // Explicit end reasons, never inferred from UI copy; no answer, score, or item data leaves the app.
+    const firstCorrect=G.events.filter(e=>e.firstAttempt&&e.correct),corrected=G.events.filter(e=>e.correct&&!e.firstAttempt);
+    // Keep historical point records intact; counts never overwrite or convert those values.
+    gd.sessions=(gd.sessions||0)+1;L.flush();
+    // Explicit end reasons, never inferred from UI copy; no answer, count, or item data leaves the app.
     if(G.analyticsStarted)window.NihongoAnalytics?.track('practice_complete',{practice_mode:G.reviewIds?'review':G.mode,completion_reason:completionReason});
-    $('resultTitle').textContent=G.score>old&&G.score?'A new personal best!':G.correct?'Nice run!':'Ready for another run?';
-    $('resultMessage').textContent=reason+'. '+(G.score>old&&G.score?'Your new record is waiting to be beaten.':'Try again and beat your best.');
-    $('resultStats').innerHTML=`<div><b>${G.score}</b><small>POINTS</small></div><div><b>${G.bestStreak}</b><small>BEST STREAK</small></div><div><b>${firstCorrect.length}</b><small>FIRST-TRY HITS</small></div><div><b>${expired.length}</b><small>EXPIRED DROPS</small></div>`;
+    $('resultTitle').textContent=G.correct?'Nice practice!':'Ready for another rain?';
+    $('resultMessage').textContent=reason+'. '+(G.correct?'Every answer is practice.':'Listen to a few kana, then try again.');
+    $('resultStats').innerHTML=`<div><b>${G.correct}</b><small>CORRECT ANSWERS</small></div><div><b>${G.errors}</b><small>WRONG ANSWERS</small></div><div><b>${G.expirations}</b><small>EXPIRED DROPS</small></div>`;
+    $('resultDetails').textContent=`${firstCorrect.length} first-try · ${corrected.length} after correction · Best streak ${G.bestStreak}`;
     renderNextRow(cfg.mode==='kata'?'katakana':'hiragana');
     const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])];
     lastReview=review.filter(id=>candidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
