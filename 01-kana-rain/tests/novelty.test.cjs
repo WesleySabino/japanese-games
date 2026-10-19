@@ -11,7 +11,7 @@ test('novelty exposes the same pure API to browser and CommonJS',()=>{
   const context=vm.createContext({});
   vm.runInContext(fs.readFileSync(path.resolve(__dirname,'../src/novelty.js'),'utf8'),context);
   assert.deepEqual(Object.keys(context.KanaNovelty),Object.keys(Novelty));
-  assert.deepEqual(Novelty.constants,{windowSize:60,missLimit:4,recoveryHits:55,maxNew:2,warmup:3});
+  assert.deepEqual(Novelty.constants,{windowSize:60,missLimit:4,timeoutLimit:2,recoveryHits:55,cooldownHits:10,maxNew:2,warmup:3});
 });
 
 const missed=(state,id,extra={})=>resolved(state,id,{firstCorrect:false,miss:true,...extra});
@@ -26,10 +26,12 @@ test('four first-answer misses on seen kana close admission even with 55 first-t
   assert.equal(state.recent.length,59);assert.equal(state.recent.filter(round=>round.miss).length,4);
 });
 
-test('expirations alone never close admission',()=>{
+test('two expirations close admission and one expiration pauses new presentations',()=>{
   const state=Novelty.create({});
-  for(let i=0;i<60;i++)resolved(state,'timeout:'+i,{timeout:true,firstCorrect:false});
-  assert.equal(state.blocked,false);assert.equal(state.recent.filter(round=>round.timeout).length,60);
+  resolved(state,'timeout:0',{timeout:true,firstCorrect:false});
+  assert.equal(state.blocked,false);assert.equal(state.cooldownRemaining,10);
+  resolved(state,'timeout:1',{timeout:true,firstCorrect:false});
+  assert.equal(state.blocked,true);assert.equal(state.recent.filter(round=>round.timeout).length,2);
   assert.equal(state.recent.some(round=>round.miss),false);
 });
 
@@ -40,7 +42,7 @@ test('a miss is only recorded for a drop that was not a first-try hit',()=>{
   missed(state,'familiar-corrected');assert.equal(state.recent.at(-1).miss,true);
 });
 
-test('recovery requires a full window and the hit target; expirations only cost hits',()=>{
+test('recovery requires a full window, hit target and fewer than two expirations',()=>{
   const state=Novelty.create({});
   for(let i=0;i<4;i++)missed(state,'miss:'+i);
   assert.equal(state.blocked,true);
@@ -48,17 +50,21 @@ test('recovery requires a full window and the hit target; expirations only cost 
   for(let i=0;i<53;i++)resolved(state,'hit:'+i);
   assert.equal(state.recent.length,59);assert.equal(state.blocked,true,'recovery requires the full 60-drop window');
   resolved(state,'hit:53');assert.equal(state.blocked,true,'four misses still block a full window');
-  resolved(state,'hit:54');assert.equal(state.blocked,false,'three misses, two expirations and 55 first-try hits reopen admission');
+  resolved(state,'hit:54');assert.equal(state.blocked,true,'two expirations still block despite 55 first hits');
+  for(let i=55;i<59;i++)resolved(state,'hit:'+i);
+  assert.equal(state.blocked,false,'one expiration and 59 first hits recover admission');
   for(let i=4;i<8;i++)missed(state,'miss:'+i);
   assert.equal(state.blocked,true,'a new reading slump closes admission again');
 });
 
-test('expirations delay recovery only by not being first-try hits',()=>{
+test('five expirations cannot reopen admission at 55 hits; one remaining can',()=>{
   const state=Novelty.create({novelty:{version:1,seen:{},recent:[],blocked:true}});
   for(let i=0;i<6;i++)resolved(state,'timeout:'+i,{timeout:true,firstCorrect:false});
   for(let i=0;i<54;i++)resolved(state,'hit:'+i);
   assert.equal(state.blocked,true,'six expirations leave only 54 first-try hits in 60');
-  resolved(state,'hit:54');assert.equal(state.blocked,false,'five expirations and 55 first-try hits reopen admission');
+  resolved(state,'hit:54');assert.equal(state.blocked,true,'five expirations still block at the hit target');
+  for(let i=55;i<59;i++)resolved(state,'hit:'+i);
+  assert.equal(state.blocked,false);
 });
 
 test('a blocked gate stays blocked when misses age out without sufficient first answers',()=>{
@@ -68,10 +74,12 @@ test('a blocked gate stays blocked when misses age out without sufficient first 
   assert.equal(state.blocked,true);assert.equal(state.recent.filter(round=>round.miss).length,0);
   for(let i=0;i<54;i++)resolved(state,'first:'+i);
   assert.equal(state.blocked,true,'54 first-try hits in 60 must not reopen admission');
-  resolved(state,'first:54');assert.equal(state.blocked,false,'55 first-try hits in 60 reopen admission');
+  resolved(state,'first:54');assert.equal(state.blocked,true,'five timeouts still block');
+  for(let i=55;i<59;i++)resolved(state,'first:'+i);
+  assert.equal(state.blocked,false,'one timeout remains after 59 fresh hits');
 });
 
-test('saved version 1 rounds without a miss flag load safely: corrections count, expirations do not',()=>{
+test('saved version 1 rounds close the restored expiration brake without rewriting history',()=>{
   const recent=[
     ...Array.from({length:5},(_,i)=>({roundId:'old-timeout:'+i,firstCorrect:false,timeout:true})),
     ...Array.from({length:51},(_,i)=>({roundId:'old-hit:'+i,firstCorrect:true,timeout:false})),
@@ -79,9 +87,9 @@ test('saved version 1 rounds without a miss flag load safely: corrections count,
   ];
   const saved={version:1,seen:{'kana:あ':true},recent,blocked:false},before=JSON.stringify(saved);
   const state=Novelty.create({novelty:saved});
-  assert.equal(state,saved);assert.equal(JSON.stringify(state),JSON.stringify({...JSON.parse(before),pace:'calm'}),'loading rewrites nothing but the pace default');
+  assert.equal(state,saved);assert.deepEqual(state.recent,JSON.parse(before).recent);assert.deepEqual(state.seen,JSON.parse(before).seen);assert.equal(state.cooldownRemaining,10);assert.equal(state.blocked,true);
   resolved(state,'new-hit');
-  assert.equal(state.blocked,false,'five old expirations and three old corrections keep admission open');
+  assert.equal(state.blocked,true,'five old expirations close admission immediately on load');
   missed(state,'new-miss');
   assert.equal(state.blocked,true,'the three old corrections and one new miss close admission');
 });
@@ -130,9 +138,9 @@ test('migration counts each terminal drop once and keeps corrections separate fr
   ],snapshot=JSON.stringify(attempts),state=Novelty.create({},{attempts});
   // The first round debuts あ, so its correction is not a miss; the next round's wrong first answer is.
   assert.deepEqual(state.recent,[
-    {roundId:'corrected',firstCorrect:false,timeout:false,miss:false},
-    {roundId:'expired',firstCorrect:false,timeout:true,miss:true},
-    {roundId:'standalone',firstCorrect:true,timeout:false,miss:false}
+    {roundId:'corrected',firstCorrect:false,timeout:false,miss:false,familiar:false},
+    {roundId:'expired',firstCorrect:false,timeout:true,miss:true,familiar:true},
+    {roundId:'standalone',firstCorrect:true,timeout:false,miss:false,familiar:true}
   ]);
   assert.equal(JSON.stringify(attempts),snapshot,'the learner ledger is untouched');
   resolved(state,'expired',{timeout:true});assert.equal(state.recent.length,3,'duplicate delivery does not consume another position');
@@ -185,11 +193,11 @@ test('only a provably earlier session reading establishes familiarity before the
   assert.equal(JSON.stringify(evidence),before,'exposure and attempt chronology is untouched');
 });
 
-test('valid saved version 1 state is unchanged even when replay evidence contains legacy familiarity',()=>{
+test('saved evidence is retained while the additive pause is initialized',()=>{
   const saved={version:1,pace:'balanced',seen:{'kana:い':true},recent:[{roundId:'saved',firstCorrect:false,timeout:false}],blocked:true};
   const before=JSON.stringify(saved),gameData={novelty:saved};
   const state=Novelty.create(gameData,{items:{'kana:あ':{legacyFacets:{'form→sound':{correct:2}}}},attempts:[event('unused')]});
-  assert.equal(state,saved);assert.equal(JSON.stringify(state),before);
+  assert.equal(state,saved);assert.deepEqual(state.recent,JSON.parse(before).recent);assert.deepEqual(state.seen,JSON.parse(before).seen);assert.equal(state.cooldownRemaining,10);
 });
 
 test('first reading in play counts as introduced but map and lesson references do not',()=>{
@@ -220,4 +228,49 @@ test('legacy answers remain seen without inventing attempts or changing earned p
 test('other facets, games and words cannot close kana reading admission',()=>{
   const attempts=[event('pair',{facet:'script→script',outcome:'timeout'}),event('word',{itemId:'w:ねこ',outcome:'timeout'}),event('other',{gameId:'other',outcome:'timeout'})];
   const state=Novelty.create({},{attempts});assert.deepEqual(state.seen,{});assert.deepEqual(state.recent,[]);assert.equal(state.blocked,false);
+});
+
+
+test('immediate pause survives JSON restart and cannot be cleared by corrections or debut hits',()=>{
+  const gameData={},state=Novelty.create(gameData);Novelty.pause(state);
+  assert.equal(state.blocked,false,'a single error only starts the short pause');
+  const restored=Novelty.create(JSON.parse(JSON.stringify(gameData)));
+  assert.equal(restored.cooldownRemaining,10);
+  resolved(restored,'correction',{firstCorrect:false,miss:true,failureRecorded:true});
+  resolved(restored,'debut',{familiar:false});
+  assert.equal(restored.cooldownRemaining,10);
+  for(let i=0;i<9;i++)resolved(restored,'familiar:'+i,{familiar:true});
+  assert.equal(restored.cooldownRemaining,1);Novelty.setPace(restored,'bold');
+  assert.equal(restored.cooldownRemaining,1,'switching difficulty does not bypass the pause');
+  resolved(restored,'tenth',{familiar:true});assert.equal(restored.cooldownRemaining,0);
+});
+
+test('every new failure resets consecutive recovery and duplicate completion is neutral',()=>{
+  const state=Novelty.create({});Novelty.pause(state);
+  for(let i=0;i<9;i++)resolved(state,'hit:'+i);
+  assert.equal(state.cooldownRemaining,1);
+  resolved(state,'expired',{timeout:true,firstCorrect:false,familiar:false});
+  assert.equal(state.cooldownRemaining,10,'even an untouched debut expiration pauses');
+  resolved(state,'one');assert.equal(state.cooldownRemaining,9);
+  resolved(state,'expired',{timeout:true,firstCorrect:false});
+  assert.equal(state.cooldownRemaining,9,'a duplicate cannot reset or reduce recovery');
+  Novelty.pause(state);resolved(state,'corrected',{firstCorrect:false,miss:true,failureRecorded:true});
+  assert.equal(state.cooldownRemaining,10);
+});
+
+test('upgrade uses recent failures and pending wrong answers without replaying saved evidence',()=>{
+  const saved=()=>({version:1,seen:{'kana:あ':true},recent:Array.from({length:60},(_,i)=>({roundId:'old:'+i,firstCorrect:i!==50,timeout:i===50,miss:false})),blocked:false});
+  const state=Novelty.create({novelty:saved()});assert.equal(state.cooldownRemaining,10,'legacy tail cannot invent familiar recovery');
+  const clean=saved();clean.recent[50].firstCorrect=true;clean.recent[50].timeout=false;
+  assert.equal(Novelty.create({novelty:clean}).cooldownRemaining,0);
+  const pending=saved();pending.recent.forEach(e=>{e.firstCorrect=true;e.timeout=false;});
+  const attempts=[event('pending',{outcome:'incorrect',correct:false})],before=JSON.stringify(attempts);
+  assert.equal(Novelty.create({novelty:pending},{attempts}).cooldownRemaining,10);
+  assert.equal(JSON.stringify(attempts),before);
+});
+
+test('explicit saved cooldown is preserved even when the completed tail looks clean',()=>{
+  const saved={version:1,pace:'calm',seen:{},recent:[],blocked:false,cooldownRemaining:7};
+  const state=Novelty.create({novelty:saved});assert.equal(state.cooldownRemaining,7);
+  Novelty.create({novelty:state});assert.equal(state.cooldownRemaining,7);
 });

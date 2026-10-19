@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..'),output=path.join(__dirname,'artifacts/no
 const url='http://127.0.0.1:4186',checks=[],errors=[],contexts=[];
 let browser,server;
 
-async function context(viewport={width:1920,height:1080},remoteName=false){
+async function context(viewport={width:1920,height:1080},remoteName=false,fixtureKind='held'){
   const ctx=await browser.newContext({viewport,isMobile:viewport.width<500,hasTouch:viewport.width<500,serviceWorkers:'block'});
   contexts.push(ctx);
   const origin=remoteName?'http://kana-rain.invalid:4186':url;
@@ -23,14 +23,15 @@ async function context(viewport={width:1920,height:1080},remoteName=false){
     }else if(target.hostname==='127.0.0.1'||['data:','blob:'].includes(target.protocol))await route.continue();
     else await route.abort();
   });
-  await ctx.addInitScript(()=>{
+  await ctx.addInitScript(fixtureKind=>{
     if(localStorage.getItem('novelty-presentation-fixture'))return;
-    const seen=Object.fromEntries(['あ','い','う','え','お'].map(char=>['kana:'+char,true]));
-    const recent=Array.from({length:60},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<54,timeout:i>=58}));
-    const saved={version:2,created:Date.now(),items:{},games:{'kana-rain':{rows:{hiragana:3,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,pace:'calm',seen,recent,blocked:true}}}};
+    const chars=fixtureKind==='empty'?[]:fixtureKind==='vowel-hold'?['あ']:['あ','い','う','え','お'];
+    const seen=Object.fromEntries(chars.map(char=>['kana:'+char,true]));
+    const recent=fixtureKind==='held'?Array.from({length:60},(_,i)=>({roundId:'seed:'+i,firstCorrect:i<54,timeout:i>=58})):[];
+    const saved={version:2,created:Date.now(),items:{},games:{'kana-rain':{rows:{hiragana:3,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,pace:'calm',seen,recent,blocked:fixtureKind==='held'||fixtureKind==='empty',cooldownRemaining:['empty','vowel-hold'].includes(fixtureKind)?10:0}}}};
     localStorage.setItem('jp-learner-v1',JSON.stringify(saved));
     localStorage.setItem('novelty-presentation-fixture','1');
-  });
+  },fixtureKind);
   const page=await ctx.newPage();
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(origin);
@@ -57,7 +58,7 @@ async function noCounter(page){
 async function noveltyState(page){
   return page.evaluate(()=>{
     const novelty=KanaRain.gameData.novelty,g=KanaRain.state;
-    return {blocked:novelty.blocked,recent:novelty.recent,seen:novelty.seen,introduced:[...g.newIds],familiar:g.familiarSinceIntroduction,drops:g.drops.map(d=>({id:d.id,isIntroduction:d.isIntroduction}))};
+    return {blocked:novelty.blocked,cooldown:novelty.cooldownRemaining,recent:novelty.recent,seen:novelty.seen,introduced:[...g.newIds],familiar:g.familiarSinceIntroduction,drops:g.drops.map(d=>({id:d.id,isIntroduction:d.isIntroduction}))};
   });
 }
 async function spawnFromQueue(page,id){
@@ -102,7 +103,9 @@ async function behavior(){
   await answer(page);await familiar(page,53);
   assert.equal((await noveltyState(page)).blocked,true,'54 fresh hits still leave the four saved corrections in the 60-drop window');
   await familiar(page,1);
-  assert.equal((await noveltyState(page)).blocked,false,'three misses and two expirations with 55 first hits reopen admission');
+  assert.equal((await noveltyState(page)).blocked,true,'55 hits cannot reopen admission while two expirations remain');
+  await familiar(page,3);assert.equal((await noveltyState(page)).blocked,true,'58 hits still retain both expirations');
+  await familiar(page,1);assert.equal((await noveltyState(page)).blocked,false,'59 hits and one remaining expiration reopen admission');
   const correct=await page.evaluate(()=>KanaRain.state.correct);
   await spawnNext(page,'kana:か');state=await noveltyState(page);
   assert.equal(state.drops[0].id,'kana:か');assert.equal(state.drops[0].isIntroduction,true);
@@ -128,10 +131,11 @@ async function behavior(){
   assert.equal(state.seen['kana:く'],undefined);assert.equal(state.introduced.length,2);
   await screenshot(page,'03-budget-without-counter');await answer(page);
   await expire(page);await expire(page);
-  assert.equal((await noveltyState(page)).blocked,false,'real expirations no longer close admission');
+  assert.equal((await noveltyState(page)).blocked,true,'two real expirations close admission');
+  assert.equal((await noveltyState(page)).cooldown,10,'expiration also starts the persistent cooldown');
   assert.equal(await page.evaluate(()=>KanaRain.state.lives),1,'real expirations retain the arcade heart cost');
   for(let i=0;i<3;i++)await misread(page);
-  assert.equal((await noveltyState(page)).blocked,false,'three misreadings leave admission open');
+  assert.equal((await noveltyState(page)).blocked,true,'the expiration brake remains closed during misreadings');
   await misread(page);
   state=await noveltyState(page);
   assert.equal(state.blocked,true,'four wrong first answers on familiar kana close admission');
@@ -144,8 +148,30 @@ async function behavior(){
   await page.reload();await page.waitForFunction(()=>!!window.KanaRain);await start(page);await noCounter(page);
   state=await noveltyState(page);assert.equal(state.blocked,true);assert.deepEqual(state.introduced,[]);
   assert.equal(await page.evaluate(()=>JSON.stringify(KanaRain.gameData.novelty)),snapshot,'reload preserves durable novelty state');
-  checks.push({check:'recovery, first presentation before answers, one debut on screen, three familiar drops, two-kana budget, expirations that cost hearts but not admission, four misreadings that close it, restart and reload without counters',pass:true});
+  checks.push({check:'recovery requires at most one expiration, first presentation, one debut, three first-try familiar hits, two-kana budget, two expirations/four misreadings close admission, restart/reload persistence without counters',pass:true});
   await page.close();
+}
+async function safeguards(){
+  const page=await context(undefined,false,'open');await start(page);await answer(page);await familiar(page,2);
+  await spawnNext(page,'kana:か');await spawnFromQueue(page,'kana:あ');
+  await page.evaluate(()=>{KanaRain.state.drops.forEach(d=>d.progress=d.id==='kana:あ'?.3:0);});
+  await page.waitForFunction(()=>KanaRain.state.target.id==='kana:あ');
+  const before=await noveltyState(page);await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');
+  await page.waitForFunction(()=>KanaRain.gameData.novelty.cooldownRemaining===10);
+  let state=await noveltyState(page);assert.equal(state.recent.length,before.recent.length,'wrong submission pauses before the round completes');assert.equal(state.familiar,0);
+  await page.locator('#answer').fill('a');await page.waitForFunction(()=>!KanaRain.state.drops.some(d=>d.id==='kana:あ'));
+  assert.equal((await noveltyState(page)).cooldown,10,'correcting a wrong first answer earns no cooldown credit');assert.equal((await noveltyState(page)).familiar,0);
+  await answer(page);assert.equal((await noveltyState(page)).cooldown,10,'a first-try debut answer earns no familiar cooldown credit');assert.equal((await noveltyState(page)).familiar,0);
+  await finish(page);await page.locator('#againBtn').click();await ready(page);await freezeScheduling(page);assert.equal((await noveltyState(page)).cooldown,10,'restart retains cooldown');
+  await page.reload();await page.waitForFunction(()=>!!window.KanaRain);assert.equal(await page.evaluate(()=>KanaRain.gameData.novelty.cooldownRemaining),10,'reload retains cooldown');await start(page);await answer(page);await familiar(page,8);
+  assert.equal((await noveltyState(page)).cooldown,1,'nine familiar first-try hits are insufficient');
+  await spawnNext(page,'kana:き');state=await noveltyState(page);assert.equal(state.seen['kana:き'],undefined,'new kana stays deferred before the tenth hit');assert.notEqual(state.drops[0].id,'kana:き');await answer(page);
+  assert.equal((await noveltyState(page)).cooldown,0);await spawnNext(page,'kana:き');assert.equal((await noveltyState(page)).drops[0].id,'kana:き');await answer(page);
+  // A wrong answer on the debut itself also starts the immediate hold.
+  await finish(page);await page.locator('#againBtn').click();await ready(page);await freezeScheduling(page);await answer(page);await familiar(page,2);await spawnNext(page,'kana:く');assert.equal((await noveltyState(page)).drops[0].isIntroduction,true);await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');assert.equal((await noveltyState(page)).cooldown,10);await answer(page);assert.equal((await noveltyState(page)).cooldown,10);
+  checks.push({check:'wrong submission pauses immediately; corrected/debut answers earn no cooldown credit; ten familiar first hits are required across restart/reload',pass:true});await page.close();
+  const vowel=await context(undefined,false,'vowel-hold');await start(vowel);await answer(vowel);await spawnNext(vowel,'kana:い');const held=await noveltyState(vowel);assert.equal(held.seen['kana:い'],undefined,'unseen starter vowel obeys the hold once a familiar kana exists');assert.notEqual(held.drops[0].id,'kana:い');await vowel.close();
+  const empty=await context(undefined,false,'empty');await start(empty);const boot=await noveltyState(empty);assert.equal(boot.drops[0].isIntroduction,true);assert.equal(boot.drops[0].id,'kana:あ');assert.equal(boot.cooldown,10);checks.push({check:'starter vowels bootstrap only an alphabet without familiar content and otherwise obey both brakes',pass:true});await empty.close();
 }
 async function responsive(){
   for(const [width,height] of [[1920,1080],[1366,768],[1200,768],[1024,768],[390,844],[320,568],[844,390],[640,360]]){
@@ -218,7 +244,7 @@ async function scope(){
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',code=>reject(new Error('Server exited '+code)));});
   const channel=process.env.PLAYWRIGHT_BROWSER_CHANNEL;
   browser=await chromium.launch({headless:true,...(channel?{channel}:{})});
-  await behavior();await responsive();await smallScreenTarget();await scope();assert.deepEqual(errors,[]);
+  await behavior();await safeguards();await responsive();await smallScreenTarget();await scope();assert.deepEqual(errors,[]);
   fs.writeFileSync(path.join(output,'verification.json'),JSON.stringify({verifiedAt:new Date().toISOString(),syntheticProgress:true,productionAccess:false,checks,errors},null,2)+'\n');
   console.log('PASS: novelty presentation rules without counters; '+checks.length+' checks, zero page errors.');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{

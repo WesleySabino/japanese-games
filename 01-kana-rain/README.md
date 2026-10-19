@@ -44,9 +44,11 @@ There is one selector. It changes when new kana resume after a rough streak; it 
 | Normal | 25 first-try hits in the latest 30 completed drops |
 | Hard | 10 first-try hits in the latest 12 completed drops |
 
-Four misses in the selected window pause first presentations. A miss is a wrong first answer on a kana already seen before that drop; expirations alone never pause them. Recovery needs the entire window, the selected hit target and fewer than four misses. These targets apply **after a pause**, not before every debut. Assisted first-try hits count; corrected retries do not. History continues across runs and reloads, retaining up to 60 completed drops.
+Any wrong submission or expiration pauses first presentations immediately, including a debut. New kana wait for **ten consecutive first-try hits on familiar drops**; corrections and debut hits do not advance that recovery. Another failure resets the ten-hit pause. Familiar rain continues, and restarting or reloading retains the pause.
 
-Three familiar completions precede and separate nonstarter debuts. A run introduces at most two distinct nonstarter kana, with only one debut on screen. Each alphabet's five starter vowels bypass pressure, spacing and the two-debut budget, while retaining the one-debut-on-screen rule. All earned rows remain eligible for familiar play. See [exact rules and saved-data behavior](NOVELTY_BALANCE.md).
+Two expirations or four familiar first-answer misses in the selected window also close the longer brake. A miss is a wrong first answer on a kana already seen before that drop. Recovery needs the entire window, the selected hit target, at most one expiration and fewer than four misses. These window targets apply **after that brake closes**, not before every debut. Assisted first-try hits count. History retains up to 60 completed drops across runs and reloads.
+
+Three consecutive first-try familiar hits precede and separate nonstarter debuts. A run introduces at most two distinct nonstarter kana, with only one debut on screen. Starter vowels bypass spacing and the two-debut budget, but respect both brakes when familiar content exists. An empty alphabet can present one starter to bootstrap familiar practice. All earned rows remain eligible for familiar play. See [exact rules and saved-data behavior](NOVELTY_BALANCE.md).
 
 ## Progress and results
 

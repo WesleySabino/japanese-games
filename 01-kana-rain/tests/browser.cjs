@@ -265,9 +265,10 @@ async function exerciseQuickWins(errors){
   await page.evaluate(()=>{
     Learner.reset();const gd=Learner.gameData('kana-rain');gd.rows={hiragana:2,katakana:1};gd.best={};gd.accuracy={};
     const kana=JPData.kana.filter(k=>k.script==='hiragana'&&['a','k'].includes(k.row));
-    for(const k of kana){for(let i=0;i<2;i++)Learner.record(k.id,'form→sound',{correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});}
-    for(let i=0;i<9;i++)Learner.record(kana[0].id,'form→sound',{correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
-    for(let i=0;i<2;i++)Learner.record(kana[0].id,'form→sound',{correct:false,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
+    // These are prior in-game answers, so admission must recognize the practice repertoire.
+    for(const k of kana){for(let i=0;i<2;i++)Learner.record(k.id,'form→sound',{gameId:'kana-rain',correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});}
+    for(let i=0;i<9;i++)Learner.record(kana[0].id,'form→sound',{gameId:'kana-rain',correct:true,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
+    for(let i=0;i<2;i++)Learner.record(kana[0].id,'form→sound',{gameId:'kana-rain',correct:false,rtMs:1000,firstAttempt:true,assistance:false,responseFormat:'romaji'});
     Learner.flush();
   });
   await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#gardenBtn').click();

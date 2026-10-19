@@ -1,5 +1,13 @@
 # Kana Rain releases
 
+## 1.8.1 — 2026-10-19
+
+- Restore the two-expiration novelty brake alongside the four familiar first-answer miss brake. Recovery requires a full difficulty window, the existing hit target, at most one expiration and fewer than four misses.
+- Any wrong submission or expiration immediately holds new kana until ten consecutive familiar first-try hits. Corrections and debut hits do not advance recovery. The pause survives restart/reload and applies to starter vowels once familiar content exists.
+- Spacing between nonstarter debuts now counts consecutive familiar first-try hits instead of all completions. Familiar rain, the adaptive curve and three hearts are preserved.
+- Reevaluate saved novelty history under the corrected brake and add a persistent cooldown without resetting attempts, exposures, earned rows, accuracy, records or the learner schema. Old recent failures conservatively start the ten-hit pause.
+- Advance the service-worker cache to release 1.8.1.
+
 ## 1.8.0 — 2026-10-18
 
 - Results name the next row ("Next: K-row · 1 / 5 kana ready") and list up to four unready kana with the consecutive first-try hits each still needs, closest first. The count uses the existing unlock rule (2 first-try hits and 85% first-try accuracy); nothing about unlocking changes. Hidden in exploration and once every row is open.

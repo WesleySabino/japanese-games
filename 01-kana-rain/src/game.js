@@ -154,7 +154,7 @@
   function spirit(mood){clearTimeout(spiritTimer);$('fieldSpirit').className='spirit '+mood;spiritTimer=setTimeout(()=>$('fieldSpirit').className='spirit idle',900);}
   function renderDifficulty(){
     $('difficultySelect').value=cfg.difficulty;$('difficultySelect').disabled=!!running();
-    $('difficultyNote').textContent={easy:'New kana return more cautiously after misreadings.',normal:'A balanced return of new kana after misreadings.',hard:'New kana return sooner after misreadings.'}[cfg.difficulty];
+    $('difficultyNote').textContent={easy:'New kana return more cautiously after mistakes or expired drops.',normal:'A balanced return of new kana after mistakes or expired drops.',hard:'New kana return sooner after mistakes or expired drops.'}[cfg.difficulty];
   }
   function changeDifficulty(id){
     if(running()||!Object.hasOwn(R.profiles,id))return;
@@ -238,10 +238,12 @@
     if(G.drops.some(d=>d.id===id&&d.isIntroduction))return false;
     if(N.hasSeen(novelty,id))return true;
     if(G.drops.some(d=>d.isIntroduction))return false;
-    // Each alphabet's five starter vowels bypass pressure/budget/warmup, one at a time.
-    if(starter(id))return true;
     const known=(G.reviewIds||candidates()).some(id=>N.hasSeen(novelty,id));
-    return G.newIds.size<N.constants.maxNew&&!novelty.blocked&&(!known||G.familiarSinceIntroduction>=N.constants.warmup);
+    // Bootstrap an empty alphabet; once familiar content exists, vowels respect both brakes.
+    if(starter(id)&&!known)return true;
+    if(novelty.blocked||novelty.cooldownRemaining>0)return false;
+    if(starter(id))return true;
+    return G.newIds.size<N.constants.maxNew&&(!known||G.familiarSinceIntroduction>=N.constants.warmup);
   }
   function nextEntry(){
     if(!G.queue.length)refill();
@@ -355,10 +357,12 @@
     if(detail.outcome!=='timeout'){G.attempts++;if(correct)G.correct++;}
     const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
     if(detail.outcome!=='timeout'){stat.attempts++;if(correct)stat.correct++;}
+    if(correct===false){N.pause(novelty);G.familiarSinceIntroduction=0;}
     if(correct||detail.outcome==='timeout'){
       // Earlier wrong answers make this a reading miss, unless the drop was the kana's debut.
-      N.finish(novelty,{roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout',miss:!d.isIntroduction&&!firstAttempt});
-      if(!d.isIntroduction)G.familiarSinceIntroduction++;
+      N.finish(novelty,{roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout',miss:!d.isIntroduction&&!firstAttempt,familiar:!d.isIntroduction,failureRecorded:!firstAttempt});
+      if(detail.outcome==='timeout'||!firstAttempt)G.familiarSinceIntroduction=0;
+      else if(!d.isIntroduction)G.familiarSinceIntroduction++;
     }
     L.flush();return ev;
   }

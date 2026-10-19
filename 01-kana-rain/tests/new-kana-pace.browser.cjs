@@ -22,11 +22,11 @@ async function context(viewport={width:1920,height:1080},pace){
   await ctx.addInitScript(({pace})=>{
     if(localStorage.getItem('new-kana-pace-fixture'))return;
     const at=1700000000000,chars=['あ','い','う','え','お'];
-    // Two expirations and four corrected rounds: only the corrections count as misses, closing Easy's 60-drop window.
+    // Two expirations and four corrected rounds close Easy; shorter windows contain only hits.
     const recent=Array.from({length:60},(_,i)=>({roundId:'pace-seed:'+i,firstCorrect:i>=6,timeout:i<2}));
     const attempts=recent.map((round,i)=>({attemptId:'pace-attempt:'+i,roundId:round.roundId,itemId:'kana:'+chars[i%5],facet:'form→sound',gameId:'kana-rain',at:at+i*1000,firstAttempt:true,assistance:false,correct:round.timeout?null:round.firstCorrect,outcome:round.timeout?'timeout':round.firstCorrect?'correct':'incorrect',reason:'synthetic-fixture'}));
     const exposures=chars.map((char,i)=>({exposureId:'pace-exposure:'+i,itemId:'kana:'+char,facet:'form→sound',gameId:'kana-rain',at:at+i,reason:'initial-reading'}));
-    const novelty={version:1,seen:Object.fromEntries(chars.map(char=>['kana:'+char,true])),recent,blocked:!pace||pace==='calm'};
+    const novelty={version:1,seen:Object.fromEntries(chars.map(char=>['kana:'+char,true])),recent,blocked:!pace||pace==='calm',cooldownRemaining:0};
     if(pace)novelty.pace=pace;
     const saved={version:2,created:at,items:{},attemptLedger:attempts,exposureLedger:exposures,games:{'kana-rain':{rows:{hiragana:15,katakana:1},best:{'hira:normal:180':1981},accuracy:{},playStyle:'arcade',difficulty:'normal',sound:false,novelty}}};
     localStorage.setItem('jp-learner-v1',JSON.stringify(saved));
@@ -84,7 +84,7 @@ async function profileRulesAndLocks(){
     const page=await context({width:1366,height:768},pace);await selected(page,pace);await start(page);
     assert.equal(await page.locator('#difficultySelect').isDisabled(),true);assert.equal(await page.locator('#mode').isDisabled(),true);
     const session=await page.evaluate(()=>({rules:KanaNovelty.constantsFor(KanaRain.gameData.novelty),blocked:KanaRain.gameData.novelty.blocked,hearts:KanaRain.state.totalLives,duration:KanaRain.state.sessionDuration,speed:KanaRain.state.speed,gap:KanaRain.state.gap,key:KanaRain.state.bestKey,previousBest:KanaRain.state.previousBest}));
-    assert.equal(session.rules.windowSize,rules.size);assert.equal(session.rules.recoveryHits,rules.hits);assert.equal(session.blocked,pace==='calm');assert.equal(session.hearts,3);assert.equal(session.duration,180);assert.ok(session.key.startsWith('arcade-v2:'));assert.equal(session.previousBest,0);
+    assert.equal(session.rules.windowSize,rules.size);assert.equal(session.rules.recoveryHits,rules.hits);assert.equal(session.rules.timeoutLimit,2);assert.equal(session.rules.cooldownHits,10);assert.equal(session.blocked,pace==='calm');assert.equal(session.hearts,3);assert.equal(session.duration,180);assert.ok(session.key.startsWith('arcade-v2:'));assert.equal(session.previousBest,0);
     assert.ok(Math.abs(session.speed-.1)<.005,'initial rain speed stays close to the common Normal curve');assert.ok(Math.abs(session.gap-2400)<120);
     assert.deepEqual(await page.evaluate(()=>['easy','normal','hard'].map(id=>KanaDifficulty.atTime(id,60))),Array.from({length:3},()=>({speed:.2,fallSeconds:5,gap:2400/Math.sqrt(2)})));
     await page.locator('#difficultySelect').evaluate(el=>{el.value='hard';el.dispatchEvent(new Event('change'));});assert.equal(await page.evaluate(()=>KanaRain.gameData.novelty.pace),pace);

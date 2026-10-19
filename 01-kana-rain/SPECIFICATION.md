@@ -1,6 +1,6 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** release 1.8.0, 18 October 2026.
+**Catalogue ID:** 01. **Baseline:** release 1.8.1, 19 October 2026.
 
 The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 
@@ -16,9 +16,11 @@ Touch input uses the sound pad: a fixed grid of 15 consonant families, then that
 
 ## Difficulty and new kana
 
-Difficulty selects recovery of first presentations after a pressure pause: Easy 55/60 (default), Normal 25/30, Hard 10/12. Four misses — wrong first answers on kana seen before that drop — in the selected window pause never-presented kana; expirations alone do not. Recovery requires the full window, the first-try hit target and fewer than four misses. This is not a prerequisite before every debut; hearts and rain speed are identical across levels.
+Any wrong submission or expiration pauses new kana immediately until ten consecutive first-try familiar hits. Corrections and debut hits are neutral; another failure resets recovery. This pause persists across restarts and reloads while familiar rain continues.
 
-Three completed familiar drops precede and separate nonstarter debuts. Each run allows at most two distinct nonstarter debuts and one debut on screen. Starter vowels bypass pressure, spacing and the two-debut budget but not the one-debut limit. First presentations and up to 60 completed outcomes persist across runs; earned rows remain eligible. See [exact admission rules](NOVELTY_BALANCE.md).
+Difficulty selects recovery after the longer brake closes: Easy 55/60 (default), Normal 25/30, Hard 10/12. Two expirations or four familiar first-answer misses in the selected window close this brake. Recovery requires the full window, the hit target, fewer than two expirations and fewer than four misses. The window target is not a prerequisite before every debut; hearts and adaptive rain are identical across levels.
+
+Three consecutive familiar first-try hits precede and separate nonstarter debuts. Each run allows at most two distinct nonstarter debuts and one debut on screen. Starter vowels bypass spacing and the two-debut budget but respect both brakes once familiar content exists; one starter can bootstrap an empty alphabet. First presentations and up to 60 completed outcomes persist; earned rows remain eligible. See [exact admission rules](NOVELTY_BALANCE.md).
 
 Rows unlock after every available kana has two correct first answers and at least 85% submitted first-answer accuracy. Hints are allowed. Corrected retries and expirations do not supply qualifying hits. Independent recall remains separately recorded evidence.
 
