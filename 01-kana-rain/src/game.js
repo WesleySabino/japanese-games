@@ -133,6 +133,17 @@
     const f=L.state(k.id)?.facets[FACET],correct=f?.firstCorrect||0,attempts=f?.firstAttempts||0,accuracy=attempts?(correct/attempts):0;
     return {k,correct,accuracy,attempts,ready:correct>=2&&accuracy>=.85};
   }
+  // Consecutive first-try hits that make a kana ready: at least 2 hits and 85% first-try accuracy (integer math).
+  const hitsToReady=({correct,attempts})=>Math.max(0,2-correct,Math.ceil((85*attempts-100*correct)/15));
+  function renderNextRow(script){
+    const box=$('resultNext'),next=D.rowsOrder[gd.rows[script]];
+    if(explore||!next){box.innerHTML='';box.classList.add('hidden');return;}
+    const rows=unlocked(script).map(readiness),pending=rows.filter(x=>!x.ready).map(x=>({k:x.k,need:hitsToReady(x)})).sort((a,b)=>a.need-b.need);
+    const shown=pending.slice(0,4).map(({k,need})=>`<span class="next-kana"><span lang="ja">${escapeText(k.char)}</span> +${need}</span>`).join(' '),more=pending.length-4;
+    box.innerHTML=`<p><b>Next: ${escapeText(rowNames[next]||next.toUpperCase()+'-row')}</b> · ${rows.length-pending.length} / ${rows.length} kana ready</p>`+
+      (pending.length?`<p class="next-needs"><span class="next-label">First-try hits to go</span> ${shown}${more>0?` <span class="next-more">+${more} more kana</span>`:''}</p>`:'');
+    box.classList.remove('hidden');
+  }
   function renderUnlocks(script){
     const count=gd.rows[script],next=D.rowsOrder[count],rows=unlocked(script).map(readiness),ready=rows.filter(x=>x.ready).length;
     $('unlockSummary').textContent=explore?'All rows available in exploration':!next?'All rows unlocked':`${ready} / ${rows.length} kana ready for the next row`;
@@ -459,6 +470,7 @@
     $('resultTitle').textContent=G.score>old&&G.score?'A new personal best!':G.correct?'Nice run!':'Ready for another run?';
     $('resultMessage').textContent=reason+'. '+(G.score>old&&G.score?'Your new record is waiting to be beaten.':'Try again and beat your best.');
     $('resultStats').innerHTML=`<div><b>${G.score}</b><small>POINTS</small></div><div><b>${G.bestStreak}</b><small>BEST STREAK</small></div><div><b>${firstCorrect.length}</b><small>FIRST-TRY HITS</small></div><div><b>${expired.length}</b><small>EXPIRED DROPS</small></div>`;
+    renderNextRow(cfg.mode==='kata'?'katakana':'hiragana');
     const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])];
     lastReview=review.filter(id=>candidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
     $('resultReview').innerHTML=review.length?'<p>A little more practice · tap to listen</p><div class="review-grid">'+review.map(id=>{

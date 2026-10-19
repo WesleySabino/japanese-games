@@ -215,6 +215,13 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .result-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:23px 0; }
 .result-stats b { display:block; color:#f9e9c4; font-family:var(--display-font); font-size:36px; font-weight:400; }
 .result-stats small { display:block; margin-top:5px; color:#bdc8ad; font-size:9px; letter-spacing:1px; }
+.result-next { margin:-6px 0 20px; padding:11px 14px; border:1px solid #a6b49030; border-radius:3px; background:#08252c; color:#e7dfbb; font-size:13px; line-height:1.5; }
+.result-next p { margin:0; }
+.result-next b { color:#f9e9c4; font-weight:600; }
+.result-next .next-needs { display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:4px 12px; margin-top:6px; color:#c4ceb4; font-size:12px; }
+.next-label { flex-basis:100%; }
+.next-kana { display:inline-flex; align-items:baseline; gap:5px; color:#f0d799; font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.next-kana [lang="ja"] { color:#f4e7c5; font:20px var(--kana-font); }
 .result-actions { display:flex; flex-direction:column; align-items:center; gap:17px; margin-top:25px; }
 .result-actions .menu-button { justify-content:center; min-height:55px; font-size:21px; }
 #resultReview { color:#bfceba; font-size:13px; line-height:1.7; }

@@ -423,6 +423,21 @@ test('single difficulty persists its recovery profile and locks across active an
   }
 });
 
+test('results name the next row and the first-try hits each kana still needs',async()=>{
+  const g=await game({prepare(L){
+    const log=(char,answers)=>answers.forEach((correct,n)=>L.record('kana:'+char,'form→sound',first(`next:${char}:${n}`,{correct,deferSave:true})));
+    // あ ready (2/2), い needs 1, う at 2/3 needs 4 (6/7 ≥ 85%, 5/6 is not), え and お unseen need 2.
+    log('あ',[true,true]);log('い',[true]);log('う',[true,false,true]);L.flush();
+  }});
+  g.app.start();g.skip();g.app.end('Result check');
+  const box=g.el('resultNext');assert.equal(box.classList.contains('hidden'),false);
+  assert.match(box.innerHTML,/Next: K-row<\/b> · 1 \/ 5 kana ready/);
+  assert.deepEqual([...box.innerHTML.matchAll(/<span lang="ja">(.+?)<\/span> \+(\d+)/g)].map(m=>m[1]+m[2]),['い1','え2','お2','う4']);
+  assert.doesNotMatch(box.innerHTML,/more kana/);
+  const explored=await game({explore:true});explored.app.start();explored.skip();explored.app.end('Result check');
+  assert.equal(explored.el('resultNext').classList.contains('hidden'),true,'exploration has no next row');
+});
+
 test('retired modes cannot be revived programmatically and focused review keeps three hearts',async()=>{
   const g=await game({explore:true});
   for(const mode of ['mix','pair','words','practice','unknown']){

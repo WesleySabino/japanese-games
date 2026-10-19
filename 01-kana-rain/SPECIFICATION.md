@@ -24,7 +24,7 @@ Rows unlock after every available kana has two correct first answers and at leas
 
 ## Menus, results and compatibility
 
-Session preparation lives only on the title screen. Settings contains device effects and analytics/privacy. My Kana Garden retains familiarity, row audio, readiness, export and collapsed learning details. Results emphasize points, best streak, first-try hits and expirations, with audio mistake cards and a focused one-minute review shortcut. Review also starts with three hearts.
+Session preparation lives only on the title screen. Settings contains device effects and analytics/privacy. My Kana Garden retains familiarity, row audio, readiness, export and collapsed learning details. Results emphasize points, best streak, first-try hits and expirations, then name the next row with the first-try hits its closest unready kana still need, with audio mistake cards and a focused one-minute review shortcut. Review also starts with three hearts.
 
 The title menu fits the viewport without internal scrolling. Alphabet/difficulty fields are centered; the entry and romaji hints follow the menu on separate lines. Limited-height and mobile layouts preserve those boundaries.
 

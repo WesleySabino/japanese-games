@@ -1,5 +1,10 @@
 # Kana Rain releases
 
+## Unreleased
+
+- Results name the next row ("Next: K-row · 1 / 5 kana ready") and list up to four unready kana with the consecutive first-try hits each still needs, closest first. The count uses the existing unlock rule (2 first-try hits and 85% first-try accuracy); nothing about unlocking changes. Hidden in exploration and once every row is open.
+- Help mentions the new results line. No storage, records or novelty state change.
+
 ## 1.7.0 — 2026-10-17
 
 - New kana pause after four wrong first answers on already-seen kana in the difficulty's recent window (60/30/12), instead of after two expirations. Expirations still cost a heart but no longer close the brake; misses on a kana's debut drop don't count. Recovery targets are unchanged: 55/60, 25/30, 10/12.
