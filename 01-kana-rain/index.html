@@ -20,7 +20,7 @@
   <meta property="og:image:alt" content="Kana Rain's illustrated Japanese rain garden, with a glowing lantern beside a misty pond.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Kana Rain — Free Japanese Kana Game">
-  <meta name="twitter:description" content="Read the falling kana. Type its sound. Grow your hiragana and katakana familiarity in a free browser game with audio and short sessions.">
+  <meta name="twitter:description" content="Learn Hiragana, then match Katakana with familiar Hiragana. Practice in a free rain garden with audio, short sessions, and saved progress.">
   <meta name="twitter:image" content="https://kana-rain.nihongogrove.top/assets/social-garden.png">
   <meta name="twitter:image:alt" content="Kana Rain's illustrated Japanese rain garden, with a glowing lantern beside a misty pond.">
   <script type="application/ld+json">
@@ -30,7 +30,7 @@
     "@id": "https://kana-rain.nihongogrove.top/#game",
     "name": "Kana Rain",
     "url": "https://kana-rain.nihongogrove.top/",
-    "description": "A free browser game for practicing Japanese hiragana and katakana through falling kana, typed answers, pronunciation audio, progressive rows, and saved local progress.",
+    "description": "A free browser game for practicing Japanese Hiragana with typed answers and Katakana with Hiragana choices, pronunciation audio, progressive rows, and saved local progress.",
     "image": "https://kana-rain.nihongogrove.top/assets/social-garden.png",
     "applicationCategory": "GameApplication",
     "applicationSubCategory": "Japanese kana reading game",
@@ -122,6 +122,14 @@
         <button id="submitBtn" class="dock-button" disabled type="submit" aria-label="Submit answer">↵</button>
         <button id="keyboardBtn" class="dock-button" type="button" aria-expanded="false" aria-label="Show the sound pad"><svg class="control-icon" aria-hidden="true"><use href="#icon-pad"/></svg></button>
       </form>
+      <div id="hiraganaChoices" class="hiragana-choice-grid hidden" role="group" aria-label="Hiragana matches for the highlighted drop" aria-describedby="targetHint">
+        <button id="hiraganaChoice0" class="menu-button primary" type="button" lang="ja" data-shortcut="1" aria-keyshortcuts="1" disabled>·</button>
+        <button id="hiraganaChoice1" class="menu-button primary" type="button" lang="ja" data-shortcut="2" aria-keyshortcuts="2" disabled>·</button>
+        <button id="hiraganaChoice2" class="menu-button primary" type="button" lang="ja" data-shortcut="3" aria-keyshortcuts="3" disabled>·</button>
+        <button id="hiraganaChoice3" class="menu-button primary" type="button" lang="ja" data-shortcut="4" aria-keyshortcuts="4" disabled>·</button>
+        <button id="hiraganaChoice4" class="menu-button primary" type="button" lang="ja" data-shortcut="5" aria-keyshortcuts="5" disabled>·</button>
+        <button id="hiraganaChoice5" class="menu-button primary" type="button" lang="ja" data-shortcut="6" aria-keyshortcuts="6" disabled>·</button>
+      </div>
       <div id="keyboard" class="touch-keyboard sound-pad hidden" role="group" aria-label="Sound pad: choose a family, then a sound" data-stage="family"></div>
       <p id="inputNote" class="input-note">Enter to submit · Esc to pause</p>
     </div>
@@ -129,7 +137,7 @@
     <aside id="storageNotice" class="storage-notice hidden" role="status" aria-live="polite"></aside>
     <div id="milestoneFeedback" class="milestone-feedback" role="status" aria-live="polite"></div>
     <div id="heartLoss" class="heart-loss hidden" role="status" aria-live="assertive"><span class="heart-loss-icon" aria-hidden="true">♡</span><span>One heart lost</span></div>
-    <section id="countdownOverlay" class="countdown-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="countdownTitle"><p class="eyebrow">READ · RECALL · REPEAT</p><h2 id="countdownTitle">Ready for the rain?</h2><strong id="countdownNumber" class="countdown-number" aria-live="polite">3</strong><p>Type the sound. Clear the rain.</p><button id="skipCountdown" class="text-button" type="button">Skip countdown</button></section>
+    <section id="countdownOverlay" class="countdown-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="countdownTitle"><p class="eyebrow">READ · RECALL · REPEAT</p><h2 id="countdownTitle">Ready for the rain?</h2><strong id="countdownNumber" class="countdown-number" aria-live="polite">3</strong><p id="countdownInstruction">Type the sound. Clear the rain.</p><button id="skipCountdown" class="text-button" type="button">Skip countdown</button></section>
     <div class="world-status"><span id="saveStatus" role="status" aria-live="polite">Checking saved progress…</span><span id="offlineStatus">Preparing your offline garden…</span></div>
     <nav class="art-link" aria-label="About the game"><a href="about.html">About Kana Rain</a> · <a href="art.html">Artwork ↗</a></nav>
   </main>
@@ -165,11 +173,12 @@
   </dialog>
   <dialog id="helpDialog" class="game-dialog help-dialog" aria-labelledby="helpTitle">
     <div class="dialog-panel"><div class="panel-heading"><h2 id="helpTitle">Read. Recall. Let it rain.</h2><button id="closeHelp" class="dialog-close" aria-label="Close instructions">×</button></div><p class="eyebrow">WELCOME TO THE GARDEN</p>
-      <p>Read a falling kana and type its sound: <b>あ → a</b>, <b>し → shi</b>. Correct answers submit automatically. Short answers such as <b>n</b> wait briefly for another letter; stop typing to accept, or press <kbd>Enter</kbd> immediately.</p>
+      <p>Start with Hiragana and type its sound: <b>あ → a</b>, <b>し → shi</b>. Correct answers submit automatically. Short answers such as <b>n</b> wait briefly for another letter; stop typing to accept, or press <kbd>Enter</kbd> immediately.</p>
       <p>Choose <b>Hiragana</b> or <b>Katakana</b> and your difficulty on the main menu. Each session begins with a short countdown; choose <b>Skip countdown</b> when you are ready. You can answer any visible drop; the highlighted drop is the priority.</p>
       <p>Read the rain and follow your <b>correct answers, mistakes and expired drops</b>. Each accepted correct answer counts once, including corrections; each wrong submission counts once. Expiring a drop is counted separately and does not add another wrong answer. A regular run lasts <b>three minutes</b>, with <b>three hearts</b>. On every difficulty, rain speeds up as you answer correctly and eases off whenever a drop gets through. Every drop that reaches the ground costs one heart and clears any unfinished answer; losing all hearts ends the run.</p>
       <p>New kana briefly show their sound. Open My Kana Garden and tap a lesson tile to listen. A new row opens when each available kana has two correct first answers and at least 85% first-answer accuracy. Reading hints and pronunciation do not block unlocks. Wrong answers show the correct reading, stain the drop, and make it fall faster. Missed or mistaken kana return for practice.</p>
-      <p>Romaji hints disappear as you learn. Both alphabets always use romaji answers. On a touch screen, the <b>sound pad</b> builds them in two taps: choose the sound family, then the sound — <b>し → S/SH → shi</b>, <b>しゃ → S/SH → sha</b>, <b>ん → N → n</b>. The pad keeps the same places for every kana; ‹ goes back. The keyboard button switches between the pad and your device keyboard.</p>
+      <p>Romaji hints disappear as you learn Hiragana. On a touch screen, the <b>sound pad</b> builds its answers in two taps: choose the sound family, then the sound — <b>し → S/SH → shi</b>, <b>しゃ → S/SH → sha</b>, <b>ん → N → n</b>. The pad keeps the same places for every kana; ‹ goes back. The keyboard button switches between the pad and your device keyboard.</p>
+      <p><b>Katakana follows Hiragana.</b> New gardens unlock it after all 104 Hiragana have two correct first answers and at least 85% first-answer accuracy. Previously earned Katakana access stays available. In Katakana, choose the matching Hiragana from <b>six options</b>: <b>シ → し</b>, <b>キャ → きゃ</b>. Tap a drop to select it. Click an option or press <b>1–6</b>, following the displayed numbers. Options stay in place until that drop is answered or expires; no Japanese keyboard or romaji typing is needed. These answers record recognition with choices, separately from independent recall.</p>
       <p>An <b>!</b> badge warns that a drop is close to the ground. After a run, the results name the next row and how many first-try hits each kana still needs. Tap a review card to hear its kana, or choose <b>Review these kana</b> for a focused <b>one-minute</b> round with three hearts. My Kana Garden shows next-row readiness and optional learning details.</p>
       <p><b>Difficulty controls new kana, not rain speed.</b> Any wrong answer or expired drop pauses new introductions until ten consecutive first-try hits on kana you have already met. Corrections and debut hits do not advance this recovery. Two expired drops or four wrong first answers on familiar kana in the recent window also close the longer brake. <b>Easy</b> brings them back with 55 first-try hits in the latest 60 completed drops, <b>Normal</b> with 25 in 30, or <b>Hard</b> with 10 in 12, once fewer than two expired drops and fewer than four of those wrong first answers remain. These are recovery targets after a pause, not requirements before every new kana. Both the recent history and the ten-hit pause continue between sessions.</p>
       <p>New kana arrive after three familiar completions, at most two per run and one debut on screen. Each alphabet's five starter vowels bypass the recovery, spacing and two-debut limits. All earned rows remain unlocked.</p>

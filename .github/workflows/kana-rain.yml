@@ -73,5 +73,8 @@ jobs:
       - name: Run sound pad browser checks
         run: pnpm run test:sound-pad
 
+      - name: Run Katakana matching and keyboard browser checks
+        run: pnpm run test:katakana-bridge
+
       - name: Build the static site
         run: pnpm build

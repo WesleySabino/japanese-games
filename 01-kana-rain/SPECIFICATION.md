@@ -1,18 +1,20 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** release 1.9.0, 19 October 2026.
+**Catalogue ID:** 01. **Baseline:** release 1.10.0, 20 October 2026.
 
 The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 
 ## Core game
 
-The title screen offers exactly two choices: Hiragana/Katakana and Easy/Normal/Hard. Both alphabets always use romaji. Any visible matching drop can be cleared; forced invalid submissions belong to the highlighted drop. Katakana retains the existing basic-Hiragana unlock requirement.
+The title screen offers Hiragana/Katakana and Easy/Normal/Hard. New gardens begin with Hiragana only; Katakana unlocks after completion of the 104-form hiragana catalogue. Hiragana uses romaji typing or the sound pad. Katakana uses six clickable hiragana choices for a selected falling drop, with no romaji or Japanese-keyboard entry. Click a choice or press 1–6, following the displayed numbers. The choices remain stable for that round, including retries; stale choices cannot answer another drop. Existing Katakana access remains available.
 
 Regular runs last three minutes, with three hearts on every difficulty. The existing Normal curve applies universally: 10-second initial falls, acceleration capped at 3.5×. The curve reads an effective time, not the clock: +1.6 seconds per correct answer, −20 seconds per expiration, never below zero. A drop expiring takes one heart and clears unfinished input; a wrong answer stains and accelerates its drop. Zero hearts ends the run. The live HUD shows correct answers and the timer around large central hearts; streaks, pronunciation, celebrations, danger cues and reduced effects remain.
 
-Complete readings submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play; Enter submits immediately. Pauses and countdowns freeze simulation and pending answer delays. Ordinary pauses preserve partial input.
+Complete typed hiragana readings submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play; Enter submits immediately. Any visible matching hiragana drop can be cleared; forced invalid submissions belong to the highlighted drop. Pauses and countdowns freeze simulation and pending answer delays. Ordinary pauses preserve partial input. Katakana choices submit immediately for their selected round.
 
-Touch input uses the sound pad: a fixed grid of 15 consonant families, then that family's sounds in nine fixed slots (five vowel columns, three yōon, final n) in the same space. It produces the same romaji readings and covers all 208 forms in two taps; nothing on the pad depends on the falling kana. Compositions submit immediately. An unmatched composition is a mistake for the drop highlighted when it began. The exact cell resolves homophones; another row with the same accepted sound still counts. Portrait places the pad below the rain and short landscape beside it. Phone portrait uses one compact status row, with listen, garden and sound tools on the answer line; two family rows fit when the pad is at least 316 px wide, otherwise it retains three. Touch targets remain at least 36 px. Phone drop width and height are reduced by 40%; normalized fall timing does not change. The native keyboard opens only on request; physical typing is unchanged.
+Hiragana touch input uses the sound pad: a fixed grid of 15 consonant families, then that family's sounds in nine fixed slots (five vowel columns, three yōon, final n) in the same space. It produces the same romaji readings and covers all 104 hiragana forms in two taps; nothing on the pad depends on the falling kana. Compositions submit immediately. An unmatched composition is a mistake for the drop highlighted when it began. The exact cell resolves homophones; another row with the same accepted sound still counts. Portrait places the pad below the rain and short landscape beside it. Phone portrait uses one compact status row, with listen, garden and sound tools on the answer line; two family rows fit when the pad is at least 316 px wide, otherwise it retains three. Touch targets remain at least 36 px. Phone drop width and height are reduced by 40%; normalized fall timing does not change. The native keyboard opens only on request in Hiragana; Katakana hides the form and pad and ignores their handlers.
+
+The catalogue has 104 exact hiragana/katakana pairs, with 104 forms per script (46 basic, 20 dakuten, five handakuten and 33 yōon). Katakana matching uses pair identity rather than shared romaji; the six options exclude homophone distractors. Extended loanword combinations, standalone small kana, small tsu and the long-vowel mark are outside the assessed catalogue.
 
 ## Counting answers
 
@@ -30,11 +32,15 @@ Three consecutive familiar first-try hits precede and separate nonstarter debuts
 
 Rows unlock after every available kana has two correct first answers and at least 85% submitted first-answer accuracy. Hints are allowed. Corrected retries and expirations do not supply qualifying hits. Independent recall remains separately recorded evidence.
 
+For a new garden with `katakanaUnlocked: false`, Katakana requires all 27 hiragana groups to be open and every one of the 104 hiragana to meet that readiness rule. Opening the final group alone is insufficient. Access is monotonic once earned. On first loading a save without the flag, earlier basic-row access or existing Katakana progress retains access; no historical hits are fabricated or rewritten.
+
+Katakana attempts keep the `form→sound` facet with `responseFormat` and `inputMethod` set to `hiragana-choice`, the selected hiragana as the response, and `assistance: true` with `recognition-options`. They may supply qualifying first-try recognition hits for arcade progression, but never count as independent recall. Existing romaji and retired-mode evidence stays unchanged.
+
 ## Menus, results and compatibility
 
 Session preparation lives only on the title screen. Settings contains device effects and analytics/privacy. My Kana Garden retains familiarity, row audio, readiness, export and collapsed learning details. Results emphasize correct answers, wrong answers and expired drops, with first-try/correction counts and best streak as secondary details, then name the next row with the first-try hits its closest unready kana still need, with audio mistake cards and a focused one-minute review shortcut. Review also starts with three hearts.
 
-The title menu fits the viewport without internal scrolling. Alphabet/difficulty fields are centered; the entry and romaji hints follow the menu on separate lines. Limited-height and mobile layouts preserve those boundaries.
+The title menu fits the viewport without internal scrolling. Alphabet/difficulty fields are centered; the entry and answer-format hints follow the menu on separate lines. Limited-height and mobile layouts preserve those boundaries. `pnpm test:katakana-bridge` exercises the new gate and recognition controls alongside the existing suites.
 
 The shared learner storage key/schema and persistence architecture remain unchanged. Attempts, exposures, earned rows, previous record keys, accuracy and novelty pressure survive. Unsupported old selections normalize without deleting their history; point-record comparisons and writes are retired. No historical point record is converted into a count. Historical design archives remain separate from active UI.
 

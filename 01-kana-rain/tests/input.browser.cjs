@@ -64,14 +64,28 @@ async function checkPrefixInput(browser, baseUrl, { baseline = false } = {}) {
       assert.equal(await page.evaluate(() => KanaRain.state.events.length), 1);
       assert.equal(await page.locator('#answer').inputValue(), '');
 
-      // Same mechanism accepts the katakana nasal; no storage migration is involved.
-      await fixture('ン', 'ネ'); await type('n');
+      // Katakana offers six visible Hiragana choices; hidden romaji and pad handlers cannot submit it.
+      await fixture('ン', 'ネ');
+      assert.equal(await page.locator('#answerForm').isVisible(), false);
+      assert.equal(await page.locator('#keyboard').isVisible(), false);
+      assert.equal(await page.locator('#hiraganaChoices button').count(), 6);
+      await page.evaluate(() => {
+        const answer = document.getElementById('answer'); answer.value = 'n'; answer.dispatchEvent(new Event('input', { bubbles: true }));
+        document.getElementById('answerForm').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        const keyboard = document.getElementById('keyboard');
+        for (const dataset of [{ family: 'n' }, { slot: 'n' }]) keyboard.onclick({ target: { closest: () => ({ dataset }) }, detail: 0 });
+      });
+      await page.waitForTimeout(400);
+      assert.equal(await page.evaluate(() => KanaRain.state.attempts), 0);
+      const nasal = page.locator('#hiraganaChoices button[data-hiragana-id="kana:ん"]');
+      if (mobile) await nasal.tap(); else await nasal.click();
       await page.waitForFunction(() => KanaRain.state.correct === 1, null, { timeout: 1500 });
       assert.deepEqual(await page.evaluate(() => KanaRain.state.events.map(e => e.itemId)), ['kana:ン']);
+      assert.deepEqual(await page.evaluate(() => { const e = KanaRain.state.events.at(-1); return { response: e.response, format: e.responseFormat, method: e.inputMethod, assisted: e.assistance, recognition: e.assistanceReasons.includes('recognition-options') }; }), { response: 'ん', format: 'hiragana-choice', method: 'hiragana-choice', assisted: true, recognition: true });
       const recorded = await page.evaluate(async () => { await Learner.flush(); return Learner.attempts(); });
       await page.reload(); await page.waitForFunction(() => !!window.KanaRain);
       assert.deepEqual(await page.evaluate(() => Learner.attempts()), recorded);
-      checks.push({ mobile, nAuto: true, neNotConsumed: true, nnSingleHit: true, katakana: true, historySurvivesReload: true });
+      checks.push({ mobile, nAuto: true, neNotConsumed: true, nnSingleHit: true, katakanaHiraganaChoice: true, katakanaRomajiAndPadIgnored: true, historySurvivesReload: true });
     } finally { await context.close(); }
   }
   assert.deepEqual(errors, []);

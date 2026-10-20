@@ -309,6 +309,80 @@ async function exerciseRunCounts(errors){
   assert.equal(await page.evaluate(()=>['score','previousBest','bestKey','bestBeaten'].some(key=>Object.hasOwn(KanaRain.state,key))),false);
   await screenshot(page,'counts-first-try-two-mistakes-correction-expiration');await context.close();
 }
+async function assertInitialDesktopResults(page,label){
+  // Read the first layout before any locator action that could auto-scroll the dialog.
+  const layout=await page.evaluate(()=>{
+    const box=el=>{const r=el.getBoundingClientRect(),style=getComputedStyle(el);return {left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height,clientWidth:el.clientWidth,clientHeight:el.clientHeight,scrollWidth:el.scrollWidth,scrollHeight:el.scrollHeight,scrollTop:el.scrollTop,scrollLeft:el.scrollLeft,visible:style.display!=='none'&&style.visibility!=='hidden'&&r.width>0&&r.height>0};};
+    const control=el=>{const r=box(el),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);return {...r,id:el.id,enabled:!el.disabled,receivesPointer:hit===el||el.contains(hit)};};
+    return {width:innerWidth,height:innerHeight,scrollX,scrollY,dialog:box(document.querySelector('#results')),panel:box(document.querySelector('#results .dialog-panel')),next:box(document.querySelector('#resultNext')),review:box(document.querySelector('#resultReview')),grid:box(document.querySelector('#resultReview .review-grid')),cards:[...document.querySelectorAll('#resultReview .review-card')].map(control),footer:box(document.querySelector('#results .result-actions')),actions:['reviewPracticeBtn','againBtn','backBtn'].map(id=>control(document.getElementById(id)))};
+  });
+  const detail=label+' initial results: '+JSON.stringify(layout);
+  const inside=(inner,outer)=>inner.left>=outer.left-1&&inner.top>=outer.top-1&&inner.right<=outer.right+1&&inner.bottom<=outer.bottom+1;
+  const viewport={left:0,top:0,right:layout.width,bottom:layout.height};
+  assert.equal(layout.scrollX,0,detail);assert.equal(layout.scrollY,0,detail);
+  for(const part of ['dialog','panel']){
+    const rect=layout[part];assert.ok(rect.visible&&inside(rect,viewport),detail);
+    assert.equal(rect.scrollTop,0,detail);assert.equal(rect.scrollLeft,0,detail);
+    assert.ok(rect.scrollHeight<=rect.clientHeight+1,detail+' '+part+' has vertical overflow');
+    assert.ok(rect.scrollWidth<=rect.clientWidth+1,detail+' '+part+' has horizontal overflow');
+  }
+  assert.ok(inside(layout.panel,layout.dialog),detail);
+  assert.ok(layout.next.visible&&inside(layout.next,layout.panel)&&inside(layout.next,viewport),detail+' next-row guidance is fully visible');
+  assert.equal(layout.cards.length,2,detail+' two real mistakes produce two review cards');
+  assert.equal(layout.grid.scrollTop,0,detail);
+  assert.ok(layout.grid.scrollHeight<=layout.grid.clientHeight+1&&layout.grid.scrollWidth<=layout.grid.clientWidth+1,detail+' both review cards fit without internal scrolling');
+  assert.ok(layout.footer.visible&&inside(layout.footer,layout.panel)&&inside(layout.footer,viewport),detail+' footer fits on first open');
+  assert.ok(layout.next.bottom<=layout.footer.top+1&&layout.review.bottom<=layout.footer.top+1,detail+' next-row/review content does not cover footer');
+  for(const card of layout.cards)assert.ok(card.visible&&card.receivesPointer&&inside(card,layout.grid)&&inside(card,layout.panel)&&card.bottom<=layout.footer.top+1,detail+' review card is visible and reachable');
+  for(const action of layout.actions)assert.ok(action.visible&&action.enabled&&action.receivesPointer&&inside(action,layout.footer)&&inside(action,layout.panel)&&inside(action,viewport),detail+' '+action.id+' is visible and clickable before scrolling');
+  return layout;
+}
+async function exerciseDesktopResults(errors){
+  for(const [width,height]of [[1366,768],[1024,600],[761,560]]){
+    // Each button gets its own fresh result screen so every real click starts unscrolled.
+    for(const actionId of ['reviewPracticeBtn','againBtn','backBtn']){
+      const label=width+'×'+height+' '+actionId;
+      const context=await gameContext({viewport:{width,height},isMobile:false,hasTouch:false,serviceWorkers:'block'});
+      try{
+        await context.route('**/*',route=>{const url=new URL(route.request().url());return url.origin==='http://127.0.0.1:4180'||['data:','blob:'].includes(url.protocol)?route.continue():route.abort();});
+        await context.addInitScript(()=>{
+          if(location.origin!=='http://127.0.0.1:4180')return;
+          // Synthetic familiar vowels avoid introduction randomness; no real profile is read.
+          const seen=Object.fromEntries(['あ','い','う','え','お'].map(char=>['kana:'+char,true]));
+          localStorage.setItem('jp-learner-v1',JSON.stringify({version:2,created:1700000000000,sequence:0,items:{},attemptLedger:[],exposureLedger:[],reveals:{},games:{'kana-rain':{rows:{hiragana:1,katakana:1},best:{},accuracy:{},playStyle:'arcade',sound:false,novelty:{version:1,pace:'calm',seen,recent:[],blocked:false,cooldownRemaining:0}}}}));
+        });
+        const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
+        await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>!!window.KanaRain);await page.evaluate(()=>document.fonts.ready);
+        await page.locator('#startBtn').click();await readyToPlay(page);
+        const pin=()=>page.evaluate(()=>{KanaRain.state.sinceSpawn=-100000;KanaRain.state.drops.forEach(drop=>drop.progress=0);});
+        await pin();
+        const first=await page.evaluate(()=>({id:KanaRain.state.target.id,answer:JPData.kanaById[KanaRain.state.target.id].romaji}));
+        await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');await page.waitForFunction(()=>KanaRain.state.errors===1);
+        await page.locator('#answer').fill(first.answer);await page.waitForFunction(()=>KanaRain.state.correct===1);
+        const second=first.id==='kana:あ'?'kana:い':'kana:あ';
+        // Select a distinct familiar drop, but create both review entries through real wrong submissions.
+        await page.evaluate(id=>{KanaRain.state.queue=[{id}];KanaRain.state.sinceSpawn=99999;},second);
+        await page.waitForFunction(id=>KanaRain.state.target?.id===id,second);await pin();
+        await page.locator('#answer').fill('zzz');await page.locator('#answer').press('Enter');await page.waitForFunction(()=>KanaRain.state.errors===2);
+        assert.deepEqual(await page.evaluate(()=>[...KanaRain.state.mistakes].sort()),[first.id,second].sort(),label+' real wrong answers populate the review list');
+        await finishSession(page);
+        assert.match(await page.locator('#resultNext').textContent(),/Next: K-row/);
+        assert.deepEqual(await page.locator('#resultStats b').allTextContents(),['1','2','0']);
+        const layout=await assertInitialDesktopResults(page,label);
+        const action=layout.actions.find(value=>value.id===actionId);
+        // Raw pointer coordinates cannot rescue a clipped footer by auto-scrolling it into view.
+        await page.mouse.click((action.left+action.right)/2,(action.top+action.bottom)/2);
+        if(actionId==='backBtn')assert.equal(await page.locator('#welcome').isVisible(),true,label+' returns to menu');
+        else{
+          await page.waitForFunction(()=>KanaRain.state&&!KanaRain.state.over);await readyToPlay(page);
+          const reviewIds=await page.evaluate(()=>KanaRain.state.reviewIds);
+          if(actionId==='reviewPracticeBtn')assert.deepEqual([...reviewIds].sort(),[first.id,second].sort(),label+' opens the two-kana review');
+          else assert.equal(reviewIds,null,label+' starts a regular replay');
+        }
+      }finally{await context.close();}
+    }
+  }
+}
 (async()=>{
   server=spawn(process.execPath,[path.join(__dirname,'../scripts/serve.cjs')],{env:{...process.env,PORT:'4180'},windowsHide:true,stdio:['ignore','pipe','pipe']});
   await new Promise((resolve,reject)=>{server.stdout.once('data',resolve);server.once('error',reject);server.once('exit',code=>reject(new Error('Server exited: '+code)));});
@@ -452,8 +526,14 @@ async function exerciseRunCounts(errors){
   await page.goto('http://127.0.0.1:4180/?all');await page.waitForFunction(()=>window.KanaRain);
   assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
   await page.locator('#mode').selectOption('kata');await page.locator('#startBtn').click();await readyToPlay(page);
-  assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='romaji'&&JPData.kanaById[d.id].script==='katakana')),true);
-  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]));await page.waitForFunction(()=>KanaRain.state.correct===1);
+  assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='hiragana-choice'&&JPData.kanaById[d.id].script==='katakana')),true);
+  assert.equal(await page.locator('#answerForm').isVisible(),false);assert.equal(await page.locator('#keyboard').isVisible(),false);
+  assert.equal(await page.locator('#hiraganaChoices button').count(),6);
+  const hiraChoice=await page.evaluate(()=>{const drop=KanaRain.state.target;return drop.hiraganaOptions.find(option=>option.pairId===JPData.kanaById[drop.id].pairId).id;});
+  await page.evaluate(()=>{const input=document.getElementById('answer');input.value='a';input.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('answerForm').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
+  assert.equal(await page.evaluate(()=>KanaRain.state.attempts),0,'hidden romaji input cannot submit katakana');
+  await page.locator('#hiraganaChoices button[data-hiragana-id="'+hiraChoice+'"]').click();await page.waitForFunction(()=>KanaRain.state.correct===1);
+  assert.equal(await page.evaluate(()=>{const event=KanaRain.state.events.at(-1);return event.responseFormat==='hiragana-choice'&&event.inputMethod==='hiragana-choice'&&event.assistance===true&&event.assistanceReasons.includes('recognition-options');}),true);
   await finishSession(page);
   await page.waitForFunction(()=>document.querySelector('#offlineStatus').textContent.includes('ready offline'));
   const cacheCount=await page.evaluate(async()=>{const key=(await caches.keys()).find(k=>k.startsWith('kana-rain-'));const c=await caches.open(key);return (await c.keys()).filter(r=>r.url.endsWith('.mp3')).length;});
@@ -598,10 +678,11 @@ async function exerciseRunCounts(errors){
   await difficultyContext.close();
   await exerciseQuickWins(errors);
   await exerciseRunCounts(errors);
+  await exerciseDesktopResults(errors);
   await exerciseResponsiveMatrix(errors);
   await exerciseStableInput(errors);
   assert.deepEqual(errors,[]);
-  console.log('PASS: desktop and 7 mobile sizes, count/timer HUD, exact first-try/correction/wrong/expiration results, legacy records preserved, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio, stable romaji for mature items, protected feedback/streak celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common answer-driven acceleration, offline shell and 104 kana recordings.');
+  console.log('PASS: desktop and 7 mobile sizes, first-open desktop results/footer at 1366×768/1024×600/761×560, count/timer HUD, exact first-try/correction/wrong/expiration results, legacy records preserved, overlays/scroll-free viewport, frozen countdown and reaction time, focused review/audio, stable romaji for mature items, protected feedback/streak celebrations, readiness/locked setup, native keyboard/SFX/mute, danger/heart cues, persistence/resize, all profiles three hearts and common answer-driven acceleration, offline shell and 104 kana recordings.');
   await browser.close();
   server.kill();
 })().catch(async e=>{console.error(e);if(browser)await browser.close();if(server)server.kill();process.exitCode=1;});

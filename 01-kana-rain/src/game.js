@@ -5,6 +5,11 @@
   await L.ready;
   let gd=L.gameData(GAME);
   gd.rows=gd.rows || {hiragana:1,katakana:1}; gd.best=gd.best || {}; gd.accuracy=gd.accuracy || {};
+  // Preserve access earned under the earlier curriculum; new gardens start locked.
+  if(typeof gd.katakanaUnlocked!=='boolean'){
+    gd.katakanaUnlocked=gd.rows.hiragana>=11||gd.rows.katakana>1||D.kana.some(k=>k.script==='katakana'&&((L.state(k.id)?.facets[FACET]?.reps||0)>0||(L.state(k.id)?.legacyFacets?.[FACET]?.reps||0)>0));
+    L.flush();
+  }
   let novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});
   const explore=new URLSearchParams(location.search).has('all');
   // The saved novelty pace is authoritative: old rain difficulty must not change it.
@@ -26,9 +31,11 @@
   let progressDirty=true,keyboardSignature=null,fieldSize={width:0,height:0};
   const mobile=()=>matchMedia('(pointer:coarse)').matches || innerWidth<=650;
   const running=()=>G && !G.over;
+  const choosingHiragana=()=>running()&&G.mode==='kata';
+  const readingLabel=id=>D.kanaById[id]?.script==='katakana'?D.counterpart(id).char:D.kanaById[id]?.romaji||'';
   function stopLoop(){cancelAnimationFrame(raf);raf=0;}
   function wakeLoop(){if(!raf&&running()&&!document.hidden&&(G.countingDown||!G.paused))raf=requestAnimationFrame(loop);}
-  function syncAnimationState(){document.body.classList.toggle('game-paused',document.hidden||!!(running()&&(G.paused||G.countingDown)));}
+  function syncAnimationState(){document.body.classList.toggle('game-paused',document.hidden||!!(running()&&(G.paused||G.countingDown)));renderHiraganaChoices();}
   function textIfChanged(el,value){value=String(value);if(el.textContent!==value)el.textContent=value;}
   function statText(id,value){
     const el=$(id),text=String(value),chars=String(text.length);
@@ -39,6 +46,7 @@
   function renderProgress(force=false){if(force||progressDirty&&$('progressDialog').open){renderMap();renderUnlocks(mapScript);renderLearningStats();progressDirty=false;}}
   function focusAnswer(){
     if(!running() || G.paused || G.countingDown)return;
+    if(choosingHiragana()){$('answer').blur();return;}
     // With the sound pad open on a phone, never focus the field: no native keyboard can open unasked.
     if(mobile()&&keyboardOpen){$('answer').inputMode='none';$('answer').blur();return;}
     $('answer').inputMode='text';$('answer').focus({preventScroll:true});
@@ -85,7 +93,11 @@
     if(mode==='kata')return unlocked('katakana').map(k=>k.id);
     return [];
   }
-  function modeAvailable(mode){return mode==='hira'||mode==='kata'&&(explore||gd.rows.hiragana>=11);}
+  function modeAvailable(mode){return mode==='hira'||mode==='kata'&&(explore||gd.katakanaUnlocked);}
+  function unlockKatakana(){
+    if(explore||gd.katakanaUnlocked||gd.rows.hiragana<D.rowsOrder.length)return;
+    if(D.kana.filter(k=>k.script==='hiragana').every(k=>readiness(k).ready)){gd.katakanaUnlocked=true;L.flush();}
+  }
   function accepted(id){
     if(typeof id==='object')id=id.id;
     const k=D.kanaById[id];
@@ -135,10 +147,11 @@
   const hitsToReady=({correct,attempts})=>Math.max(0,2-correct,Math.ceil((85*attempts-100*correct)/15));
   function renderNextRow(script){
     const box=$('resultNext'),next=D.rowsOrder[gd.rows[script]];
-    if(explore||!next){box.innerHTML='';box.classList.add('hidden');return;}
+    if(explore||!next&&script!=='hiragana'){box.innerHTML='';box.classList.add('hidden');return;}
     const rows=unlocked(script).map(readiness),pending=rows.filter(x=>!x.ready).map(x=>({k:x.k,need:hitsToReady(x)})).sort((a,b)=>a.need-b.need);
     const shown=pending.slice(0,4).map(({k,need})=>`<span class="next-kana"><span lang="ja">${escapeText(k.char)}</span> +${need}</span>`).join(' '),more=pending.length-4;
-    box.innerHTML=`<p><b>Next: ${escapeText(rowNames[next]||next.toUpperCase()+'-row')}</b> · ${rows.length-pending.length} / ${rows.length} kana ready</p>`+
+    const heading=next?'Next: '+(rowNames[next]||next.toUpperCase()+'-row'):pending.length?'Finish Hiragana':'Hiragana complete · Katakana ready';
+    box.innerHTML=`<p><b>${escapeText(heading)}</b> · ${rows.length-pending.length} / ${rows.length} kana ready</p>`+
       (pending.length?`<p class="next-needs"><span class="next-label">First-try hits to go</span> ${shown}${more>0?` <span class="next-more">+${more} more kana</span>`:''}</p>`:'');
     box.classList.remove('hidden');
   }
@@ -158,14 +171,17 @@
     cfg.difficulty=id;N.setPace(novelty,R.profiles[id].pace);cfg.noveltyPace=N.profile(novelty).id;gd.difficulty=id;L.flush();renderMenu();
   }
   function renderMenu(){
+    unlockKatakana();
     const names={hira:'Hiragana',kata:'Katakana'};
-    [...$('mode').options].forEach(o=>{o.disabled=!modeAvailable(o.value);o.textContent=names[o.value]+(o.disabled?' · Unlock the basic Hiragana rows first':'');});
+    [...$('mode').options].forEach(o=>{o.disabled=!modeAvailable(o.value);o.textContent=names[o.value]+(o.disabled?' · Complete Hiragana first':'');});
     if(!running()&&!modeAvailable(cfg.mode))cfg.mode='hira';$('mode').value=cfg.mode;$('mode').disabled=!!running();
-    $('menuHint').innerHTML='Romaji · <kbd>Enter</kbd> to begin';
+    $('menuHint').innerHTML=cfg.mode==='kata'?'Hiragana choices · <kbd>Enter</kbd> to begin':'Romaji · <kbd>Enter</kbd> to begin';
+    document.querySelectorAll('[data-script]').forEach(b=>{b.disabled=b.dataset.script==='katakana'&&!modeAvailable('kata');});
+    if(mapScript==='katakana'&&!modeAvailable('kata'))mapScript='hiragana';
     renderDifficulty();
     const sc=mapScript, rows=unlocked(sc), count=explore?D.rowsOrder.length:gd.rows[sc], row=D.rowsOrder[count-1];
     const current=rows.filter(k=>k.row===row);$('rowName').textContent=rowNames[row]||row.toUpperCase()+'-row';
-    $('lesson').innerHTML=current.map(k=>`<button data-kana="${k.char}" data-known="${L.mastery(k.id,FACET)>=.55}" aria-label="Listen to ${k.char}, ${k.romaji}">${k.char}<small>${k.romaji}</small></button>`).join('');
+    $('lesson').innerHTML=current.map(k=>`<button data-kana="${k.char}" data-known="${L.mastery(k.id,FACET)>=.55}" aria-label="Listen to ${k.char}, ${readingLabel(k.id)}">${k.char}<small>${readingLabel(k.id)}</small></button>`).join('');
     $('unlockNote').textContent=explore?'Exploration: all kana are available.':'Each available kana needs 2 correct first answers and at least 85% first-answer accuracy. Reading hints and pronunciation do not block unlocks.';
     const next=D.rowsOrder[count];$('milestone').textContent=next?'Meet '+(rowNames[next]||next.toUpperCase()+'-row'):'Your whole kana garden';
     $('milestoneKana').textContent=next?D.kana.filter(k=>k.script===sc && k.row===next).map(k=>k.char).join(' '):'Keep your reading growing';
@@ -173,7 +189,7 @@
   }
   function renderMap(){
     const items=D.kana.filter(k=>k.script===mapScript), available=new Set(unlocked(mapScript).map(k=>k.id));
-    $('masteryMap').innerHTML=items.map(k=>{const m=L.mastery(k.id,FACET);const cls=m===0?'new':m<.55?'learning':m<.75?'known':'strong';return `<button class="${cls} ${available.has(k.id)?'':'locked'} ${k.kind==='yoon'?'compound':''}" data-kana="${k.char}" title="${k.char} · ${k.romaji} · ${Math.round(m*100)}% familiarity" aria-label="Listen to ${k.char}, ${k.romaji}, ${Math.round(m*100)} percent familiarity">${k.char}</button>`;}).join('');
+    $('masteryMap').innerHTML=items.map(k=>{const m=L.mastery(k.id,FACET);const cls=m===0?'new':m<.55?'learning':m<.75?'known':'strong';return `<button class="${cls} ${available.has(k.id)?'':'locked'} ${k.kind==='yoon'?'compound':''}" data-kana="${k.char}" title="${k.char} · ${readingLabel(k.id)} · ${Math.round(m*100)}% familiarity" aria-label="Listen to ${k.char}, ${readingLabel(k.id)}, ${Math.round(m*100)} percent familiarity">${k.char}</button>`;}).join('');
     const known=items.filter(k=>L.mastery(k.id,FACET)>=.55).length, pct=Math.round(known/items.length*100);
     $('masteryCount').textContent=`${known} / ${items.length} familiar`;$('masteryPercent').textContent=pct+'%';$('masteryBar').style.width=pct+'%';
     $('totalLearned').textContent=D.kana.filter(k=>L.mastery(k.id,FACET)>=.55).length;
@@ -197,7 +213,7 @@
     if(!running()||!G.countingDown)return;cancelCountdown();
     const now=performance.now();G.drops.forEach(d=>d.pausedMs+=Math.max(0,now-Math.max(G.pauseAt??now,d.born)));
     if(G.inputStartedAt!=null)G.inputPausedMs+=Math.max(0,now-Math.max(G.pauseAt??now,G.inputStartedAt));
-    G.paused=false;G.last=now;$('answer').disabled=false;$('submitBtn').disabled=false;focusAnswer();spirit('idle');
+    G.paused=false;G.last=now;$('answer').disabled=choosingHiragana();$('submitBtn').disabled=choosingHiragana();renderHiraganaChoices();focusAnswer();spirit('idle');
     scheduleFeedback();
     // Count real gameplay once; countdowns on pause/resume are not new sessions.
     if(!G.analyticsStarted){G.analyticsStarted=true;window.NihongoAnalytics?.track('practice_start',{practice_mode:G.reviewIds?'review':G.mode});}
@@ -216,7 +232,7 @@
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
     $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana'}[cfg.mode]);
-    $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();resetPad();keyboard();focusAnswer();
+    $('lives').classList.remove('hidden');$('countdownInstruction').textContent=G.mode==='kata'?'Match the Katakana with Hiragana.':'Type the sound. Clear the rain.';enableSetup(false);hud();keyboardOpen=mobile();resetPad();keyboard();focusAnswer();
     fitField();initializeRounds();syncAnimationState();wakeLoop();
   }
   function initializeRounds(){
@@ -259,13 +275,13 @@
     if(G.attempts)L.shuffle(plan);
     plan.forEach(id=>G.queue.push({id}));
   }
-  function generateRound(plan,rng=Math.random){if(!D.kanaById[plan.id])throw new RangeError('Only kana can appear in Kana Rain.');return {id:plan.id,x:rng(),facet:FACET,responseFormat:'romaji'};}
+  function generateRound(plan,rng=Math.random){if(!D.kanaById[plan.id])throw new RangeError('Only kana can appear in Kana Rain.');return {id:plan.id,x:rng(),facet:FACET,responseFormat:D.kanaById[plan.id].script==='katakana'?'hiragana-choice':'romaji'};}
   function render(root,round){
     const id=round.id,st=L.state(id),f=st?.facets[round.facet];
     const hint=!f || f.correct===0;
     const el=document.createElement('div');el.className='drop';el.dataset.id=id;el.setAttribute('lang','ja');
     const glyph=document.createElement('span');glyph.textContent=symbol(id);el.appendChild(glyph);
-    if(hint){const h=document.createElement('span');h.className='hint';h.textContent=accepted(round)[0];el.appendChild(h);}
+    if(hint){const h=document.createElement('span');h.className='hint';h.textContent=readingLabel(id);el.appendChild(h);}
     root.appendChild(el);return {el,hint};
   }
   function spawn(entry,xHint){
@@ -277,6 +293,12 @@
     x=Math.max(5,Math.min(W-w-5,x));
     const prior=L.assistanceFor?.(round.id,round.facet)||{assisted:false,reasons:[]};
     const d={...round,...view,hint:view.hint||prior.assisted,roundId:`${G.sessionId}:r:${++G.roundSerial}`,attemptCount:0,assistanceReasons:new Set([...(view.hint?['initial-reading']:[]),...(prior.assisted?prior.reasons:[])]),firstResponseMs:null,x,y:8,progress:0,w,h,wrong:0,v:1,born:performance.now(),pausedMs:0};
+    if(round.responseFormat==='hiragana-choice'){
+      d.hiraganaOptions=D.hiraganaChoices(d.id);d.assistanceReasons.add('recognition-options');
+      d.el.setAttribute('role','button');d.el.setAttribute('tabindex','0');d.el.setAttribute('aria-label','Choose '+symbol(d.id)+' to match with Hiragana');
+      d.el.onclick=()=>selectHiraganaTarget(d);
+      d.el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectHiraganaTarget(d);}};
+    }
     d.isIntroduction=isIntroduction;
     if(isIntroduction){N.markSeen(novelty,d.id);if(!starter(d.id))G.newIds.add(d.id);G.familiarSinceIntroduction=0;}
     G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);return d;
@@ -331,10 +353,15 @@
   function rainSeconds(){return Math.max(0,G.correct*RAIN_SECONDS_PER_HIT-G.expirations*RAIN_SECONDS_PER_EXPIRATION);}
   function lowest(){return G?.drops.reduce((a,b)=>!a||b.y>a.y?b:a,null);}
   function updateTarget(){
-    const t=lowest();if(t===G.target)return;
+    const t=choosingHiragana()&&G.drops.includes(G.choiceTarget)?G.choiceTarget:lowest();if(t===G.target)return;
     G.target?.el.classList.remove('target');G.target=t;t?.el.classList.add('target');
+    if(choosingHiragana())G.choiceTarget=t;
     // The pad never changes with the drops; only the shared guidance is refreshed.
     renderPadPrompt();
+    if(choosingHiragana()){
+      $('inputFormat').textContent='Choose Hiragana';$('targetHint').textContent=t?'For '+symbol(t.id)+' · tap another drop to select':'Waiting for the rain…';
+      $('inputNote').textContent='Click a choice or press 1–6 · follow the numbers';renderHiraganaChoices();return;
+    }
     $('inputScript').textContent='a';
     $('inputFormat').textContent='Type romaji';
     $('targetHint').textContent='Any drop · highlighted first';
@@ -366,10 +393,10 @@
   function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
   function remove(d,pop=false){if(G.pendingAnswer?.drop===d)G.pendingAnswer=null;dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
   function hit(d){
-    record(d,true,{response:d.submittedResponse,reason:'accepted',inputMethod:d.submittedMethod});G.streak=d.wrong?0:G.streak+1;
+    record(d,true,{response:d.submittedResponse,submittedItemId:d.submittedItemId,reason:'accepted',inputMethod:d.submittedMethod});G.streak=d.wrong?0:G.streak+1;
     G.bestStreak=Math.max(G.bestStreak,G.streak);
     playReading(d.id,'answer-feedback');
-    flash(`${symbol(d.id)} · ${D.kanaById[d.id].romaji} ✓`,false,1000,0,()=>exposeReading(d.id,'answer-feedback'));
+    flash(`${symbol(d.id)} · ${readingLabel(d.id)} ✓`,false,1000,0,()=>exposeReading(d.id,'answer-feedback'));
     if([5,10,20].includes(G.streak))celebrate(`${G.streak} in a row!`);
     effect(d,'splash');spirit('happy');remove(d,true);checkUnlock();hud();invalidateProgress();updateTarget();
   }
@@ -378,22 +405,23 @@
     const k=D.kanaById[d.id],options=D.kana.filter(x=>x.script===k.script&&x.id!==d.id&&[x.romaji,...x.alt].includes(text));
     return {chosenItemId:options.length===1?options[0].id:null,candidateItemIds:options.map(x=>x.id),reason:options.length>1?'ambiguous-reading':options.length?'different-item':/[ぁ-ヿ]/.test(text)?'wrong-response-format':'unrecognized-response'};
   }
-  function wrong(d,text,method='typing'){
-    const k=D.kanaById[d.id],detail=confusionFor(d,text),chosen=D.kanaById[detail.chosenItemId];
+  function wrong(d,text,method='typing',choice=null){
+    const k=D.kanaById[d.id],detail=choice?{reason:'different-item',chosenItemId:D.counterpart(choice.id).id,submittedItemId:choice.id,candidateItemIds:[D.counterpart(choice.id).id]}:confusionFor(d,text),chosen=D.kanaById[detail.chosenItemId];
     record(d,false,{...detail,response:text,inputMethod:method});G.mistakes.add(d.id);d.wrong++;d.v=Math.min(2.2,d.v*1.45);d.el.classList.add('stained');G.streak=0;spirit('worried');
-    flash(`${symbol(d.id)} = ${k.romaji}. You ${method==='composer'?'chose':'typed'} ${text}${chosen?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
-    if(chosen && (G.reviewIds||candidates()).includes(chosen.id)){G.confs.add(d.id+'|'+chosen.id);G.queue=G.queue.filter(e=>e.id!==d.id && e.id!==chosen.id);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id,partner:chosen.id});}
+    flash(`${symbol(d.id)} = ${readingLabel(d.id)}. You ${method==='composer'||choice?'chose':'typed'} ${text}${chosen&&!choice?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
+    if(chosen && (!choice||N.hasSeen(novelty,chosen.id)) && (G.reviewIds||candidates()).includes(chosen.id)){G.confs.add(d.id+'|'+chosen.id);G.queue=G.queue.filter(e=>e.id!==d.id && e.id!==chosen.id);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id,partner:chosen.id});}
     else G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
   }
   function miss(d){
     if(G.over||!G.drops.includes(d))return;record(d,null,{outcome:'timeout',reason:'timeout'});G.missed.add(d.id);G.lives--;G.expirations++;G.streak=0;
     G.pendingAnswer=null;$('answer').value='';resetPad();
-    flash(`Lost a heart. ${symbol(d.id)} = ${D.kanaById[d.id].romaji}.`,true,3500,4,()=>exposeReading(d.id,'timeout-feedback'));
+    flash(`Lost a heart. ${symbol(d.id)} = ${readingLabel(d.id)}.`,true,3500,4,()=>exposeReading(d.id,'timeout-feedback'));
     playReading(d.id,'timeout-feedback');
     clearTimeout(heartTimer);document.body.classList.remove('heart-hit');void $('heartLoss').offsetWidth;document.body.classList.add('heart-hit');$('heartLoss').classList.remove('hidden');
     sfx('heart');heartTimer=setTimeout(()=>{document.body.classList.remove('heart-hit');$('heartLoss').classList.add('hidden');},900);
     spirit('worried');effect(d,'ripple');remove(d);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
     if(G.lives===0)end(`All 3 hearts lost · ${R.profiles[G.difficulty].name}`,'hearts_lost');
+    else updateTarget();
   }
   function checkUnlock(){
     if(explore)return;
@@ -403,12 +431,14 @@
         gd.rows[sc]++;L.flush();const row=D.rowsOrder[gd.rows[sc]-1];flash('A new row is growing: '+D.kana.filter(k=>k.script===sc && k.row===row).map(k=>k.char).join(' '),false,4000,3);sfx('unlock');G.queue=[];
       }
     });
+    unlockKatakana();
   }
   function submitMatchedAnswer(drop,value,method='typing'){
     G.pendingAnswer=null;drop.submittedResponse=value;drop.submittedMethod=method;$('answer').value='';hit(drop);
   }
   // A completed composition is a deliberate answer, like Enter: it never waits for a longer reading.
   function submitComposed(cell){
+    if(choosingHiragana())return;
     const v=cell.reading,ordered=[...G.drops].sort((a,b)=>b.y-a.y);
     // The exact cell settles homophones (じ/ぢ, ず/づ, お/を); any drop with the same accepted sound still counts.
     const match=ordered.find(d=>{const k=D.kanaById[d.id];return k.row===cell.row&&k.col===cell.col;})||ordered.find(d=>accepted(d).includes(v));
@@ -430,7 +460,7 @@
   }
   function onInput(force=false){
     if(G)G.pendingAnswer=null;
-    if(!G||G.over||G.paused||composing)return;const v=normalize($('answer').value);if(!v)return;
+    if(!G||G.over||G.paused||composing||choosingHiragana())return;const v=normalize($('answer').value);if(!v)return;
     if(G.inputStartedAt==null){G.inputStartedAt=performance.now();G.inputPausedMs=0;}
     const matches=[...G.drops].sort((a,b)=>b.y-a.y);const match=matches.find(d=>accepted(d).includes(v));
     const longer=G.drops.some(d=>accepted(d).some(a=>a.length>v.length&&a.startsWith(v)));
@@ -476,7 +506,7 @@
     const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])];
     lastReview=review.filter(id=>candidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
     $('resultReview').innerHTML=review.length?'<p>A little more practice · tap to listen</p><div class="review-grid">'+review.map(id=>{
-      const char=symbol(id),reading=D.kanaById[id].romaji;
+      const char=symbol(id),reading=readingLabel(id);
       const tag=A.hasRecording(char)?'button':'div';
       return `<${tag} class="review-card" ${tag==='button'?`type="button" data-kana="${escapeText(char)}" aria-label="Listen to ${escapeText(char)}, ${escapeText(reading)}"`:''}><span lang="ja">${escapeText(char)}</span><small>${escapeText(reading)}</small>${tag==='button'?'<span class="review-audio" aria-hidden="true">♪</span>':''}</${tag}>`;
     }).join('')+'</div>':G.correct?'Keep the streak growing.':'Listen to the current row, then try again.';
@@ -484,10 +514,13 @@
     dispose();closeDialogs();$('results').showModal();$('answer').disabled=true;$('submitBtn').disabled=true;enableSetup(true);$('answer').blur();$('againBtn').focus({preventScroll:true});$('results').querySelector('.dialog-panel').scrollTop=0;
   }
   function keyboard(){
-    $('keyboard').classList.toggle('hidden',!keyboardOpen);$('keyboardBtn').setAttribute('aria-expanded',keyboardOpen);
+    const choices=choosingHiragana();
+    document.body.classList.toggle('hiragana-choices',choices);$('answerForm').classList.toggle('hidden',choices);$('hiraganaChoices').classList.toggle('hidden',!choices);
+    $('answer').disabled=choices||!running()||G.paused;$('submitBtn').disabled=$('answer').disabled;
+    $('keyboard').classList.toggle('hidden',choices||!keyboardOpen);$('keyboardBtn').setAttribute('aria-expanded',keyboardOpen&&!choices);
     $('keyboardBtn').setAttribute('aria-label',keyboardOpen?'Use the device keyboard':'Show the sound pad');
     $('keyboardBtn').querySelector('use')?.setAttribute('href',keyboardOpen?'#icon-keyboard':'#icon-pad');
-    document.body.dataset.keyboard=String(keyboardOpen);document.body.classList.toggle('has-keyboard',keyboardOpen);
+    document.body.dataset.keyboard=String(keyboardOpen&&!choices);document.body.classList.toggle('has-keyboard',keyboardOpen&&!choices);
     $('answer').inputMode=mobile()&&keyboardOpen?'none':'text';
     if(keyboardOpen&&keyboardSignature!=='sound-pad'){
       // Built once: both stages keep fixed positions and never depend on the falling kana.
@@ -498,6 +531,29 @@
       $('keyboard').innerHTML=`<div class="pad-families" role="group" aria-label="Sound families">${families}</div><div class="pad-sounds" role="group" aria-label="Sounds in the chosen family">${slots}<button type="button" class="pad-back" data-pad="back" aria-label="Back to the sound families">‹ Back</button></div>`;
     }
     renderPad();
+    renderHiraganaChoices();
+  }
+  function selectHiraganaTarget(drop){
+    if(!choosingHiragana()||G.paused||G.countingDown||!G.drops.includes(drop))return;
+    G.choiceTarget=drop;G.inputStartedAt=null;G.inputPausedMs=0;updateTarget();
+  }
+  function renderHiraganaChoices(){
+    const drop=choosingHiragana()?G.target:null;
+    for(let index=0;index<D.hiraganaChoiceCount;index++){
+      const button=$('hiraganaChoice'+index),choice=drop?.hiraganaOptions?.[index];
+      button.disabled=!choice||G.paused||G.countingDown;
+      textIfChanged(button,choice?.char||'·');button.dataset.hiraganaId=choice?.id||'';button.dataset.roundId=drop?.roundId||'';
+      button.setAttribute('aria-label',choice?(index+1)+': Choose '+choice.char:'Waiting for a drop');
+    }
+  }
+  function chooseHiragana(id,roundId){
+    if(!choosingHiragana()||G.paused||G.countingDown)return false;
+    const drop=G.target,choice=drop?.hiraganaOptions?.find(k=>k.id===id);
+    if(!drop||drop.roundId!==roundId||!G.drops.includes(drop)||!choice)return false;
+    if(G.inputStartedAt==null){G.inputStartedAt=performance.now();G.inputPausedMs=0;}
+    if(D.counterpart(drop.id).id===id){drop.submittedResponse=choice.char;drop.submittedMethod='hiragana-choice';drop.submittedItemId=id;hit(drop);}
+    else wrong(drop,choice.char,'hiragana-choice',choice);
+    return true;
   }
   function renderPadPrompt(){
     const label=PAD_FAMILIES.find(f=>f[0]===padFamily)?.[1];
@@ -518,7 +574,7 @@
   document.querySelectorAll('[data-script]').forEach(b=>b.onclick=()=>{mapScript=b.dataset.script;document.querySelectorAll('[data-script]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b);});renderMenu();if($('progressDialog').open)exposeReference();else if(!$('welcome').classList.contains('hidden'))exposeLesson();});
   const listen=async e=>{const b=e.target.closest('[data-kana]');if(b){const k=D.kana.find(k=>k.char===b.dataset.kana);if(!k)return;if(running())pause(true,false);exposeReading(k.id,'reference-audio');if(!await A.play(b.dataset.kana)&&A.enabled)flash('Audio is unavailable. The lesson reading is shown on the tile.',true);}};
   $('lesson').onclick=$('masteryMap').onclick=$('resultReview').onclick=listen;
-  $('listenBtn').onclick=async()=>{const t=lowest();if(t){pause(true);const reading=symbol(t.id)+' = '+D.kanaById[t.id].romaji;$('pauseHint').textContent=reading;exposeReading(t.id,'target-help');await A.play(symbol(t.id));}};
+  $('listenBtn').onclick=async()=>{const t=choosingHiragana()?G.target:lowest();if(t){pause(true);const reading=symbol(t.id)+' = '+readingLabel(t.id);$('pauseHint').textContent=reading;exposeReading(t.id,'target-help');await A.play(symbol(t.id));}};
   function renderSound(){const b=$('soundBtn');b.querySelector('use').setAttribute('href',A.enabled?'#icon-sound':'#icon-muted');b.querySelector('.control-label').textContent=A.enabled?'Sound on':'Sound off';b.setAttribute('aria-pressed',A.enabled);b.setAttribute('aria-label',A.enabled?'Mute sound':'Enable sound');b.title=A.enabled?'Mute sound':'Enable sound';}
   $('soundBtn').onclick=()=>{A.enabled=!A.enabled;gd.sound=A.enabled;L.flush();renderSound();if(A.enabled)sfx('menu');};
   $('effectsBtn').onclick=()=>{gd.reducedEffects=!gd.reducedEffects;L.flush();renderEffects();};
@@ -528,9 +584,24 @@
   $('answerForm').onsubmit=e=>{e.preventDefault();onInput(true);};$('answer').oninput=()=>onInput();
   $('answer').oncompositionstart=()=>{composing=true;if(G)G.pendingAnswer=null;if(G?.inputStartedAt==null&&!G?.paused&&running()){G.inputStartedAt=performance.now();G.inputPausedMs=0;}};$('answer').oncompositionend=()=>{composing=false;onInput();};
   $('keyboardBtn').onclick=()=>{keyboardOpen=!keyboardOpen;if(!keyboardOpen)resetPad();keyboard();if(keyboardOpen)$('answer').blur();else focusAnswer();};
+  let choicePress=null,choiceKeyPress=null;
+  for(let index=0;index<D.hiraganaChoiceCount;index++){
+    const button=$('hiraganaChoice'+index);
+    button.onpointerdown=()=>{choicePress={id:button.dataset.hiraganaId,roundId:button.dataset.roundId};};
+    button.onkeydown=e=>{
+      if((e.key===' '||e.key==='Enter')&&!e.repeat)choiceKeyPress={id:button.dataset.hiraganaId,roundId:button.dataset.roundId};
+    };
+    button.onkeyup=e=>{if(e.key===' '||e.key==='Enter'){const held=choiceKeyPress;setTimeout(()=>{if(choiceKeyPress===held)choiceKeyPress=null;},0);}};
+    button.onblur=()=>{choiceKeyPress=null;};
+    button.onclick=e=>{
+      // Pointer release or a held Space/Enter may arrive after this button changes rounds.
+      const press=e.detail>0?choicePress:choiceKeyPress;choicePress=null;
+      chooseHiragana(press?.id||button.dataset.hiraganaId,press?.roundId||button.dataset.roundId);
+    };
+  }
   $('keyboard').onclick=e=>{
     const b=e.target.closest('[data-family],[data-slot],[data-pad]');
-    if(!b||b.disabled||!running()||G.paused||G.countingDown)return;
+    if(!b||b.disabled||!running()||G.paused||G.countingDown||choosingHiragana())return;
     // A pointer click a few frames after the stage changed is a bounce or ghost tap, not a choice.
     if(e.detail>0&&performance.now()-padChangedAt<PAD_BOUNCE_MS)return;
     // Each press only acts in its own stage, so a stale press can never skip a step.
@@ -543,13 +614,18 @@
   $('settingsBtn').onclick=$('pauseSettingsBtn').onclick=()=>openPanel('settingsDialog');
   $('closeSettings').onclick=$('saveSettings').onclick=()=>closePanel('settingsDialog');
   $('helpBtn').onclick=$('pauseHelpBtn').onclick=()=>openPanel('helpDialog');$('closeHelp').onclick=()=>closePanel('helpDialog');
-  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.best={};gd.accuracy={};novelty=N.create(gd);cfg.mode='hira';cfg.difficulty='easy';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
+  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);cfg.mode='hira';cfg.difficulty='easy';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   document.querySelectorAll('dialog.game-dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='results')showMenu();else closePanel(d.id);}));
   window.addEventListener('nihongo-analytics-settings-open',()=>{if(running())pause(true);});
   document.addEventListener('keydown',e=>{
     if(G?.countingDown&&e.key==='Tab'){e.preventDefault();$('skipCountdown').focus({preventScroll:true});return;}
     if(document.querySelector('dialog[open]'))return;
+    if(choosingHiragana()&&!G.paused&&!G.countingDown&&!document.hidden&&/^[1-6]$/.test(e.key)){
+      if(e.defaultPrevented||e.repeat||e.isComposing||composing||e.keyCode===229||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.target?.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName))return;
+      const drop=G.target,choice=drop?.hiraganaOptions?.[Number(e.key)-1];
+      if(choice){e.preventDefault();chooseHiragana(choice.id,drop.roundId);}return;
+    }
     if(e.key==='Escape'&&running()){e.preventDefault();pause();}
     else if(e.key==='Enter'&&!running()&&!['SELECT','BUTTON','INPUT'].includes(e.target.tagName)){e.preventDefault();start();}
   });
@@ -587,5 +663,5 @@
   }).catch(()=>$('offlineStatus').textContent='Offline setup unavailable in this browser.');}
   else $('offlineStatus').textContent='Offline setup is unavailable in this browser.';
   // Public module boundary for the future minigame shell and meaningful integration tests.
-  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},difficultyProfiles:R.profiles,get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
+  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer','hiragana-choice'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,chooseHiragana,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},difficultyProfiles:R.profiles,get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
 })();

@@ -63,6 +63,51 @@
   // The input accepts one kana unit, including a compound such as きゃ.
   function toRomaji(symbol) { var k = byChar[String(symbol).normalize('NFC')]; return k ? k.romaji : ''; }
   function romajiVariants(symbol) { var k = byChar[String(symbol).normalize('NFC')]; return k ? [k.romaji].concat(k.alt) : []; }
-  root.JPData = { kana: kana, kanaByChar: byChar, kanaById: kana.reduce(function (m, k) { m[k.id] = k; return m; }, {}),
-                  toRomaji: toRomaji, romajiVariants: romajiVariants, rowsOrder: ROWS };
+  var byId = kana.reduce(function (m, k) { m[k.id] = k; return m; }, {});
+  function requireKana(id) {
+    if (typeof id !== 'string' || !Object.prototype.hasOwnProperty.call(byId, id)) throw new Error('Unknown kana id: ' + String(id));
+    return byId[id];
+  }
+  // Exact script partner; row/column distinguish homophones such as じ and ぢ.
+  function counterpart(id) {
+    var source = requireKana(id), other = kana.find(function (k) {
+      return k.script !== source.script && k.row === source.row && k.col === source.col && k.pairId === source.pairId;
+    });
+    if (!other) throw new Error('No script counterpart for kana id: ' + id);
+    return other;
+  }
+  function shuffled(values, rng) {
+    var result = values.slice();
+    for (var i = result.length - 1; i > 0; i--) {
+      var sample = rng();
+      if (typeof sample !== 'number' || !Number.isFinite(sample) || sample < 0 || sample >= 1) throw new Error('Kana choice RNG must return a number in [0, 1)');
+      var j = Math.floor(sample * (i + 1)), temporary = result[i]; result[i] = result[j]; result[j] = temporary;
+    }
+    return result;
+  }
+  var HIRAGANA_CHOICE_COUNT = 6;
+  // Pure catalogue choices; callers keep the shuffled result stable for a round.
+  function hiraganaChoices(id, rng = Math.random) {
+    var source = requireKana(id), partner = counterpart(id);
+    var correct = source.script === 'hiragana' ? source : partner;
+    if (typeof rng !== 'function') throw new Error('Kana choice RNG must be a function');
+    var choices = [correct], usedReadings = new Set([correct.romaji].concat(correct.alt));
+    var hira = kana.filter(function (k) { return k.script === 'hiragana' && k.id !== correct.id; });
+    // Keep compounds among compounds and prefer familiar basic shapes before a catalogue fallback.
+    var pools = [hira.filter(function (k) { return k.kind === correct.kind; }),
+                 hira.filter(function (k) { return k.kind !== correct.kind && k.kind === 'basic'; }),
+                 hira.filter(function (k) { return k.kind !== correct.kind && k.kind !== 'basic'; })];
+    for (var p = 0; p < pools.length && choices.length < HIRAGANA_CHOICE_COUNT; p++) {
+      var candidates = shuffled(pools[p], rng);
+      for (var i = 0; i < candidates.length && choices.length < HIRAGANA_CHOICE_COUNT; i++) {
+        var candidate = candidates[i], readings = [candidate.romaji].concat(candidate.alt);
+        if (readings.some(function (reading) { return usedReadings.has(reading); })) continue;
+        choices.push(candidate); readings.forEach(function (reading) { usedReadings.add(reading); });
+      }
+    }
+    if (choices.length !== HIRAGANA_CHOICE_COUNT) throw new Error('Not enough unambiguous hiragana choices for kana id: ' + id);
+    return shuffled(choices, rng);
+  }
+  root.JPData = { kana: kana, kanaByChar: byChar, kanaById: byId,
+                  toRomaji: toRomaji, romajiVariants: romajiVariants, counterpart: counterpart, hiraganaChoices: hiraganaChoices, hiraganaChoiceCount: HIRAGANA_CHOICE_COUNT, rowsOrder: ROWS };
 })(typeof window !== 'undefined' ? window : globalThis);

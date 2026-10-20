@@ -1,5 +1,13 @@
 # Kana Rain releases
 
+## 1.10.0 — 2026-10-20
+
+- New gardens complete all 104 hiragana before unlocking Katakana: each needs two correct first answers and at least 85% first-answer accuracy. Preserve earlier Katakana access and all earned rows; the additive access flag never relocks an earned alphabet.
+- Answer Katakana with six Hiragana choices, using clicks/taps or keys 1–6. Keep each round's options stable, allow selecting another drop, exclude homophone distractors and prevent delayed clicks or held keys from answering a replacement round. Hiragana typing and the sound pad remain available.
+- Record the new activity as assisted recognition with `hiragana-choice` evidence, without rewriting earlier attempts or counting it as independent recall. Preserve learner storage, history, historical bests, accuracy, novelty brakes and adaptive rain.
+- Fit desktop results actions without scrolling the main panel. Place next-row guidance and review side by side, keep replay/review/menu visible, and scroll only long review lists. Use one row of six choices on desktop and two rows of three on phones.
+- Add exhaustive mapping, progression, keyboard and browser regressions, update help and advance the service-worker cache to release 1.10.0.
+
 ## 1.9.0 — 2026-10-19
 
 - Replace visible points and record comparisons with correct-answer, wrong-answer and expiration totals in results. During play, show only correct answers and time around larger central hearts; wrong-answer and expiration totals stay in the final summary. Streak feedback remains.
