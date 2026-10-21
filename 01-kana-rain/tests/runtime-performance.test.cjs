@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { runtime, play, inputRain } = require('./runtime-harness.cjs');
 
-test('a single n auto-submits hiragana after a bounded typing pause', async () => {
-  for (const [id, mode] of [['kana:ん', 'hira']]) {
+test('a single n auto-submits both hiragana and katakana after a bounded typing pause', async () => {
+  for (const [id, mode] of [['kana:ん', 'hira'], ['kana:ン', 'kata']]) {
     const g = await inputRain([id], mode);
     g.type('n'); play(g, 290);
     assert.equal(g.app.state.correct, 0, 'leave a short window for the accepted nn spelling');
@@ -13,24 +13,6 @@ test('a single n auto-submits hiragana after a bounded typing pause', async () =
     assert.equal(g.learner.attempts().at(-1).itemId, id);
     assert.equal(g.learner.attempts().at(-1).response, 'n');
   }
-});
-
-test('katakana ignores delayed romaji and accepts a hiragana choice without a prefix wait', async () => {
-  const g = await inputRain(['kana:ン', 'kana:ネ'], 'kata');
-  const target = g.app.state.target;
-  assert.equal(target.hiraganaOptions.length, 6);
-  assert.equal(new Set(target.hiraganaOptions.map(option => option.id)).size, 6);
-  g.type('n'); play(g, 400); g.answer('nn'); g.compose('kana:ン');
-  assert.equal(g.app.state.correct, 0); assert.equal(g.app.state.attempts, 0);
-  assert.ok(!g.app.state.pendingAnswer); assert.equal(g.learner.attempts().length, 0);
-  const option = target.hiraganaOptions.find(k => k.pairId === g.data.kanaById[target.id].pairId);
-  g.app.chooseHiragana(option.id, target.roundId);
-  assert.equal(g.app.state.correct, 1); assert.equal(g.app.state.attempts, 1);
-  play(g, 400);
-  assert.equal(g.learner.attempts().length, 1);
-  assert.equal(g.learner.attempts()[0].response, 'ん');
-  assert.equal(g.learner.attempts()[0].responseFormat, 'hiragana-choice');
-  assert.equal(g.app.state.drops[0].id, 'kana:ネ');
 });
 
 test('n resolves with ne on screen, while continued typing still selects ne or nn exactly once', async () => {

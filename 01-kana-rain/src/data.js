@@ -76,38 +76,6 @@
     if (!other) throw new Error('No script counterpart for kana id: ' + id);
     return other;
   }
-  function shuffled(values, rng) {
-    var result = values.slice();
-    for (var i = result.length - 1; i > 0; i--) {
-      var sample = rng();
-      if (typeof sample !== 'number' || !Number.isFinite(sample) || sample < 0 || sample >= 1) throw new Error('Kana choice RNG must return a number in [0, 1)');
-      var j = Math.floor(sample * (i + 1)), temporary = result[i]; result[i] = result[j]; result[j] = temporary;
-    }
-    return result;
-  }
-  var HIRAGANA_CHOICE_COUNT = 6;
-  // Pure catalogue choices; callers keep the shuffled result stable for a round.
-  function hiraganaChoices(id, rng = Math.random) {
-    var source = requireKana(id), partner = counterpart(id);
-    var correct = source.script === 'hiragana' ? source : partner;
-    if (typeof rng !== 'function') throw new Error('Kana choice RNG must be a function');
-    var choices = [correct], usedReadings = new Set([correct.romaji].concat(correct.alt));
-    var hira = kana.filter(function (k) { return k.script === 'hiragana' && k.id !== correct.id; });
-    // Keep compounds among compounds and prefer familiar basic shapes before a catalogue fallback.
-    var pools = [hira.filter(function (k) { return k.kind === correct.kind; }),
-                 hira.filter(function (k) { return k.kind !== correct.kind && k.kind === 'basic'; }),
-                 hira.filter(function (k) { return k.kind !== correct.kind && k.kind !== 'basic'; })];
-    for (var p = 0; p < pools.length && choices.length < HIRAGANA_CHOICE_COUNT; p++) {
-      var candidates = shuffled(pools[p], rng);
-      for (var i = 0; i < candidates.length && choices.length < HIRAGANA_CHOICE_COUNT; i++) {
-        var candidate = candidates[i], readings = [candidate.romaji].concat(candidate.alt);
-        if (readings.some(function (reading) { return usedReadings.has(reading); })) continue;
-        choices.push(candidate); readings.forEach(function (reading) { usedReadings.add(reading); });
-      }
-    }
-    if (choices.length !== HIRAGANA_CHOICE_COUNT) throw new Error('Not enough unambiguous hiragana choices for kana id: ' + id);
-    return shuffled(choices, rng);
-  }
   root.JPData = { kana: kana, kanaByChar: byChar, kanaById: byId,
-                  toRomaji: toRomaji, romajiVariants: romajiVariants, counterpart: counterpart, hiraganaChoices: hiraganaChoices, hiraganaChoiceCount: HIRAGANA_CHOICE_COUNT, rowsOrder: ROWS };
+                  toRomaji: toRomaji, romajiVariants: romajiVariants, counterpart: counterpart, rowsOrder: ROWS };
 })(typeof window !== 'undefined' ? window : globalThis);

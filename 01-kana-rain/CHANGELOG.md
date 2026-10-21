@@ -1,5 +1,31 @@
 # Kana Rain releases
 
+## 1.10.1 — 2026-10-21
+
+- Keep unfamiliar Katakana out of wrong-answer feedback, mistake-review cards and result readiness hints, including pasted kana and previously recorded confusion partners. Announce Katakana rows by name instead of revealing every future glyph. Only an actual prior presentation permits its glyph in these surfaces; opening a row does not. Preserve readiness totals, the original response, confusion evidence and all earlier progress.
+- Answer Katakana by sound through romaji typing or the fixed touch sound pad, with Hiragana reading support. Retain all older assisted-recognition evidence without conversion.
+- Release the Katakana-only longer reading brake, reusable learning slots and aligned results from the local previews below. Preserve the shared ten-hit failure pause, adaptive rain, earned rows, access and historical records.
+- Advance the offline cache to release 1.10.1 without changing learner storage.
+
+## 1.10.1-local.3 — local preview, 2026-10-21
+
+- Answer Katakana by sound, exactly like Hiragana: type romaji on a computer, or use the same fixed sound pad on a phone (シ is S/SH → shi). The answer controls no longer change with each drop, and any visible matching drop can be answered.
+- Keep Hiragana as Katakana's support: a new katakana shows its hiragana partner instead of romaji (シ over し), and corrections name it (ネ = ね).
+- Remove the per-drop Hiragana choices, drop selection and keys 1–3. Distractors came from the whole catalogue, so the first rows could be answered without reading katakana: with only the vowels open, a simulated player who picked an option from an open row was right 91% of the time.
+- Record new Katakana answers as `romaji` with `typing` or `composer` input, like Hiragana. Earlier `hiragana-choice` events keep their exact shape and assisted meaning; rows, access, readiness, novelty brakes and learning slots are unchanged.
+
+## 1.10.1-local.2 — local preview, 2026-10-20
+
+- Fix cold Katakana getting stuck on ア while repaying Hiragana's longer admission brake. Save a Katakana-only pressure window initialized from real Katakana evidence, while preserving the original history and shared ten-hit failure pause.
+- Keep Katakana's own four-miss/two-expiration brake, difficulty thresholds, progress, recognition evidence, three choices and result alignment intact. Reloads and mode switches do not reset recovery.
+
+## 1.10.1-local.1 — local preview, 2026-10-20
+
+- Return Katakana matching to three Hiragana buttons with keys 1–3, on one row on desktop and phones.
+- Align desktop result panels and action columns, keep readiness on its own line and preserve visible actions on short screens.
+- Replace Katakana's fixed two-introduction limit per run with two slots for newly introduced nonstarter kana still needing practice. Meeting the existing two-first-hit/85% rule frees a slot; familiar spacing, failures, expiration recovery and one debut on screen remain enforced. Hiragana retains its existing run limit.
+- Preserve all saved learning evidence, row readiness, earned access, records, adaptive rain and new-kana pressure.
+
 ## 1.10.0 — 2026-10-20
 
 - New gardens complete all 104 hiragana before unlocking Katakana: each needs two correct first answers and at least 85% first-answer accuracy. Preserve earlier Katakana access and all earned rows; the additive access flag never relocks an earned alphabet.

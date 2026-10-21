@@ -198,20 +198,20 @@ test('hiragana rounds use romaji and reject copying the kana prompt',async()=>{
   const round=g.app.generateRound({id:'kana:あ'});assert.equal(round.facet,'form→sound');assert.equal(round.responseFormat,'romaji');assert.deepEqual(plain(g.app.accepted(round)),['a']);assert.equal(g.app.score(round,{correct:true})[0].facet,'form→sound');assert.ok(!g.app.accepted('kana:い').includes('い'));assert.deepEqual(plain(g.app.accepted('w:ねこ')),[]);assert.throws(()=>g.app.generateRound({id:'w:ねこ'}),/Only kana/);
 });
 
-test('all familiar hiragana keep romaji while katakana use hiragana recognition through the unlocked catalogue',async()=>{
+test('all familiar hiragana and katakana keep romaji answers through the unlocked catalogue',async()=>{
   const g=await game({explore:true,prepare:seedFamiliarReadings});
   for(const mode of ['hira','kata']){
     g.el('mode').value=mode;g.el('mode').onchange();assert.equal(g.app.settings.mode,mode);
     const ids=g.app.candidates();assert.ok(ids.length>0);
     assert.equal(ids.length,104);
-    for(const id of ids){const round=g.app.generateRound({id});assert.equal(round.responseFormat,mode==='kata'?'hiragana-choice':'romaji');assert.equal(round.facet,'form→sound');assert.ok(!g.app.accepted(round).includes(id.slice(5)),mode+': copying prompt is rejected');}
+    for(const id of ids){const round=g.app.generateRound({id});assert.equal(round.responseFormat,'romaji');assert.equal(round.facet,'form→sound');assert.ok(!g.app.accepted(round).includes(id.slice(5)),mode+': copying prompt is rejected');}
   }
 });
 
 test('normal and review sessions keep their selected response format through repeated answers and pause/resume',async()=>{
   for(const mode of ['hira','kata']){
     const g=await game({explore:true,prepare(L,D){seedFamiliarReadings(L,D);Object.assign(L.gameData('kana-rain'),{scriptIntro:{hiragana:true}});}});
-    g.el('mode').value=mode;g.el('mode').onchange();const reviewIds=plain(g.app.candidates().slice(0,3)),format=mode==='kata'?'hiragana-choice':'romaji',facet='form→sound';
+    g.el('mode').value=mode;g.el('mode').onchange();const reviewIds=plain(g.app.candidates().slice(0,3)),format='romaji',facet='form→sound';
     for(const review of [false,true]){
       g.app.start(review?{reviewIds}:{});g.skip();assert.equal(g.app.state.paused,false,`${mode}: session starts without an unexpected script introduction`);
       assert.equal(g.app.state.reviewIds!==null,review);
@@ -222,16 +222,9 @@ test('normal and review sessions keep their selected response format through rep
         assert.equal(round.responseFormat,format);assert.equal(round.facet,facet);
         if(review)assert.ok(reviewIds.includes(round.id),`${mode}: review remains inside its selected collection`);
         if(answer===2){g.app.pause(true);g.advance(2500);g.app.pause(false);g.skip();assert.equal(round.responseFormat,format);assert.equal(g.app.state.paused,false);}
-        if(mode==='kata'){
-          assert.equal(round.hiraganaOptions.length,6);assert.equal(new Set(round.hiraganaOptions.map(option=>option.id)).size,6);
-          const correct=round.hiraganaOptions.find(option=>option.pairId===g.D.kanaById[round.id].pairId);
-          assert.ok(correct);const count=g.L.attempts().length;
-          g.submit(g.D.kanaById[round.id].romaji);assert.equal(g.L.attempts().length,count,'katakana ignores forced romaji');
-          g.app.chooseHiragana(correct.id,round.roundId);
-        }else g.submit(g.app.accepted(round)[0]);
+        g.submit(g.app.accepted(round)[0]);
         assert.equal(g.app.state.countingDown,false);assert.equal(g.el('scriptDialog').open,false,'familiarity cannot introduce a new script midway through the session');
-        const event=g.L.attempts().at(-1);assert.equal(event.correct,true);assert.equal(event.responseFormat,format);assert.equal(event.facet,facet);
-        if(mode==='kata'){assert.equal(event.assistance,true);assert.ok(event.assistanceReasons.includes('recognition-options'));assert.equal(event.inputMethod,'hiragana-choice');}
+        const event=g.L.attempts().at(-1);assert.equal(event.correct,true);assert.equal(event.responseFormat,format);assert.equal(event.facet,facet);assert.equal(event.inputMethod,'typing');
       }
       const attempts=g.L.attempts().slice(start);assert.equal(attempts.length,6);assert.deepEqual([...new Set(attempts.map(event=>event.responseFormat))],[format]);assert.deepEqual([...new Set(attempts.map(event=>event.facet))],[facet]);
       g.app.end('Response-format regression complete');
@@ -444,7 +437,7 @@ test('results name the next row and the first-try hits each kana still needs',as
   }});
   g.app.start();g.skip();g.app.end('Result check');
   const box=g.el('resultNext');assert.equal(box.classList.contains('hidden'),false);
-  assert.match(box.innerHTML,/Next: K-row<\/b> · 1 \/ 5 kana ready/);
+  assert.match(box.innerHTML.replace(/<[^>]*>/g,' ').replace(/\s+/g,' '),/Next: K-row 1 \/ 5 kana ready/);
   assert.deepEqual([...box.innerHTML.matchAll(/<span lang="ja">(.+?)<\/span> \+(\d+)/g)].map(m=>m[1]+m[2]),['い1','え2','お2','う4']);
   assert.doesNotMatch(box.innerHTML,/more kana/);
   const explored=await game({explore:true});explored.app.start();explored.skip();explored.app.end('Result check');

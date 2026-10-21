@@ -526,14 +526,10 @@ async function exerciseDesktopResults(errors){
   await page.goto('http://127.0.0.1:4180/?all');await page.waitForFunction(()=>window.KanaRain);
   assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
   await page.locator('#mode').selectOption('kata');await page.locator('#startBtn').click();await readyToPlay(page);
-  assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='hiragana-choice'&&JPData.kanaById[d.id].script==='katakana')),true);
-  assert.equal(await page.locator('#answerForm').isVisible(),false);assert.equal(await page.locator('#keyboard').isVisible(),false);
-  assert.equal(await page.locator('#hiraganaChoices button').count(),6);
-  const hiraChoice=await page.evaluate(()=>{const drop=KanaRain.state.target;return drop.hiraganaOptions.find(option=>option.pairId===JPData.kanaById[drop.id].pairId).id;});
-  await page.evaluate(()=>{const input=document.getElementById('answer');input.value='a';input.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('answerForm').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
-  assert.equal(await page.evaluate(()=>KanaRain.state.attempts),0,'hidden romaji input cannot submit katakana');
-  await page.locator('#hiraganaChoices button[data-hiragana-id="'+hiraChoice+'"]').click();await page.waitForFunction(()=>KanaRain.state.correct===1);
-  assert.equal(await page.evaluate(()=>{const event=KanaRain.state.events.at(-1);return event.responseFormat==='hiragana-choice'&&event.inputMethod==='hiragana-choice'&&event.assistance===true&&event.assistanceReasons.includes('recognition-options');}),true);
+  assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='romaji'&&JPData.kanaById[d.id].script==='katakana')),true);
+  assert.equal(await page.locator('#answerForm').isVisible(),true,'desktop Katakana is typed like Hiragana');
+  await page.locator('#answer').fill(await page.evaluate(()=>KanaRain.accepted(KanaRain.state.target)[0]));await page.waitForFunction(()=>KanaRain.state.correct===1);
+  assert.equal(await page.evaluate(()=>{const event=KanaRain.state.events.at(-1);return event.responseFormat==='romaji'&&event.inputMethod==='typing';}),true);
   await finishSession(page);
   await page.waitForFunction(()=>document.querySelector('#offlineStatus').textContent.includes('ready offline'));
   const cacheCount=await page.evaluate(async()=>{const key=(await caches.keys()).find(k=>k.startsWith('kana-rain-'));const c=await caches.open(key);return (await c.keys()).filter(r=>r.url.endsWith('.mp3')).length;});

@@ -1,6 +1,6 @@
 # New kana admission
 
-**Release 1.8.1, 19 October 2026.** Expirations once again signal overload. A persistent short pause prevents new kana immediately after any failure; the longer recovery brake also considers the recent expiration count. Familiar practice continues throughout.
+**Release 1.10.1, 21 October 2026.** A persistent short pause prevents new kana immediately after any failure; the longer recovery brake also considers recent expirations. Katakana uses its own completed outcomes for that longer brake and frees presentation slots when newly introduced kana reach readiness. Familiar practice continues throughout.
 
 ## Immediate pause
 
@@ -22,19 +22,23 @@ Two or more expirations **or** four or more familiar first-answer misses in the 
 
 A familiar miss is a wrong first answer on a kana seen before its drop appeared. It enters the completed-drop window once when corrected or expired. Several wrong submissions on one drop remain one familiar miss, and a wrong debut does not manufacture a familiar miss. All expirations count independently of familiarity or prior typing. Intermediate wrong submissions start the short pause immediately but do not fabricate a completed outcome.
 
-These window targets apply after the longer brake closes, not before every debut. The shared window retains up to 60 distinct completed outcomes across runs, scripts and focused reviews. Switching difficulty evaluates the corresponding tail without erasing history or the short pause.
+These window targets apply after the longer brake closes, not before every debut. The original window retains up to 60 distinct completed outcomes across runs, scripts and focused reviews; it stays intact and continues to govern Hiragana. Katakana instead uses a persistent window of its own completed outcomes, with the same selected difficulty and thresholds. Earlier Hiragana failures do not count as Katakana failures. The immediate ten-hit pause is still the original shared counter. Switching difficulty evaluates both corresponding tails without erasing history or the short pause.
 
 ## Presentation limits and continued practice
 
-Three consecutive familiar first-try hits precede and separate nonstarter debuts; wrong answers, corrections and expirations reset this spacing. At most two distinct nonstarter kana debut per run, with only one debut on screen. The budget is spent at presentation. A debut keeps its identity until that drop leaves, although it is saved as seen immediately.
+Three consecutive familiar first-try hits precede and separate nonstarter debuts; wrong answers, corrections and expirations reset this spacing. Only one debut can be on screen. A debut keeps its identity until that drop leaves, although it is saved as seen immediately.
+
+Hiragana keeps a maximum of two distinct nonstarter debuts per run, spent at presentation. Katakana instead counts introduced nonstarter kana that have not yet reached the existing readiness rule: two correct first answers and at least 85% submitted first-answer accuracy. At most two such kana can occupy slots. When one reaches readiness, another may debut in the same run, subject to familiar spacing and both brakes. Corrections do not free a slot. The session's complete introduction set is retained; no attempts, counters or saved pressure are reset to make room.
 
 Normal queues, unlocks, retries and confusion partners share admission checks. Deferred new kana are replaced by familiar content. Earned rows remain available; `seen` means previously presented, not learned. Existing hinted or weak kana may still repeat.
 
-Starter vowels bypass spacing and the two-debut budget, while respecting both brakes if any familiar content is eligible. With no familiar content, one starter can bootstrap an alphabet. The one-debut-on-screen rule always applies. Session budgets reset each run; pressure and cooldown do not.
+Starter vowels bypass spacing and the two-slot budget, while respecting both brakes if any familiar content is eligible. With no familiar content, one starter can bootstrap an alphabet. The one-debut-on-screen rule always applies. Session budgets reset each run; pressure and cooldown do not.
 
 ## Persistence and compatibility
 
 The shared learner key/schema, ledgers and storage architecture are unchanged. Novelty keeps `version:1` and adds `cooldownRemaining`; new completed entries also record whether the drop was familiar. This does not alter attempt/exposure evidence, independent/assisted classifications, earned rows, accuracy or personal bests (including historical and `arcade-v2` keys).
+
+The additive game-data field `katakanaNovelty` also uses the existing version-1 state format. On first creation it replays only catalogue-identified Katakana attempts and initial-reading exposures; legacy Katakana aggregates can establish familiarity but never fabricate ordered outcomes. A valid saved state remains authoritative across restarts and reloads. Unattributed original-window outcomes stay in that original window rather than being assigned to Katakana. Each new Katakana outcome updates both histories with the same real round identity and outcome. Katakana admission checks its own longer brake and the original shared cooldown; its separate stored cooldown never adds a second recovery requirement.
 
 On load, valid saved cooldown values (0–10) are preserved. If absent or invalid, the latest ten saved outcomes initialize the pause conservatively: a failure starts at ten, and only explicitly recorded familiar first-try hits provide recovery credit. Older samples lack debut identity, so no familiar credit is invented. A last relevant incorrect attempt also starts the pause when initializing it, even without a terminal outcome. A clean ten-outcome tail initializes zero. The longer brake is reevaluated using saved recent expirations and misses immediately; no saved recent entry is rewritten or replaced.
 
