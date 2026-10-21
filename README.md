@@ -22,6 +22,7 @@ The game is public and requires no account. Progress stays in the browser on the
 | [New-kana rules](01-kana-rain/NOVELTY_BALANCE.md) | Admission, recovery and progression policy. |
 | [Development](01-kana-rain/DEVELOPMENT.md) | Architecture, validation, asset preparation and release invariants. |
 | [Learning design](01-kana-rain/LEARNING_DESIGN.md) | Evidence, assistance, cognitive load and research limits. |
+| [Final release plan](01-kana-rain/RELEASE_PLAN.md) | Current study and priorities for menu music, animation polish and usability. |
 | [Changelog](01-kana-rain/CHANGELOG.md) | Released changes. |
 
 Retired prototypes, presentations and imported research copies remain recoverable from Git history. The current artwork masters, audio sources, licenses, provenance and save-migration fixtures stay with the game because they support development and compatible releases.
