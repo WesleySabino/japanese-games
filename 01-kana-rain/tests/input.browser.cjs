@@ -64,11 +64,11 @@ async function checkPrefixInput(browser, baseUrl, { baseline = false } = {}) {
       assert.equal(await page.evaluate(() => KanaRain.state.events.length), 1);
       assert.equal(await page.locator('#answer').inputValue(), '');
 
-      // Katakana offers six visible Hiragana choices; hidden romaji and pad handlers cannot submit it.
+      // Katakana offers three visible Hiragana choices; hidden romaji and pad handlers cannot submit it.
       await fixture('ン', 'ネ');
       assert.equal(await page.locator('#answerForm').isVisible(), false);
       assert.equal(await page.locator('#keyboard').isVisible(), false);
-      assert.equal(await page.locator('#hiraganaChoices button').count(), 6);
+      assert.equal(await page.locator('#hiraganaChoices button').count(), 3);
       await page.evaluate(() => {
         const answer = document.getElementById('answer'); answer.value = 'n'; answer.dispatchEvent(new Event('input', { bubbles: true }));
         document.getElementById('answerForm').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));

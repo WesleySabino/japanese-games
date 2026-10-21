@@ -85,7 +85,7 @@
     }
     return result;
   }
-  var HIRAGANA_CHOICE_COUNT = 6;
+  var HIRAGANA_CHOICE_COUNT = 3;
   // Pure catalogue choices; callers keep the shuffled result stable for a round.
   function hiraganaChoices(id, rng = Math.random) {
     var source = requireKana(id), partner = counterpart(id);

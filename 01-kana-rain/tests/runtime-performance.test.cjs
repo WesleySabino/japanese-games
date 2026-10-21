@@ -18,8 +18,8 @@ test('a single n auto-submits hiragana after a bounded typing pause', async () =
 test('katakana ignores delayed romaji and accepts a hiragana choice without a prefix wait', async () => {
   const g = await inputRain(['kana:ン', 'kana:ネ'], 'kata');
   const target = g.app.state.target;
-  assert.equal(target.hiraganaOptions.length, 6);
-  assert.equal(new Set(target.hiraganaOptions.map(option => option.id)).size, 6);
+  assert.equal(target.hiraganaOptions.length, 3);
+  assert.equal(new Set(target.hiraganaOptions.map(option => option.id)).size, 3);
   g.type('n'); play(g, 400); g.answer('nn'); g.compose('kana:ン');
   assert.equal(g.app.state.correct, 0); assert.equal(g.app.state.attempts, 0);
   assert.ok(!g.app.state.pendingAnswer); assert.equal(g.learner.attempts().length, 0);

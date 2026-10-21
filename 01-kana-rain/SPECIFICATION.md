@@ -1,12 +1,12 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** release 1.10.0, 20 October 2026.
+**Catalogue ID:** 01. **Baseline:** local preview 1.10.1-local.2, 20 October 2026.
 
 The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 
 ## Core game
 
-The title screen offers Hiragana/Katakana and Easy/Normal/Hard. New gardens begin with Hiragana only; Katakana unlocks after completion of the 104-form hiragana catalogue. Hiragana uses romaji typing or the sound pad. Katakana uses six clickable hiragana choices for a selected falling drop, with no romaji or Japanese-keyboard entry. Click a choice or press 1–6, following the displayed numbers. The choices remain stable for that round, including retries; stale choices cannot answer another drop. Existing Katakana access remains available.
+The title screen offers Hiragana/Katakana and Easy/Normal/Hard. New gardens begin with Hiragana only; Katakana unlocks after completion of the 104-form hiragana catalogue. Hiragana uses romaji typing or the sound pad. Katakana uses three clickable hiragana choices for a selected falling drop, with no romaji or Japanese-keyboard entry. Click a choice or press 1–3, following the displayed numbers. The choices remain stable for that round, including retries; stale choices cannot answer another drop. Existing Katakana access remains available.
 
 Regular runs last three minutes, with three hearts on every difficulty. The existing Normal curve applies universally: 10-second initial falls, acceleration capped at 3.5×. The curve reads an effective time, not the clock: +1.6 seconds per correct answer, −20 seconds per expiration, never below zero. A drop expiring takes one heart and clears unfinished input; a wrong answer stains and accelerates its drop. Zero hearts ends the run. The live HUD shows correct answers and the timer around large central hearts; streaks, pronunciation, celebrations, danger cues and reduced effects remain.
 
@@ -14,7 +14,7 @@ Complete typed hiragana readings submit automatically. Ambiguous prefixes such a
 
 Hiragana touch input uses the sound pad: a fixed grid of 15 consonant families, then that family's sounds in nine fixed slots (five vowel columns, three yōon, final n) in the same space. It produces the same romaji readings and covers all 104 hiragana forms in two taps; nothing on the pad depends on the falling kana. Compositions submit immediately. An unmatched composition is a mistake for the drop highlighted when it began. The exact cell resolves homophones; another row with the same accepted sound still counts. Portrait places the pad below the rain and short landscape beside it. Phone portrait uses one compact status row, with listen, garden and sound tools on the answer line; two family rows fit when the pad is at least 316 px wide, otherwise it retains three. Touch targets remain at least 36 px. Phone drop width and height are reduced by 40%; normalized fall timing does not change. The native keyboard opens only on request in Hiragana; Katakana hides the form and pad and ignores their handlers.
 
-The catalogue has 104 exact hiragana/katakana pairs, with 104 forms per script (46 basic, 20 dakuten, five handakuten and 33 yōon). Katakana matching uses pair identity rather than shared romaji; the six options exclude homophone distractors. Extended loanword combinations, standalone small kana, small tsu and the long-vowel mark are outside the assessed catalogue.
+The catalogue has 104 exact hiragana/katakana pairs, with 104 forms per script (46 basic, 20 dakuten, five handakuten and 33 yōon). Katakana matching uses pair identity rather than shared romaji; the three options exclude homophone distractors. Extended loanword combinations, standalone small kana, small tsu and the long-vowel mark are outside the assessed catalogue.
 
 ## Counting answers
 
@@ -28,7 +28,9 @@ Any wrong submission or expiration pauses new kana immediately until ten consecu
 
 Difficulty selects recovery after the longer brake closes: Easy 55/60 (default), Normal 25/30, Hard 10/12. Two expirations or four familiar first-answer misses in the selected window close this brake. Recovery requires the full window, the hit target, fewer than two expirations and fewer than four misses. The window target is not a prerequisite before every debut; hearts and adaptive rain are identical across levels.
 
-Three consecutive familiar first-try hits precede and separate nonstarter debuts. Each run allows at most two distinct nonstarter debuts and one debut on screen. Starter vowels bypass spacing and the two-debut budget but respect both brakes once familiar content exists; one starter can bootstrap an empty alphabet. First presentations and up to 60 completed outcomes persist; earned rows remain eligible. See [exact admission rules](NOVELTY_BALANCE.md).
+Katakana evaluates the longer brake using a saved Katakana-only window, initialized once from identifiable Katakana evidence. It does not inherit Hiragana failures. The original novelty history remains intact and continues to govern Hiragana; its immediate ten-hit cooldown still applies to both alphabets. Real Katakana failures close and recover the Katakana brake with the same thresholds. Reloading, starting a run or switching alphabets cannot reset either history.
+
+Three consecutive familiar first-try hits precede and separate nonstarter debuts, with one debut on screen. Hiragana allows at most two distinct nonstarter debuts per run. Katakana limits new nonstarter kana still below the two-first-hit/85% readiness rule to two at a time; a ready kana frees a slot during the same run. Both brakes and familiar spacing still apply before every introduction. Starter vowels bypass spacing and this budget but respect both brakes once familiar content exists; one starter can bootstrap an empty alphabet. First presentations and up to 60 completed outcomes persist; earned rows remain eligible. See [exact admission rules](NOVELTY_BALANCE.md).
 
 Rows unlock after every available kana has two correct first answers and at least 85% submitted first-answer accuracy. Hints are allowed. Corrected retries and expirations do not supply qualifying hits. Independent recall remains separately recorded evidence.
 

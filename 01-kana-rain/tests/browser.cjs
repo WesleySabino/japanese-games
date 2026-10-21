@@ -528,7 +528,7 @@ async function exerciseDesktopResults(errors){
   await page.locator('#mode').selectOption('kata');await page.locator('#startBtn').click();await readyToPlay(page);
   assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='hiragana-choice'&&JPData.kanaById[d.id].script==='katakana')),true);
   assert.equal(await page.locator('#answerForm').isVisible(),false);assert.equal(await page.locator('#keyboard').isVisible(),false);
-  assert.equal(await page.locator('#hiraganaChoices button').count(),6);
+  assert.equal(await page.locator('#hiraganaChoices button').count(),3);
   const hiraChoice=await page.evaluate(()=>{const drop=KanaRain.state.target;return drop.hiraganaOptions.find(option=>option.pairId===JPData.kanaById[drop.id].pairId).id;});
   await page.evaluate(()=>{const input=document.getElementById('answer');input.value='a';input.dispatchEvent(new Event('input',{bubbles:true}));document.getElementById('answerForm').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
   assert.equal(await page.evaluate(()=>KanaRain.state.attempts),0,'hidden romaji input cannot submit katakana');

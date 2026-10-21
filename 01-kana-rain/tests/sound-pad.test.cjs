@@ -51,7 +51,7 @@ test('hiragana homophones resolve to the chosen row; the same sound still answer
   }
 });
 
-test('all 104 katakana use six hiragana choices and ignore romaji typing and the sound pad', async () => {
+test('all 104 katakana use three hiragana choices and ignore romaji typing and the sound pad', async () => {
   const g = await runtime({ explore: true, mobile: true });
   g.el('mode').value = 'kata'; g.el('mode').onchange();
   const kana = g.data.kana.filter(k => k.script === 'katakana');
@@ -63,7 +63,7 @@ test('all 104 katakana use six hiragana choices and ignore romaji typing and the
     const drop = g.app.state.target;
     assert.equal(drop.id, k.id); assert.equal(drop.responseFormat, 'hiragana-choice');
     const options = Array.from(drop.hiraganaOptions);
-    assert.equal(options.length, 6); assert.equal(new Set(options.map(option => option.id)).size, 6);
+    assert.equal(options.length, 3); assert.equal(new Set(options.map(option => option.id)).size, 3);
     assert.ok(options.every(option => option.script === 'hiragana'));
     const matches = options.filter(option => option.pairId === k.pairId);
     assert.equal(matches.length, 1, k.char + ' has exactly one script counterpart, including homophones and combinations');

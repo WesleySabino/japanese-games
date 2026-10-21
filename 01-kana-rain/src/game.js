@@ -11,6 +11,19 @@
     L.flush();
   }
   let novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});
+  const katakanaIds=new Set(D.kana.filter(k=>k.script==='katakana').map(k=>k.id));
+  function createKatakanaNovelty(){
+    // Keep Katakana's long reading brake separate from earlier Hiragana pressure.
+    // Only attributable evidence can reconstruct it; the shared short pause stays global.
+    const holder={novelty:gd.katakanaNovelty},state=N.create(holder,{
+      attempts:(L.attempts?.()||[]).filter(event=>katakanaIds.has(event.itemId)),
+      exposures:(L.exposures?.()||[]).filter(event=>katakanaIds.has(event.itemId)),
+      items:Object.fromEntries(Object.entries(L.all?.()||{}).filter(([id])=>katakanaIds.has(id)))
+    });
+    for(const id of katakanaIds)if(N.hasSeen(novelty,id))N.markSeen(state,id);
+    N.setPace(state,N.profile(novelty).id);gd.katakanaNovelty=state;return state;
+  }
+  let katakanaNovelty=createKatakanaNovelty();
   const explore=new URLSearchParams(location.search).has('all');
   // The saved novelty pace is authoritative: old rain difficulty must not change it.
   const difficultyForPace=id=>Object.keys(R.profiles).find(key=>R.profiles[key].pace===id)||'easy';
@@ -151,7 +164,7 @@
     const rows=unlocked(script).map(readiness),pending=rows.filter(x=>!x.ready).map(x=>({k:x.k,need:hitsToReady(x)})).sort((a,b)=>a.need-b.need);
     const shown=pending.slice(0,4).map(({k,need})=>`<span class="next-kana"><span lang="ja">${escapeText(k.char)}</span> +${need}</span>`).join(' '),more=pending.length-4;
     const heading=next?'Next: '+(rowNames[next]||next.toUpperCase()+'-row'):pending.length?'Finish Hiragana':'Hiragana complete · Katakana ready';
-    box.innerHTML=`<p><b>${escapeText(heading)}</b> · ${rows.length-pending.length} / ${rows.length} kana ready</p>`+
+    box.innerHTML=`<p class="next-heading"><b>${escapeText(heading)}</b><span class="next-ready">${rows.length-pending.length} / ${rows.length} kana ready</span></p>`+
       (pending.length?`<p class="next-needs"><span class="next-label">First-try hits to go</span> ${shown}${more>0?` <span class="next-more">+${more} more kana</span>`:''}</p>`:'');
     box.classList.remove('hidden');
   }
@@ -168,7 +181,7 @@
   }
   function changeDifficulty(id){
     if(running()||!Object.hasOwn(R.profiles,id))return;
-    cfg.difficulty=id;N.setPace(novelty,R.profiles[id].pace);cfg.noveltyPace=N.profile(novelty).id;gd.difficulty=id;L.flush();renderMenu();
+    cfg.difficulty=id;N.setPace(novelty,R.profiles[id].pace);N.setPace(katakanaNovelty,R.profiles[id].pace);cfg.noveltyPace=N.profile(novelty).id;gd.difficulty=id;L.flush();renderMenu();
   }
   function renderMenu(){
     unlockKatakana();
@@ -253,9 +266,12 @@
     const known=(G.reviewIds||candidates()).some(id=>N.hasSeen(novelty,id));
     // Bootstrap an empty alphabet; once familiar content exists, vowels respect both brakes.
     if(starter(id)&&!known)return true;
-    if(novelty.blocked||novelty.cooldownRemaining>0)return false;
+    if((G.mode==='kata'?katakanaNovelty:novelty).blocked||novelty.cooldownRemaining>0)return false;
     if(starter(id))return true;
-    return G.newIds.size<N.constants.maxNew&&(!known||G.familiarSinceIntroduction>=N.constants.warmup);
+    // Recognition practice can move on once an introduced Katakana is ready;
+    // keep every debut in the session history and retain Hiragana's total limit.
+    const learning=G.mode==='kata'?[...G.newIds].filter(id=>!readiness(D.kanaById[id]).ready).length:G.newIds.size;
+    return learning<N.constants.maxNew&&(!known||G.familiarSinceIntroduction>=N.constants.warmup);
   }
   function nextEntry(){
     if(!G.queue.length)refill();
@@ -301,6 +317,7 @@
     }
     d.isIntroduction=isIntroduction;
     if(isIntroduction){N.markSeen(novelty,d.id);if(!starter(d.id))G.newIds.add(d.id);G.familiarSinceIntroduction=0;}
+    if(katakanaIds.has(d.id))N.markSeen(katakanaNovelty,d.id);
     G.drops.push(d);dropResizeObserver.observe(d.el);if(view.hint)exposeReading(d.id,'initial-reading');else if(isIntroduction)L.flush();place(d);return d;
   }
   function place(d){d.el.style.transform=`translate(${d.x}px,${d.y}px)`;}
@@ -360,7 +377,7 @@
     renderPadPrompt();
     if(choosingHiragana()){
       $('inputFormat').textContent='Choose Hiragana';$('targetHint').textContent=t?'For '+symbol(t.id)+' · tap another drop to select':'Waiting for the rain…';
-      $('inputNote').textContent='Click a choice or press 1–6 · follow the numbers';renderHiraganaChoices();return;
+      $('inputNote').textContent='Click a choice or press 1–3 · follow the numbers';renderHiraganaChoices();return;
     }
     $('inputScript').textContent='a';
     $('inputFormat').textContent='Type romaji';
@@ -381,10 +398,11 @@
     if(detail.outcome!=='timeout'){G.attempts++;if(correct===true)G.correct++;else if(correct===false)G.errors++;}
     const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
     if(detail.outcome!=='timeout'){stat.attempts++;if(correct)stat.correct++;}
-    if(correct===false){N.pause(novelty);G.familiarSinceIntroduction=0;}
+    if(correct===false){N.pause(novelty);if(G.mode==='kata')N.pause(katakanaNovelty);G.familiarSinceIntroduction=0;}
     if(correct||detail.outcome==='timeout'){
       // Earlier wrong answers make this a reading miss, unless the drop was the kana's debut.
-      N.finish(novelty,{roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout',miss:!d.isIntroduction&&!firstAttempt,familiar:!d.isIntroduction,failureRecorded:!firstAttempt});
+      const outcome={roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout',miss:!d.isIntroduction&&!firstAttempt,familiar:!d.isIntroduction,failureRecorded:!firstAttempt};
+      N.finish(novelty,outcome);if(G.mode==='kata')N.finish(katakanaNovelty,outcome);
       if(detail.outcome==='timeout'||!firstAttempt)G.familiarSinceIntroduction=0;
       else if(!d.isIntroduction)G.familiarSinceIntroduction++;
     }
@@ -505,11 +523,11 @@
     renderNextRow(cfg.mode==='kata'?'katakana':'hiragana');
     const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])];
     lastReview=review.filter(id=>candidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
-    $('resultReview').innerHTML=review.length?'<p>A little more practice · tap to listen</p><div class="review-grid">'+review.map(id=>{
+    $('resultReview').innerHTML=review.length?'<p class="review-heading"><b>A little more practice</b><span class="review-hint">Tap to listen</span></p><div class="review-grid">'+review.map(id=>{
       const char=symbol(id),reading=readingLabel(id);
       const tag=A.hasRecording(char)?'button':'div';
       return `<${tag} class="review-card" ${tag==='button'?`type="button" data-kana="${escapeText(char)}" aria-label="Listen to ${escapeText(char)}, ${escapeText(reading)}"`:''}><span lang="ja">${escapeText(char)}</span><small>${escapeText(reading)}</small>${tag==='button'?'<span class="review-audio" aria-hidden="true">♪</span>':''}</${tag}>`;
-    }).join('')+'</div>':G.correct?'Keep the streak growing.':'Listen to the current row, then try again.';
+    }).join('')+'</div>':`<p class="review-empty">${G.correct?'Keep the streak growing.':'Listen to the current row, then try again.'}</p>`;
     review.forEach(id=>exposeReading(id,'results-review',true));L.flush();
     dispose();closeDialogs();$('results').showModal();$('answer').disabled=true;$('submitBtn').disabled=true;enableSetup(true);$('answer').blur();$('againBtn').focus({preventScroll:true});$('results').querySelector('.dialog-panel').scrollTop=0;
   }
@@ -614,14 +632,14 @@
   $('settingsBtn').onclick=$('pauseSettingsBtn').onclick=()=>openPanel('settingsDialog');
   $('closeSettings').onclick=$('saveSettings').onclick=()=>closePanel('settingsDialog');
   $('helpBtn').onclick=$('pauseHelpBtn').onclick=()=>openPanel('helpDialog');$('closeHelp').onclick=()=>closePanel('helpDialog');
-  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);cfg.mode='hira';cfg.difficulty='easy';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
+  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);katakanaNovelty=createKatakanaNovelty();cfg.mode='hira';cfg.difficulty='easy';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   document.querySelectorAll('dialog.game-dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='results')showMenu();else closePanel(d.id);}));
   window.addEventListener('nihongo-analytics-settings-open',()=>{if(running())pause(true);});
   document.addEventListener('keydown',e=>{
     if(G?.countingDown&&e.key==='Tab'){e.preventDefault();$('skipCountdown').focus({preventScroll:true});return;}
     if(document.querySelector('dialog[open]'))return;
-    if(choosingHiragana()&&!G.paused&&!G.countingDown&&!document.hidden&&/^[1-6]$/.test(e.key)){
+    if(choosingHiragana()&&!G.paused&&!G.countingDown&&!document.hidden&&/^[1-3]$/.test(e.key)){
       if(e.defaultPrevented||e.repeat||e.isComposing||composing||e.keyCode===229||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.target?.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName))return;
       const drop=G.target,choice=drop?.hiraganaOptions?.[Number(e.key)-1];
       if(choice){e.preventDefault();chooseHiragana(choice.id,drop.roundId);}return;

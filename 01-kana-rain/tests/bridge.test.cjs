@@ -36,15 +36,15 @@ test('all 104 katakana have their exact reversible hiragana counterpart, includi
   assert.equal(partners.size, 104);
 });
 
-test('each bridge offers six distinct hiragana, exactly one partner and no shared accepted reading across 128 seeds', () => {
+test('each bridge offers three distinct hiragana, exactly one partner and no shared accepted reading across 128 seeds', () => {
   const data = catalogue(), before = JSON.stringify(data.kana);
-  assert.equal(data.hiraganaChoiceCount, 6);
+  assert.equal(data.hiraganaChoiceCount, 3);
   for (const kana of data.kana.filter(kana => kana.script === 'katakana')) {
     const correct = data.counterpart(kana.id), positions = new Set();
     for (let seed = 0; seed < 128; seed++) {
       const choices = data.hiraganaChoices(kana.id, seeded(seed)), label = kana.id + ' seed ' + seed;
-      assert.equal(choices.length, 6, label);
-      assert.equal(new Set(choices.map(choice => choice.id)).size, 6, label);
+      assert.equal(choices.length, 3, label);
+      assert.equal(new Set(choices.map(choice => choice.id)).size, 3, label);
       assert.equal(choices.filter(choice => choice === correct).length, 1, label);
       positions.add(choices.indexOf(correct));
       const accepted = new Set();
@@ -58,11 +58,10 @@ test('each bridge offers six distinct hiragana, exactly one partner and no share
         }
       }
       const matchingKind = choices.filter(choice => choice.kind === correct.kind);
-      assert.equal(matchingKind.length, correct.kind === 'handakuten' ? 5 : 6, label + ' uses the available matching kind first');
-      assert.ok(choices.filter(choice => choice.kind !== correct.kind).every(choice => choice.kind === 'basic'), label + ' the five handakuten use a basic fallback for the sixth option');
+      assert.equal(matchingKind.length, 3, label + ' keeps all three choices in the matching kind');
       assert.deepEqual(Array.from(data.hiraganaChoices(kana.id, seeded(seed)), choice => choice.id), Array.from(choices, choice => choice.id), label + ' deterministic with the same RNG');
     }
-    assert.equal(positions.size, 6, kana.id + ' correct choice can occupy all six positions');
+    assert.equal(positions.size, 3, kana.id + ' correct choice can occupy all three positions');
   }
   assert.equal(JSON.stringify(data.kana), before, 'choice generation never mutates or reorders the catalogue');
 });
@@ -85,7 +84,7 @@ test('hiragana inputs retain their own correct symbol and choice arrays are inde
     const first = data.hiraganaChoices(kana.id, seeded(42)), second = data.hiraganaChoices(kana.id, seeded(42));
     assert.notEqual(first, second);
     assert.equal(first.filter(choice => choice === kana).length, 1, kana.id);
-    first.pop(); assert.equal(second.length, 6);
+    first.pop(); assert.equal(second.length, 3);
   }
 });
 

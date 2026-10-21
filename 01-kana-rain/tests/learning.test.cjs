@@ -223,7 +223,7 @@ test('normal and review sessions keep their selected response format through rep
         if(review)assert.ok(reviewIds.includes(round.id),`${mode}: review remains inside its selected collection`);
         if(answer===2){g.app.pause(true);g.advance(2500);g.app.pause(false);g.skip();assert.equal(round.responseFormat,format);assert.equal(g.app.state.paused,false);}
         if(mode==='kata'){
-          assert.equal(round.hiraganaOptions.length,6);assert.equal(new Set(round.hiraganaOptions.map(option=>option.id)).size,6);
+          assert.equal(round.hiraganaOptions.length,3);assert.equal(new Set(round.hiraganaOptions.map(option=>option.id)).size,3);
           const correct=round.hiraganaOptions.find(option=>option.pairId===g.D.kanaById[round.id].pairId);
           assert.ok(correct);const count=g.L.attempts().length;
           g.submit(g.D.kanaById[round.id].romaji);assert.equal(g.L.attempts().length,count,'katakana ignores forced romaji');
@@ -444,7 +444,7 @@ test('results name the next row and the first-try hits each kana still needs',as
   }});
   g.app.start();g.skip();g.app.end('Result check');
   const box=g.el('resultNext');assert.equal(box.classList.contains('hidden'),false);
-  assert.match(box.innerHTML,/Next: K-row<\/b> · 1 \/ 5 kana ready/);
+  assert.match(box.innerHTML.replace(/<[^>]*>/g,' ').replace(/\s+/g,' '),/Next: K-row 1 \/ 5 kana ready/);
   assert.deepEqual([...box.innerHTML.matchAll(/<span lang="ja">(.+?)<\/span> \+(\d+)/g)].map(m=>m[1]+m[2]),['い1','え2','お2','う4']);
   assert.doesNotMatch(box.innerHTML,/more kana/);
   const explored=await game({explore:true});explored.app.start();explored.skip();explored.app.end('Result check');
