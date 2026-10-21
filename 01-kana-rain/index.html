@@ -154,14 +154,18 @@
   </dialog>
   <dialog id="settingsDialog" class="game-dialog settings-dialog" aria-labelledby="settingsTitle">
     <div class="dialog-panel"><div class="panel-heading"><h2 id="settingsTitle">Your little rain</h2><button id="closeSettings" class="dialog-close" aria-label="Close settings">×</button></div><p class="eyebrow">YOUR DEVICE &amp; PRIVACY</p>
-      <p id="settingsNote" class="field-note">Use the sound button to mute pronunciation and effects. Saved progress stays on this device; export a backup from My Kana Garden.</p>
+      <p id="settingsNote" class="field-note">Progress stays on this device when storage is available; export a backup from My Kana Garden.</p>
+      <button id="settingsSoundBtn" class="effects-toggle sound-toggle" type="button" aria-pressed="true" aria-label="Mute pronunciation and effects" aria-describedby="settingsSoundNote">Sound <span id="settingsSoundState" class="effects-state">On</span></button><p id="settingsSoundNote" class="field-note effects-note">Pronunciation and interface effects share this sound control.</p>
       <button id="effectsBtn" class="effects-toggle" type="button" aria-pressed="false">Reduced effects <span class="effects-state">Off</span></button><p class="field-note effects-note">Calmer motion; gameplay stays the same.</p>
       <button class="text-button analytics-entry" type="button" data-analytics-settings>Analytics and privacy</button>
       <div class="panel-actions"><button id="saveSettings" class="menu-button primary"><span>Return to the Garden</span><span aria-hidden="true">›</span></button></div>
     </div>
   </dialog>
   <dialog id="results" class="game-dialog results-dialog" aria-labelledby="resultTitle">
-    <div class="dialog-panel"><p class="eyebrow">RAIN COMPLETE</p><h2 id="resultTitle">Nice practice!</h2><p id="resultMessage"></p><div id="resultStats" class="result-stats"></div><p id="resultDetails" class="result-details"></p><p id="resultCountingNote" class="result-counting-note">Correct answers include corrections. Each wrong submission counts once; expired drops count separately.</p><div id="resultNext" class="result-next hidden"></div><div id="resultReview" class="result-review"></div><div class="result-actions"><button id="reviewPracticeBtn" class="menu-button primary hidden"><span>Review these kana</span><span aria-hidden="true">›</span></button><button id="againBtn" class="menu-button primary"><span>Another little rain</span><span aria-hidden="true">›</span></button><button id="backBtn" class="text-button">Return to the main menu</button></div></div>
+    <div class="dialog-panel">
+      <div class="result-content"><p class="eyebrow">RAIN COMPLETE</p><h2 id="resultTitle">Nice practice!</h2><p id="resultMessage"></p><div id="resultStats" class="result-stats"></div><p id="resultDetails" class="result-details"></p><p id="resultCountingNote" class="result-counting-note">Correct answers include corrections. Each wrong submission counts once; expired drops count separately.</p><div id="resultNext" class="result-next hidden"></div><div id="resultReview" class="result-review"></div></div>
+      <div class="result-actions"><button id="reviewPracticeBtn" class="menu-button primary hidden"><span>Review these kana</span><span aria-hidden="true">›</span></button><button id="againBtn" class="menu-button primary"><span>Another little rain</span><span aria-hidden="true">›</span></button><button id="backBtn" class="text-button">Return to the main menu</button></div>
+    </div>
   </dialog>
   <dialog id="helpDialog" class="game-dialog help-dialog" aria-labelledby="helpTitle">
     <div class="dialog-panel"><div class="panel-heading"><h2 id="helpTitle">Read. Recall. Let it rain.</h2><button id="closeHelp" class="dialog-close" aria-label="Close instructions">×</button></div><p class="eyebrow">WELCOME TO THE GARDEN</p>

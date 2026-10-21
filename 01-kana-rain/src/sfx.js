@@ -119,7 +119,7 @@
     void play(buttonCue(button));
     // The capture listener sees the old mute state; stop any remaining notes
     // after the toggle's handler has applied its new state.
-    if (button.id === 'soundBtn') root.queueMicrotask(() => { if (!enabled()) silence(); });
+    if (button.id === 'soundBtn' || button.id === 'settingsSoundBtn') root.queueMicrotask(() => { if (!enabled()) silence(); });
   }, true);
   document.addEventListener('change', event => {
     const select = event.target.closest?.('select');
