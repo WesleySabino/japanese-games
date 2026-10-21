@@ -2,7 +2,7 @@
 
 **Catalogue ID:** 01. **Baseline:** release 1.10.1, 21 October 2026.
 
-The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
+The [README](README.md) gives setup and current behavior. [Development](DEVELOPMENT.md) covers implementation and validation; [learning design](LEARNING_DESIGN.md) explains the evidence and its limits. This specification describes the current game; superseded proposals remain in Git history.
 
 ## Core game
 

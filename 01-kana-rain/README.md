@@ -8,7 +8,7 @@ The illustrated garden, correct-answer/mistake/expiration counters, streaks, acc
 
 The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens.
 
-[Production game](https://kana-rain.nihongogrove.top/) · [Local preview](http://127.0.0.1:4173/) · [Specification](SPECIFICATION.md) · [Design review](REVIEW.md) · [New-kana rules](NOVELTY_BALANCE.md)
+[Production game](https://kana-rain.nihongogrove.top/) · [Local preview](http://127.0.0.1:4173/) · [Specification](SPECIFICATION.md) · [Development](DEVELOPMENT.md) · [Learning design](LEARNING_DESIGN.md) · [New-kana rules](NOVELTY_BALANCE.md)
 
 ## Play locally
 
@@ -99,10 +99,10 @@ pnpm build
 
 Browser suites use isolated profiles and temporary localhost servers. The sound-pad suite measures fall distance, dock size and touch targets at eight phone sizes, and checks quick taps, ignored bounces, cancelled slides, stable slots, correction and evidence labels. `test:katakana-bridge` checks the hiragana completion gate, retained legacy access, katakana typing on desktop and the pad on phones, hiragana-partner hints and corrections, continued introductions in the same run and the evidence labels. The suites also check all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.
 
-For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. [Performance diagnostics](PERFORMANCE.md) documents earlier measurements and the preserved optimization strategy.
+For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. Use a disposable browser profile for tests. [Development](DEVELOPMENT.md) documents the architecture, performance invariants, asset preparation and release checks.
 
 ## Artwork and release
 
-The garden, spirit poses and water sprites keep the established teal, ivory and gold presentation. The public `art.html` gallery, runtime WebP images, source masters and `assets/PROMPTS.md` remain. Earlier concepts and explanatory images are preserved in [the design archive](../docs/design/kana-rain/README.md). The original prototype is [non-executable historical source](../docs/history/kana-rain/prototypes/kana-rain-standalone.html.txt).
+The garden, spirit poses and water sprites keep the established teal, ivory and gold presentation. The public `art.html` gallery, runtime WebP images, source masters and [art prompts](assets/PROMPTS.md) remain. The gallery's concepts and atlases are public assets and also document the current art direction. Superseded mockups, infographics and prototypes are recoverable from Git history.
 
 `pnpm build` creates `dist/` from an explicit production allowlist. It excludes private exports, prototypes, development scripts, tests and design documents. A build does not perform publication; deployment uses the verified release package. HTTPS or localhost is required for the service worker. Index/about metadata, canonical URLs, sitemap and robots retain the production address.

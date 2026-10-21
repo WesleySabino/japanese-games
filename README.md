@@ -1,26 +1,31 @@
-# Japanese Learning Games
+# Kana Rain
 
-This repository holds **Kana Rain**, a short-session arcade game for reading hiragana and katakana. It is the only game in active development.
+This repository holds **Kana Rain**, a short-session arcade game for reading hiragana and katakana.
 
 [Play Kana Rain](https://kana-rain.nihongogrove.top/) · [How to play](https://kana-rain.nihongogrove.top/about.html)
 
 The game is public and requires no account. Progress stays in the browser on the player's device. The rain garden fills the screen. The game supports keyboard and touch controls, pronunciation audio, short sessions and mistake review, and it plays offline after the first download.
 
-## Scope since 2026-10-15
-
-The project was reduced to two parts: the [nihongogrove.top](https://nihongogrove.top/) site, which includes Japanese Core, and this game. The rest of the earlier catalogue was moved out of this repository and remains in the git history. That covers Gojūon Board (02), the 32 documented game concepts (03–34), the Curriculum Atlas and the `planejamento/` folder. New games can return later as separate decisions.
-
-The parts of that material, and of the earlier research, that help with game design live in [docs/didatica/](docs/didatica/README.md). They cover what the research says about learning kana, feedback, evidence and transfer, plus the design rules shared by the first prototypes.
-
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `01-kana-rain/` | Game source, tests, assets and build. See its [README](01-kana-rain/README.md). |
-| `docs/design/kana-rain/` | Concept art and infographics. |
-| `docs/history/kana-rain/` | Earlier specifications, reviews and the original prototype, kept as non-executable history. |
-| `docs/didatica/` | Research-based notes for designing learning games. |
+| `01-kana-rain/` | Game source, tests, assets, public pages and build. |
 | `.github/workflows/kana-rain.yml` | CI: unit tests, browser tests and the static build. |
+
+## Documentation
+
+| Document | Purpose |
+|---|---|
+| [Game README](01-kana-rain/README.md) | Setup, controls and current player experience. |
+| [Specification](01-kana-rain/SPECIFICATION.md) | Functional contract and saved-progress behavior. |
+| [New-kana rules](01-kana-rain/NOVELTY_BALANCE.md) | Admission, recovery and progression policy. |
+| [Development](01-kana-rain/DEVELOPMENT.md) | Architecture, validation, asset preparation and release invariants. |
+| [Learning design](01-kana-rain/LEARNING_DESIGN.md) | Evidence, assistance, cognitive load and research limits. |
+| [Final release plan](01-kana-rain/RELEASE_PLAN.md) | Current study and priorities for menu music, animation polish and usability. |
+| [Changelog](01-kana-rain/CHANGELOG.md) | Released changes. |
+
+Retired prototypes, presentations and imported research copies remain recoverable from Git history. The current artwork masters, audio sources, licenses, provenance and save-migration fixtures stay with the game because they support development and compatible releases.
 
 ## Run Kana Rain locally
 
