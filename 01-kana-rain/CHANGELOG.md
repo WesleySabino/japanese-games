@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.10.1-local.3 — local preview, 2026-10-21
+
+- Answer Katakana by sound, exactly like Hiragana: type romaji on a computer, or use the same fixed sound pad on a phone (シ is S/SH → shi). The answer controls no longer change with each drop, and any visible matching drop can be answered.
+- Keep Hiragana as Katakana's support: a new katakana shows its hiragana partner instead of romaji (シ over し), and corrections name it (ネ = ね).
+- Remove the per-drop Hiragana choices, drop selection and keys 1–3. Distractors came from the whole catalogue, so the first rows could be answered without reading katakana: with only the vowels open, a simulated player who picked an option from an open row was right 91% of the time.
+- Record new Katakana answers as `romaji` with `typing` or `composer` input, like Hiragana. Earlier `hiragana-choice` events keep their exact shape and assisted meaning; rows, access, readiness, novelty brakes and learning slots are unchanged.
+
 ## 1.10.1-local.2 — local preview, 2026-10-20
 
 - Fix cold Katakana getting stuck on ア while repaying Hiragana's longer admission brake. Save a Katakana-only pressure window initialized from real Katakana evidence, while preserving the original history and shared ten-hit failure pause.

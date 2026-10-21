@@ -7,8 +7,8 @@ const FAMILIES = ['a', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w', 'g', 'z', 'd
 const SLOTS = ['a', 'i', 'u', 'e', 'o', 'ya', 'yu', 'yo', 'n'];
 const stage = g => g.el('keyboard').dataset.stage;
 
-test('each of the 104 hiragana has one two-tap path, and composing it answers that kana', async () => {
-  for (const [script, mode] of [['hiragana', 'hira']]) {
+test('each of the 208 kana has one two-tap path, and composing it answers that kana', async () => {
+  for (const [script, mode] of [['hiragana', 'hira'], ['katakana', 'kata']]) {
     const g = await runtime({ explore: true, mobile: true });
     g.el('mode').value = mode; g.el('mode').onchange();
     const kana = g.data.kana.filter(k => k.script === script), cells = new Set();
@@ -35,8 +35,8 @@ test('each of the 104 hiragana has one two-tap path, and composing it answers th
   }
 });
 
-test('hiragana homophones resolve to the chosen row; the same sound still answers a lone homophone', async () => {
-  for (const [lower, chosen, mode] of [['kana:じ', 'kana:ぢ', 'hira'], ['kana:ぢ', 'kana:じ', 'hira'], ['kana:ず', 'kana:づ', 'hira'], ['kana:を', 'kana:お', 'hira']]) {
+test('homophones resolve to the chosen row; the same sound still answers a lone homophone', async () => {
+  for (const [lower, chosen, mode] of [['kana:じ', 'kana:ぢ', 'hira'], ['kana:ぢ', 'kana:じ', 'hira'], ['kana:ず', 'kana:づ', 'hira'], ['kana:を', 'kana:お', 'hira'], ['kana:ヂ', 'kana:ジ', 'kata'], ['kana:オ', 'kana:ヲ', 'kata']]) {
     const g = await inputRain([lower, chosen], mode);
     assert.equal(g.app.state.target.id, lower);
     g.compose(chosen);
@@ -51,37 +51,41 @@ test('hiragana homophones resolve to the chosen row; the same sound still answer
   }
 });
 
-test('all 104 katakana use three hiragana choices and ignore romaji typing and the sound pad', async () => {
-  const g = await runtime({ explore: true, mobile: true });
-  g.el('mode').value = 'kata'; g.el('mode').onchange();
-  const kana = g.data.kana.filter(k => k.script === 'katakana');
-  assert.equal(kana.length, 104);
-  for (const k of kana) {
-    if (g.app.state && !g.app.state.over) g.app.end('Next katakana');
-    g.app.gameData.novelty.seen[k.id] = true;
-    g.app.start({ reviewIds: [k.id] }); g.skip();
-    const drop = g.app.state.target;
-    assert.equal(drop.id, k.id); assert.equal(drop.responseFormat, 'hiragana-choice');
-    const options = Array.from(drop.hiraganaOptions);
-    assert.equal(options.length, 3); assert.equal(new Set(options.map(option => option.id)).size, 3);
-    assert.ok(options.every(option => option.script === 'hiragana'));
-    const matches = options.filter(option => option.pairId === k.pairId);
-    assert.equal(matches.length, 1, k.char + ' has exactly one script counterpart, including homophones and combinations');
-    const before = g.learner.attempts().length;
-    g.type(k.romaji); play(g, 400); g.answer(k.romaji); g.compose(k.id);
-    assert.equal(g.app.state.attempts, 0, 'romaji and composer cannot answer or penalize katakana');
-    assert.equal(g.learner.attempts().length, before);
-    g.app.chooseHiragana(matches[0].id, drop.roundId);
-    assert.equal(g.app.state.correct, 1); assert.equal(g.app.state.attempts, 1);
-    const event = g.learner.attempts().at(-1);
-    assert.equal(event.itemId, k.id); assert.equal(event.correct, true); assert.equal(event.firstAttempt, true);
-    assert.equal(event.facet, 'form→sound'); assert.equal(event.responseFormat, 'hiragana-choice');
-    assert.equal(event.response, matches[0].char); assert.equal(event.inputMethod, 'hiragana-choice');
-    assert.equal(event.assistance, true); assert.ok(event.assistanceReasons.includes('recognition-options'));
-    assert.equal(g.learner.state(k.id).facets['form→sound'].independentFirstCorrect, 0);
-    g.app.chooseHiragana(matches[0].id, drop.roundId);
-    assert.equal(g.learner.attempts().length, before + 1, 'a repeated click cannot answer a removed round');
+test('katakana is typed on desktop and composed on phones like hiragana; a new one shows its hiragana partner', async () => {
+  for (const mobile of [false, true]) {
+    const g = await runtime({ explore: true, mobile });
+    g.el('mode').value = 'kata'; g.el('mode').onchange();
+    for (const k of g.data.kana.filter(k => k.script === 'katakana')) {
+      const partner = g.data.counterpart(k.id);
+      assert.deepEqual(g.app.padPath(k.id), g.app.padPath(partner.id), k.char + ' shares the pad cell of ' + partner.char);
+      if (g.app.state && !g.app.state.over) g.app.end('Next katakana');
+      g.app.gameData.novelty.seen[k.id] = true;
+      g.app.start({ reviewIds: [k.id] }); g.skip();
+      assert.equal(g.el('keyboard').classList.contains('hidden'), !mobile, 'the pad opens only on phones');
+      const drop = g.app.state.target;
+      assert.equal(drop.id, k.id); assert.equal(drop.responseFormat, 'romaji');
+      assert.equal(drop.el.children.find(child => child.className === 'hint')?.textContent, partner.char, k.char + ' debut hint is its hiragana, not romaji');
+      if (mobile) g.compose(k.id); else g.answer(k.romaji);
+      assert.equal(g.app.state.correct, 1, k.char + ' answered by its sound');
+      const event = g.learner.attempts().at(-1);
+      assert.equal(event.itemId, k.id); assert.equal(event.correct, true); assert.equal(event.firstAttempt, true);
+      assert.equal(event.facet, 'form→sound'); assert.equal(event.responseFormat, 'romaji');
+      assert.equal(event.inputMethod, mobile ? 'composer' : 'typing');
+      assert.ok(!event.assistanceReasons.includes('recognition-options'));
+    }
   }
+});
+
+test('a wrong katakana sound names the hiragana partner and what the typed sound reads as', async () => {
+  const g = await inputRain(['kana:ネ', 'kana:ノ'], 'kata');
+  g.answer('no');
+  assert.equal(g.app.state.correct, 1, 'no answers the visible ノ, as typing does in hiragana');
+  g.answer('nu');
+  assert.equal(g.app.state.errors, 1);
+  assert.equal(g.el('feedback').textContent, 'ネ = ね. You typed nu → ヌ.');
+  const event = g.learner.attempts().at(-1);
+  assert.equal(event.itemId, 'kana:ネ'); assert.equal(event.correct, false); assert.equal(event.chosenItemId, 'kana:ヌ');
+  assert.equal(event.responseFormat, 'romaji'); assert.equal(event.inputMethod, 'typing');
 });
 
 test('N family: n answers ん at once and ne still answers ね, each exactly once', async () => {

@@ -19,7 +19,7 @@ function record(g, id, extra = {}) {
   g.learner.record(id, facet, {
     attemptId: 'katakana-progression:' + serial, roundId: 'synthetic-round:' + serial, sessionId: 'synthetic-progression',
     gameId: 'kana-rain', firstAttempt: true, correct: true, assistance: true, assistanceReasons: ['synthetic-reading'],
-    responseFormat: g.data.kanaById[id].script === 'katakana' ? 'hiragana-choice' : 'romaji',
+    responseFormat: 'romaji',
     now: 1700000000000 + serial * 1000, deferSave: true, ...extra
   });
 }
@@ -161,7 +161,7 @@ test('an explicit false flag survives export/reload alongside rows, novelty, bes
   for (const [id, item] of Object.entries(before.items)) assert.deepEqual(after.items[id].facets, item.facets, id + ' learning evidence is preserved');
 });
 
-test('ten real assisted Katakana vowel choices unlock K and admit a new K drop without independent-recall credit', async () => {
+test('ten real typed Katakana vowel answers unlock K and admit a new K drop', async () => {
   const g = await garden({ katakanaUnlocked: true, best: { 'arcade-v2:kata:easy:180': 321 } });
   const vowels = g.data.kana.filter(kana => kana.script === 'katakana' && kana.row === 'a');
   for (const kana of vowels) g.app.gameData.novelty.seen[kana.id] = true;
@@ -172,24 +172,22 @@ test('ten real assisted Katakana vowel choices unlock K and admit a new K drop w
   for (let index = 0; index < sequence.length; index++) {
     if (!g.app.state.drops.length) { g.app.state.sinceSpawn = 99999; g.tick(); }
     const drop = g.app.state.target; assert.equal(drop.id, sequence[index]);
-    const option = drop.hiraganaOptions.find(kana => kana.pairId === g.data.kanaById[drop.id].pairId);
-    assert.ok(option); assert.equal(g.app.chooseHiragana(option.id, drop.roundId), true);
+    answerKatakana(g, drop);
     assert.equal(g.app.gameData.rows.katakana, index < 9 ? 1 : 2, 'the last required first-answer hit opens K');
   }
   assert.equal(g.app.state.correct, 10); assert.equal(g.app.state.errors, 0); assert.equal(g.app.state.expirations, 0);
   const events = g.learner.attempts(); assert.equal(events.length, 10);
-  assert.ok(events.every(event => event.correct && event.firstAttempt && event.assistance === true && event.assistanceReasons.includes('recognition-options') && event.responseFormat === 'hiragana-choice'));
+  assert.ok(events.every(event => event.correct && event.firstAttempt && event.responseFormat === 'romaji' && event.inputMethod === 'typing' && !event.assistanceReasons.includes('recognition-options')));
   for (const kana of vowels) {
     const evidence = g.learner.state(kana.id).facets[facet];
-    assert.equal(evidence.firstCorrect, 2); assert.equal(evidence.firstAttempts, 2); assert.equal(evidence.independentFirstCorrect, 0);
+    assert.equal(evidence.firstCorrect, 2); assert.equal(evidence.firstAttempts, 2);
   }
   let introduced;
   for (let attempt = 0; attempt < 30 && !introduced; attempt++) {
     if (!g.app.state.drops.length) { g.app.state.sinceSpawn = 99999; g.tick(); }
     const drop = g.app.state.target;
     if (g.data.kanaById[drop.id].row === 'k') { introduced = drop; break; }
-    const option = drop.hiraganaOptions.find(kana => kana.pairId === g.data.kanaById[drop.id].pairId);
-    g.app.chooseHiragana(option.id, drop.roundId);
+    answerKatakana(g, drop);
   }
   assert.ok(introduced, 'ordinary refill and admission present a newly unlocked K kana');
   assert.equal(introduced.isIntroduction, true); assert.equal(g.app.gameData.novelty.blocked, false); assert.equal(g.app.gameData.novelty.cooldownRemaining, 0);
@@ -200,10 +198,18 @@ test('ten real assisted Katakana vowel choices unlock K and admit a new K drop w
   assert.deepEqual(plain(restored.app.gameData.best), { 'arcade-v2:kata:easy:180': 321 });
 });
 
+// Each helper submits its sound while the round is the only drop on screen.
 function answerKatakana(g, drop = g.app.state.target) {
-  assert.ok(drop, 'a real selected Katakana round is present');
-  const correct = drop.hiraganaOptions.find(kana => kana.pairId === g.data.kanaById[drop.id].pairId);
-  assert.ok(correct); assert.equal(g.app.chooseHiragana(correct.id, drop.roundId), true);
+  assert.ok(drop, 'a real Katakana round is present');
+  const before = g.learner.attempts().length;
+  g.answer(g.data.kanaById[drop.id].romaji);
+  assert.equal(g.learner.attempts().length, before + 1); assert.equal(g.learner.attempts().at(-1).roundId, drop.roundId);
+  return drop;
+}
+function missKatakana(g, drop = g.app.state.target) {
+  const before = g.app.state.errors;
+  g.answer('qq');
+  assert.equal(g.app.state.errors, before + 1); assert.equal(g.learner.attempts().at(-1).roundId, drop.roundId);
   return drop;
 }
 function nextKatakana(g, queuedId) {
@@ -214,7 +220,7 @@ function nextKatakana(g, queuedId) {
   return g.app.state.target;
 }
 
-test('successful Katakana recognition can introduce a third nonstarter in the same session', async () => {
+test('successful Katakana practice can introduce a third nonstarter in the same session', async () => {
   const g = await garden({ katakanaUnlocked: true });
   g.el('mode').value = 'kata'; g.el('mode').onchange(); g.app.start(); g.skip();
   const sessionId = g.app.state.sessionId;
@@ -228,8 +234,7 @@ test('successful Katakana recognition can introduce a third nonstarter in the sa
   assert.ok(introduced.slice(0, 3).every(id => g.data.kanaById[id].row === 'k'));
   assert.ok(introduced.slice(0, 2).some(id => g.learner.state(id).facets[facet].firstCorrect >= 2));
   assert.equal(g.app.gameData.novelty.blocked, false); assert.equal(g.app.gameData.novelty.cooldownRemaining, 0);
-  assert.ok(g.learner.attempts().every(event => event.assistance === true && event.assistanceReasons.includes('recognition-options')));
-  for (const id of introduced) assert.equal(g.learner.state(id).facets[facet].independentFirstCorrect, 0);
+  assert.ok(g.learner.attempts().every(event => event.responseFormat === 'romaji' && event.inputMethod === 'typing'));
 });
 
 test('two unready Katakana introductions block a third, and open slots never bypass a failure pause', async () => {
@@ -250,8 +255,7 @@ test('two unready Katakana introductions block a third, and open slots never byp
   const kaEvidence = g.learner.state('kana:カ').facets[facet];
   assert.ok(kaEvidence.firstCorrect >= 2 && kaEvidence.firstCorrect / kaEvidence.firstAttempts >= 0.85);
   const failing = nextKatakana(g, 'kana:ア');
-  const wrong = failing.hiraganaOptions.find(kana => kana.pairId !== g.data.kanaById[failing.id].pairId);
-  g.app.chooseHiragana(wrong.id, failing.roundId); assert.equal(g.app.gameData.novelty.cooldownRemaining, 10);
+  missKatakana(g, failing); assert.equal(g.app.gameData.novelty.cooldownRemaining, 10);
   answerKatakana(g, failing); assert.equal(g.app.gameData.novelty.cooldownRemaining, 10, 'correcting the error does not recover admission');
   const blocked = nextKatakana(g, 'kana:ク'); assert.notEqual(blocked.id, 'kana:ク'); answerKatakana(g, blocked);
   for (let count = 0; count < 8; count++) answerKatakana(g, nextKatakana(g, 'kana:ア'));
@@ -309,7 +313,7 @@ test('cold Katakana recovers the global pause without inheriting Hiragana long p
     assert.equal(g.app.gameData.novelty.recent.filter(round => round.timeout).length, 2);
     assert.equal(g.app.gameData.katakanaNovelty.blocked, false);
     assert.equal(g.app.gameData.katakanaNovelty.recent.length, 11);
-    assert.ok(g.learner.attempts().every(event => event.responseFormat === 'hiragana-choice' && event.assistance === true));
+    assert.ok(g.learner.attempts().every(event => event.responseFormat === 'romaji' && event.inputMethod === 'typing'));
   }
 });
 
@@ -320,8 +324,7 @@ test('a Katakana mistake restarts the global pause even when its own long gate i
     const drop = correct === 1 ? g.app.state.target : nextKatakana(g);
     assert.equal(drop.id, 'kana:ア', 'no new vowel bypasses the current global pause');
     if (correct === 5) {
-      const wrong = drop.hiraganaOptions.find(kana => kana.pairId !== g.data.kanaById[drop.id].pairId);
-      assert.equal(g.app.chooseHiragana(wrong.id, drop.roundId), true);
+      missKatakana(g, drop);
       assert.equal(g.app.gameData.novelty.cooldownRemaining, 10);
     }
     answerKatakana(g, drop);
@@ -342,8 +345,7 @@ test('four real corrected familiar Katakana rounds retain the own long brake aft
   startKatakana(g);
   for (let miss = 0; miss < 4; miss++) {
     const drop = miss === 0 ? g.app.state.target : nextKatakana(g, 'kana:ア');
-    const wrong = drop.hiraganaOptions.find(kana => kana.pairId !== g.data.kanaById[drop.id].pairId);
-    assert.equal(g.app.chooseHiragana(wrong.id, drop.roundId), true); answerKatakana(g, drop);
+    missKatakana(g, drop); answerKatakana(g, drop);
     assert.equal(g.app.gameData.katakanaNovelty.blocked, miss === 3);
   }
   for (let hit = 0; hit < 10; hit++) answerKatakana(g, nextKatakana(g, 'kana:ア'));

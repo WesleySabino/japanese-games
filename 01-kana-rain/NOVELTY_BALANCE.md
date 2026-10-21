@@ -1,6 +1,6 @@
 # New kana admission
 
-**Local preview 1.10.1-local.2, 20 October 2026.** A persistent short pause prevents new kana immediately after any failure; the longer recovery brake also considers recent expirations. Katakana uses its own completed outcomes for that longer brake and frees presentation slots when newly introduced kana reach readiness. Familiar practice continues throughout.
+**Local preview 1.10.1-local.3, 21 October 2026.** A persistent short pause prevents new kana immediately after any failure; the longer recovery brake also considers recent expirations. Katakana uses its own completed outcomes for that longer brake and frees presentation slots when newly introduced kana reach readiness. Familiar practice continues throughout.
 
 ## Immediate pause
 
