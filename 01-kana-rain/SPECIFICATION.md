@@ -1,6 +1,6 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** local preview 1.10.1-local.3, 21 October 2026.
+**Catalogue ID:** 01. **Baseline:** release 1.10.1, 21 October 2026.
 
 The [README](README.md) gives setup and current behavior. Original catalogue proposals remain [historical evidence](../docs/history/kana-rain/SPECIFICATION.md).
 
@@ -15,6 +15,8 @@ Complete typed readings submit automatically. Ambiguous prefixes such as `n` wai
 Touch input uses the sound pad for both alphabets: a fixed grid of 15 consonant families, then that family's sounds in nine fixed slots (five vowel columns, three yōon, final n) in the same space. It produces the same romaji readings and covers all 208 forms in two taps, a katakana sharing its hiragana partner's cell; nothing on the pad depends on the falling kana. Compositions submit immediately. An unmatched composition is a mistake for the drop highlighted when it began. The exact cell resolves homophones; another row with the same accepted sound still counts. Portrait places the pad below the rain and short landscape beside it. Phone portrait uses one compact status row, with listen, garden and sound tools on the answer line; two family rows fit when the pad is at least 316 px wide, otherwise it retains three. Touch targets remain at least 36 px. Phone drop width and height are reduced by 40%; normalized fall timing does not change. The native keyboard opens only on request; physical typing is unchanged.
 
 The catalogue has 104 exact hiragana/katakana pairs, with 104 forms per script (46 basic, 20 dakuten, five handakuten and 33 yōon). Katakana support labels use pair identity rather than shared romaji, so ヂ names ぢ, not じ. Extended loanword combinations, standalone small kana, small tsu and the long-vowel mark are outside the assessed catalogue.
+
+Wrong-answer feedback, mistake-review cards and result readiness hints only display Katakana already marked as presented, not merely unlocked. This includes confusion arrows, echoed pasted input, review audio and accessibility labels. Filter review candidates before recording result-review exposures or starting focused practice. Result readiness totals still include unintroduced forms, counted in the remaining-kana label; Katakana row-unlock announcements use the row name without future glyphs. Preserve the original submitted response and confusion evidence, including older history; only the displayed feedback and review selection change. My Kana Garden remains an explicit curriculum reference.
 
 ## Counting answers
 

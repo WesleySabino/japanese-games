@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.10.1 — 2026-10-21
+
+- Keep unfamiliar Katakana out of wrong-answer feedback, mistake-review cards and result readiness hints, including pasted kana and previously recorded confusion partners. Announce Katakana rows by name instead of revealing every future glyph. Only an actual prior presentation permits its glyph in these surfaces; opening a row does not. Preserve readiness totals, the original response, confusion evidence and all earlier progress.
+- Answer Katakana by sound through romaji typing or the fixed touch sound pad, with Hiragana reading support. Retain all older assisted-recognition evidence without conversion.
+- Release the Katakana-only longer reading brake, reusable learning slots and aligned results from the local previews below. Preserve the shared ten-hit failure pause, adaptive rain, earned rows, access and historical records.
+- Advance the offline cache to release 1.10.1 without changing learner storage.
+
 ## 1.10.1-local.3 — local preview, 2026-10-21
 
 - Answer Katakana by sound, exactly like Hiragana: type romaji on a computer, or use the same fixed sound pad on a phone (シ is S/SH → shi). The answer controls no longer change with each drop, and any visible matching drop can be answered.

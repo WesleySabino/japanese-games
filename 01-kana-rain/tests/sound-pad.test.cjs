@@ -76,8 +76,9 @@ test('katakana is typed on desktop and composed on phones like hiragana; a new o
   }
 });
 
-test('a wrong katakana sound names the hiragana partner and what the typed sound reads as', async () => {
+test('a wrong katakana sound names its hiragana partner and an already introduced sound counterpart', async () => {
   const g = await inputRain(['kana:ネ', 'kana:ノ'], 'kata');
+  g.app.gameData.novelty.seen['kana:ヌ'] = true;
   g.answer('no');
   assert.equal(g.app.state.correct, 1, 'no answers the visible ノ, as typing does in hiragana');
   g.answer('nu');

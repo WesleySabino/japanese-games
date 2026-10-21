@@ -1,6 +1,6 @@
 # Kana Rain
 
-**Local preview: 1.10.1-local.3 — 21 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.10.1 — 21 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
@@ -29,6 +29,7 @@ Open http://127.0.0.1:4173/. A different port can be supplied through `PORT`. No
 - Each expired drop costs one heart, clears unfinished input and cancels any pending automatic answer. Losing all hearts ends the run. Wrong submissions stain and accelerate the affected drop without immediately taking a heart.
 - Both alphabets use romaji typing or the sound pad. Any visible matching drop can be answered; forced invalid submissions and listening use the highlighted priority drop. Common alternate readings are accepted; copying the displayed kana is not a reading answer.
 - Katakana keeps Hiragana as its support instead of romaji: a new katakana shows its hiragana partner (シ over し), and corrections, review cards and garden tiles name it (ネ = ね). The answer is still the sound: シ → `shi`.
+- Corrections, mistake-review cards and result readiness hints only show Katakana that has already been presented. Unshown kana remain in the readiness totals; a new row is announced by its name. An unfamiliar Katakana is also hidden when pasted into an answer; the original response and confusion evidence remain in saved history. Unlocked rows alone do not count as presentation.
 - Complete typed answers submit automatically. Ambiguous prefixes such as `n` wait 300 ms of active play for another letter; stop typing to accept, or press Enter immediately. Continuing cancels the pending match. An exact answer entered before the waterline is protected during this short wait.
 - Start or resume with a skippable three-second countdown. Escape or the Pause button pauses; leaving the tab pauses automatically. Opening a menu during play pauses and closing it resumes; opening one from Pause returns to Pause. Ordinary pauses retain partial input.
 - A danger badge and pond cue warn of imminent expirations. Heart loss, streaks of 5/10/20 and row unlocks have visual cues and optional sounds. Reduced effects preserves gameplay while calming decorative motion.

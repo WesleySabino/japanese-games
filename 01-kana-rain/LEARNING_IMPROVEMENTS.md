@@ -1,6 +1,6 @@
 # Kana Rain — learning evidence and arcade behavior
 
-**Local preview: 1.10.1-local.3, 21 October 2026.** [README](README.md) and [specification](SPECIFICATION.md) describe playable behavior; [release notes](CHANGELOG.md) preserve release changes.
+**Release: 1.10.1, 21 October 2026.** [README](README.md) and [specification](SPECIFICATION.md) describe playable behavior; [release notes](CHANGELOG.md) preserve release changes.
 
 ## Evidence retained through simplification
 

@@ -46,6 +46,20 @@
   const running=()=>G && !G.over;
   // Both alphabets are answered by sound; a katakana's support label is its known hiragana.
   const readingLabel=id=>D.kanaById[id]?.script==='katakana'?D.counterpart(id).char:D.kanaById[id]?.romaji||'';
+  const canShowFeedbackKana=id=>{const k=D.kanaById[id];return !!k&&(k.script!=='katakana'||N.hasSeen(novelty,id));};
+  const katakanaFeedbackForms=[...katakanaIds].map(id=>D.kanaById[id]).sort((a,b)=>b.char.length-a.char.length);
+  function feedbackResponse(text){
+    // Keep the recorded response intact; pasted kana must not bypass presentation pacing.
+    // Match compounds before their base kana, including normalized half-width input.
+    for(const chunk of text.normalize('NFKC').match(/[\p{Script=Katakana}\u30fc\u3099\u309a]+/gu)||[]){
+      for(let at=0;at<chunk.length;){
+        const k=katakanaFeedbackForms.find(k=>chunk.startsWith(k.char,at));
+        if(!k||!canShowFeedbackKana(k.id))return 'an unlearned kana';
+        at+=k.char.length;
+      }
+    }
+    return text;
+  }
   function stopLoop(){cancelAnimationFrame(raf);raf=0;}
   function wakeLoop(){if(!raf&&running()&&!document.hidden&&(G.countingDown||!G.paused))raf=requestAnimationFrame(loop);}
   function syncAnimationState(){document.body.classList.toggle('game-paused',document.hidden||!!(running()&&(G.paused||G.countingDown)));}
@@ -161,7 +175,8 @@
     const box=$('resultNext'),next=D.rowsOrder[gd.rows[script]];
     if(explore||!next&&script!=='hiragana'){box.innerHTML='';box.classList.add('hidden');return;}
     const rows=unlocked(script).map(readiness),pending=rows.filter(x=>!x.ready).map(x=>({k:x.k,need:hitsToReady(x)})).sort((a,b)=>a.need-b.need);
-    const shown=pending.slice(0,4).map(({k,need})=>`<span class="next-kana"><span lang="ja">${escapeText(k.char)}</span> +${need}</span>`).join(' '),more=pending.length-4;
+    const visible=pending.filter(({k})=>canShowFeedbackKana(k.id)).slice(0,4);
+    const shown=visible.map(({k,need})=>`<span class="next-kana"><span lang="ja">${escapeText(k.char)}</span> +${need}</span>`).join(' '),more=pending.length-visible.length;
     const heading=next?'Next: '+(rowNames[next]||next.toUpperCase()+'-row'):pending.length?'Finish Hiragana':'Hiragana complete · Katakana ready';
     box.innerHTML=`<p class="next-heading"><b>${escapeText(heading)}</b><span class="next-ready">${rows.length-pending.length} / ${rows.length} kana ready</span></p>`+
       (pending.length?`<p class="next-needs"><span class="next-label">First-try hits to go</span> ${shown}${more>0?` <span class="next-more">+${more} more kana</span>`:''}</p>`:'');
@@ -414,8 +429,9 @@
   function wrong(d,text,method='typing'){
     const detail=confusionFor(d,text),chosen=D.kanaById[detail.chosenItemId];
     record(d,false,{...detail,response:text,inputMethod:method});G.mistakes.add(d.id);d.wrong++;d.v=Math.min(2.2,d.v*1.45);d.el.classList.add('stained');G.streak=0;spirit('worried');
-    flash(`${symbol(d.id)} = ${readingLabel(d.id)}. You ${method==='composer'?'chose':'typed'} ${text}${chosen?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
-    if(chosen && (G.reviewIds||candidates()).includes(chosen.id)){G.confs.add(d.id+'|'+chosen.id);G.queue=G.queue.filter(e=>e.id!==d.id && e.id!==chosen.id);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id,partner:chosen.id});}
+    const visibleChosen=chosen&&canShowFeedbackKana(chosen.id);
+    flash(`${symbol(d.id)} = ${readingLabel(d.id)}. You ${method==='composer'?'chose':'typed'} ${feedbackResponse(text)}${visibleChosen?' → '+chosen.char:''}.`,true,3500,4,()=>exposeReading(d.id,'correction'));playReading(d.id,'correction');
+    if(visibleChosen && (G.reviewIds||candidates()).includes(chosen.id)){G.confs.add(d.id+'|'+chosen.id);G.queue=G.queue.filter(e=>e.id!==d.id && e.id!==chosen.id);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id,partner:chosen.id});}
     else G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
   }
   function miss(d){
@@ -434,7 +450,9 @@
     const scripts=cfg.mode==='hira'?['hiragana']:['katakana'];
     scripts.forEach(sc=>{if(gd.rows[sc]>=D.rowsOrder.length)return;
       if(unlocked(sc).every(k=>readiness(k).ready)){
-        gd.rows[sc]++;L.flush();const row=D.rowsOrder[gd.rows[sc]-1];flash('A new row is growing: '+D.kana.filter(k=>k.script===sc && k.row===row).map(k=>k.char).join(' '),false,4000,3);sfx('unlock');G.queue=[];
+        gd.rows[sc]++;L.flush();const row=D.rowsOrder[gd.rows[sc]-1];
+        const label=sc==='katakana'?(rowNames[row]||row.toUpperCase()+'-row'):D.kana.filter(k=>k.script===sc && k.row===row).map(k=>k.char).join(' ');
+        flash('A new row is growing: '+label,false,4000,3);sfx('unlock');G.queue=[];
       }
     });
     unlockKatakana();
@@ -508,7 +526,7 @@
     $('resultStats').innerHTML=`<div><b>${G.correct}</b><small>CORRECT ANSWERS</small></div><div><b>${G.errors}</b><small>WRONG ANSWERS</small></div><div><b>${G.expirations}</b><small>EXPIRED DROPS</small></div>`;
     $('resultDetails').textContent=`${firstCorrect.length} first-try · ${corrected.length} after correction · Best streak ${G.bestStreak}`;
     renderNextRow(cfg.mode==='kata'?'katakana':'hiragana');
-    const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])];
+    const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])].filter(canShowFeedbackKana);
     lastReview=review.filter(id=>candidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
     $('resultReview').innerHTML=review.length?'<p class="review-heading"><b>A little more practice</b><span class="review-hint">Tap to listen</span></p><div class="review-grid">'+review.map(id=>{
       const char=symbol(id),reading=readingLabel(id);

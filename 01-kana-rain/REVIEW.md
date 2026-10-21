@@ -1,6 +1,6 @@
 # 01 — Kana Rain: simplified design review
 
-**Baseline:** local preview 1.10.1-local.3, 21 October 2026. Sources: [specification](SPECIFICATION.md), [game documentation](README.md), [admission rules](NOVELTY_BALANCE.md).
+**Baseline:** release 1.10.1, 21 October 2026. Sources: [specification](SPECIFICATION.md), [game documentation](README.md), [admission rules](NOVELTY_BALANCE.md).
 
 ## Direction
 
