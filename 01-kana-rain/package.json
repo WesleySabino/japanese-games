@@ -1,6 +1,6 @@
 {
   "name": "kana-rain",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "private": true,
   "description": "An offline-first kana arcade with three hearts and selectable new-kana difficulty",
   "scripts": {
@@ -13,6 +13,7 @@
     "test:improvements": "node tests/improvements.browser.cjs",
     "test:sound-pad": "node tests/sound-pad.browser.cjs",
     "test:katakana-bridge": "node tests/katakana-bridge.browser.cjs",
+    "test:quick-wins": "node tests/quick-wins.browser.cjs",
     "test:performance": "node --test tests/runtime-performance.test.cjs tests/production-performance.test.cjs",
     "assets": "node scripts/prepare-assets.cjs",
     "build": "node scripts/build.cjs"

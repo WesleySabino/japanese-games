@@ -1,12 +1,12 @@
 # Kana Rain
 
-**Release: 1.10.1 — 21 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.10.2 — 22 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
 The illustrated garden, correct-answer/mistake/expiration counters, streaks, accelerating rain, pronunciation audio, touch sound pad and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
 
-The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens.
+The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens. Settings includes the same sound toggle as the main sound button: both mute pronunciation and interface effects and remember the existing preference.
 
 [Production game](https://kana-rain.nihongogrove.top/) · [Local preview](http://127.0.0.1:4173/) · [Specification](SPECIFICATION.md) · [Development](DEVELOPMENT.md) · [Learning design](LEARNING_DESIGN.md) · [New-kana rules](NOVELTY_BALANCE.md)
 
@@ -65,7 +65,7 @@ My Kana Garden retains its two script tabs, four estimated familiarity states, c
 
 During play, the HUD shows **correct answers and time**, with large central hearts and a secondary streak. Wrong answers and expirations appear only in the final results, alongside correct answers. A correct accepted answer counts once, including an answer after correction. Every submitted wrong answer counts once, even repeated errors on the same drop. An expiration counts separately, costs its existing heart and does not add another wrong answer. Partial input and blank submissions count nothing. A wrong answer followed by expiration therefore contributes one wrong answer and one expired drop; these are event counts, not mutually exclusive categories of kana.
 
-Results keep first-try hits, corrected answers and best streak as secondary details. Below them, the next row and up to four unready kana show the consecutive first-try hits each still needs (2 hits and 85% first-answer accuracy). Mistake cards keep readings and pronunciation; **Review these kana** starts a focused 60-second round with three hearts. Point scoring, record comparisons and new point-record writes are retired. Historical best scores and accuracy data remain unchanged in saved game data and progress export; no point record is converted into a hit count.
+Results keep first-try hits, corrected answers and best streak as secondary details. Below them, the next row and up to four unready kana show the consecutive first-try hits each still needs (2 hits and 85% first-answer accuracy). Mistake cards keep readings and pronunciation; **Review these kana** starts a focused 60-second round with three hearts. On small screens the details scroll independently while Review, Another little rain and Return to the main menu remain visible; desktop keeps its two-column layout. Point scoring, record comparisons and new point-record writes are retired. Historical best scores and accuracy data remain unchanged in saved game data and progress export; no point record is converted into a hit count.
 
 Progress uses the existing localStorage journal (`jp-learner-v1`) and IndexedDB. Save status follows completed writes; if saving fails, a persistent warning and export action remain available. The compatible newer snapshot is restored. The v2 attempt/exposure ledgers deduplicate events and reconstruct aggregates; v1 history retains unknown assistance and dated legacy errors. New submitted answers in both alphabets record `responseFormat: 'romaji'` and `inputMethod` (`composer` or `typing`); earlier events keep their exact shape and are not reclassified. Katakana events from 1.10.0 to 1.10.1-local.2 keep `hiragana-choice` and `recognition-options` assistance: they remain recognition answers, not independent-recall evidence. The additive `katakanaUnlocked` flag preserves legacy access without changing rows, history, accuracy, records or novelty state. No account or cloud synchronization is provided.
 
@@ -95,9 +95,12 @@ pnpm test:novelty-pace
 pnpm test:sound-pad
 pnpm test:katakana-bridge
 pnpm build
+pnpm test:quick-wins
 ```
 
 Browser suites use isolated profiles and temporary localhost servers. The sound-pad suite measures fall distance, dock size and touch targets at eight phone sizes, and checks quick taps, ignored bounces, cancelled slides, stable slots, correction and evidence labels. `test:katakana-bridge` checks the hiragana completion gate, retained legacy access, katakana typing on desktop and the pad on phones, hiragana-partner hints and corrections, continued introductions in the same run and the evidence labels. The suites also check all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.
+
+`test:quick-wins` checks the built `dist/` after `pnpm build`: results actions on phones and desktop, keyboard and touch focus through both pad stages, synchronized sound controls, and reload of synthetic saved progress. Keyboard/assistive activation moves focus from a family to its first enabled sound; Back or an answer returns to that family. Pointer/touch activation does not force a new focus target or open the native keyboard.
 
 For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. Use a disposable browser profile for tests. [Development](DEVELOPMENT.md) documents the architecture, performance invariants, asset preparation and release checks.
 

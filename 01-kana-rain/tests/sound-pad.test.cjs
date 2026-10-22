@@ -7,6 +7,28 @@ const FAMILIES = ['a', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w', 'g', 'z', 'd
 const SLOTS = ['a', 'i', 'u', 'e', 'o', 'ya', 'yu', 'yo', 'n'];
 const stage = g => g.el('keyboard').dataset.stage;
 
+// Model the existing fixed pad buttons, not browser tab order. Real Enter/Space/Tab is covered in browser QA.
+function focusablePad(g) {
+  const pad = g.el('keyboard'), Button = pad.constructor;
+  const button = dataset => { const b = new Button(); b.dataset = dataset; b.closest = () => b; return b; };
+  const families = FAMILIES.map(family => button({ family })), slots = SLOTS.map(slot => button({ slot })), back = button({ pad: 'back' });
+  slots.forEach(b => { b.disabled = true; });
+  const buttons = [...families, ...slots, back];
+  pad.contains = b => buttons.includes(b);
+  pad.querySelectorAll = selector => selector === '[data-slot]' ? slots : [];
+  pad.querySelector = selector => selector === '[data-slot]:not(:disabled)' ? slots.find(b => !b.disabled) || null : families.find(b => selector === `[data-family="${b.dataset.family}"]`) || null;
+  return {
+    families, slots, back,
+    activate(dataset, detail = 0) {
+      const b = buttons.find(b => Object.entries(dataset).every(([key, value]) => b.dataset[key] === value));
+      assert.ok(b, 'the activation belongs to a real fixed pad button');
+      if (detail === 0) b.focus();
+      pad.onclick({ target: b, detail });
+      return b;
+    }
+  };
+}
+
 test('each of the 208 kana has one two-tap path, and composing it answers that kana', async () => {
   for (const [script, mode] of [['hiragana', 'hira'], ['katakana', 'kata']]) {
     const g = await runtime({ explore: true, mobile: true });
@@ -186,4 +208,71 @@ test('on a phone the pad never focuses the answer field; the keyboard button opt
   assert.equal(g.el('answer').inputMode, 'text'); assert.equal(g.document.activeElement, g.el('answer'));
   g.el('keyboardBtn').onclick();
   assert.equal(g.el('keyboard').classList.contains('hidden'), false); assert.equal(g.el('answer').inputMode, 'none');
+});
+
+test('keyboard pad activation focuses a valid sound and Back or a committed answer returns to its family', async () => {
+  for (const [ids, mode] of [[['kana:か', 'kana:ね'], 'hira'], [['kana:カ', 'kana:ネ'], 'kata']]) {
+    const g = await inputRain(ids, mode, { mobile: true }), pad = focusablePad(g);
+    const family = id => pad.families.find(b => b.dataset.family === id), sound = id => pad.slots.find(b => b.dataset.slot === id);
+    pad.activate({ family: 'w' });
+    assert.equal(g.document.activeElement, sound('a')); assert.equal(sound('i').disabled, true, 'blank cells cannot become the focus destination');
+    pad.activate({ pad: 'back' }); assert.equal(g.document.activeElement, family('w')); assert.equal(g.app.state.attempts, 0);
+    pad.activate({ family: 'k' }); assert.equal(g.document.activeElement, sound('a'));
+    pad.activate({ slot: 'a' }); assert.equal(g.app.state.correct, 1); assert.equal(g.document.activeElement, family('k'));
+    pad.activate({ family: 'w' }); pad.activate({ slot: 'a' });
+    assert.equal(g.app.state.errors, 1); assert.equal(g.learner.attempts().at(-1).itemId, ids[1]); assert.equal(g.document.activeElement, family('w'));
+    assert.equal(g.el('answer').inputMode, 'none'); assert.notEqual(g.document.activeElement, g.el('answer'), 'a physical keyboard on a coarse phone does not open its native keyboard');
+  }
+});
+
+test('pointer pad presses change stages without forcing keyboard focus, including Back and commit', async () => {
+  const g = await inputRain(['kana:か'], 'hira', { mobile: true }), pad = focusablePad(g), outside = g.el('pauseBtn');
+  outside.focus(); pad.activate({ family: 'w' }, 1); assert.equal(g.document.activeElement, outside);
+  g.tick(80); pad.activate({ pad: 'back' }, 1); assert.equal(g.document.activeElement, outside);
+  g.tick(80); pad.activate({ family: 'k' }, 1); assert.equal(g.document.activeElement, outside);
+  g.tick(80); pad.activate({ slot: 'a' }, 1); assert.equal(g.app.state.correct, 1); assert.equal(g.document.activeElement, outside);
+  assert.equal(g.el('answer').inputMode, 'none');
+});
+
+test('keyboard pad focus survives pause and follows an expiry reset only while focus still belongs to the pad', async () => {
+  const g = await inputRain(['kana:か', 'kana:ね'], 'hira', { mobile: true }), pad = focusablePad(g);
+  const family = pad.families.find(b => b.dataset.family === 'k'), sound = pad.slots.find(b => b.dataset.slot === 'a');
+  pad.activate({ family: 'k' }); g.app.pause(true); g.el('keyboard').onfocusout({ relatedTarget: g.el('resumeBtn') });
+  g.app.pause(false); g.el('keyboard').onfocusout({ relatedTarget: g.el('skipCountdown') }); g.skip();
+  assert.equal(stage(g), 'sound'); assert.equal(g.document.activeElement, sound, 'resume returns keyboard users to their unfinished composition');
+  g.app.state.drops[1].progress = 1; g.tick();
+  assert.equal(stage(g), 'family'); assert.equal(g.document.activeElement, family); assert.equal(g.app.state.attempts, 0);
+  pad.activate({ family: 'k' }); const outside = g.el('pauseBtn'); outside.focus();
+  g.app.state.drops[0].progress = 1; g.tick(); assert.equal(stage(g), 'family'); assert.equal(g.document.activeElement, outside, 'an automatic reset never steals focus back from another control');
+});
+
+test('hiding the pad and finishing a run clear its keyboard focus destination', async () => {
+  const g = await inputRain(['kana:か'], 'hira', { mobile: true }), pad = focusablePad(g);
+  pad.activate({ family: 'k' }); g.el('keyboardBtn').onclick();
+  assert.equal(stage(g), 'family'); assert.equal(g.el('keyboard').classList.contains('hidden'), true); assert.equal(g.document.activeElement, g.el('answer'), 'requesting the native keyboard explicitly still focuses it');
+  g.el('keyboardBtn').onclick(); assert.notEqual(g.document.activeElement, g.el('answer'));
+  pad.activate({ family: 'k' }); g.app.end('Focused pad cleanup');
+  assert.equal(g.document.activeElement, g.el('againBtn'), 'disposal does not restore a hidden pad button over the result action');
+});
+
+test('explicit answer focus or typing replaces the pad focus destination without changing partial input', async () => {
+  for (const action of ['focus', 'input']) {
+    const g = await inputRain(['kana:ん', 'kana:ね']), answer = g.el('answer');
+    g.el('keyboardBtn').onclick(); const pad = focusablePad(g); pad.activate({ family: 'k' });
+    if (action === 'focus') { answer.focus(); answer.onfocus(); answer.value = 'n'; }
+    else g.type('n');
+    g.app.pause(true); g.app.pause(false); g.skip();
+    assert.equal(g.document.activeElement, answer, action + ' explicitly returns to typing, not the earlier sound button');
+    assert.equal(answer.value, 'n'); assert.equal(g.app.state.attempts, 0); assert.equal(stage(g), 'sound', 'focus intent does not rewrite the unfinished pad stage');
+    if (action === 'input') { play(g, 400); assert.equal(g.app.state.correct, 1); assert.equal(g.learner.attempts().at(-1).itemId, 'kana:ん'); }
+  }
+});
+
+test('moving from the pad to another active control ends pad focus restoration', async () => {
+  const g = await inputRain(['kana:か']); g.el('keyboardBtn').onclick(); const pad = focusablePad(g);
+  pad.activate({ family: 'k' }); const outside = g.el('helpBtn'); outside.focus();
+  g.el('keyboard').onfocusout({ relatedTarget: outside });
+  g.app.pause(true); g.app.pause(false); g.skip();
+  assert.equal(g.document.activeElement, g.el('answer'), 'resume uses the normal typing destination after deliberately leaving the pad');
+  assert.equal(g.app.state.attempts, 0); assert.equal(stage(g), 'sound');
 });

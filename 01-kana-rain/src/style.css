@@ -239,6 +239,23 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .result-actions { display:flex; flex-direction:column; align-items:center; gap:17px; margin-top:25px; }
 .result-actions .menu-button { justify-content:center; min-height:55px; font-size:21px; }
 #resultReview { color:#bfceba; font-size:13px; line-height:1.7; }
+/* Results details can scroll; their actions remain outside that scroll area. */
+.game-dialog.results-dialog { --result-max-height:calc(var(--viewport-height) - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); width:min(620px,calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right))); max-height:var(--result-max-height); }
+.results-dialog .dialog-panel { display:flex; flex-direction:column; max-height:calc(var(--result-max-height) - 2px); padding:26px 18px 12px; overflow:hidden; }
+.results-dialog .result-content { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:0 2px 4px; scroll-padding-block:8px; scrollbar-color:#9c9e7d #0a2930; scrollbar-width:thin; }
+.results-dialog .result-actions { flex:none; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; gap:6px 10px; margin-top:10px; padding-top:10px; border-top:1px solid #a6b49030; }
+.results-dialog .result-actions .menu-button,.results-dialog .result-actions #reviewPracticeBtn { min-height:48px; padding:8px 10px; gap:6px; font-size:17px; line-height:1.2; }
+.results-dialog .result-actions:has(#reviewPracticeBtn.hidden) #againBtn { grid-column:1/-1; }
+.results-dialog #backBtn { grid-column:1/-1; min-height:44px; padding:6px 0; line-height:1.4; }
+.results-dialog .review-card:focus-visible { outline-offset:-3px; }
+@media (min-width:480px) and (max-height:480px) {
+  .results-dialog .dialog-panel { padding:18px 18px 10px; }
+  .results-dialog #resultTitle { font-size:28px; line-height:1.15; }
+  .results-dialog .result-stats { margin-top:12px; }
+  .results-dialog .result-actions { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px; padding-top:8px; }
+  .results-dialog .result-actions:has(#reviewPracticeBtn.hidden) #againBtn { grid-column:1/3; }
+  .results-dialog #backBtn { grid-column:auto; min-height:48px; }
+}
 
 @keyframes rain { to { transform:translateY(56px); } }
 @keyframes pop { to { opacity:0; scale:1.35; } }
@@ -416,6 +433,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .effects-toggle[aria-pressed="true"] { border-color:var(--gold-bright); background:#1d493e; }
 .effects-state { color:#f0d799; font-size:12px; }
 .game-dialog .effects-note { margin:8px 0 0; font-size:11px; }
+.settings-dialog .sound-toggle + .effects-note { margin-bottom:16px; }
 .result-review { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:9px; }
 .review-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:9px; grid-column:1/-1; }
 .result-review > p { grid-column:1/-1; margin:0 0 8px; }
@@ -428,8 +446,9 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .result-actions #reviewPracticeBtn { min-height:53px; }
 /* Keep desktop results actions in view; only a long kana list can scroll. */
 @media (min-width:761px) and (min-height:560px) {
-  .results-dialog { width:min(820px,calc(100% - 40px)); }
-  .results-dialog .dialog-panel { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(6,auto) minmax(0,1fr) auto; column-gap:20px; height:auto; max-height:min(650px,calc(var(--viewport-height) - 58px)); padding:28px 28px 18px; overflow:visible; }
+  .game-dialog.results-dialog { --result-max-height:calc(var(--viewport-height) - 56px); width:min(820px,calc(100% - 40px)); }
+  .results-dialog .dialog-panel { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(6,auto) minmax(0,1fr) auto; column-gap:20px; height:auto; max-height:min(650px,calc(var(--viewport-height) - 58px)); padding:28px 28px 18px; overflow:hidden; }
+  .results-dialog .result-content { display:contents; }
   .results-dialog .eyebrow { grid-area:1/1/2/3; margin:0 0 4px; }
   .results-dialog #resultTitle { grid-area:2/1/3/3; margin:0 0 6px; font-size:34px; line-height:1.15; }
   .results-dialog #resultMessage { grid-area:3/1/4/3; margin:0 0 12px; line-height:1.5; }
@@ -447,7 +466,7 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
   .results-dialog #resultReview > .review-empty { margin:0; }
   .results-dialog .review-grid { min-height:0; overflow-y:auto; overscroll-behavior:contain; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); align-content:start; gap:8px; padding:2px; scrollbar-color:#9c9e7d #0a2930; scrollbar-width:thin; }
   .results-dialog .review-card { min-height:78px; padding:8px 6px; font-size:26px; }
-  .results-dialog .result-actions { grid-area:8/1/9/3; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:10px 20px; margin-top:14px; }
+  .results-dialog .result-actions { grid-area:8/1/9/3; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:10px 20px; margin-top:14px; padding:0; border:0; }
   .results-dialog .result-actions .menu-button,.results-dialog .result-actions #reviewPracticeBtn { min-height:50px; padding:10px 16px; font-size:20px; }
   .results-dialog .result-actions:has(#reviewPracticeBtn.hidden) #againBtn { grid-column:1/-1; }
   .results-dialog #backBtn { grid-column:1/-1; justify-self:center; min-height:36px; padding:6px 0; line-height:1.5; }

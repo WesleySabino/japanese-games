@@ -37,7 +37,7 @@
   const padCells={};
   D.kana.filter(k=>k.script==='hiragana').forEach(k=>{const [family,slot]=padKey(k);(padCells[family]||(padCells[family]={}))[slot]={family,slot,reading:k.romaji,row:k.row,col:k.col};});
   function padPath(id){const k=D.kanaById[id]||D.kanaByChar[id];if(!k)return null;const [family,slot]=padKey(k);return padCells[family]?.[slot]||null;}
-  let padFamily=null,padTarget=null,padChangedAt=-Infinity;
+  let padFamily=null,padTarget=null,padChangedAt=-Infinity,padFocusFamily=null,padKeyboardFocus=false;
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
   const panelOrigins=new Map();
@@ -73,6 +73,7 @@
   function renderProgress(force=false){if(force||progressDirty&&$('progressDialog').open){renderMap();renderUnlocks(mapScript);renderLearningStats();progressDirty=false;}}
   function focusAnswer(){
     if(!running() || G.paused || G.countingDown)return;
+    if(keyboardOpen&&padKeyboardFocus&&focusPad())return;
     // With the sound pad open on a phone, never focus the field: no native keyboard can open unasked.
     if(mobile()&&keyboardOpen){$('answer').inputMode='none';$('answer').blur();return;}
     $('answer').inputMode='text';$('answer').focus({preventScroll:true});
@@ -85,7 +86,7 @@
     if(running())pause(true,false);
     closeDialogs();renderMenu();
     if(id==='progressDialog'){$('gardenContext').textContent=running()?'GAME PAUSED':'ONE DROP AT A TIME';exposeReference();}
-    if(id==='settingsDialog')$('settingsNote').textContent=running()?'Your current session is paused.':'Progress stays on this device when storage is available.';
+    if(id==='settingsDialog')$('settingsNote').textContent=(running()?'Your current session is paused. ':'')+'Progress stays on this device when storage is available; export a backup from My Kana Garden.';
     $(id).showModal();
     if(id==='progressDialog')renderProgress(true);
     $(id).querySelector('.dialog-close')?.focus({preventScroll:true});
@@ -461,22 +462,35 @@
     G.pendingAnswer=null;drop.submittedResponse=value;drop.submittedMethod=method;$('answer').value='';hit(drop);
   }
   // A completed composition is a deliberate answer, like Enter: it never waits for a longer reading.
-  function submitComposed(cell){
+  function submitComposed(cell,fromKeyboard=false){
     const v=cell.reading,ordered=[...G.drops].sort((a,b)=>b.y-a.y);
     // The exact cell settles homophones (じ/ぢ, ず/づ, お/を); any drop with the same accepted sound still counts.
     const match=ordered.find(d=>{const k=D.kanaById[d.id];return k.row===cell.row&&k.col===cell.col;})||ordered.find(d=>accepted(d).includes(v));
     const target=padTarget&&G.drops.includes(padTarget)?padTarget:lowest();
-    resetPad();G.pendingAnswer=null;$('answer').value='';
+    resetPad(fromKeyboard);G.pendingAnswer=null;$('answer').value='';
     if(match)submitMatchedAnswer(match,v,'composer');
     else if(target)wrong(target,v,'composer');
   }
-  function choosePadFamily(id){
+  function focusPad(){
+    if(!keyboardOpen||!running()||G.paused||G.countingDown||document.querySelector('dialog[open]'))return false;
+    const pad=$('keyboard');if(pad.classList.contains('hidden'))return false;
+    const button=pad.querySelector(padFamily?'[data-slot]:not(:disabled)':`[data-family="${padFocusFamily}"]`);
+    if(!button||button.disabled)return false;
+    button.focus({preventScroll:true});return true;
+  }
+  function choosePadFamily(id,fromKeyboard=false){
     if(!padCells[id])return;
     if(G.inputStartedAt==null){G.inputStartedAt=performance.now();G.inputPausedMs=0;}
     // An unmatched composition belongs to the drop that was highlighted when it began.
-    padFamily=id;padTarget=G.target;padChangedAt=performance.now();renderPad();
+    padFamily=id;padTarget=G.target;padFocusFamily=id;padKeyboardFocus=fromKeyboard;padChangedAt=performance.now();renderPad();
+    if(fromKeyboard)focusPad();
   }
-  function resetPad(){if(padFamily)padChangedAt=performance.now();padFamily=null;padTarget=null;renderPad();}
+  function resetPad(fromKeyboard){
+    const restore=fromKeyboard??(padKeyboardFocus&&$('keyboard').contains(document.activeElement));
+    if(padFamily){padFocusFamily=padFamily;padChangedAt=performance.now();}
+    padFamily=null;padTarget=null;padKeyboardFocus=!!restore&&keyboardOpen&&running()&&!G.paused;
+    renderPad();if(padKeyboardFocus)focusPad();
+  }
   function completePendingAnswer(){
     const pending=G.pendingAnswer;G.pendingAnswer=null;
     if(pending&&!composing&&normalize($('answer').value)===pending.value&&G.drops.includes(pending.drop))submitMatchedAnswer(pending.drop,pending.value);
@@ -534,7 +548,7 @@
       return `<${tag} class="review-card" ${tag==='button'?`type="button" data-kana="${escapeText(char)}" aria-label="Listen to ${escapeText(char)}, ${escapeText(reading)}"`:''}><span lang="ja">${escapeText(char)}</span><small>${escapeText(reading)}</small>${tag==='button'?'<span class="review-audio" aria-hidden="true">♪</span>':''}</${tag}>`;
     }).join('')+'</div>':`<p class="review-empty">${G.correct?'Keep the streak growing.':'Listen to the current row, then try again.'}</p>`;
     review.forEach(id=>exposeReading(id,'results-review',true));L.flush();
-    dispose();closeDialogs();$('results').showModal();$('answer').disabled=true;$('submitBtn').disabled=true;enableSetup(true);$('answer').blur();$('againBtn').focus({preventScroll:true});$('results').querySelector('.dialog-panel').scrollTop=0;
+    dispose();closeDialogs();$('results').showModal();$('answer').disabled=true;$('submitBtn').disabled=true;enableSetup(true);$('answer').blur();$('againBtn').focus({preventScroll:true});$('results').querySelector('.dialog-panel').scrollTop=0;$('results').querySelector('.result-content').scrollTop=0;
   }
   function keyboard(){
     $('keyboard').classList.toggle('hidden',!keyboardOpen);$('keyboardBtn').setAttribute('aria-expanded',keyboardOpen);
@@ -572,24 +586,39 @@
   const listen=async e=>{const b=e.target.closest('[data-kana]');if(b){const k=D.kana.find(k=>k.char===b.dataset.kana);if(!k)return;if(running())pause(true,false);exposeReading(k.id,'reference-audio');if(!await A.play(b.dataset.kana)&&A.enabled)flash('Audio is unavailable. The lesson reading is shown on the tile.',true);}};
   $('lesson').onclick=$('masteryMap').onclick=$('resultReview').onclick=listen;
   $('listenBtn').onclick=async()=>{const t=lowest();if(t){pause(true);const reading=symbol(t.id)+' = '+readingLabel(t.id);$('pauseHint').textContent=reading;exposeReading(t.id,'target-help');await A.play(symbol(t.id));}};
-  function renderSound(){const b=$('soundBtn');b.querySelector('use').setAttribute('href',A.enabled?'#icon-sound':'#icon-muted');b.querySelector('.control-label').textContent=A.enabled?'Sound on':'Sound off';b.setAttribute('aria-pressed',A.enabled);b.setAttribute('aria-label',A.enabled?'Mute sound':'Enable sound');b.title=A.enabled?'Mute sound':'Enable sound';}
-  $('soundBtn').onclick=()=>{A.enabled=!A.enabled;gd.sound=A.enabled;L.flush();renderSound();if(A.enabled)sfx('menu');};
+  let soundUnavailable=false;
+  function renderSound(){
+    const enabled=A.enabled,b=$('soundBtn'),settings=$('settingsSoundBtn');
+    b.querySelector('use').setAttribute('href',enabled?'#icon-sound':'#icon-muted');
+    b.querySelector('.control-label').textContent=soundUnavailable?'Sound unavailable':enabled?'Sound on':'Sound off';
+    b.setAttribute('aria-pressed',enabled);b.setAttribute('aria-label',soundUnavailable?'Sound unavailable':enabled?'Mute sound':'Enable sound');b.title=soundUnavailable?'Sound unavailable':enabled?'Mute sound':'Enable sound';b.disabled=soundUnavailable;
+    settings.setAttribute('aria-pressed',enabled);settings.setAttribute('aria-label',soundUnavailable?'Sound unavailable':enabled?'Mute pronunciation and effects':'Enable pronunciation and effects');settings.disabled=soundUnavailable;
+    textIfChanged($('settingsSoundState'),soundUnavailable?'Unavailable':enabled?'On':'Off');
+  }
+  function toggleSound(){A.enabled=!A.enabled;gd.sound=A.enabled;L.flush();renderSound();if(A.enabled)sfx('menu');}
+  $('soundBtn').onclick=$('settingsSoundBtn').onclick=toggleSound;
   $('effectsBtn').onclick=()=>{gd.reducedEffects=!gd.reducedEffects;L.flush();renderEffects();};
   $('skipCountdown').onclick=completeCountdown;
   $('reviewPracticeBtn').onclick=()=>start({reviewIds:lastReview});
   $('pauseBtn').onclick=()=>pause();$('resumeBtn').onclick=()=>pause(false);$('finishBtn').onclick=()=>end('Session finished');
-  $('answerForm').onsubmit=e=>{e.preventDefault();onInput(true);};$('answer').oninput=()=>onInput();
+  $('answerForm').onsubmit=e=>{e.preventDefault();onInput(true);};$('answer').oninput=()=>{padKeyboardFocus=false;onInput();};
+  $('answer').onfocus=()=>{padKeyboardFocus=false;};
   $('answer').oncompositionstart=()=>{composing=true;if(G)G.pendingAnswer=null;if(G?.inputStartedAt==null&&!G?.paused&&running()){G.inputStartedAt=performance.now();G.inputPausedMs=0;}};$('answer').oncompositionend=()=>{composing=false;onInput();};
   $('keyboardBtn').onclick=()=>{keyboardOpen=!keyboardOpen;if(!keyboardOpen)resetPad();keyboard();if(keyboardOpen)$('answer').blur();else focusAnswer();};
+  $('keyboard').onfocusout=e=>{
+    // Modal/countdown focus temporarily leaves the pad; an explicit move elsewhere ends pad navigation.
+    if(running()&&!G.paused&&!G.countingDown&&e.relatedTarget&&!$('keyboard').contains(e.relatedTarget))padKeyboardFocus=false;
+  };
   $('keyboard').onclick=e=>{
     const b=e.target.closest('[data-family],[data-slot],[data-pad]');
     if(!b||b.disabled||!running()||G.paused||G.countingDown)return;
     // A pointer click a few frames after the stage changed is a bounce or ghost tap, not a choice.
     if(e.detail>0&&performance.now()-padChangedAt<PAD_BOUNCE_MS)return;
     // Each press only acts in its own stage, so a stale press can never skip a step.
-    if(b.dataset.family){if(!padFamily)choosePadFamily(b.dataset.family);}
-    else if(b.dataset.slot){const cell=padCells[padFamily]?.[b.dataset.slot];if(cell)submitComposed(cell);}
-    else if(b.dataset.pad==='back'&&padFamily)resetPad();
+    const fromKeyboard=e.detail===0;
+    if(b.dataset.family){if(!padFamily)choosePadFamily(b.dataset.family,fromKeyboard);}
+    else if(b.dataset.slot){const cell=padCells[padFamily]?.[b.dataset.slot];if(cell)submitComposed(cell,fromKeyboard);}
+    else if(b.dataset.pad==='back'&&padFamily)resetPad(fromKeyboard);
   };
   $('gardenBtn').onclick=$('progressBtn').onclick=$('pauseGardenBtn').onclick=()=>openPanel('progressDialog');
   $('closeGarden').onclick=$('returnGarden').onclick=()=>closePanel('progressDialog');
@@ -634,7 +663,7 @@
     $('storageNotice').classList.toggle('hidden',!storageWarning);
     if(storageWarning){$('storageNotice').innerHTML='<span>Device storage is unavailable. Keep playing, and export your progress before leaving.</span> <button type="button" id="storageExportBtn">Export progress</button>';const b=$('storageExportBtn');if(b)b.onclick=()=>$('exportBtn').onclick();}
   });
-  A.ready.then(()=>{if(!A.available){$('soundBtn').querySelector('.control-label').textContent='Sound unavailable';$('soundBtn').setAttribute('aria-label','Sound unavailable');$('soundBtn').disabled=true;}});
+  A.ready.then(()=>{soundUnavailable=!A.available;renderSound();});
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{
     $('offlineStatus').textContent='Your garden is ready offline.';
   }).catch(()=>$('offlineStatus').textContent='Offline setup unavailable in this browser.');}

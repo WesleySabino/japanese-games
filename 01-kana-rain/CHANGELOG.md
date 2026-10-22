@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.10.2 — 2026-10-22
+
+- Keep result actions visible on small portrait and short landscape screens; only result details scroll. Preserve the desktop layout and reset detail scrolling for each new run.
+- Keep keyboard focus within the sound pad: family to first enabled sound, then back to the original family on Back or submission. Preserve touch behavior, stable slots, the bounce guard, pause/resume and evidence labels.
+- Add a sound toggle inside Settings, synchronized with the main control and the existing saved preference. Muting either control stops pronunciation and pending interface tones. Preserve storage/export guidance and both controls' unavailable state.
+- Add focused browser regression checks against the built game. All existing progress, novelty brakes, adaptive rain, counts and records remain compatible. Promote the approved 1.10.2-local.1 preview and advance the offline cache without changing learner storage.
+
 ## 1.10.1 — 2026-10-21
 
 - Keep unfamiliar Katakana out of wrong-answer feedback, mistake-review cards and result readiness hints, including pasted kana and previously recorded confusion partners. Announce Katakana rows by name instead of revealing every future glyph. Only an actual prior presentation permits its glyph in these surfaces; opening a row does not. Preserve readiness totals, the original response, confusion evidence and all earlier progress.
