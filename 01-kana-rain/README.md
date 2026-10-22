@@ -1,6 +1,6 @@
 # Kana Rain
 
-**Local preview: 1.10.2-local.1 — 21 October 2026. Published release: 1.10.1.** See [release history](CHANGELOG.md).
+**Release: 1.10.2 — 22 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 

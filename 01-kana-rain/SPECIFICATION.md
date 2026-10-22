@@ -1,10 +1,10 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** local preview 1.10.2-local.1, 21 October 2026; published release 1.10.1.
+**Catalogue ID:** 01. **Baseline:** release 1.10.2, 22 October 2026.
 
 The [README](README.md) gives setup and current behavior. [Development](DEVELOPMENT.md) covers implementation and validation; [learning design](LEARNING_DESIGN.md) explains the evidence and its limits. This specification describes the current game; superseded proposals remain in Git history.
 
-The local preview keeps result actions visible on small screens, scrolling details independently. Sound-pad keyboard activation moves focus into the selected family's enabled sounds and back to that family on Back/submission; touch does not force focus or open the native keyboard. Settings and the main sound button share the existing persisted sound preference for pronunciation and effects. These changes do not alter learner storage or progression rules.
+Result actions stay visible on small screens, scrolling details independently. Sound-pad keyboard activation moves focus into the selected family's enabled sounds and back to that family on Back/submission; touch does not force focus or open the native keyboard. Settings and the main sound button share the existing persisted sound preference for pronunciation and effects. These changes do not alter learner storage or progression rules.
 
 ## Core game
 

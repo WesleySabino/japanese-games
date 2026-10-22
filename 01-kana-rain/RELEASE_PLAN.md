@@ -1,12 +1,12 @@
 # Plano para a versão final do Kana Rain
 
-**Estudo: 21 de outubro de 2026. Base: jogo 1.10.1, commit `235d450`. Estado: três quick wins em prévia local 1.10.2-local.1; demais propostas pendentes.**
+**Estudo: 21 de outubro de 2026. Base: jogo 1.10.1, commit `235d450`. Estado atualizado em 22 de outubro: três quick wins entregues na versão 1.10.2; demais propostas pendentes.**
 
 Este é o plano de trabalho atual. Quando uma proposta for entregue, atualizar seu estado aqui e documentar o comportamento definitivo no [README](README.md), na [especificação](SPECIFICATION.md) e no [changelog](CHANGELOG.md). Os contratos de desenvolvimento e aprendizagem continuam em [DEVELOPMENT](DEVELOPMENT.md) e [LEARNING_DESIGN](LEARNING_DESIGN.md).
 
-### Prévia local em avaliação
+### Quick wins entregues
 
-Os quick wins **1, 2 e 3** abaixo estão implementados para teste local: ações dos resultados visíveis no celular, foco do sound pad por teclado e áudio em Settings. O comportamento está descrito no README e no changelog. Ainda não houve publicação desta prévia; música, novos efeitos e as demais propostas continuam pendentes.
+Os quick wins **1, 2 e 3** abaixo foram aprovados na prévia local e entregues na versão **1.10.2**: ações dos resultados visíveis no celular, foco do sound pad por teclado e áudio em Settings. O comportamento está descrito no README e no changelog. Música, novos efeitos e as demais propostas continuam pendentes.
 
 ## Recomendação
 

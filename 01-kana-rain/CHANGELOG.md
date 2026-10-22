@@ -1,11 +1,11 @@
 # Kana Rain releases
 
-## 1.10.2-local.1 — local preview, 2026-10-21
+## 1.10.2 — 2026-10-22
 
 - Keep result actions visible on small portrait and short landscape screens; only result details scroll. Preserve the desktop layout and reset detail scrolling for each new run.
 - Keep keyboard focus within the sound pad: family to first enabled sound, then back to the original family on Back or submission. Preserve touch behavior, stable slots, the bounce guard, pause/resume and evidence labels.
 - Add a sound toggle inside Settings, synchronized with the main control and the existing saved preference. Muting either control stops pronunciation and pending interface tones. Preserve storage/export guidance and both controls' unavailable state.
-- Add focused browser regression checks against the built game. All existing progress, novelty brakes, adaptive rain, counts and records remain compatible. This preview is local and has not been published.
+- Add focused browser regression checks against the built game. All existing progress, novelty brakes, adaptive rain, counts and records remain compatible. Promote the approved 1.10.2-local.1 preview and advance the offline cache without changing learner storage.
 
 ## 1.10.1 — 2026-10-21
 
