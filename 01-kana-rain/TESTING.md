@@ -1,8 +1,8 @@
 # Testes do Kana Rain
 
-Atualização de 23 de outubro de 2026: proteção local contra retrocesso de saves na 1.10.4-local.1, sem publicação ou restauração de progresso pessoal. As auditorias históricas abaixo partiram da 1.10.2 e acompanharam a promoção da 1.10.3. Escopo: somente este jogo; não inclui os testes de `japanese-core`, arquivos históricos ou outros repositórios.
+Atualização de 23 de outubro de 2026: proteção contra retrocesso de saves validada na prévia 1.10.4-local.1 e promovida para 1.10.4, sem restauração de progresso pessoal. As auditorias históricas abaixo partiram da 1.10.2 e acompanharam a promoção da 1.10.3. Escopo: somente este jogo; não inclui os testes de `japanese-core`, arquivos históricos ou outros repositórios.
 
-A prévia atual usa o cache `kana-rain-v43-local-save-guard`; a produção 1.10.3 usa `kana-rain-v42-release-1.10.3`. As evidências históricas conservam o identificador usado naquela validação. A suíte nova de versões misturadas cobre a escrita de um runtime antigo ainda em memória; a suíte anterior de duas abas, sozinha, não cobria esse caso.
+O pacote 1.10.4 usa o cache `kana-rain-v43-release-1.10.4`. A prévia validada usava `kana-rain-v43-local-save-guard` e a versão anterior usava `kana-rain-v42-release-1.10.3`. As evidências históricas conservam o identificador usado naquela validação. A suíte nova de versões misturadas cobre a escrita de um runtime antigo ainda em memória; a suíte anterior de duas abas, sozinha, não cobria esse caso.
 
 ## Como interpretar a cobertura
 
