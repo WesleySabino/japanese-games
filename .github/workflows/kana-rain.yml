@@ -55,6 +55,15 @@ jobs:
       - name: Run core tests
         run: pnpm test
 
+      - name: Use the official Ubuntu mirror with bounded download retries
+        run: |
+          for sources in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+            if [ -f "$sources" ]; then
+              sudo sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g' "$sources"
+            fi
+          done
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99-kana-rain-ci-downloads
+
       - name: Install Chromium and Linux dependencies
         run: pnpm exec playwright install --with-deps chromium
 
