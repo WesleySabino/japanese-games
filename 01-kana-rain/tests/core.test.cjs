@@ -23,9 +23,9 @@ test('single-kana readings retain alternate romanizations and reject removed wor
 
 test('each answer immediately persists evidence and keeps facets separate',()=>{
   const {L,map}=model();L.record('kana:あ','form→sound',{correct:true,rtMs:950,gameId:'kana-rain'});
-  let saved=JSON.parse(map.get('jp-learner-v1'));assert.equal(saved.items['kana:あ'].facets['form→sound'].correct,1);
+  let saved=JSON.parse(map.get('jp-learner-v1:protected:v1'));assert.equal(saved.items['kana:あ'].facets['form→sound'].correct,1);
   L.record('kana:あ','sound→form',{correct:false,chosenItemId:'kana:お',gameId:'kana-rain'});
-  saved=JSON.parse(map.get('jp-learner-v1'));assert.equal(saved.items['kana:あ'].facets['form→sound'].errors,0);assert.equal(saved.items['kana:あ'].facets['sound→form'].errors,1);assert.equal(saved.items['kana:あ'].confusions['kana:お'],1);
+  saved=JSON.parse(map.get('jp-learner-v1:protected:v1'));assert.equal(saved.items['kana:あ'].facets['form→sound'].errors,0);assert.equal(saved.items['kana:あ'].facets['sound→form'].errors,1);assert.equal(saved.items['kana:あ'].confusions['kana:お'],1);
 });
 test('scheduler respects its new-item limit and includes personal confusions',()=>{
   const {D,L}=model(),ids=D.kana.slice(0,30).map(k=>k.id);
@@ -34,7 +34,7 @@ test('scheduler respects its new-item limit and includes personal confusions',()
   const plan=L.selectRound(ids,{facet:'form→sound',size:8,maxNew:2});assert.ok(plan.includes(ids[0]));assert.ok(plan.includes(ids[1]));
 });
 test('reset replaces saved evidence with an empty model',()=>{
-  const {L,map}=model();L.record('kana:あ','form→sound',{correct:true});L.reset();assert.equal(Object.keys(L.all()).length,0);assert.equal(Object.keys(JSON.parse(map.get('jp-learner-v1')).items).length,0);
+  const {L,map}=model();L.record('kana:あ','form→sound',{correct:true});L.reset();assert.equal(Object.keys(L.all()).length,0);assert.equal(Object.keys(JSON.parse(map.get('jp-learner-v1:protected:v1')).items).length,0);
 });
 
 test('difficulty choices vary novelty recovery while sharing three hearts and Normal rain',()=>{

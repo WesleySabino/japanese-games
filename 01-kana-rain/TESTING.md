@@ -1,12 +1,27 @@
 # Testes do Kana Rain
 
-Auditoria de 22 de outubro de 2026. Base: versão 1.10.2; pacote de correções e testes promovido para 1.10.3. Escopo: somente este jogo; não inclui os testes de `japanese-core`, arquivos históricos ou outros repositórios.
+Atualização de 23 de outubro de 2026: proteção contra retrocesso de saves validada na prévia 1.10.4-local.1 e promovida para 1.10.4, sem restauração de progresso pessoal. As auditorias históricas abaixo partiram da 1.10.2 e acompanharam a promoção da 1.10.3. Escopo: somente este jogo; não inclui os testes de `japanese-core`, arquivos históricos ou outros repositórios.
 
-O pacote 1.10.3 usa o cache `kana-rain-v42-release-1.10.3`. As evidências da prévia local abaixo conservam o identificador usado naquela validação; a publicação exige build novo e repetição das suítes que verificam seus bytes. Recarregar abas anteriores ativa o protocolo novo em cada uma: a suíte de duas abas cobre runtimes atualizados, não escrita concorrente por um runtime antigo que permaneça em memória.
+O pacote 1.10.4 usa o cache `kana-rain-v43-release-1.10.4`. A prévia validada usava `kana-rain-v43-local-save-guard` e a versão anterior usava `kana-rain-v42-release-1.10.3`. As evidências históricas conservam o identificador usado naquela validação. A suíte nova de versões misturadas cobre a escrita de um runtime antigo ainda em memória; a suíte anterior de duas abas, sozinha, não cobria esse caso.
 
 ## Como interpretar a cobertura
 
-O projeto tem **215 casos executáveis em 19 arquivos de testes Node** e **nove comandos de testes de navegador no CI**. Alguns casos percorrem todos os kanas ou várias combinações, por isso contar casos não mede a proporção do jogo testada. Os comandos também compartilham cenários; não são nove áreas independentes de cobertura. As regressões de sobrescrita entre abas têm verificações específicas, incluindo encerramento durante escrita e quota nativa.
+O projeto tem **232 casos executáveis em 20 arquivos de testes Node** e **dez comandos de testes de navegador no CI**. Alguns casos percorrem todos os kanas ou várias combinações, por isso contar casos não mede a proporção do jogo testada. Os comandos também compartilham cenários; não são dez áreas independentes de cobertura. As regressões de sobrescrita entre abas têm verificações específicas, incluindo encerramento durante escrita e quota nativa.
+
+## Proteção contra snapshots antigos e versões misturadas
+
+`pnpm test:mixed-version-storage` usa o learner original da 1.10.2, fixado pelo commit `6bdf542` e por SHA-256, junto do código atual. As páginas mínimas carregam apenas o learner e as regras de novidade, em contextos Chromium descartáveis com localhost, dados sintéticos, service workers bloqueados e nenhuma requisição externa. Os quatro cenários verificam:
+
+- uma aba antiga responde e fecha depois de a atual já ter salvo novas respostas;
+- os dois armazenamentos antigos são sobrescritos enquanto todas as abas atuais estão fechadas, preservando a chave protegida;
+- cópias protegidas inválidas são recuperadas por um checkpoint real, escrito após o commit principal;
+- um reset explícito permanece vazio diante da escrita atrasada de uma versão antiga.
+
+`snapshot-recovery.test.cjs` acrescenta 17 casos em memória para snapshots divergentes, revisão enganosa, v1 e v2 mínimos, conquistas, operação já reconhecida com fatos ausentes, metadados inválidos, referências de ajuda, contadores históricos e fronteiras de reset/importação. Entre eles está o caso que motivou a correção: um snapshot menor com vetor de revisão não pode descartar um histórico legado maior, independentemente do timestamp. Contadores criados depois de parte do histórico não podem contar essa parte retroativamente.
+
+A chave `jp-learner-v1` continua sendo lida, mas as gravações atuais usam `jp-learner-v1:protected:v1` nos dois destinos. O checkpoint `jp-learner-v1:checkpoint:v1` é limitado a uma cópia no IndexedDB e usa uma transação opcional separada. Testes de atualização leem a chave correspondente ao runtime histórico ou atual, sem forçar um flush para esconder falhas de autosave. Relatórios ficam em `tests/artifacts/mixed-version-storage/` e `tests/artifacts/save-guard/`.
+
+Essas proteções não constituem backup remoto, nem cobrem remoção de todos os dados do site, perda do aparelho ou falha física do disco. Os testes não utilizam o progresso pessoal para validar a correção.
 
 Ainda não existe um relatório confiável de cobertura de linhas, funções e decisões, nem um limite mínimo aplicado no CI. Não é correto atribuir uma porcentagem geral de cobertura. Vários testes Node executam scripts em `vm` com DOM, relógio, áudio e armazenamento simulados; instrumentar apenas os arquivos normalmente importados deixaria parte importante do código de fora da medição.
 
