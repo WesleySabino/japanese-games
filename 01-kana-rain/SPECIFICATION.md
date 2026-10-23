@@ -1,10 +1,12 @@
 # 01 — Kana Rain: simplified specification
 
-**Catalogue ID:** 01. **Baseline:** release 1.10.2, 22 October 2026.
+**Catalogue ID:** 01. **Baseline:** release 1.10.3, 22 October 2026.
 
 The [README](README.md) gives setup and current behavior. [Development](DEVELOPMENT.md) covers implementation and validation; [learning design](LEARNING_DESIGN.md) explains the evidence and its limits. This specification describes the current game; superseded proposals remain in Git history.
 
 Result actions stay visible on small screens, scrolling details independently. Sound-pad keyboard activation moves focus into the selected family's enabled sounds and back to that family on Back/submission; touch does not force focus or open the native keyboard. Settings and the main sound button share the existing persisted sound preference for pronunciation and effects. These changes do not alter learner storage or progression rules.
+
+Concurrent tabs journal changes separately and merge immutable evidence and counter deltas; closing a tab during a pending save must preserve its recorded changes for recovery. Keep earned rows/access, historical records, settings and novelty pauses. Storage keys, IndexedDB store and schema-v2 exports remain compatible; concurrency metadata is additive. Reload tabs opened before the update so every writer uses the current protocol. Native quota/fallback, browser restart, update/offline and simultaneous-tab regressions protect this contract.
 
 ## Core game
 

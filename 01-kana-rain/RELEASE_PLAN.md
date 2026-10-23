@@ -8,6 +8,10 @@ Este é o plano de trabalho atual. Quando uma proposta for entregue, atualizar s
 
 Os quick wins **1, 2 e 3** abaixo foram aprovados na prévia local e entregues na versão **1.10.2**: ações dos resultados visíveis no celular, foco do sound pad por teclado e áudio em Settings. O comportamento está descrito no README e no changelog. Música, novos efeitos e as demais propostas continuam pendentes.
 
+Em 22 de outubro, o quick win **6** (cursor das gotas) foi implementado e verificado somente na prévia local, ainda sem publicação. Os quick wins **4 e 5** foram adiados por decisão do usuário. O inventário, os limites de cobertura e as prioridades de testes estão em [TESTING](TESTING.md).
+
+A auditoria de armazenamento real reproduziu perda de respostas entre duas abas e sobrescrita ao fechar uma aba com estado antigo. Os dois testes de regressão permanecem falhando; corrigir a concorrência de gravação antes da próxima publicação. Os testes de quota e fechamento/reabertura do navegador passaram. Esta etapa acrescenta testes e diagnóstico, sem publicar ou alterar o salvamento do jogador.
+
 ## Recomendação
 
 1. Corrigir pequenas fricções de resultados, teclado e configurações antes de acrescentar efeitos.

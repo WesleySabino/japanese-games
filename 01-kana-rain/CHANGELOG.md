@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.10.3 — 2026-10-22
+
+- Merge learning events and counter changes from concurrent tabs. Journal each tab's pending changes synchronously before consolidation, including on page close, and recover them without duplicated answers or sessions. Preserve earned rows, Katakana access, historical records, preferences and both novelty brakes.
+- Keep the existing learner key, schema-v2 export and IndexedDB store. Use unique writer IDs, idempotent revision metadata and reset/import generations; retain readable recovery journals when write quota is full. Keep fallback/export warnings accurate when only one storage backend succeeds.
+- Add native quota, browser restart, pending-close and 24-answer multi-tab regressions; add historical-release online/offline update tests and persistence/coverage documentation to CI. Development fixtures and reports stay outside the public build.
+- Use the normal cursor on decorative drops. Preserve typing, the sound pad, counts, audio and adaptive rain. Advance the offline cache for this release. Reload previously opened tabs to activate the new saving protocol in each tab.
+
 ## 1.10.2 — 2026-10-22
 
 - Keep result actions visible on small portrait and short landscape screens; only result details scroll. Preserve the desktop layout and reset detail scrolling for each new run.

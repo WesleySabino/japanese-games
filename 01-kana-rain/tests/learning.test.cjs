@@ -10,7 +10,7 @@ async function model(options={}){
   let now=options.now||1700000000000;
   const map=options.map||new Map(),writes=[],journalWrites=[],serialization={stringifies:0,parses:0};
   class Clock extends Date{static now(){return now;}}
-  const localStorage={getItem:k=>map.get(k)||null,setItem(k,v){if(options.denyStorage)throw new Error('denied');map.set(k,v);if(k==='jp-learner-v1')journalWrites.push(v);},removeItem:k=>map.delete(k)};
+  const localStorage={get length(){return map.size;},key:i=>[...map.keys()][i]||null,getItem:k=>map.get(k)||null,setItem(k,v){if(options.denyStorage)throw new Error('denied');map.set(k,v);if(k==='jp-learner-v1')journalWrites.push(v);},removeItem:k=>map.delete(k)};
   const countedJSON=Object.create(JSON);countedJSON.stringify=(...args)=>{serialization.stringifies++;return JSON.stringify(...args);};countedJSON.parse=(...args)=>{serialization.parses++;return JSON.parse(...args);};
   const math=options.random?Object.assign(Object.create(Math),{random:options.random}):Math;
   const context=vm.createContext({Date:Clock,Math:math,JSON:options.countJSON?countedJSON:JSON,console,localStorage,queueMicrotask});context.window=context;
@@ -129,6 +129,14 @@ test('legacy export keeps earned rows, unknown assistance and dated legacy error
   assert.deepEqual(plain(again.app.gameData.rows),old.games['kana-rain'].rows);assert.deepEqual(plain(again.app.gameData.best),old.games['kana-rain'].best);assert.equal(again.L.state('kana:あ').facets['form→sound'].firstCorrect,0);assert.equal(again.L.attempts().length,0);
   const migrated=JSON.parse(again.L.export());assert.deepEqual(migrated.legacyErrorLog,old.errorLog);assert.equal(migrated.items['kana:あ'].legacyFacets['form→sound'].correct,6);
 });
+test('an IndexedDB-only v1 save migrates without losing legacy progress',async()=>{
+  const saved={version:1,created:123,updatedAt:1700000000001,items:{'kana:あ':{itemId:'kana:あ',facets:{'form→sound':{correct:6,errors:1,reps:7,lastReview:1}},flags:{},scaffold:{}}},games:{'kana-rain':{rows:{hiragana:8,katakana:4},best:{old:900}}},errorLog:[]};
+  for(const input of [saved,{...saved,updatedAt:undefined}]){
+  const m=await model({denyStorage:true,idb:true,idbSaved:input}),data=JSON.parse(m.L.export());
+  assert.equal(data.version,2);assert.equal(m.L.state('kana:あ').facets['form→sound'].correct,6);assert.equal(m.L.state('kana:あ').facets['form→sound'].independentFirstCorrect,0);
+  assert.deepEqual(data.games['kana-rain'].rows,saved.games['kana-rain'].rows);assert.deepEqual(data.games['kana-rain'].best,{old:900});assert.equal(data.attemptLedger.length,0);
+  }
+});
 
 test('revealed answers stay assisted across future rounds until time and distinct intervening opportunities both pass',async()=>{
   const m=await model();m.L.recordExposure('kana:あ','form→sound',{reason:'reference-panel'});
@@ -144,13 +152,13 @@ test('familiarity does not silently turn residence or typing latency into a spee
 });
 
 test('save waits for IndexedDB transaction completion and reports abort; journal success survives an IDB failure',async()=>{
-  const m=await model({denyStorage:true,idb:true}),observed=[];m.L.subscribePersistence(s=>observed.push(s.state));const pending=m.L.flush();assert.equal(m.L.persistenceStatus().state,'saving');assert.equal(m.L.persistenceStatus().saved,false);m.writes[0].tx.onabort();assert.equal((await pending).saved,false);assert.equal(m.L.persistenceStatus().state,'unsaved');
-  const again=m.L.flush();m.writes[1].tx.oncomplete();assert.equal((await again).backend,'indexedDB');assert.equal(m.L.persistenceStatus().state,'saved');assert.ok(observed.includes('unsaved'));
-  const journal=await model({idb:true});const save=journal.L.flush();journal.writes[0].tx.onabort();assert.equal((await save).backend,'journal');assert.equal(journal.L.persistenceStatus().saved,true);
+  const m=await model({denyStorage:true,idb:true}),observed=[];m.L.subscribePersistence(s=>observed.push(s.state));const pending=m.L.flush();assert.equal(m.L.persistenceStatus().state,'saving');assert.equal(m.L.persistenceStatus().saved,false);await Promise.resolve();m.writes[0].tx.onabort();assert.equal((await pending).saved,false);assert.equal(m.L.persistenceStatus().state,'unsaved');
+  const again=m.L.flush();await Promise.resolve();m.writes[1].tx.oncomplete();assert.equal((await again).backend,'indexedDB');assert.equal(m.L.persistenceStatus().state,'saved');assert.ok(observed.includes('unsaved'));
+  const journal=await model({idb:true});const save=journal.L.flush();await Promise.resolve();journal.writes[0].tx.onabort();assert.equal((await save).backend,'journal');assert.equal(journal.L.persistenceStatus().saved,true);
 });
 
 test('late completion of an older save cannot erase the latest unsaved warning',async()=>{
-  const m=await model({denyStorage:true,idb:true});const older=m.L.flush(),newer=m.L.flush();m.writes[1].tx.onabort();await newer;m.writes[0].tx.oncomplete();await older;assert.equal(m.L.persistenceStatus().state,'unsaved');
+  const m=await model({denyStorage:true,idb:true});const older=m.L.flush(),newer=m.L.flush();await Promise.resolve();m.writes[1].tx.onabort();await newer;m.writes[0].tx.oncomplete();await older;assert.equal(m.L.persistenceStatus().state,'unsaved');
 });
 
 test('deferred record batches its attempt and game accuracy in one immediately durable journal save',async()=>{
@@ -160,7 +168,9 @@ test('deferred record batches its attempt and game accuracy in one immediately d
   assert.equal(m.journalWrites.length,0);assert.equal(m.map.has('jp-learner-v1'),false);
   await m.L.flush();const saved=JSON.parse(m.journalWrites[0]);
   assert.equal(saved.attemptLedger.length,1);assert.equal(saved.items['kana:あ'].facets['form→sound'].independentFirstCorrect,1);assert.deepEqual(saved.games['kana-rain'].accuracy,{attempts:1,correct:1});
-  assert.equal(m.journalWrites.length,1);assert.equal(m.serialization.stringifies,1);assert.equal(m.serialization.parses,0);
+  assert.equal(m.journalWrites.length,1);
+  const pending=[...m.map].filter(([key])=>key.startsWith('jp-learner-v1:pending:')).flatMap(([,value])=>JSON.parse(value));
+  assert.equal(pending.length,1);assert.equal(pending[0].attempts[0].attemptId,'batched','one write-ahead operation contains the batched answer');
   m.L.record('kana:い','form→sound',first('immediate-default'));
   assert.equal(m.journalWrites.length,2);assert.equal(JSON.parse(m.journalWrites[1]).attemptLedger.length,2);
 });
@@ -176,11 +186,11 @@ test('attempt and exposure indexes rebuild after import and reload, and reset pe
   assert.equal(imported.L.attempts().length,1);assert.equal(imported.L.exposures().length,1);assert.equal(imported.L.assistanceFor('kana:あ','form→sound').lastExposureReason,'audio-playback');
 });
 
-test('one serialization supplies both backends and pending IndexedDB snapshots stay immutable',async()=>{
+test('read/merge/write keeps pending IndexedDB snapshots immutable',async()=>{
   const m=await model({idb:true,countJSON:true}),gd=m.L.gameData('kana-rain');gd.sessions=1;m.serialization.stringifies=0;m.serialization.parses=0;
-  m.L.record('kana:あ','form→sound',first('snapshot-one'));const firstSnapshot=m.writes[0].snapshot;
-  assert.deepEqual(plain(firstSnapshot),JSON.parse(m.journalWrites[0]));assert.equal(m.serialization.stringifies,1);assert.equal(m.serialization.parses,1);
-  gd.sessions=2;m.L.record('kana:い','form→sound',first('snapshot-two'));
+  m.L.record('kana:あ','form→sound',first('snapshot-one'));await Promise.resolve();const firstSnapshot=m.writes[0].snapshot;
+  assert.deepEqual(plain(firstSnapshot),JSON.parse(m.journalWrites[0]));
+  gd.sessions=2;m.L.record('kana:い','form→sound',first('snapshot-two'));await Promise.resolve();
   assert.equal(firstSnapshot.games['kana-rain'].sessions,1);assert.equal(firstSnapshot.attemptLedger.length,1);assert.equal(m.writes[1].snapshot.games['kana-rain'].sessions,2);assert.equal(m.writes[1].snapshot.attemptLedger.length,2);
   m.writes[1].tx.oncomplete();m.writes[0].tx.onabort();assert.equal(m.L.persistenceStatus().state,'saved');assert.equal(m.L.persistenceStatus().backend,'journal+indexedDB');
 });
@@ -188,7 +198,7 @@ test('one serialization supplies both backends and pending IndexedDB snapshots s
 test('a deferred answer keeps the latest failure warning when an older IndexedDB save succeeds later',async()=>{
   const m=await model({denyStorage:true,idb:true});m.L.record('kana:あ','form→sound',first('older-answer'));
   m.L.record('kana:い','form→sound',first('newer-answer',{deferSave:true}));m.L.gameData('kana-rain').accuracy={attempts:2,correct:2};const latest=m.L.flush();
-  m.writes[1].tx.onabort();assert.equal((await latest).saved,false);m.writes[0].tx.oncomplete();
+  await Promise.resolve();m.writes[1].tx.onabort();assert.equal((await latest).saved,false);m.writes[0].tx.oncomplete();
   assert.equal(m.L.persistenceStatus().state,'unsaved');assert.equal(m.L.persistenceStatus().saved,false);assert.equal(JSON.parse(m.L.export()).attemptLedger.length,2);assert.equal(m.writes[1].snapshot.games['kana-rain'].accuracy.attempts,2);
 });
 

@@ -81,3 +81,9 @@ jobs:
 
       - name: Run results, sound-pad focus and audio settings browser checks
         run: pnpm run test:quick-wins
+
+      - name: Run version update, retained progress and offline recovery browser checks
+        run: pnpm run test:update
+
+      - name: Run native storage quota, browser restart and multi-tab regressions
+        run: pnpm run test:storage
