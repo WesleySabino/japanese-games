@@ -117,12 +117,13 @@ async function snapshot(page) {
   // Observe the app's own completed saves. Forcing flush here would hide autosave regressions.
   await page.waitForFunction(() => Learner.persistenceStatus().state === 'saved');
   const result = await page.evaluate(async () => {
-    const status = Learner.persistenceStatus(), saved = JSON.parse(Learner.export()), journal = JSON.parse(localStorage.getItem('jp-learner-v1'));
+    const persistenceKey = localStorage.getItem('jp-learner-v1:protected:v1') ? 'jp-learner-v1:protected:v1' : 'jp-learner-v1';
+    const status = Learner.persistenceStatus(), saved = JSON.parse(Learner.export()), journal = JSON.parse(localStorage.getItem(persistenceKey));
     const idb = await new Promise((resolve, reject) => {
       const request = indexedDB.open('kana-garden', 1);
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
-        const db = request.result, tx = db.transaction('learner'), read = tx.objectStore('learner').get('jp-learner-v1');
+        const db = request.result, tx = db.transaction('learner'), read = tx.objectStore('learner').get(persistenceKey);
         read.onerror = () => { db.close(); reject(read.error); };
         read.onsuccess = () => resolve(read.result); tx.oncomplete = () => db.close();
       };

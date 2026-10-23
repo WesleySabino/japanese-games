@@ -10,7 +10,7 @@ async function model(options={}){
   let now=options.now||1700000000000;
   const map=options.map||new Map(),writes=[],journalWrites=[],serialization={stringifies:0,parses:0};
   class Clock extends Date{static now(){return now;}}
-  const localStorage={get length(){return map.size;},key:i=>[...map.keys()][i]||null,getItem:k=>map.get(k)||null,setItem(k,v){if(options.denyStorage)throw new Error('denied');map.set(k,v);if(k==='jp-learner-v1')journalWrites.push(v);},removeItem:k=>map.delete(k)};
+  const localStorage={get length(){return map.size;},key:i=>[...map.keys()][i]||null,getItem:k=>map.get(k)||null,setItem(k,v){if(options.denyStorage)throw new Error('denied');map.set(k,v);if(k==='jp-learner-v1:protected:v1')journalWrites.push(v);},removeItem:k=>map.delete(k)};
   const countedJSON=Object.create(JSON);countedJSON.stringify=(...args)=>{serialization.stringifies++;return JSON.stringify(...args);};countedJSON.parse=(...args)=>{serialization.parses++;return JSON.parse(...args);};
   const math=options.random?Object.assign(Object.create(Math),{random:options.random}):Math;
   const context=vm.createContext({Date:Clock,Math:math,JSON:options.countJSON?countedJSON:JSON,console,localStorage,queueMicrotask});context.window=context;
@@ -476,7 +476,7 @@ test('a wrong answer immediately defers queued new kana and survives abandoning 
   assert.equal(g.app.state.familiarSinceIntroduction,0);
   g.app.state.queue=[{id:'kana:か'}];g.app.state.sinceSpawn=99999;g.tick();
   assert.ok(g.app.state.drops.every(d=>!d.isIntroduction),'an unfinished wrong round already prevents the queued debut');
-  const saved=g.map.get('jp-learner-v1');
+  const saved=g.map.get('jp-learner-v1:protected:v1');
   assert.equal(JSON.parse(saved).games['kana-rain'].novelty.cooldownRemaining,10,'pause is journaled with the error');
   g.app.end('Restart');const reloaded=await game({map:g.map});
   assert.equal(reloaded.app.gameData.novelty.cooldownRemaining,10);

@@ -87,3 +87,6 @@ jobs:
 
       - name: Run native storage quota, browser restart and multi-tab regressions
         run: pnpm run test:storage
+
+      - name: Run mixed-version save protection and checkpoint recovery
+        run: pnpm run test:mixed-version-storage

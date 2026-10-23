@@ -7,7 +7,7 @@ const http = require('node:http');
 const { chromium } = require('playwright');
 const { currentBuild, hash } = require('./helpers/update-fixture.cjs');
 const out = path.join(__dirname, 'artifacts/storage');
-const KEY = 'jp-learner-v1', PRESSURE = 'storage-test-pressure';
+const KEY = 'jp-learner-v1:protected:v1', PRESSURE = 'storage-test-pressure';
 const report = { startedAt: new Date().toISOString(), passed: false, syntheticProgressOnly: true, userProfileAccess: false, productionAccess: false, serviceWorkers: 'blocked', scenarios: [], pageErrors: [], outsideRequests: [], contextsOpened: 0, contextsClosed: 0 };
 const live = new Set();
 const ownedProfiles = new Set();
@@ -74,7 +74,7 @@ async function open(ctx) {
 async function snapshot(page, includeIdb = true) {
   return page.evaluate(async ({ includeIdb, KEY }) => {
     const journal = JSON.parse(localStorage.getItem(KEY));
-    const pending = Object.keys(localStorage).filter(key => key.startsWith(KEY + ':pending:')).flatMap(key => JSON.parse(localStorage.getItem(key)));
+    const pending = Object.keys(localStorage).filter(key => key.startsWith('jp-learner-v1:pending:')).flatMap(key => JSON.parse(localStorage.getItem(key)));
     const idb = includeIdb ? await new Promise((resolve, reject) => {
       const request = indexedDB.open('kana-garden', 1); request.onerror = () => reject(request.error);
       request.onsuccess = () => {

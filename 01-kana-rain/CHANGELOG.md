@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.10.4-local.1 — 2026-10-23 (unpublished)
+
+- Prevent compatible, smaller snapshots from discarding attempts or exposures merely because they carry a newer timestamp or synchronization vector. Unite immutable facts, preserve legacy baselines and earned access/rows, and keep reset/import generations separate.
+- Write protected localStorage/IndexedDB primaries that older runtimes cannot replace on page close. Continue reading legacy snapshots and pending journals, including late answers from old tabs. Do not modify the old canonical key.
+- Retain one optional IndexedDB checkpoint in a separate transaction. Recover valid copies independently of malformed primary JSON or synchronization metadata; preserve reference assistance when reconstructing evidence. No cloud synchronization or automatic restoration of a personal backup is included.
+- Add synthetic snapshot and native mixed-version regressions, pin the historical learner used by those tests and include the suite in CI. Advance only the local offline cache; no deployment has been performed.
+
 ## 1.10.3 — 2026-10-22
 
 - Merge learning events and counter changes from concurrent tabs. Journal each tab's pending changes synchronously before consolidation, including on page close, and recover them without duplicated answers or sessions. Preserve earned rows, Katakana access, historical records, preferences and both novelty brakes.

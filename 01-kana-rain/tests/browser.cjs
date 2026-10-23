@@ -445,7 +445,7 @@ async function exerciseDesktopResults(errors){
   await page.locator('#answer').fill(answer);
   await page.waitForFunction(()=>KanaRain.state.correct===1);
   assert.ok(await page.evaluate(()=>Learner.attempts().at(-1).firstResponseMs<1000),'the initial countdown must not count toward reaction time');
-  const persisted=await page.evaluate(id=>JSON.parse(localStorage.getItem('jp-learner-v1')).items[id].facets['form→sound'].correct,first);
+  const persisted=await page.evaluate(id=>JSON.parse(localStorage.getItem('jp-learner-v1:protected:v1')).items[id].facets['form→sound'].correct,first);
   assert.equal(persisted,1);
   await page.waitForFunction(()=>KanaRain.state.drops.length>0);
   const typo=await page.evaluate(()=>({id:KanaRain.state.target.id,char:JPData.kanaById[KanaRain.state.target.id].char,reading:JPData.kanaById[KanaRain.state.target.id].romaji}));
