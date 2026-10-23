@@ -4,6 +4,86 @@
 'use strict';
 var KEY='jp-learner-v1',DAY=86400000,MIN=60000,mem,db=null,store=null,revision=0,listeners=[];
 var attemptIds=new Set(),exposureIds=new Set();
+// Each tab owns its write-ahead journal. Never overwrite another tab's pending work.
+var writer=root.crypto&&root.crypto.randomUUID?root.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);
+var LOG=KEY+':pending:',LOCK=KEY+':commit',pending=[],serial=0,checkpoint;
+function copy(value){return value===undefined?undefined:JSON.parse(JSON.stringify(value));}
+function epoch(data){return data._sync&&data._sync.epoch||{id:'legacy:'+data.created,at:0};}
+function sameEpoch(a,b){return a.id===b.id||a.at===0&&b.at===0;}
+function newerEpoch(a,b){return a.at>b.at||a.at===b.at&&a.id>b.id;}
+function syncInfo(data){return data._sync||(data._sync={epoch:epoch(data),applied:{}});}
+function remember(){checkpoint={games:copy(mem.games),attempts:mem.attemptLedger.length,exposures:mem.exposureLedger.length,sequence:mem.sequence};}
+// Mutate existing objects so the running game keeps its gameData/novelty references.
+function reconcile(target,source){Object.keys(target).forEach(function(k){if(!Object.hasOwn(source,k))delete target[k];});Object.keys(source).forEach(function(k){var v=source[k];if(v&&typeof v==='object'&&!Array.isArray(v)&&target[k]&&typeof target[k]==='object'&&!Array.isArray(target[k]))reconcile(target[k],v);else target[k]=v;});return target;}
+function changes(before,after,path,out){
+if(before===after)return;
+if(after&&typeof after==='object'&&!Array.isArray(after)){
+if(!Object.keys(after).length&&(!before||typeof before!=='object')){out.push({path:path,kind:'set',value:{}});return;}
+Object.keys(after).forEach(function(k){changes(before&&before[k],after[k],path.concat(k),out);});return;
+}
+if(Array.isArray(after)&&JSON.stringify(before)===JSON.stringify(after))return;
+var kind='set',delta=after,p=path.join('.');
+if(typeof after==='number'&&(/\.accuracy\./.test(p)||path.length===2&&path[1]==='sessions')){kind='add';delta=after-(Number(before)||0);}
+else if(typeof after==='number'&&/\.(rows|best)\./.test(p))kind='max';
+else if(after===true&&(/Unlocked$/.test(p)||/\.seen\./.test(p)||/\.featuresIntro\./.test(p)))kind='earned';
+out.push({path:path,kind:kind,value:copy(delta)});
+}
+function patch(target,list){(list||[]).forEach(function(c){var obj=target;for(var i=0;i<c.path.length-1;i++){var k=c.path[i];if(!obj[k]||typeof obj[k]!=='object')obj[k]={};obj=obj[k];}var key=c.path[c.path.length-1];
+if(c.kind==='novelty'&&obj[key]){var n=obj[key];Object.assign(n.seen,c.value.seen);(c.value.recent||[]).forEach(function(r){if(root.KanaNovelty)root.KanaNovelty.finish(n,r);});n.cooldownRemaining=Math.max(n.cooldownRemaining||0,c.value.cooldownRemaining||0);n.blocked=n.blocked||c.value.blocked;return;}
+obj[key]=c.kind==='add'?(Number(obj[key])||0)+c.value:c.kind==='max'?Math.max(Number(obj[key])||0,c.value):c.kind==='earned'?!!obj[key]||c.value:copy(c.value);});}
+function capture(){
+var games=[],novelty=[],attempts=mem.attemptLedger.slice(checkpoint.attempts),exposures=mem.exposureLedger.slice(checkpoint.exposures);
+Object.keys(mem.games).forEach(function(game){
+var current=mem.games[game],previous=checkpoint.games[game]||{},a=Object.assign({},current),b=Object.assign({},previous);
+['novelty','katakanaNovelty'].forEach(function(name){
+var n=current[name],old=previous[name];delete a[name];delete b[name];if(!n)return;
+if(!old){games.push({path:[game,name],kind:'novelty',value:copy(n)});return;}
+var rest=Object.assign({},n),prior=Object.assign({},old);['seen','recent','blocked','cooldownRemaining'].forEach(function(k){delete rest[k];delete prior[k];});changes(prior,rest,[game,name],games);
+var seen=Object.keys(n.seen||{}).filter(function(id){return n.seen[id]&&!(old.seen||{})[id];});
+var ids=new Set((old.recent||[]).map(function(r){return r.roundId;})),rounds=(n.recent||[]).filter(function(r){return !ids.has(r.roundId);});
+var failed=attempts.some(function(ev){return ev.gameId===game&&(ev.outcome==='incorrect'||ev.outcome==='timeout')&&(name==='novelty'||/^kana:[ァ-ヶ]/.test(ev.itemId));});
+if(seen.length||rounds.length||failed||n.cooldownRemaining!==old.cooldownRemaining||n.blocked!==old.blocked)novelty.push({game:game,name:name,seen:seen,rounds:copy(rounds),pause:failed||n.cooldownRemaining>old.cooldownRemaining,blocked:n.blocked===true&&old.blocked!==true});
+});changes(b,a,[game],games);
+});
+if(!attempts.length&&!exposures.length&&!games.length&&!novelty.length&&mem.sequence===checkpoint.sequence)return;
+var op={writer:writer,seq:++serial,sequence:mem.sequence,epoch:copy(epoch(mem)),at:Date.now(),attempts:copy(attempts),exposures:copy(exposures),games:games,novelty:novelty,items:{}};
+attempts.forEach(function(ev){var s=mem.items[ev.itemId];if(s)op.items[ev.itemId]=copy(s);});
+pending.push(op);syncInfo(mem).applied[writer]=serial;remember();
+}
+function writePending(){if(!store)return false;try{if(!pending.length){store.removeItem(LOG+writer);return false;}store.setItem(LOG+writer,JSON.stringify(pending));return true;}catch(e){return false;}}
+function logs(){var all=pending.slice();if(store)try{for(var i=0;i<store.length;i++){var key=store.key(i);if(key&&key.indexOf(LOG)===0&&key!==LOG+writer){try{var entries=JSON.parse(store.getItem(key));if(Array.isArray(entries))all=all.concat(entries);}catch(e){}}}}catch(e){}return all;}
+function journalData(){if(store)try{return JSON.parse(store.getItem(KEY));}catch(e){}return null;}
+function choose(a,b){if(!b)return a;if(!a)return b;var x=epoch(a),y=epoch(b);if(!sameEpoch(x,y))return newerEpoch(y,x)?b:a;
+if(x.at===0&&!Object.keys(a.items||{}).length&&!Object.keys(a.games||{}).length&&(Object.keys(b.items||{}).length||Object.keys(b.games||{}).length))return b;
+var av=syncInfo(a).applied,bv=syncInfo(b).applied;var aHas=Object.keys(av).some(function(k){return av[k]>(bv[k]||0);}),bHas=Object.keys(bv).some(function(k){return bv[k]>(av[k]||0);});if(aHas&&!bHas)return a;if(bHas&&!aHas)return b;return (b.updatedAt||0)>(a.updatedAt||0)?b:a;}
+function normalized(data){var previous=mem,ai=attemptIds,ei=exposureIds;try{return restore(data);}finally{mem=previous;attemptIds=ai;exposureIds=ei;}}
+function merged(base,operations){
+var data=copy(base),info=syncInfo(data),rebuild=false,ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;})),exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
+// Concurrent writers may be linearized in either order; a writer's own sequence
+// must always win over wall-clock timestamps (which can move backwards).
+operations.slice().sort(function(a,b){return a.writer.localeCompare(b.writer)||a.seq-b.seq;}).forEach(function(op){
+if(!op||!op.writer||!Number.isSafeInteger(op.seq)||!op.epoch)return;
+if(!sameEpoch(info.epoch,op.epoch)){
+if(!op.replace||!newerEpoch(op.epoch,info.epoch))return;
+data=copy(op.replace);info=syncInfo(data);rebuild=true;ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;}));exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
+}
+if((info.applied[op.writer]||0)>=op.seq)return;
+patch(data.games,op.games);
+(op.novelty||[]).forEach(function(n){var gd=data.games[n.game]||(data.games[n.game]={}),s=gd[n.name];if(!s)return;
+n.seen.forEach(function(id){s.seen[id]=true;});if(n.pause)s.cooldownRemaining=10;if(n.blocked)s.blocked=true;
+n.rounds.forEach(function(round){if(root.KanaNovelty)root.KanaNovelty.finish(s,Object.assign({failureRecorded:true},round));else if(!s.recent.some(function(r){return r.roundId===round.roundId;})){if(round.timeout)s.cooldownRemaining=10;else if(round.firstCorrect&&round.familiar&&s.cooldownRemaining>0)s.cooldownRemaining--;s.recent.push(copy(round));if(s.recent.length>60)s.recent.shift();}});
+// Keep the admission gate conservative even when this script loads before novelty.js.
+var size=s.pace==='bold'?12:s.pace==='balanced'?30:60,recent=s.recent.slice(-size),misses=recent.filter(function(r){return r.miss===true;}).length,timeouts=recent.filter(function(r){return r.timeout;}).length;
+if(misses>=4||timeouts>=2)s.blocked=true;else if(s.blocked&&recent.length===size&&recent.filter(function(r){return r.firstCorrect;}).length>=(size===12?10:size-5))s.blocked=false;
+});
+(op.exposures||[]).forEach(function(ev){if(exposures.has(ev.exposureId))return;exposures.add(ev.exposureId);data.exposureLedger.push(copy(ev));data.reveals[ev.itemId+'|'+ev.facet]=Object.assign({},ev,{intervening:[]});});
+(op.attempts||[]).forEach(function(ev){if(ids.has(ev.attemptId))return;ids.add(ev.attemptId);rebuild=true;if(!data.items[ev.itemId]&&op.items[ev.itemId])data.items[ev.itemId]=copy(op.items[ev.itemId]);data.attemptLedger.push(copy(ev));if(ev.firstAttempt&&ev.outcome!=='timeout')Object.keys(data.reveals).forEach(function(k){var r=data.reveals[k];if(r.itemId!==ev.itemId&&ev.at>=r.at&&!r.intervening.includes(ev.itemId))r.intervening.push(ev.itemId);});});
+info.applied[op.writer]=op.seq;data.sequence=Math.max(data.sequence||0,op.sequence||0);data.updatedAt=Math.max(data.updatedAt||0,op.at);
+});
+// Rebuild aggregates from the union of immutable facts, never add saved totals twice.
+return rebuild?normalized(data):data;
+}
+function adopt(data){reconcile(mem,data);attemptIds=new Set(mem.attemptLedger.map(function(e){return e.attemptId;}));exposureIds=new Set(mem.exposureLedger.map(function(e){return e.exposureId;}));remember();}
 var status={state:'checking',saved:false,backend:null,journal:false,indexedDB:false,revision:0};
 var clamp=function(x,a,b){return Math.max(a,Math.min(b,x));};
 function publish(next){status=Object.assign({},status,next);listeners.slice().forEach(function(fn){try{fn(Object.assign({},status));}catch(e){}});return status;}
@@ -51,31 +131,55 @@ d.exposureLedger=Array.isArray(d.exposureLedger)?d.exposureLedger:[];
 d.exposureLedger.forEach(function(ev){if(ev&&ev.exposureId)exposureIds.add(ev.exposureId);});
 if(d.errorLog.length>500)d.errorLog=d.errorLog.slice(-500);return d;
 }
-try{store=root.localStorage;store.setItem('__t','1');store.removeItem('__t');}catch(e){store=null;}
+// A full quota can reject writes while reads (including recovery journals) work.
+try{store=root.localStorage;store.getItem(KEY);}catch(e){store=null;}
 var restoredBackend=null;
 try{var journal=store&&JSON.parse(store.getItem(KEY));mem=journal?restore(journal):fresh();if(journal)restoredBackend='journal';}catch(e){mem=fresh();}
+remember();var durable=copy(mem);
 var ready=new Promise(function(resolve){
-var done=false;function finish(){if(done)return;done=true;publish({state:restoredBackend?'restored':'ready',saved:!!restoredBackend,backend:restoredBackend,journal:restoredBackend==='journal',indexedDB:restoredBackend==='indexedDB'});resolve();}
+var done=false;function finish(){if(done)return;done=true;try{durable=merged(durable,logs());adopt(copy(durable));}catch(e){}publish({state:restoredBackend?'restored':'ready',saved:!!restoredBackend,backend:restoredBackend,journal:restoredBackend==='journal',indexedDB:restoredBackend==='indexedDB'});resolve();}
 if(!root.indexedDB){finish();return;}
 var request;try{request=root.indexedDB.open('kana-garden',1);}catch(e){finish();return;}
 request.onupgradeneeded=function(){request.result.createObjectStore('learner');};
 request.onerror=request.onblocked=finish;
 request.onsuccess=function(){db=request.result;var read;try{read=db.transaction('learner').objectStore('learner').get(KEY);}catch(e){finish();return;}
-read.onsuccess=function(){if(!done&&read.result&&(read.result.updatedAt||0)>(mem.updatedAt||0)){try{restore(read.result);restoredBackend='indexedDB';}catch(e){}}finish();};read.onerror=finish;
+read.onsuccess=function(){if(!done&&read.result){try{var selected=choose(durable,read.result);if(selected===read.result)restoredBackend='indexedDB';durable=normalized(copy(selected));}catch(e){}}finish();};read.onerror=finish;
 };
 });
 function flush(){
-var token=++revision,journalOK=false;mem.updatedAt=Date.now();var serialized=JSON.stringify(mem);
+capture();var token=++revision,journalOK=writePending(),hasLocks=!!(root.navigator&&root.navigator.locks);
 publish({state:'saving',saved:false,revision:token});
-if(store)try{store.setItem(KEY,serialized);journalOK=true;}catch(e){}
 if(journalOK)publish({state:'saving',saved:true,backend:'journal',journal:true,indexedDB:false,revision:token});
-return new Promise(function(resolve){
-var settled=false;function finish(idbOK){if(settled)return;settled=true;var result={state:journalOK||idbOK?'saved':'unsaved',saved:journalOK||idbOK,backend:journalOK&&idbOK?'journal+indexedDB':journalOK?'journal':idbOK?'indexedDB':null,journal:journalOK,indexedDB:idbOK,revision:token};if(token===revision)publish(result);resolve(result);}
-if(!db){finish(false);return;}
-try{var snapshot=JSON.parse(serialized),tx=db.transaction('learner','readwrite');tx.oncomplete=function(){finish(true);};tx.onerror=tx.onabort=function(){finish(false);};tx.objectStore('learner').put(snapshot,KEY);}catch(e){finish(false);}
-});
+function commit(){return new Promise(function(resolve){
+var settled=false,snapshot,canonicalOK=false;
+function finish(idbOK){if(settled)return;settled=true;
+if(snapshot&&(canonicalOK||idbOK)){
+durable=copy(snapshot);
+// Only this journal's owner removes acknowledged operations. Another tab may
+// append to its own journal while this transaction is running.
+if(hasLocks){var info=syncInfo(snapshot);pending=pending.filter(function(op){return sameEpoch(op.epoch,info.epoch)?op.seq>(info.applied[writer]||0):newerEpoch(op.epoch,info.epoch);});writePending();}
 }
-function nextId(prefix){mem.sequence++;return prefix+':'+mem.created+':'+mem.sequence;}
+if(snapshot){capture();writePending();adopt(merged(snapshot,pending));}
+var result={state:journalOK||idbOK?'saved':'unsaved',saved:journalOK||idbOK,backend:journalOK&&idbOK?'journal+indexedDB':journalOK?'journal':idbOK?'indexedDB':null,journal:journalOK,indexedDB:idbOK,revision:token};if(token===revision)publish(result);resolve(result);
+}
+function prepare(saved){capture();journalOK=writePending();snapshot=merged(choose(choose(durable,journalData()),saved),logs());
+if(store)try{store.setItem(KEY,JSON.stringify(snapshot));canonicalOK=true;journalOK=true;}catch(e){}
+adopt(copy(snapshot));return snapshot;
+}
+if(!db){try{prepare(null);}catch(e){journalOK=false;}finish(false);return;}
+try{var tx=db.transaction('learner','readwrite'),objectStore=tx.objectStore('learner'),read=objectStore.get(KEY);
+tx.oncomplete=function(){finish(!!snapshot);};tx.onerror=tx.onabort=function(){finish(false);};
+read.onsuccess=function(){try{objectStore.put(prepare(read.result),KEY);}catch(e){try{tx.abort();}catch(ignore){}finish(false);}};read.onerror=function(){finish(false);};
+}catch(e){try{prepare(null);}catch(ignore){}finish(false);}
+});}
+// Web Locks serialize journal commits too when IndexedDB is unavailable/full.
+// pagehide only needs the synchronous, tab-owned write-ahead journal above.
+function lockFailed(){var result={state:journalOK?'saved':'unsaved',saved:journalOK,backend:journalOK?'journal':null,journal:journalOK,indexedDB:false,revision:token};if(token===revision)publish(result);return result;}
+if(!hasLocks)return commit();
+try{return root.navigator.locks.request(LOCK,commit).catch(lockFailed);}catch(e){return Promise.resolve(lockFailed());}
+}
+function nextId(prefix){mem.sequence++;return prefix+':'+writer+':'+mem.sequence;}
+function replace(data){var at=Math.max(Date.now(),epoch(mem).at+1);mem=data;attemptIds=new Set(mem.attemptLedger.map(function(e){return e.attemptId;}));exposureIds=new Set(mem.exposureLedger.map(function(e){return e.exposureId;}));mem._sync={epoch:{id:writer+':replace:'+String(++serial),at:at},applied:{}};var op={writer:writer,seq:serial,epoch:copy(mem._sync.epoch),at:at,replace:copy(mem)};pending=[op];mem._sync.applied[writer]=serial;remember();return flush();}
 function beginSession(gameId){var id=nextId(gameId+':session');flush();return id;}
 // Two distinct intervening items AND 60 seconds after a reference are required.
 // This conservative bookkeeping rule does not prove long-term retention.
@@ -104,6 +208,7 @@ var out=unseen.slice(0,nNew).concat(weak.slice(0,nWeak).map(function(x){return x
 for(var i=0;out.length<size&&i<rest.length;i++)if(!out.includes(rest[i].id))out.push(rest[i].id);
 if(opts.interleave!==false)out.slice().forEach(function(id){var s=state(id);if(!s)return;var graph=s.confusionsByFacet[name]||{};Object.keys(graph).forEach(function(c){if(graph[c]>=1&&!out.includes(c)&&candidates.includes(c)&&out.length<size+3)out.push(c);});});return out;
 }
-root.Learner={ready:ready,state:state,record:record,recordExposure:recordExposure,assistanceFor:assistanceFor,beginSession:beginSession,mastery:mastery,retrievability:retrievability,selectRound:selectRound,shuffle:shuffle,recentErrors:function(n){return mem.errorLog.slice(-(n||20));},gameData:function(id){return mem.games[id]||(mem.games[id]={});},save:flush,flush:flush,all:function(){return mem.items;},attempts:function(){return mem.attemptLedger.slice();},exposures:function(){return mem.exposureLedger.slice();},persistenceStatus:function(){return Object.assign({},status);},subscribePersistence:function(fn){listeners.push(fn);fn(Object.assign({},status));return function(){listeners=listeners.filter(function(x){return x!==fn;});};},export:function(){return JSON.stringify(mem);},import:function(json){restore(JSON.parse(json));return flush();},reset:function(){mem=fresh();attemptIds=new Set();exposureIds=new Set();return flush();}};
+root.Learner={ready:ready,state:state,record:record,recordExposure:recordExposure,assistanceFor:assistanceFor,beginSession:beginSession,mastery:mastery,retrievability:retrievability,selectRound:selectRound,shuffle:shuffle,recentErrors:function(n){return mem.errorLog.slice(-(n||20));},gameData:function(id){return mem.games[id]||(mem.games[id]={});},save:flush,flush:flush,all:function(){return mem.items;},attempts:function(){return mem.attemptLedger.slice();},exposures:function(){return mem.exposureLedger.slice();},persistenceStatus:function(){return Object.assign({},status);},subscribePersistence:function(fn){listeners.push(fn);fn(Object.assign({},status));return function(){listeners=listeners.filter(function(x){return x!==fn;});};},export:function(){return JSON.stringify(mem);},import:function(json){var previous=mem;try{var imported=restore(JSON.parse(json));}finally{mem=previous;}return replace(imported);},reset:function(){return replace(fresh());}};
 if(root.addEventListener)root.addEventListener('pagehide',flush);
+if(root.addEventListener)root.addEventListener('storage',function(event){if(event.key&&event.key.indexOf(LOG)===0&&event.key!==LOG+writer&&event.newValue)flush();});
 })(typeof window!=='undefined'?window:globalThis);

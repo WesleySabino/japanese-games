@@ -1,0 +1,135 @@
+# Testes do Kana Rain
+
+Auditoria de 22 de outubro de 2026. Base: versão 1.10.2; pacote de correções e testes promovido para 1.10.3. Escopo: somente este jogo; não inclui os testes de `japanese-core`, arquivos históricos ou outros repositórios.
+
+O pacote 1.10.3 usa o cache `kana-rain-v42-release-1.10.3`. As evidências da prévia local abaixo conservam o identificador usado naquela validação; a publicação exige build novo e repetição das suítes que verificam seus bytes. Recarregar abas anteriores ativa o protocolo novo em cada uma: a suíte de duas abas cobre runtimes atualizados, não escrita concorrente por um runtime antigo que permaneça em memória.
+
+## Como interpretar a cobertura
+
+O projeto tem **215 casos executáveis em 19 arquivos de testes Node** e **nove comandos de testes de navegador no CI**. Alguns casos percorrem todos os kanas ou várias combinações, por isso contar casos não mede a proporção do jogo testada. Os comandos também compartilham cenários; não são nove áreas independentes de cobertura. As regressões de sobrescrita entre abas têm verificações específicas, incluindo encerramento durante escrita e quota nativa.
+
+Ainda não existe um relatório confiável de cobertura de linhas, funções e decisões, nem um limite mínimo aplicado no CI. Não é correto atribuir uma porcentagem geral de cobertura. Vários testes Node executam scripts em `vm` com DOM, relógio, áudio e armazenamento simulados; instrumentar apenas os arquivos normalmente importados deixaria parte importante do código de fora da medição.
+
+As avaliações abaixo descrevem **cobertura funcional observada**, não certificação de ausência de defeitos. Elas resultam da leitura das asserções e dos fluxos de teste.
+
+## O que já existe
+
+| Tipo / área | O que é verificado | Alcance e limite atual |
+|---|---|---|
+| Catálogo e conteúdo | Leituras canônicas, aliases de romaji, 104 pares reversíveis hiragana/katakana, arquivos de áudio e caminho de duas etapas do sound pad para as 208 formas. | Exaustivo para os itens do catálogo nesses contratos; não avalia qualidade da pronúncia nem aprendizagem real. |
+| Regras de partida e contagens | Acertos, múltiplos erros, correções, expirações, corações, fim manual/tempo, reinício e preservação de recordes antigos. | Boa cobertura dos casos de borda conhecidos, combinando runtime simulado e navegador; não percorre todas as sequências possíveis. |
+| Progressão e freios | Espaçamento de estreias, pausas após falhas, janelas dos três níveis, erros/expirações, histerese, persistência e mudança de dificuldade. | Forte nas regressões já encontradas. Os cenários usam histórias sintéticas e várias sequências determinísticas. |
+| Katakana | Bloqueio inicial, conclusão dos 104 hiraganas, acesso legado, progressão na mesma partida, pressão separada por alfabeto e ausência de revelações prematuras em correções/resultados/revisão. | Forte nas falhas históricas, incluindo fixture sintética dos 29 acertos presos em ア. Não há uma jornada integral dos dois alfabetos pelo navegador. |
+| Evidência e persistência | Tentativas/exposições, assistência, IDs duplicados, migração v1/v2, importação/exportação, reload, snapshots, quota nativa, fallback, fechamento/reabertura durante escrita e duas abas. | Dez cenários nativos e dez novos casos Node de mesclagem, contagens, freios, referências vivas, gerações de reset/importação e migração v1 exclusiva do IndexedDB. Não cobre queda de energia, encerramento forçado do processo ou todos os mecanismos de concorrência. |
+| Entrada e pausa | Romaji, aliases, ambiguidade `n`/`nn`/`ne`, Enter, composição IME simulada, sound pad, bounce de toque, deslize cancelado, foco, countdown e pausa. | Boa cobertura desktop/toque em Chromium. Teclado virtual do sistema e tecnologias assistivas reais não são substituídos pela emulação. |
+| Interface responsiva | Menus, HUD/corações, área das gotas, alvos de toque, sobreposição, orientação, diálogos e ações dos resultados. | Matriz do HUD com 14 tamanhos, menu com 11 e pad com oito tamanhos de celular. Capturas e asserções geométricas; não há comparação automática de pixels nem comprovação em aparelhos físicos. |
+| Áudio | Correspondência com 104 gravações, cache, mute sincronizado, preferência após reload, indisponibilidade do manifesto e cancelamento de tons. | Parcial: não escuta os arquivos e não valida toda a matriz de autoplay, interrupções do sistema, Bluetooth ou saída real do dispositivo. |
+| Offline e atualização | Shell, navegação, 104 gravações em cache, áudio acessível offline, respostas HTML redirecionadas, atualização real 1.10.1→candidato e falha/repetição da instalação. | Atualização com aba aberta em Chromium desktop/celular emulado. Confere hashes dos arquivos e preservação de progresso nos dois armazenamentos; não cobre encerramento do navegador, múltiplas abas ou todas as versões antigas. |
+| Analytics e privacidade | Consentimento, hosts permitidos, DNT/GPC, retirada do consentimento, allowlist de eventos, URLs saneadas e ausência de dados do aluno nos payloads. | Ampla cobertura do contrato local com ambiente simulado; não valida ingestão real no Google nem representa auditoria geral de segurança. |
+| Desempenho e empacotamento | RAF parado durante pausa, leituras de geometria limitadas, atualizações de DOM, serialização, ordem do bundle, estilos inline, orçamento de sprite e lista de arquivos de produção. | Bons guardrails de implementação. Benchmark de navegador é opcional e não tem um limite estável de FPS/memória em aparelho fraco aplicado no CI. |
+
+## Comandos e automação
+
+`pnpm test` executa os 215 testes Node, inclusive os testes de analytics, desempenho e concorrência. `test:analytics` e `test:performance` são subconjuntos; não devem ser somados como novos testes.
+
+Os nove comandos de navegador são:
+
+| Comando | Foco |
+|---|---|
+| `pnpm test:browser` | Fluxo geral, prefixos de digitação (`input.browser.cjs` é chamado aqui), contagens, pausa, resultados, responsividade e offline. |
+| `pnpm test:improvements` | Correções, armazenamento indisponível, exportação, detalhes de aprendizagem e Settings. |
+| `pnpm test:novelty-presentation` | Admissão/recuperação de novos kanas, HUD e tamanho/caminho das gotas. |
+| `pnpm test:novelty-pace` | Três dificuldades, persistência, controles bloqueados durante partida e menu responsivo. |
+| `pnpm test:sound-pad` | Geometria, duas etapas, toque, bounce, cancelamento, teclado e evidência preservada. |
+| `pnpm test:katakana-bridge` | Desbloqueio, progressão contínua, saves legados, entrada, homófonos e proteção contra revelação prematura. |
+| `pnpm test:quick-wins` | Ações dos resultados, foco do pad e áudio sincronizado sobre o **build de produção**, conferindo que `dist/` corresponde às fontes. |
+| `pnpm test:update` | Atualização de um build histórico fixado para o candidato no mesmo endereço, preservação dos dados, jogo online/offline e recuperação após instalação interrompida. |
+| `pnpm test:storage` | Dez cenários: quota nativa, fallback/exportação, fechamento/reabertura, abas alternadas, 24 respostas simultâneas, fechamento de aba pendente e concorrência com IndexedDB cheio. |
+
+O CI em `.github/workflows/kana-rain.yml` usa Linux, Node 22 e Chromium. Executa testes Node, seis suítes de navegador sobre as fontes, build e três suítes sobre `dist/`. Essa configuração foi preparada localmente; o CI remoto não foi disparado nesta entrega. O navegador de celular é emulado. O benchmark opcional `node tests/runtime-browser.benchmark.cjs` não está no CI e sua comparação pública depende da disponibilidade e da versão publicada.
+
+Todos os testes devem usar dados sintéticos e perfis descartáveis. Os cenários offline precisam permitir service workers no seu contexto isolado. Não usar o progresso pessoal como fixture. Artefatos de testes ficam ignorados pelo Git e fora do pacote publicado.
+
+## Testes ausentes ou que precisam ser ampliados
+
+| Prioridade | Proposta | Defeito que ajudaria a detectar |
+|---|---|---|
+| Alta | Ampliar os testes de atualização existentes para mais versões de origem, múltiplas abas e encerramento/reabertura do navegador durante instalação. | Regressões fora do caminho já testado 1.10.1→candidato, com aba aberta e instalação concluída ou falhando por download. |
+| Alta | Ampliar concorrência para encerramento forçado, muitas abas, limpeza de journals órfãos e convivência com uma aba que ainda executa o runtime antigo. | A união dos eventos/contagens entre duas abas atuais está coberta, inclusive no fechamento pendente e fallback de quota. Esses testes não equivalem a uma atualização com duas versões diferentes escrevendo juntas. |
+| Alta | Smoke em Firefox/WebKit e roteiro em Android/Chrome e iPhone/Safari físicos, incluindo rotação e teclado nativo. | Diferenças de layout, toque, foco, armazenamento, áudio e ciclo de vida que Chromium emulado não reproduz. |
+| Alta | Expandir os fluxos sobre `dist/` para desbloqueios completos, revisão dirigida e recuperação dos freios. A suíte de atualização já joga hiragana/katakana e verifica offline sobre o build. | Defeitos de empacotamento que aparecem em regras mais longas, além do fluxo principal já coberto. |
+| Média | Regressão visual com referências aprovadas para menu, HUD, correção e resultados; controlar fontes, relógio e aleatoriedade. | Desalinhamento ou mudança de escala que ainda satisfaz os limites geométricos atuais. As screenshots existentes são evidências, não comparação automática. |
+| Média | Acessibilidade automatizada e avaliação manual com leitor de tela, teclado completo, zoom e movimento reduzido do sistema. | Foco perdido/preso, nomes inacessíveis e estados mal anunciados. Os testes atuais de foco/ARIA cobrem apenas parte disso. Não implica implementar a alteração de movimento reduzido adiada. |
+| Média | Jornadas longas e testes baseados em sequências geradas, com sementes reproduzíveis e invariantes de progressão, contagens e preservação de dados. | Travamentos que aparecem após muitas partidas ou combinações de falha, pausa, revisão e troca de alfabeto. Já há loops e aleatoriedade controlada em testes específicos; falta uma campanha abrangente. |
+| Média | Desempenho com histórico grande, aparelho fraco e rede limitada; medir frame time, memória, inicialização, exportação e reload com orçamento definido. | Jogo que passa nos contadores internos, mas engasga ou demora depois de meses de uso. |
+| Média | Áudio real: decodificação das 104 gravações, falhas/lentidão por arquivo, autoplay bloqueado, alternância de aba e interrupções no celular; escuta humana por amostragem. | Som ausente, sobreposto, atrasado ou incorreto apesar do manifesto válido. |
+| Complementar | Sessões observadas com iniciantes, incluindo recuperação após erros e transição para katakana. | Carga cognitiva, instruções confusas e ritmo inadequado que testes técnicos não conseguem medir. |
+
+Uma medição instrumentada de linhas/funções/decisões seria útil para orientar essas adições. Ela deve reconhecer os scripts executados em `vm` e o runtime no navegador; definir um percentual antes disso daria uma falsa sensação de segurança. Testes de mutação nas regras de progressão também ajudariam a avaliar se as asserções detectam alterações erradas, em vez de somente executar o código.
+
+## Escopo da auditoria inicial
+
+Na auditoria inicial, a única mudança de comportamento foi `.drop { cursor:default; }`. A correção de concorrência descrita abaixo é uma entrega local posterior. Os dois outros quick wins discutidos — estado efetivo de movimento reduzido e estabilidade do botão de exportação em falhas repetidas — permanecem adiados.
+
+## Verificação executada nesta auditoria
+
+Ambiente local: Windows, Node 24.20.0, pnpm 11.25.0 e Chromium headless do Playwright instalado. Isso não equivale a uma nova execução do CI em Linux/Node 22.
+
+- `pnpm test`: **205 passaram**, zero falhas ou casos ignorados.
+- As **sete suítes completas de navegador passaram**, incluindo offline na suíte geral e verificação do build na suíte de quick wins.
+- `pnpm build` e `node scripts/build.cjs --check`: passaram; pacote com 141 arquivos e 104 gravações.
+- Verificação pontual do cursor no build a 1366×768 e 390×844: gota, glifo e dica com cursor normal; botões com cursor de clique; clique na gota não muda alvo, contagens ou exportação; resposta aceita uma vez pela digitação no desktop e pelo pad no celular. Zero erros de página ou requisições externas nesses dois contextos. Capturas revisadas visualmente.
+- Prévia das fontes disponível em `http://127.0.0.1:4193/`; confirmado que serve o CSS alterado. Não foi acessado o perfil pessoal nem o progresso do jogador. Não houve publicação.
+
+Logs e verificação pontual: `tests/artifacts/test-audit-2026-10-22/`. O relatório de `test:quick-wins` fica em `../.release/quick-wins-20261021/verification.json`, conforme o caminho definido pela suíte. Ambos são artefatos locais ignorados pelo Git, não conteúdo de produção.
+
+## Suíte de atualização entre versões
+
+Executar `pnpm build` e `pnpm test:update`. A suíte lê os bytes reais do build candidato e rejeita arquivos desatualizados. Sua origem é a versão **1.10.1**, commit `4e02aee67272e21111875087e6a7a033fed5e4b7`, com cache `kana-rain-v38-release-1.10.1`. O destino é o candidato local baseado em **1.10.2**, agora com cache `kana-rain-v41-local-storage-concurrency`. Essa origem é fixada, não uma consulta à produção nem uma cobertura automática de todas as versões anteriores.
+
+São três cenários, com dez pontos de verificação reportados:
+
+1. **Desktop:** instalar e jogar a versão antiga; atualizar no mesmo endereço; jogar katakana online e hiragana offline; recarregar, navegar para a página About, decodificar um MP3 offline e reconectar.
+2. **Celular emulado:** repetir o fluxo usando o sound pad a 390×844. Não equivale a um iPhone/Android físico.
+3. **Instalação interrompida:** responder HTTP 503 para uma gravação durante a instalação do candidato; exigir estado `redundant` do worker que falhou, manter a versão antiga jogável offline, salvar uma resposta nesse intervalo e completar a atualização numa nova tentativa.
+
+O save é criado com a API histórica e contém 221 eventos sintéticos, incluindo respostas independentes, uma resposta assistida no formato antigo, correção, expiração, exposição, acesso a katakana, recordes legados e estados dos freios. A comparação exige tentativas antigas idênticas e na mesma ordem, exposições preservadas, ausência de duplicações, agregados por kana e campos protegidos intactos durante a atualização. Novas respostas devem acrescentar exatamente um evento, preservar os dados antigos e sobreviver a reload.
+
+As verificações **não chamam `Learner.flush()` para ajudar o jogo a salvar**: aguardam o estado de salvamento do aplicativo e leem localStorage e IndexedDB reais, comparando ambos com a exportação em memória. A instalação também deve guardar os bytes exatos do candidato, incluindo as 104 gravações. Uma ativação bem-sucedida remove o cache antigo do jogo e mantém um cache alheio usado como sentinela.
+
+Durante offline, além de `context.setOffline(true)`, o servidor encerra conexões sem entregar bytes. Isso cobre as consultas de atualização de service worker feitas pelo próprio navegador, que podem escapar da emulação offline da página. Os testes não apagam/resemeiam dados após o primeiro carregamento e não usam `/?all` para liberar conteúdo artificialmente.
+
+A suíte passou os dez pontos com três contextos criados/fechados, zero erros de página e zero requisições externas. Os 205 testes Node também passaram novamente. Dois controles negativos locais, executados com alterações somente em memória no teste, falharam como esperado: bundle antigo na instalação nova e remoção de uma tentativa do histórico sintético. Esses controles comprovaram as asserções; não são casos adicionais dos 205 testes nem alteram o jogo.
+
+Relatório e capturas: `tests/artifacts/update/verification.json` e arquivos PNG na mesma pasta. Controles negativos: `tests/artifacts/update-negative-stale-runtime/` e `tests/artifacts/update-negative-lost-progress/`. Foi adicionada uma etapa para a suíte no CI; a execução desta entrega ocorreu localmente em Windows/Node 24, sem publicar ou disparar o CI remoto. Não houve mudança no código de salvamento, no service worker do jogo ou no progresso pessoal.
+
+## Armazenamento concorrente e falhas nativas
+
+Executar `pnpm build` e `pnpm test:storage`. Um cenário específico pode ser selecionado pelo nome: por exemplo, `pnpm test:storage simultaneous-tabs-close-pending`. Falhas nas asserções continuam produzindo código 1; nenhum caso foi ignorado ou convertido em sucesso esperado.
+
+| Cenário | Resultado observado |
+|---|---|
+| `local-quota` | Passou: preencher localStorage até `QuotaExceededError` faz o jogo salvar no IndexedDB. A resposta sobrevive a reload; liberar espaço e recarregar restaura os dois armazenamentos sem perder histórico. |
+| `indexeddb-quota` | Passou: quota nativa insuficiente aborta uma transação real com `QuotaExceededError`. O journal em localStorage preserva a resposta, inclusive após reload; remover o limite restaura a gravação em ambos. |
+| `both-quotas` | Passou: falhando os dois destinos, o estado é `unsaved`, o aviso aparece e a exportação pela interface contém a resposta nova que ficou em memória. Depois de liberar espaço, outra partida faz o próprio jogo persistir tudo; os dados sobrevivem a reload. |
+| `browser-close-committed` | Passou: após confirmação dos dois destinos, fechar o processo do Chromium de teste e reabri-lo com o mesmo perfil preserva a resposta e o histórico. |
+| `browser-close-pending` | Passou: uma transação real mantém o store ocupado enquanto o jogo escreve o journal e aguarda o IndexedDB. Fechar/reabrir o navegador preserva a resposta por meio do journal. O IndexedDB contém um snapshot completo observado; a inicialização reconcilia os destinos. |
+| `two-tabs` | A e B, abertas antes das respostas, salvam por caminhos reais da interface. Journal e IndexedDB precisam conter os eventos exatos das duas abas, inclusive após reload. |
+| `stale-tab-close` | Repete as duas respostas e fecha a aba antiga. Exige a união dos eventos nos dois destinos antes e depois de recarregar. |
+| `simultaneous-tabs` | Dois renderizadores submetem 24 respostas no mesmo prazo, sem aguardar as gravações entre chamadas. Exige IDs distintos, união dos eventos, contagens/sessões somadas uma vez, linhas e preferências preservadas. |
+| `simultaneous-tabs-close-pending` | Bloqueia uma transação nativa, observa os dois journals com as 24 respostas e fecha uma aba antes de permitir o commit. A outra aba e o reload precisam recuperar tudo sem duplicação. |
+| `simultaneous-tabs-indexeddb-quota` | Repete a concorrência com quota nativa insuficiente no IndexedDB. O journal deve preservar as 24 respostas e contagens; liberar quota e recarregar restaura os dois destinos. |
+
+Antes da correção, dois dos sete cenários originais falhavam por **sobrescrita de snapshots completos entre abas**, inclusive em `pagehide`. Agora cada aba grava alterações imutáveis em uma chave própria antes do commit. Web Locks serializam a consolidação, e a transação de IndexedDB lê/mescla/grava atomicamente. Vetores de revisão impedem reaplicação; tentativas e exposições são unidas por ID, contagens por delta, linhas conquistadas por máximo e preferências somente quando editadas. Os objetos de jogo/freios são reconciliados mantendo as referências usadas pela partida. Reset/importação recebem uma geração nova para uma aba antiga não ressuscitar o estado descartado.
+
+O fechamento não depende de uma Promise completar: o journal da aba é escrito de forma síncrona e recuperado na próxima inicialização. Só o proprietário remove operações confirmadas; um journal de aba encerrada durante escrita pode permanecer como evidência idempotente. Sem Web Locks, os journals são retidos para reconciliação. Os nove casos de `concurrent-storage.test.cjs` verificam essas regras com armazenamento compartilhado e cenários de commit bloqueado/falhando, incluindo uma nova falha de katakana em aba com pausa desatualizada; a suíte de navegador comprova a concorrência/quota/ciclo de vida no mecanismo real.
+
+Os testes usam somente a fixture sintética existente (`cold-katakana-legacy29.json`), com 90 eventos iniciais e marcadores de preservação; nenhuma exportação pessoal foi lida. São executados sobre o build validado, em servidor localhost com requisições externas bloqueadas e service workers desativados. Os casos de quota/reabertura usam perfis de disco exclusivos sob `tests/artifacts/storage/`; as duas abas compartilham o mesmo contexto para compartilhar armazenamento de verdade.
+
+Para localStorage, o teste grava chaves próprias até esgotar o limite real, reduzindo os blocos finais para evitar espaço sobrando. Para IndexedDB, usa a [quota nativa por origem do protocolo DevTools](https://chromedevtools.github.io/devtools-protocol/tot/Storage/#method-overrideQuotaForOrigin), limitada a um byte, abaixo do uso real já existente. Uma escrita de 128 KiB precisa falhar com `DOMException`/`QuotaExceededError` antes de testar a gravação do jogo. Isso testa falta de quota no mecanismo real do navegador **sem encher o disco físico**. Não substitui `setItem`, `indexedDB`, transações ou funções de salvamento por mocks. O teste espera 31 segundos para expirar a [reserva de escrita de 30 segundos do Chromium](https://chromium.googlesource.com/chromium/src/+/c0811f657d5ae8c42a9fb827e7e36e7e58a16bab/content/browser/indexed_db/instance/bucket_context.h); definir o limite sem essa espera ainda permitia escritas pela reserva anterior.
+
+O fechamento pendente é provocado mantendo uma transação `readwrite` ativa em uma página de apoio. O teste observa a resposta no journal próprio da aba e o IndexedDB ainda pendente antes de fechar o navegador. Após reabertura, uma página sem o jogo lê o disco primeiro, para a inicialização não mascarar o resultado: o journal pendente deve conter o evento exato; depois o próprio aplicativo o recupera e consolida com as contagens. O IndexedDB deve conter um snapshot inteiro realmente observado, nunca dados parcialmente escritos. Esse cenário é fechamento normal do processo, **não** queda de energia, disco defeituoso ou encerramento forçado pelo sistema operacional.
+
+Evidências locais da correção: `tests/artifacts/storage/verification.json`, `tests/artifacts/concurrent-storage-final.log`, `tests/artifacts/concurrent-unit-final.log`, `tests/artifacts/concurrent-update-final.log` e capturas nas pastas de relatórios. O JSON registra os erros nativos de quota, os eventos preservados, o estado antes do fechamento e as verificações de contagens/IDs. O progresso pessoal e a produção permanecem intocados. A prévia continua em `http://127.0.0.1:4193/`; o cache do candidato local passou a `kana-rain-v41-local-storage-concurrency` para permitir atualização/offline desse runtime.
+
+Verificação final da correção em Windows/Node 24/Chromium: **215/215 testes Node, 10/10 cenários nativos de armazenamento, 10 verificações de atualização e as sete suítes restantes do navegador passaram**, sem casos ignorados. O build e `git diff --check` também passaram. Nos testes nativos, 12 contextos foram criados/fechados, os cinco perfis temporários foram removidos após fechamento, e houve zero erros de página e zero requisições externas. Revisadas as capturas do aviso de falha dupla e da recuperação após fechamento pendente. O resumo `tests/artifacts/concurrent-verification.json` confere o mesmo SHA-256 do runtime validado nas suítes de armazenamento e atualização. Leitura dos journals não depende de uma escrita de sondagem: a recuperação funciona mesmo quando a quota está cheia. Nenhuma publicação ou acesso ao perfil/progresso pessoal foi realizado.

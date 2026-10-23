@@ -1,6 +1,6 @@
 # Kana Rain
 
-**Release: 1.10.2 — 22 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.10.3 — 22 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
@@ -73,6 +73,8 @@ Old session selections normalize to supported choices without resetting attempts
 
 ## Audio, offline and privacy
 
+Concurrent tabs keep their own pending journals and merge learning events and counters instead of replacing another tab's progress. Closing a tab during a pending commit is recoverable. Refresh previously open tabs after updating so all of them use the new saving protocol; an old runtime already running in memory cannot gain this protection until reloaded. Existing storage keys, schema-v2 exports, earned access/rows and historical records remain compatible.
+
 Pronunciations use only the supplied `kana-audio-bundle/` recordings. All 208 kana map to 104 runtime MP3 files, with shared pronunciation files for the alphabets and separately recorded homophones. The source bundle retains its 112 recordings and full provenance; eight historical word examples are excluded from the game/offline build. Correct answers, corrections, expirations, lesson tiles and review cards retain audio. The complete manifest, licenses and provenance remain available; gameplay loads a compact lookup.
 
 The service worker caches the application, optimized gameplay images, audio lookup and recordings. Wait for **Your garden is ready offline** before relying on offline play. The art gallery loads source artwork separately on demand. Release cache changes do not reset learner storage.
@@ -96,11 +98,17 @@ pnpm test:sound-pad
 pnpm test:katakana-bridge
 pnpm build
 pnpm test:quick-wins
+pnpm test:update
+pnpm test:storage
 ```
 
 Browser suites use isolated profiles and temporary localhost servers. The sound-pad suite measures fall distance, dock size and touch targets at eight phone sizes, and checks quick taps, ignored bounces, cancelled slides, stable slots, correction and evidence labels. `test:katakana-bridge` checks the hiragana completion gate, retained legacy access, katakana typing on desktop and the pad on phones, hiragana-partner hints and corrections, continued introductions in the same run and the evidence labels. The suites also check all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.
 
 `test:quick-wins` checks the built `dist/` after `pnpm build`: results actions on phones and desktop, keyboard and touch focus through both pad stages, synchronized sound controls, and reload of synthetic saved progress. Keyboard/assistive activation moves focus from a family to its first enabled sound; Back or an answer returns to that family. Pointer/touch activation does not force a new focus target or open the native keyboard.
+
+`test:update` installs the pinned 1.10.1 production build, creates real browser saves from synthetic history and switches the same localhost origin to the validated candidate build. Desktop and phone scenarios verify exact historical evidence, rows, brakes, preferences and both storage backends after activation/reload, online play, offline play/audio/navigation and reconnect. An interrupted audio download must leave the old version playable offline; retry must finish the upgrade without losing intervening answers. Service workers are deliberately enabled only in the disposable test contexts. Historical payload provenance is in [the fixture README](tests/fixtures/releases/README.md); coverage and remaining limits are in [TESTING](TESTING.md).
+
+`test:storage` exercises native localStorage exhaustion, a Chromium-enforced IndexedDB quota, fallback/export/recovery, actual browser close/reopen during a blocked write, alternating tabs and 24 overlapping answers from two renderer processes. It checks exact event preservation and counters after closing a stale/pending tab and while IndexedDB is full. Tab-owned write-ahead journals and serialized merge commits prevent stale snapshots replacing another tab's changes. Tests use owned temporary profiles and synthetic data; they never open a personal Chrome profile. Select a scenario with `pnpm test:storage simultaneous-tabs-close-pending` (full list in [TESTING](TESTING.md)). Reports/screenshots stay in `tests/artifacts/storage/`.
 
 For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. Use a disposable browser profile for tests. [Development](DEVELOPMENT.md) documents the architecture, performance invariants, asset preparation and release checks.
 

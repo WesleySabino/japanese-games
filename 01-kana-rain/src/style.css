@@ -105,7 +105,7 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .spirit.sleep { background-position:100% 100%; }
 #fieldSpirit { position:absolute; z-index:1; left:15.5%; bottom:18%; width:clamp(110px,13.5vw,215px); height:clamp(110px,13.5vw,215px); filter:drop-shadow(0 6px 8px #001c2780); transition:transform .2s; }
 #fieldSpirit.happy { transform:translateY(-7px); }
-.drop { position:absolute; top:0; left:0; width:124px; height:155px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:35px; background:url('../assets/drop.webp') center / 100% 100% no-repeat; color:white; font-family:var(--kana-font); font-size:47px; line-height:1; text-shadow:0 2px 6px #0a343a; user-select:none; cursor:pointer; will-change:transform; }
+.drop { position:absolute; top:0; left:0; width:124px; height:155px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:35px; background:url('../assets/drop.webp') center / 100% 100% no-repeat; color:white; font-family:var(--kana-font); font-size:47px; line-height:1; text-shadow:0 2px 6px #0a343a; user-select:none; cursor:default; will-change:transform; }
 .drop.stained { background-image:url('../assets/drop-stained.webp'); }
 .drop .hint { font:13px "Segoe UI",sans-serif; color:#e9f8ef; margin-top:7px; }
 .drop.target { filter:drop-shadow(0 0 9px #a1e9e260); }
