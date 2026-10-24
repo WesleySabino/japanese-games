@@ -183,6 +183,27 @@ main:not(.game-world) { max-width:1360px; padding:0 40px; margin:auto; }
 .garden-dialog { width:min(650px,calc(100% - 40px)); }
 .garden-dialog .panel-heading h2 { font-size:39px; }
 .garden-dialog .eyebrow { text-align:center; font-family:var(--display-font); letter-spacing:2px; }
+.progress-transfer { margin-top:24px; padding-top:20px; border-top:1px solid #c9ac7140; }
+.progress-transfer h3 { margin:0; color:var(--gold-bright); font-size:23px; }
+.progress-transfer .field-note { margin:10px 0; }
+.progress-transfer-actions { display:flex; flex-wrap:wrap; gap:8px 25px; }
+.progress-transfer .text-button { min-height:44px; padding:10px 2px; text-align:left; line-height:1.5; }
+.import-preview { margin-top:16px; padding:18px; border:1px solid #c9ac7170; border-radius:3px; background:#031f26a0; }
+.import-preview h3:focus-visible,.import-status:focus-visible { outline:2px solid var(--gold-bright); outline-offset:4px; }
+.import-filename { margin:9px 0 14px; overflow-wrap:anywhere; color:#acbfae; font-size:12px; }
+.import-summary { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px 15px; margin:14px 0; font-size:13px; line-height:1.5; }
+.import-summary dt { color:#c9d1c1; }
+.import-summary dd { margin:0; text-align:right; color:var(--ivory); font-variant-numeric:tabular-nums; }
+.import-preview-actions { position:sticky; bottom:0; z-index:1; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px; margin-top:14px; padding:10px 0; background:#082b32; }
+.import-preview-actions .menu-button { justify-content:center; min-height:48px; padding:10px 15px; font-size:20px; }
+.import-status { margin:12px 0 0; color:var(--gold-bright); font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.import-status:empty { display:none; }
+.import-status[data-kind="error"] { color:#efb49c; }
+@media (max-width:400px) {
+  .import-preview { padding:14px 12px; }
+  .import-summary { gap:8px 10px; font-size:12px; }
+  .import-preview-actions { gap:14px; }
+}
 .map-tabs { display:flex; gap:7px; margin:21px 0 17px; }
 .map-tabs button { flex:1; min-height:44px; padding:9px; border:1px solid #96a79470; border-radius:2px; color:#aabdb0; background:#061e2690; font-size:16px; font-family:var(--display-font); }
 .map-tabs button.selected { border-color:var(--gold-bright); background:#18483f90; color:#fff0ce; box-shadow:0 0 12px #dfc27c1a,inset 0 0 16px #dfc27c12; }

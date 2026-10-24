@@ -10,6 +10,7 @@ var attemptIds=new Set(),exposureIds=new Set();
 // Each tab owns its write-ahead journal. Never overwrite another tab's pending work.
 var writer=root.crypto&&root.crypto.randomUUID?root.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);
 var LOG=KEY+':pending:',LOCK=KEY+':commit',pending=[],serial=0,checkpoint;
+var IMPORT_LOCKED={},MAX_IMPORT_BYTES=32*1024*1024,importRejections=Object.create(null);
 function copy(value){return value===undefined?undefined:JSON.parse(JSON.stringify(value));}
 function epoch(data){return data._sync&&data._sync.epoch||{id:'legacy:'+data.created,at:0};}
 function sameEpoch(a,b){return a.id===b.id||a.at===0&&b.at===0;}
@@ -106,6 +107,40 @@ if(other.legacyErrorLog){var legacyErrors=data.legacyErrorLog||[],keys=new Set(l
 return divergent||rebuild?normalized(data):data;
 }
 function normalized(data){var previous=mem,ai=attemptIds,ei=exposureIds;try{return restore(data);}finally{mem=previous;attemptIds=ai;exposureIds=ei;}}
+function importError(message){return new Error(message||'Invalid progress file. Choose a Kana Rain progress export.');}
+function plainObject(value){return !!value&&typeof value==='object'&&!Array.isArray(value);}
+function importString(value){return typeof value==='string'&&value.length>0&&value.length<=1024;}
+function utf8Size(value){var count=0;for(var i=0;i<value.length;i++){var c=value.charCodeAt(i);count+=c<128?1:c<2048?2:3;if(c>=55296&&c<=56319&&i+1<value.length){var low=value.charCodeAt(i+1);if(low>=56320&&low<=57343){count++;i++;}}if(count>MAX_IMPORT_BYTES)return count;}return count;}
+// JSON.parse alone accepts finite-looking overflows and dangerous object keys.
+// Check the whole document before normalizing any learner or touching storage.
+function safeImportTree(value,depth){if(depth>80)throw importError('The progress file is nested too deeply.');if(typeof value==='number'&&!Number.isFinite(value))throw importError('The progress file contains an invalid number.');if(!value||typeof value!=='object')return;Object.keys(value).forEach(function(k){if(k==='__proto__'||k==='constructor'||k==='prototype')throw importError('The progress file contains an unsafe field.');safeImportTree(value[k],depth+1);});}
+function checkImportShape(data){
+if(!plainObject(data)||![1,2].includes(data.version)||!plainObject(data.items)||!plainObject(data.games))throw importError();
+['sequence','created','updatedAt'].forEach(function(k){if(data[k]!==undefined&&(typeof data[k]!=='number'||!Number.isFinite(data[k])||data[k]<0||k==='sequence'&&!Number.isSafeInteger(data[k])))throw importError();});
+if(data._sync&&(!plainObject(data._sync)||!plainObject(data._sync.epoch)||!importString(data._sync.epoch.id)||!Number.isFinite(data._sync.epoch.at)||data._sync.epoch.at<0||!plainObject(data._sync.applied)||Object.values(data._sync.applied).some(function(v){return !Number.isSafeInteger(v)||v<0;})))throw importError('Invalid progress synchronization metadata.');
+['attemptLedger','exposureLedger','errorLog','legacyErrorLog'].forEach(function(k){if(data[k]!==undefined&&!Array.isArray(data[k]))throw importError();});
+if(data.reveals!==undefined&&!plainObject(data.reveals))throw importError();
+Object.keys(data.items).forEach(function(id){var s=data.items[id];if(!importString(id)||!plainObject(s)||s.itemId!==undefined&&s.itemId!==id)throw importError('Invalid item history.');['facets','legacyFacets','flags','scaffold','confusions','legacyConfusions','confusionsByFacet'].forEach(function(k){if(s[k]!==undefined&&!plainObject(s[k]))throw importError('Invalid item history.');});['facets','legacyFacets'].forEach(function(k){Object.keys(s[k]||{}).forEach(function(name){var f=s[k][name];if(!importString(name)||!plainObject(f))throw importError('Invalid familiarity history.');['correct','errors','reps','timeouts','stability','difficulty','lastReview','lapses'].forEach(function(field){if(f[field]!==undefined&&(typeof f[field]!=='number'||!Number.isFinite(f[field])||f[field]<0))throw importError('Invalid familiarity history.');});});});});
+Object.keys(data.games).forEach(function(id){var gd=data.games[id];if(!importString(id)||!plainObject(gd))throw importError('Invalid game progress.');['rows','best','accuracy','featuresIntro'].forEach(function(k){if(gd[k]!==undefined&&!plainObject(gd[k]))throw importError('Invalid game progress.');});Object.keys(gd.rows||{}).forEach(function(k){if(!Number.isSafeInteger(gd.rows[k])||gd.rows[k]<0||id==='kana-rain'&&(k==='hiragana'||k==='katakana')&&(gd.rows[k]<1||gd.rows[k]>(root.JPData&&Array.isArray(root.JPData.rowsOrder)?root.JPData.rowsOrder.length:27)))throw importError('Invalid row progress.');});Object.keys(gd.best||{}).forEach(function(k){if(typeof gd.best[k]!=='number'||!Number.isFinite(gd.best[k])||gd.best[k]<0)throw importError('Invalid best score.');});Object.keys(gd.accuracy||{}).forEach(function(k){var a=gd.accuracy[k];if(!plainObject(a)||Object.values(a).some(function(v){return typeof v!=='number'||!Number.isFinite(v)||v<0;}))throw importError('Invalid answer counts.');});['novelty','katakanaNovelty'].forEach(function(k){var n=gd[k];if(n===undefined)return;if(!plainObject(n)||n.seen!==undefined&&!plainObject(n.seen)||n.recent!==undefined&&!Array.isArray(n.recent)||n.cooldownRemaining!==undefined&&(!Number.isSafeInteger(n.cooldownRemaining)||n.cooldownRemaining<0))throw importError('Invalid presentation history.');});});
+var attempts=new Map(),exposures=new Map();(data.attemptLedger||[]).forEach(function(ev){if(!plainObject(ev)||!importString(ev.attemptId)||!importString(ev.itemId)||!importString(ev.facet)||!Number.isFinite(ev.at)||ev.at<0||!['correct','incorrect','timeout'].includes(ev.outcome)||ev.correct!==(ev.outcome==='timeout'?null:ev.outcome==='correct')||ev.firstAttempt!==undefined&&typeof ev.firstAttempt!=='boolean'||ev.assistance!==undefined&&ev.assistance!==null&&typeof ev.assistance!=='boolean')throw importError('Invalid answer record.');checkImportFact(attempts,ev,'attemptId');});
+(data.exposureLedger||[]).forEach(function(ev){if(!plainObject(ev)||!importString(ev.exposureId)||!importString(ev.itemId)||!importString(ev.facet)||!Number.isFinite(ev.at)||ev.at<0)throw importError('Invalid reference record.');checkImportFact(exposures,ev,'exposureId');});
+return data;
+}
+function canonicalFact(value){if(Array.isArray(value))return '['+value.map(canonicalFact).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(function(k){return JSON.stringify(k)+':'+canonicalFact(value[k]);}).join(',')+'}';return JSON.stringify(value);}
+function checkImportFact(ids,ev,key){var prior=ids.get(ev[key]);if(prior&&canonicalFact(prior)!==canonicalFact(ev))throw importError('The progress file has conflicting records with the same identifier.');if(!prior)ids.set(ev[key],ev);}
+function noImportConflicts(current,imported){['attemptLedger','exposureLedger'].forEach(function(name){var key=name==='attemptLedger'?'attemptId':'exposureId',ids=new Map();(current[name]||[]).forEach(function(ev){checkImportFact(ids,ev,key);});(imported[name]||[]).forEach(function(ev){checkImportFact(ids,ev,key);});});}
+function reserveImportFacts(data,operations,importOp){var reserved={attemptLedger:data.attemptLedger.slice(),exposureLedger:data.exposureLedger.slice()};operations.forEach(function(op){if(!op||!op.epoch||!sameEpoch(op.epoch,importOp.epoch))return;reserved.attemptLedger=reserved.attemptLedger.concat(op.attempts||[]);reserved.exposureLedger=reserved.exposureLedger.concat(op.exposures||[]);if(op.replace){reserved.attemptLedger=reserved.attemptLedger.concat(op.replace.attemptLedger||[]);reserved.exposureLedger=reserved.exposureLedger.concat(op.replace.exposureLedger||[]);}});return reserved;}
+function parseImport(json){if(typeof json!=='string'||json.length>MAX_IMPORT_BYTES||utf8Size(json)>MAX_IMPORT_BYTES)throw importError('Choose a JSON progress file smaller than 32 MiB.');var parsed;try{parsed=JSON.parse(json);}catch(e){throw importError('This is not a valid JSON progress file.');}safeImportTree(parsed,0);checkImportShape(parsed);var result=normalized(copy(parsed));safeImportTree(result,0);checkImportShape(result);return result;}
+function importProvenance(a,b){if(a===undefined)return copy(b);if(b===undefined)return copy(a);var values=(Array.isArray(a)?a:[a]).concat(Array.isArray(b)?b:[b]),seen=new Set();return values.filter(function(value){var key=canonicalFact(value);if(seen.has(key))return false;seen.add(key);return true;}).map(copy);}
+// Imports are additive even when the file came from another reset generation.
+// Keep local preferences and admission samples; only earned progress is joined.
+function joinImported(current,imported){
+noImportConflicts(current,imported);var left=copy(current),right=copy(imported);right._sync={epoch:copy(epoch(left)),applied:{}};syncInfo(left);var joined=choose(left,right);
+Object.keys(current.games).forEach(function(game){var old=current.games[game],gd=joined.games[game];if(!gd)return;if(game==='kana-rain')['sound','reducedEffects','difficulty'].forEach(function(k){if(!Object.hasOwn(old,k))delete gd[k];});Object.keys(old).forEach(function(k){if(['rows','best','featuresIntro','accuracy','sessions','novelty','katakanaNovelty'].includes(k)||/Unlocked$/.test(k))return;gd[k]=copy(old[k]);});['novelty','katakanaNovelty'].forEach(function(k){var before=old[k],incoming=imported.games[game]&&imported.games[game][k];if(!before)return;gd[k]=copy(before);if(incoming){gd[k].seen=maximums(before.seen,incoming.seen);gd[k].cooldownRemaining=Math.max(before.cooldownRemaining||0,incoming.cooldownRemaining||0);gd[k].blocked=!!(before.blocked||incoming.blocked);}});});
+joined._sync=copy(syncInfo(left));if(imported.manualReconstruction)joined.manualReconstruction=importProvenance(current.manualReconstruction,imported.manualReconstruction);var result=normalized(joined);safeImportTree(result,0);checkImportShape(result);return result;
+}
+function importSummary(imported,joined,current){var gd=joined.games['kana-rain']||{},now=Date.now();return {attempts:imported.attemptLedger.length,exposures:imported.exposureLedger.length,addedAttempts:joined.attemptLedger.length-current.attemptLedger.length,addedExposures:joined.exposureLedger.length-current.exposureLedger.length,hiraganaRows:(gd.rows||{}).hiragana||0,katakanaRows:(gd.rows||{}).katakana||0,katakanaUnlocked:gd.katakanaUnlocked===true,hiraganaFamiliar:Object.keys(joined.items).filter(function(id){var f=joined.items[id].facets['form→sound'];return /^kana:[ぁ-ゖ]/.test(id)&&f&&f.correct&&.6*retrievability(f,now)+.4*Math.min(1,Math.log1p(f.stability)/Math.log1p(60))>=.55;}).length,manualEstimate:!!joined.manualReconstruction};}
+function previewImport(json){var imported=parseImport(json),current=copy(mem);return importSummary(imported,joinImported(current,imported),current);}
 function merged(base,operations){
 var data=copy(base),info=syncInfo(data),rebuild=false,ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;})),exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
 // Concurrent writers may be linearized in either order; a writer's own sequence
@@ -116,6 +151,9 @@ if(!sameEpoch(info.epoch,op.epoch)){
 if(!op.replace||!newerEpoch(op.epoch,info.epoch))return;
 data=copy(op.replace);info=syncInfo(data);rebuild=true;ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;}));exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
 }
+// Replay additive imports even if an old checkpoint acknowledges their sequence
+// but is missing an imported fact or a familiarity-only historical baseline.
+if(op.importSnapshot){try{noImportConflicts(reserveImportFacts(data,operations,op),op.importSnapshot);data=joinImported(data,op.importSnapshot);info=syncInfo(data);rebuild=true;ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;}));exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));}catch(e){importRejections[op.writer+':'+op.seq]=e.message;return;}}
 var applied=(info.applied[op.writer]||0)>=op.seq;
 patch(data.games,applied?(op.games||[]).filter(function(c){return c.kind==='max'||c.kind==='earned';}):op.games);
 if(applied)(op.games||[]).filter(function(c){return c.kind==='novelty';}).forEach(function(c){var game=data.games[c.path[0]]||(data.games[c.path[0]]={}),name=c.path[1];if(!game[name])game[name]=copy(c.value);else game[name].seen=maximums(game[name].seen,c.value.seen);});
@@ -206,7 +244,7 @@ read.onsuccess=function(){if(!done){var saved=candidate(read.result);if(saved){d
 // A bounded previous copy is best effort. Its own transaction may fail quota
 // without rolling back an already completed primary commit.
 function checkpointSnapshot(previous,snapshot){if(!db)return;try{var tx=db.transaction('learner','readwrite'),s=tx.objectStore('learner'),read=s.get(BACKUP);tx.onerror=tx.onabort=function(){};read.onsuccess=function(){var old=read.result,base=previous&&sameEpoch(epoch(previous),epoch(snapshot))?previous:snapshot;if(old&&old.snapshot&&sameEpoch(epoch(old.snapshot),epoch(snapshot))&&Date.now()-(old.at||0)<MIN)return;try{s.put({at:Date.now(),snapshot:copy(base)},BACKUP);}catch(e){}};read.onerror=function(e){if(e&&e.preventDefault)e.preventDefault();};}catch(e){}}
-function flush(){
+function flush(locked){
 capture();var token=++revision,journalOK=writePending(),hasLocks=!!(root.navigator&&root.navigator.locks);
 publish({state:'saving',saved:false,revision:token});
 if(journalOK)publish({state:'saving',saved:true,backend:'journal',journal:true,indexedDB:false,revision:token});
@@ -235,11 +273,30 @@ tx.oncomplete=function(){if(snapshot)checkpointSnapshot(previous,snapshot);finis
 // Web Locks serialize journal commits too when IndexedDB is unavailable/full.
 // pagehide only needs the synchronous, tab-owned write-ahead journal above.
 function lockFailed(){var result={state:journalOK?'saved':'unsaved',saved:journalOK,backend:journalOK?'journal':null,journal:journalOK,indexedDB:false,revision:token};if(token===revision)publish(result);return result;}
-if(!hasLocks)return commit();
+if(locked===IMPORT_LOCKED||!hasLocks)return commit();
 try{return root.navigator.locks.request(LOCK,commit).catch(lockFailed);}catch(e){return Promise.resolve(lockFailed());}
 }
 function nextId(prefix){mem.sequence++;return prefix+':'+writer+':'+mem.sequence;}
 function replace(data){var at=Math.max(Date.now(),epoch(mem).at+1);mem=data;attemptIds=new Set(mem.attemptLedger.map(function(e){return e.attemptId;}));exposureIds=new Set(mem.exposureLedger.map(function(e){return e.exposureId;}));mem._sync={epoch:{id:writer+':replace:'+String(++serial),at:at},applied:{}};var op={writer:writer,seq:serial,epoch:copy(mem._sync.epoch),at:at,replace:copy(mem)};pending=[op];mem._sync.applied[writer]=serial;remember();return flush();}
+async function importProgress(json){
+// Invalid files must not flush pending answers, advance a sequence or write a
+// journal. Preview and application share this validation and merge contract.
+var imported=parseImport(json);joinImported(copy(mem),imported);await ready;
+var joined=joinImported(copy(mem),imported);capture();var op={writer:writer,seq:++serial,epoch:copy(epoch(mem)),at:Date.now(),importSnapshot:copy(imported)};
+pending.push(op);adopt(joined);syncInfo(mem).applied[writer]=serial;remember();writePending();
+async function applyImport(){
+var result=await flush(IMPORT_LOCKED),key=writer+':'+op.seq,message=importRejections[key];
+if(message){pending=pending.filter(function(entry){return entry!==op&&!(entry.writer===writer&&entry.seq===op.seq);});writePending();delete importRejections[key];throw importError(message);}
+if(!sameEpoch(epoch(mem),op.epoch))throw importError('Progress was reset in another tab. Choose the progress file again to review a new preview.');
+return result;
+}
+// The tab-owned write-ahead journal above survives closing while awaiting this
+// lock. The commit reads the latest snapshot and rejects conflicting immutable
+// facts before applying an import, so another tab's history remains authoritative.
+// Use the ordinary save lock without recursively acquiring it inside flush.
+if(root.navigator&&root.navigator.locks)return root.navigator.locks.request(LOCK,applyImport);
+return applyImport();
+}
 function beginSession(gameId){var id=nextId(gameId+':session');flush();return id;}
 // Two distinct intervening items AND 60 seconds after a reference are required.
 // This conservative bookkeeping rule does not prove long-term retention.
@@ -268,7 +325,7 @@ var out=unseen.slice(0,nNew).concat(weak.slice(0,nWeak).map(function(x){return x
 for(var i=0;out.length<size&&i<rest.length;i++)if(!out.includes(rest[i].id))out.push(rest[i].id);
 if(opts.interleave!==false)out.slice().forEach(function(id){var s=state(id);if(!s)return;var graph=s.confusionsByFacet[name]||{};Object.keys(graph).forEach(function(c){if(graph[c]>=1&&!out.includes(c)&&candidates.includes(c)&&out.length<size+3)out.push(c);});});return out;
 }
-root.Learner={ready:ready,state:state,record:record,recordExposure:recordExposure,assistanceFor:assistanceFor,beginSession:beginSession,mastery:mastery,retrievability:retrievability,selectRound:selectRound,shuffle:shuffle,recentErrors:function(n){return mem.errorLog.slice(-(n||20));},gameData:function(id){return mem.games[id]||(mem.games[id]={});},save:flush,flush:flush,all:function(){return mem.items;},attempts:function(){return mem.attemptLedger.slice();},exposures:function(){return mem.exposureLedger.slice();},persistenceStatus:function(){return Object.assign({},status);},subscribePersistence:function(fn){listeners.push(fn);fn(Object.assign({},status));return function(){listeners=listeners.filter(function(x){return x!==fn;});};},export:function(){return JSON.stringify(mem);},import:function(json){var previous=mem;try{var imported=restore(JSON.parse(json));}finally{mem=previous;}return replace(imported);},reset:function(){return replace(fresh());}};
+root.Learner={ready:ready,state:state,record:record,recordExposure:recordExposure,assistanceFor:assistanceFor,beginSession:beginSession,mastery:mastery,retrievability:retrievability,selectRound:selectRound,shuffle:shuffle,recentErrors:function(n){return mem.errorLog.slice(-(n||20));},gameData:function(id){return mem.games[id]||(mem.games[id]={});},save:flush,flush:flush,all:function(){return mem.items;},attempts:function(){return mem.attemptLedger.slice();},exposures:function(){return mem.exposureLedger.slice();},persistenceStatus:function(){return Object.assign({},status);},subscribePersistence:function(fn){listeners.push(fn);fn(Object.assign({},status));return function(){listeners=listeners.filter(function(x){return x!==fn;});};},export:function(){return JSON.stringify(mem);},previewImport:previewImport,importProgress:importProgress,import:function(json){var previous=mem;try{var imported=restore(JSON.parse(json));}finally{mem=previous;}return replace(imported);},reset:function(){return replace(fresh());}};
 if(root.addEventListener)root.addEventListener('pagehide',flush);
 if(root.addEventListener)root.addEventListener('storage',function(event){if(event.key&&event.key.indexOf(LOG)===0&&event.key!==LOG+writer&&event.newValue)flush();});
 })(typeof window!=='undefined'?window:globalThis);

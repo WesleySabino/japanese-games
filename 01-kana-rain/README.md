@@ -1,6 +1,6 @@
 # Kana Rain
 
-**Release: 1.10.3 — 22 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.10.5 — 24 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
@@ -73,7 +73,9 @@ Old session selections normalize to supported choices without resetting attempts
 
 ## Audio, offline and privacy
 
-Concurrent tabs keep their own pending journals and merge learning events and counters. Closing an old runtime can still overwrite its legacy save, but cannot overwrite the protected primary. Reloading the current version reconciles late legacy answers with protected progress. Refresh old tabs to see the reconciled state; protection cannot be installed inside an old runtime already in memory. Explicit reset/import starts a new generation, which older snapshots cannot undo. Schema-v2 exports remain compatible.
+Concurrent tabs keep their own pending journals and merge learning events and counters. Closing an old runtime can still overwrite its legacy save, but cannot overwrite the protected primary. Reloading the current version reconciles late legacy answers with protected progress. Refresh old tabs to see the reconciled state; protection cannot be installed inside an old runtime already in memory. Explicit reset and the legacy replacement API start a new generation, which older snapshots cannot undo. Schema-v2 exports remain compatible.
+
+**Import my progress** in My Kana Garden accepts version-1 or version-2 JSON exports up to 32 MiB. The preview does not change progress; cancel returns without applying it. Export the current state with **Save a backup first**, then choose **Apply import** to combine histories. The importer retains current preferences, unions attempts and exposures by ID, keeps earned rows and access, and preserves concurrent practice. Reimporting the same file does not duplicate events. Malformed or conflicting files are rejected. Importing is unavailable until a running session ends, and files stay on the device.
 
 IndexedDB also retains one bounded checkpoint (`jp-learner-v1:checkpoint:v1`), refreshed at most once per minute during ordinary saves. Invalid copies are ignored independently so valid primary, checkpoint and legacy data remain usable. The optional checkpoint has a separate transaction: quota failure cannot undo a completed primary commit. This is local redundancy, not a cloud backup or protection against clearing all site data or losing the device; keep exported backups for those cases.
 
@@ -103,6 +105,7 @@ pnpm test:quick-wins
 pnpm test:update
 pnpm test:storage
 pnpm test:mixed-version-storage
+pnpm test:import
 ```
 
 Browser suites use isolated profiles and temporary localhost servers. The sound-pad suite measures fall distance, dock size and touch targets at eight phone sizes, and checks quick taps, ignored bounces, cancelled slides, stable slots, correction and evidence labels. `test:katakana-bridge` checks the hiragana completion gate, retained legacy access, katakana typing on desktop and the pad on phones, hiragana-partner hints and corrections, continued introductions in the same run and the evidence labels. The suites also check all three recovery profiles, three hearts, common acceleration, countdowns, input, pause/resume, results, focused review, touch layouts, row progression, offline audio and saved data. Title-menu checks cover 11 viewport sizes, centered fields, no internal scrolling and separated hints. Generated reports/screenshots stay in ignored test artifacts.

@@ -149,7 +149,24 @@
       <div class="lesson-heading"><span class="field-label">LISTEN TO YOUR CURRENT ROW</span><span id="rowName" class="badge">Vowels</span></div><div id="lesson" class="lesson"></div><p id="unlockNote" class="field-note">A new row opens as you learn.</p>
       <section class="unlock-progress" aria-label="Next row readiness"><p id="unlockSummary" class="unlock-summary">Hit each sound twice on your first try.</p><div class="progress-track unlock-track"><div id="unlockBar" style="width:0%"></div></div><details class="unlock-details"><summary>See row readiness</summary><div id="unlockDetails" class="unlock-list"></div></details></section>
       <details class="learning-details"><summary>Learning details</summary><div id="learningStats" class="learning-stats"></div></details>
-      <div class="panel-actions"><button id="returnGarden" class="menu-button primary"><svg class="control-icon" aria-hidden="true"><use href="#icon-return"/></svg><span>Return to the Garden</span></button><button id="exportBtn" class="text-button">Export my progress</button></div><span id="totalLearned" class="sr-only">0</span>
+      <section class="progress-transfer" aria-labelledby="progressTransferTitle">
+        <h3 id="progressTransferTitle">Keep your garden</h3>
+        <p class="field-note">Import a Kana Rain progress file to combine it with your current history. Your existing progress and device settings stay. Files are read on this device and are not uploaded.</p>
+        <div class="progress-transfer-actions"><button id="exportBtn" class="text-button" type="button">Export my progress</button><button id="importBtn" class="text-button" type="button" aria-describedby="importAvailability">Import my progress</button></div>
+        <p id="importAvailability" class="field-note">Choose a JSON file, review it, then apply. Export a backup first if you want a separate copy of your current progress.</p>
+        <input id="importFile" type="file" accept=".json,application/json" class="hidden" aria-label="Choose a Kana Rain progress file">
+        <section id="importPreview" class="import-preview hidden" aria-labelledby="importPreviewTitle">
+          <h3 id="importPreviewTitle" tabindex="-1">Import preview</h3>
+          <p id="importFilename" class="import-filename"></p>
+          <dl id="importSummary" class="import-summary"></dl>
+          <p id="importEstimateNote" class="field-note hidden">This file includes a personal familiarity estimate. It is kept as an estimate, not recorded as answers you played.</p>
+          <p class="field-note">Nothing has been changed. Applying combines the file with your latest saved history; it does not replace your garden.</p>
+          <button id="importBackupBtn" class="text-button" type="button">Save a backup of my current progress</button>
+          <div class="import-preview-actions"><button id="applyImportBtn" class="menu-button primary" type="button"><span>Apply import</span></button><button id="cancelImportBtn" class="text-button" type="button">Cancel</button></div>
+        </section>
+        <p id="importStatus" class="import-status" role="status" aria-live="polite" tabindex="-1"></p>
+      </section>
+      <div class="panel-actions"><button id="returnGarden" class="menu-button primary"><svg class="control-icon" aria-hidden="true"><use href="#icon-return"/></svg><span>Return to the Garden</span></button></div><span id="totalLearned" class="sr-only">0</span>
     </div>
   </dialog>
   <dialog id="settingsDialog" class="game-dialog settings-dialog" aria-labelledby="settingsTitle">
