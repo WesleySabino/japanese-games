@@ -99,3 +99,6 @@ jobs:
 
       - name: Run mixed-version save protection and checkpoint recovery
         run: pnpm run test:mixed-version-storage
+
+      - name: Run progress import, retained history and reload checks
+        run: pnpm run test:import

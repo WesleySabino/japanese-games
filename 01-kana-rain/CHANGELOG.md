@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.10.5 — 2026-10-24
+
+- Import a progress JSON from My Kana Garden, inspect a preview, cancel or apply, and export the current state before applying. Files remain on the device; imports are unavailable during a running session.
+- Combine imported learning evidence with the current history without duplicating attempts or exposures, removing earned rows, or replacing current preferences. Keep the protected save protocol and concurrent-tab journals; older imports cannot erase newer practice.
+- Validate file size, structure, versions, unsafe keys and conflicting event IDs before applying. Report persistence failures without claiming the profile was saved.
+- Add unit and browser regressions for preview, cancellation, malformed files, merging, repeated imports, reconstructed familiarity, reload, quota fallback and responsive controls.
+
 ## 1.10.4 — 2026-10-23
 
 - Prevent compatible, smaller snapshots from discarding attempts or exposures merely because they carry a newer timestamp or synchronization vector. Unite immutable facts, preserve legacy baselines and earned access/rows, and keep reset/import generations separate.

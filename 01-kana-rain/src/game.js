@@ -41,6 +41,7 @@
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
   const panelOrigins=new Map();
+  let importText=null,importBusy=false,importReadId=0;
   let progressDirty=true,keyboardSignature=null,fieldSize={width:0,height:0};
   const mobile=()=>matchMedia('(pointer:coarse)').matches || innerWidth<=650;
   const running=()=>G && !G.over;
@@ -85,7 +86,7 @@
     panelOrigins.set(id,origin);
     if(running())pause(true,false);
     closeDialogs();renderMenu();
-    if(id==='progressDialog'){$('gardenContext').textContent=running()?'GAME PAUSED':'ONE DROP AT A TIME';exposeReference();}
+    if(id==='progressDialog'){$('gardenContext').textContent=running()?'GAME PAUSED':'ONE DROP AT A TIME';renderImportAvailability();exposeReference();}
     if(id==='settingsDialog')$('settingsNote').textContent=(running()?'Your current session is paused. ':'')+'Progress stays on this device when storage is available; export a backup from My Kana Garden.';
     $(id).showModal();
     if(id==='progressDialog')renderProgress(true);
@@ -93,6 +94,7 @@
     $(id).querySelector('.dialog-panel').scrollTop=0;
   }
   function closePanel(id){
+    if(id==='progressDialog'){if(importBusy)return;clearImportPreview();}
     A.stop();$(id).close();
     const origin=panelOrigins.get(id);panelOrigins.delete(id);
     if(origin==='pause' && running())showPause();
@@ -226,6 +228,65 @@
     const events=(L.attempts?.()||[]).filter(e=>e.gameId===GAME&&e.facet===FACET&&D.kanaById[e.itemId]);
     const independent=events.filter(e=>e.firstAttempt&&e.outcome!=='timeout'&&e.assistance===false),correct=independent.filter(e=>e.correct).length,help=events.filter(e=>e.correct&&e.assistance===true).length;
     $('learningStats').innerHTML=`<p><strong>${correct}/${independent.length}</strong> independent first answers · <strong>${help}</strong> correct answers with help.</p><p>Reading hints, recent audio and corrections count as help. Familiarity estimates practice; it does not prove long-term retention.</p>`;
+  }
+  function importMessage(text,kind='info'){
+    $('importStatus').textContent=text;$('importStatus').dataset.kind=kind;
+  }
+  function renderImportAvailability(){
+    const blocked=!!running();
+    $('importBtn').disabled=blocked||importBusy;
+    $('importAvailability').textContent=blocked?'Finish your current session before importing progress. You can export a backup at any time.':'Choose a JSON file, review it, then apply. Export a backup first if you want a separate copy of your current progress.';
+    for(const id of ['applyImportBtn','cancelImportBtn','importBackupBtn','exportBtn','closeGarden','returnGarden'])$(id).disabled=importBusy;
+    $('applyImportBtn').disabled=blocked||importBusy||!importText;
+    $('importPreview').setAttribute('aria-busy',String(importBusy));
+  }
+  function clearImportPreview(clearStatus=true){
+    importReadId++;importText=null;$('importFile').value='';$('importPreview').classList.add('hidden');
+    $('importSummary').replaceChildren();$('importFilename').textContent='';
+    if(clearStatus)importMessage('');renderImportAvailability();
+  }
+  function refreshImportedProgress(){
+    gd=L.gameData(GAME);gd.rows=gd.rows||{hiragana:1,katakana:1};gd.best=gd.best||{};gd.accuracy=gd.accuracy||{};
+    novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});katakanaNovelty=createKatakanaNovelty();
+    cfg.noveltyPace=N.profile(novelty).id;cfg.difficulty=difficultyForPace(cfg.noveltyPace);
+    if(!modeAvailable(cfg.mode))cfg.mode='hira';
+    if(mapScript==='katakana'&&!modeAvailable('kata'))mapScript='hiragana';
+    document.querySelectorAll('[data-script]').forEach(b=>{const selected=b.dataset.script===mapScript;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
+    A.enabled=gd.sound!==false;renderMenu();renderSound();renderEffects();renderProgress(true);
+  }
+  async function previewProgressFile(){
+    const file=$('importFile').files?.[0];if(!file||running()||importBusy)return;
+    const readId=++importReadId;importText=null;$('importPreview').classList.add('hidden');renderImportAvailability();
+    importMessage('Reading progress file…');
+    try{
+      if(file.size>32*1024*1024)throw new Error('Choose a progress file of 32 MB or smaller.');
+      const text=await file.text();
+      if(readId!==importReadId||!$('progressDialog').open)return;
+      const summary=L.previewImport(text);
+      const rows=[['Answers in the file',summary.attempts],['Reading and audio references',summary.exposures],['New answer records',summary.addedAttempts],['New reference records',summary.addedExposures],['Hiragana rows after import',summary.hiraganaRows],['Katakana rows after import',summary.katakanaRows],['Familiar Hiragana after import',summary.hiraganaFamiliar],['Katakana access after import',summary.katakanaUnlocked?'Available':'Locked']];
+      $('importSummary').replaceChildren(...rows.flatMap(([label,value])=>{const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=String(value);return [dt,dd];}));
+      $('importFilename').textContent=file.name;$('importEstimateNote').classList.toggle('hidden',!summary.manualEstimate);
+      importText=text;$('importPreview').classList.remove('hidden');importMessage('Preview ready. Your progress has not changed.');renderImportAvailability();
+      $('importPreviewTitle').focus({preventScroll:true});$('importPreview').scrollIntoView({block:'nearest',behavior:'instant'});
+    }catch(error){
+      if(readId!==importReadId)return;
+      importText=null;importMessage(error instanceof Error?error.message:'This file could not be read. Choose a Kana Rain progress JSON file.','error');renderImportAvailability();$('importStatus').focus({preventScroll:true});
+    }
+  }
+  async function applyProgressImport(){
+    if(!importText||running()||importBusy)return;
+    importBusy=true;renderImportAvailability();importMessage('Combining and saving your progress…');
+    try{
+      const result=await L.importProgress(importText);
+      refreshImportedProgress();
+      if(result?.saved!==true||!result.indexedDB&&!result.journal)throw new Error('The import could not be saved on this device. Export your current progress before leaving and try again when storage is available.');
+      importBusy=false;clearImportPreview(false);
+      importMessage(result.indexedDB?'Import saved on this device. Your existing history and settings were kept.':'Import saved in the device recovery journal. Your existing history and settings were kept. The main save is still pending; export a backup before leaving.','success');
+      $('importStatus').focus({preventScroll:true});
+    }catch(error){
+      importBusy=false;renderImportAvailability();
+      importMessage(error instanceof Error?error.message:'The import could not be completed. Your current history has been kept.','error');$('importStatus').focus({preventScroll:true});
+    }
   }
   function enableSetup(value){for(const id of ['mode','difficultySelect'])$(id).disabled=!value;$('startBtn').disabled=!value;if(value)renderMenu();else renderDifficulty();}
   function cancelCountdown(){if(G)G.countingDown=false;$('countdownOverlay').classList.add('hidden');stopLoop();}
@@ -627,6 +688,11 @@
   $('helpBtn').onclick=$('pauseHelpBtn').onclick=()=>openPanel('helpDialog');$('closeHelp').onclick=()=>closePanel('helpDialog');
   $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);katakanaNovelty=createKatakanaNovelty();cfg.mode='hira';cfg.difficulty='easy';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  $('importBackupBtn').onclick=()=>$('exportBtn').onclick();
+  $('importBtn').onclick=()=>{if(running()||importBusy)return;clearImportPreview();$('importFile').click();};
+  $('importFile').onchange=previewProgressFile;
+  $('applyImportBtn').onclick=applyProgressImport;
+  $('cancelImportBtn').onclick=()=>{if(importBusy)return;clearImportPreview();importMessage('Import cancelled. Your progress has not changed.');$('importBtn').focus({preventScroll:true});};
   document.querySelectorAll('dialog.game-dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='results')showMenu();else closePanel(d.id);}));
   window.addEventListener('nihongo-analytics-settings-open',()=>{if(running())pause(true);});
   document.addEventListener('keydown',e=>{

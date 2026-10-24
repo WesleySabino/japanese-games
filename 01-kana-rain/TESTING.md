@@ -45,9 +45,9 @@ As avaliações abaixo descrevem **cobertura funcional observada**, não certifi
 
 ## Comandos e automação
 
-`pnpm test` executa os 215 testes Node, inclusive os testes de analytics, desempenho e concorrência. `test:analytics` e `test:performance` são subconjuntos; não devem ser somados como novos testes.
+`pnpm test` executa a suíte Node, inclusive os testes de analytics, desempenho, concorrência e importação. `test:analytics` e `test:performance` são subconjuntos; não devem ser somados como novos testes.
 
-Os nove comandos de navegador são:
+Os comandos de navegador são:
 
 | Comando | Foco |
 |---|---|
@@ -60,8 +60,10 @@ Os nove comandos de navegador são:
 | `pnpm test:quick-wins` | Ações dos resultados, foco do pad e áudio sincronizado sobre o **build de produção**, conferindo que `dist/` corresponde às fontes. |
 | `pnpm test:update` | Atualização de um build histórico fixado para o candidato no mesmo endereço, preservação dos dados, jogo online/offline e recuperação após instalação interrompida. |
 | `pnpm test:storage` | Dez cenários: quota nativa, fallback/exportação, fechamento/reabertura, abas alternadas, 24 respostas simultâneas, fechamento de aba pendente e concorrência com IndexedDB cheio. |
+| `pnpm test:mixed-version-storage` | Runtime antigo e atual na mesma origem, gravação/fechamento da aba antiga, proteção da cópia principal, checkpoint e limite de reset. |
+| `pnpm test:import` | Escolha real de arquivo, backup, prévia/cancelamento, rejeição de arquivos inválidos, mesclagem sem duplicação, estimativas de familiaridade, quota, reload e controles responsivos. |
 
-O CI em `.github/workflows/kana-rain.yml` usa Linux, Node 22 e Chromium. Executa testes Node, seis suítes de navegador sobre as fontes, build e três suítes sobre `dist/`. Essa configuração foi preparada localmente; o CI remoto não foi disparado nesta entrega. O navegador de celular é emulado. O benchmark opcional `node tests/runtime-browser.benchmark.cjs` não está no CI e sua comparação pública depende da disponibilidade e da versão publicada.
+O CI em `.github/workflows/kana-rain.yml` usa Linux, Node 22 e Chromium. Executa testes Node, seis suítes de navegador sobre as fontes, build e cinco suítes sobre `dist/`, incluindo importação. O navegador de celular é emulado. O benchmark opcional `node tests/runtime-browser.benchmark.cjs` não está no CI e sua comparação pública depende da disponibilidade e da versão publicada.
 
 Todos os testes devem usar dados sintéticos e perfis descartáveis. Os cenários offline precisam permitir service workers no seu contexto isolado. Não usar o progresso pessoal como fixture. Artefatos de testes ficam ignorados pelo Git e fora do pacote publicado.
 
