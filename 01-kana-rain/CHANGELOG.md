@@ -1,5 +1,11 @@
 # Kana Rain releases
 
+## 1.11.2 — 2026-10-26
+
+- Reduce consolidation work by reusing a private normalized IndexedDB snapshot only when its complete serialized content matches, and retaining the commit-owned durable snapshot instead of cloning it again. Public memory still receives an independent copy and final reconciliation is unchanged.
+- Preserve schema-v2 exports, protected storage keys, synchronous per-tab journals, serialized commits, imports, reset boundaries, checkpoints and quota fallback. No history truncation, delayed durability or personal save migration.
+- Pin the 1.11.1 learner for differential regressions and repeatable baseline/current native diagnostics. Add a native coexistence regression for the previous protected-key runtime closing with a lock-blocked save.
+
 ## 1.11.1 — 2026-10-26
 
 - Prepare the existing stained-drop, splash and ripple images after critical scene resources, outside the input path. Decode failures remain optional; images, effects and gameplay rules stay the same.

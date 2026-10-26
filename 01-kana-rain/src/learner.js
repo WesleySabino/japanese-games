@@ -5,7 +5,7 @@
 var KEY='jp-learner-v1',DAY=86400000,MIN=60000,mem,db=null,store=null,revision=0,listeners=[];
 // Old runtimes can still replace KEY on pagehide. They never write this primary.
 var PRIMARY=KEY+':protected:v1',BACKUP=KEY+':checkpoint:v1';
-var readCache={};
+var readCache={},databaseCache={};
 var attemptIds=new Set(),exposureIds=new Set();
 // Each tab owns its write-ahead journal. Never overwrite another tab's pending work.
 var writer=root.crypto&&root.crypto.randomUUID?root.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);
@@ -56,7 +56,15 @@ pending.push(op);syncInfo(mem).applied[writer]=serial;remember();
 }
 function writePending(){if(!store)return false;try{if(!pending.length){store.removeItem(LOG+writer);return false;}store.setItem(LOG+writer,JSON.stringify(pending));return true;}catch(e){return false;}}
 function logs(){var all=pending.slice();if(store)try{for(var i=0;i<store.length;i++){var key=store.key(i);if(key&&key.indexOf(LOG)===0&&key!==LOG+writer){try{var entries=JSON.parse(store.getItem(key));if(Array.isArray(entries))all=all.concat(entries);}catch(e){}}}}catch(e){}return all;}
-function candidate(value){try{if(typeof value==='string')value=JSON.parse(value);if(value&&value.snapshot)value=value.snapshot;if(!value||![1,2].includes(value.version)||!value.items||!value.games)return null;if(value.version===2&&['attemptLedger','exposureLedger'].some(function(k){return value[k]!==undefined&&!Array.isArray(value[k]);}))return null;return normalized(copy(value));}catch(e){return null;}}
+function candidate(value,key){try{
+// IndexedDB returns a new object for every read. Reuse a private normalized
+// snapshot only after comparing its complete JSON content, never a revision,
+// timestamp or ledger length. A truncated/changed snapshot takes the full path.
+var raw=key===PRIMARY||key===KEY?JSON.stringify(value):null,cached=raw!==null&&databaseCache[key];
+if(cached&&cached.raw===raw)return cached.data;
+if(typeof value==='string')value=JSON.parse(value);if(value&&value.snapshot)value=value.snapshot;if(!value||![1,2].includes(value.version)||!value.items||!value.games)return null;if(value.version===2&&['attemptLedger','exposureLedger'].some(function(k){return value[k]!==undefined&&!Array.isArray(value[k]);}))return null;
+var data=normalized(copy(value));if(raw!==null)databaseCache[key]={raw:raw,data:data};return data;
+}catch(e){return null;}}
 function stored(key){if(store)try{var raw=store.getItem(key),cached=readCache[key];if(cached&&cached.raw===raw)return cached.data;var data=candidate(raw);readCache[key]={raw:raw,data:data};return data;}catch(e){}return null;}
 function journalData(){return choose(stored(PRIMARY),stored(KEY));}
 function unionFacts(a,b,key){var ids=new Set(a.map(function(e){return e[key];})),out=a.slice();b.forEach(function(e){if(!ids.has(e[key])){ids.add(e[key]);out.push(e);}});return out;}
@@ -237,7 +245,7 @@ request.onupgradeneeded=function(){request.result.createObjectStore('learner');}
 request.onerror=request.onblocked=finish;
 request.onsuccess=function(){db=request.result;var objectStore;try{objectStore=db.transaction('learner').objectStore('learner');}catch(e){finish();return;}
 var remaining=3;[PRIMARY,BACKUP,KEY].forEach(function(key){var read;function next(){if(!--remaining)finish();}try{read=objectStore.get(key);}catch(e){next();return;}
-read.onsuccess=function(){if(!done){var saved=candidate(read.result);if(saved){durable=choose(durable,saved);restoredBackend='indexedDB';}}next();};read.onerror=next;
+read.onsuccess=function(){if(!done){var saved=candidate(read.result,key);if(saved){durable=choose(durable,saved);restoredBackend='indexedDB';}}next();};read.onerror=next;
 });
 };
 });
@@ -252,7 +260,9 @@ function commit(){return new Promise(function(resolve){
 var settled=false,snapshot,previous,canonicalOK=false;
 function finish(idbOK){if(settled)return;settled=true;
 if(snapshot&&(canonicalOK||idbOK)){
-durable=copy(snapshot);
+// The prepared snapshot is commit-owned: memory received a separate JSON copy
+// below, and choose/merged never mutate their private snapshot inputs.
+durable=snapshot;
 // Only this journal's owner removes acknowledged operations. Another tab may
 // append to its own journal while this transaction is running.
 if(hasLocks){var info=syncInfo(snapshot);pending=pending.filter(function(op){return sameEpoch(op.epoch,info.epoch)?op.seq>(info.applied[writer]||0):newerEpoch(op.epoch,info.epoch);});writePending();}
@@ -261,13 +271,14 @@ if(snapshot){capture();writePending();adopt(merged(snapshot,pending));}
 var result={state:journalOK||idbOK?'saved':'unsaved',saved:journalOK||idbOK,backend:journalOK&&idbOK?'journal+indexedDB':journalOK?'journal':idbOK?'indexedDB':null,journal:journalOK,indexedDB:idbOK,revision:token};if(token===revision)publish(result);resolve(result);
 }
 function prepare(saved){capture();journalOK=writePending();snapshot=merged(choose(choose(durable,journalData()),saved),logs());
-if(store)try{var raw=JSON.stringify(snapshot);store.setItem(PRIMARY,raw);readCache[PRIMARY]={raw:raw,data:snapshot};canonicalOK=true;journalOK=true;}catch(e){}
+var raw=JSON.stringify(snapshot);databaseCache[PRIMARY]={raw:raw,data:snapshot};
+if(store)try{store.setItem(PRIMARY,raw);readCache[PRIMARY]={raw:raw,data:snapshot};canonicalOK=true;journalOK=true;}catch(e){}
 adopt(copy(snapshot));return snapshot;
 }
 if(!db){try{prepare(null);}catch(e){journalOK=false;}finish(false);return;}
 try{var tx=db.transaction('learner','readwrite'),objectStore=tx.objectStore('learner'),remaining=2,saved=null;
 tx.oncomplete=function(){if(snapshot)checkpointSnapshot(previous,snapshot);finish(!!snapshot);};tx.onerror=tx.onabort=function(){finish(false);};
-[PRIMARY,KEY].forEach(function(key){var read=objectStore.get(key);read.onsuccess=function(){try{var value=candidate(read.result);if(key===PRIMARY)previous=value;saved=choose(saved,value);if(!--remaining)objectStore.put(prepare(saved),PRIMARY);}catch(e){try{tx.abort();}catch(ignore){}finish(false);}};read.onerror=function(){finish(false);};});
+[PRIMARY,KEY].forEach(function(key){var read=objectStore.get(key);read.onsuccess=function(){try{var value=candidate(read.result,key);if(key===PRIMARY)previous=value;saved=choose(saved,value);if(!--remaining)objectStore.put(prepare(saved),PRIMARY);}catch(e){try{tx.abort();}catch(ignore){}finish(false);}};read.onerror=function(){finish(false);};});
 }catch(e){try{prepare(null);}catch(ignore){}finish(false);}
 });}
 // Web Locks serialize journal commits too when IndexedDB is unavailable/full.

@@ -7,16 +7,20 @@ const path = require('node:path');
 const http = require('node:http');
 const { createHash } = require('node:crypto');
 const { chromium } = require('playwright');
-const out = path.join(__dirname, 'artifacts/save-performance');
-const learnerSource = fs.readFileSync(path.join(__dirname, '../src/learner.js'));
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+assert.ok(process.argv.slice(2).every(arg => arg === '--baseline'), 'Use --baseline for the pinned 1.11.1 learner, or no arguments for current code');
+const mode = process.argv.includes('--baseline') ? 'baseline' : 'candidate';
+const out = path.join(__dirname, 'artifacts/save-performance', mode);
+const learnerPath = path.join(__dirname, mode === 'baseline' ? 'fixtures/learner-1.11.1.js' : '../src/learner.js');
+const learnerSource = fs.readFileSync(learnerPath);
+if (mode === 'baseline') assert.equal(hash(learnerSource.toString('utf8').replace(/\r\n/g, '\n')), 'cdeac72f7937c24bcc0aabb5308d1313afd40bda2830604a406ee21855e91a72', 'Pinned baseline fixture must match release 1.11.1');
 const PRIMARY = 'jp-learner-v1:protected:v1';
 const samples = Number(process.env.KANA_SAVE_BENCH_SAMPLES || 7);
 assert.ok(Number.isInteger(samples) && samples >= 3 && samples <= 30, 'Use 3–30 measured samples');
 const sizes = [{ name: 'small', attempts: 100, exposures: 1000 }, { name: 'medium', attempts: 1000, exposures: 10000 }, { name: 'large', attempts: 5000, exposures: 50000 }];
 const report = { startedAt: new Date().toISOString(), passed: false, diagnosticOnly: true, syntheticProgressOnly: true,
   productionAccess: false, userProfileAccess: false, personalExportAccess: false, serviceWorkers: 'blocked',
-  learnerSHA256: hash(learnerSource), samplesPerTab: samples, warmupSamplesPerTab: 1, cpuThrottling: false,
+  mode, learnerSHA256: hash(learnerSource), samplesPerTab: samples, warmupSamplesPerTab: 1, cpuThrottling: false,
   environment: { platform: process.platform, architecture: process.arch, node: process.version, browser: null },
   notes: [
     'Native headless Chromium on this host; these are not measurements on a real phone or a guarantee of game FPS.',
@@ -136,7 +140,7 @@ async function scenario(config,tabs) {
   fs.mkdirSync(out,{recursive:true});await serve();const channel=process.env.PLAYWRIGHT_BROWSER_CHANNEL;
   browser=await chromium.launch({headless:true,...(channel?{channel}:{})});report.environment.browser=browser.version();
   for(const config of sizes)for(const tabs of [1,2])await scenario(config,tabs);
-  assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.outsideRequests,[]);assert.equal(hash(fs.readFileSync(path.join(__dirname,'../src/learner.js'))),report.learnerSHA256,'Persistence source remained unchanged');report.passed=true;
+  assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.outsideRequests,[]);assert.equal(hash(fs.readFileSync(learnerPath)),report.learnerSHA256,'Measured persistence source remained unchanged');report.passed=true;
 })().catch(error=>{report.failure={message:error.message,stack:error.stack};console.error(error);process.exitCode=1;}).finally(async()=>{
   for(const ctx of contexts)try{await close(ctx);}catch(e){report.cleanupErrors.push(e.message);}
   if(browser)try{await browser.close();report.browserClosed=true;}catch(e){report.cleanupErrors.push(e.message);}

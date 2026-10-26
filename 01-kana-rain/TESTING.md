@@ -1,5 +1,23 @@
 # Testes do Kana Rain
 
+## Consolidação 1.11.2 — comparação com a 1.11.1
+
+A otimização conserva o schema, todos os eventos e o journal síncrono. O cache de normalização compara o conteúdo JSON completo de cada snapshot do IndexedDB; contadores, vetores e timestamps iguais não bastam. O snapshot durável é privado e a memória pública mantém uma cópia independente. A reconciliação ao concluir a transação continua sendo executada.
+
+`consolidation-regressions.test.cjs` compara exports completos com a fixture publicada 1.11.1 em 12 cenários: appends ordenados/retroativos, mesmas revisões com fatos ou baselines diferentes, aliases mutáveis antes/durante a gravação, semântica JSON, referências de ajuda, duas abas, journals reconhecidos com fatos ausentes, importação/reset, v1/v2 com timestamp legado ausente e recuperação por checkpoint. A suíte nativa `test:mixed-version-storage` acrescenta `protected-runtime-concurrent-close`: uma aba da 1.11.1 e uma otimizada gravam na mesma chave protegida; a antiga fecha enquanto o Web Lock está bloqueado, deixando resposta e referência no journal, e a atual preserva tudo em ambos os backends e após reload. Os quatro casos anteriores com a 1.10.2 continuam presentes.
+
+Baseline e candidato foram medidos sequencialmente em Chromium headless 151.0.7922.34, Windows x64/Node 24.20.0, sem outros testes pesados em paralelo. Mesmos históricos, sete amostras medidas e um aquecimento por aba. Todos os seis cenários de cada versão preservaram hashes exatos dos eventos, configurações e fatos pendentes ao fechar/recarregar.
+
+| Respostas / referências | p95 de commit, uma aba: antes → depois | p95 de commit, duas abas: antes → depois |
+|---|---:|---:|
+| 100 / 1.000 | 11,3 → 9,2 ms | 52,7 → 45,2 ms |
+| 1.000 / 10.000 | 138,2 → 92,8 ms | 615,6 → 450,1 ms |
+| 5.000 / 50.000 | 406,7 → 315,3 ms | 1.488,6 → 1.314,5 ms |
+
+No maior histórico, a mediana caiu de 352,3 para 266,5 ms em uma aba (24,4%) e de 1.153,4 para 1.062,0 ms em duas (7,9%). As tarefas longas medidas em duas abas caíram de 42 para 36. O p95 ainda supera um segundo nesse cenário: há espaço para otimizações posteriores. O perfil maior excedeu a quota nativa do localStorage nas duas versões, com retenção pelo IndexedDB. Esses percentis são descritivos de poucas amostras, não medem FPS ou apresentação de pixels e não garantem os mesmos ganhos em um telefone real.
+
+Fixture baseline SHA-256 normalizado: `cdeac72f7937c24bcc0aabb5308d1313afd40bda2830604a406ee21855e91a72`. Fonte candidata medida: `11c250e1e483920d2e2dff3ed64bdcbf6fa3fd3fe65b7fbf43de147f21f7688d`. Reproduzir com `pnpm benchmark:save --baseline` e depois `pnpm benchmark:save`. Os relatórios ficam separados em `tests/artifacts/save-performance/baseline/` e `candidate/`; o comparativo local fica em `comparison.json`. As medições não são um limite de tempo aplicado no CI.
+
 ## Otimização 1.11.1 — 26 de outubro de 2026
 
 Medição nesta máquina Windows x64, Node 24.20.0 e Chromium headless 151.0.7922.34, sem limitação artificial de CPU e sem outras suítes de navegador em paralelo. Os percentis abaixo descrevem somente sete amostras por aba (mais um aquecimento); com essa amostragem, p95 coincide com o maior valor de uma aba. Não são garantia de desempenho no aparelho do jogador.
