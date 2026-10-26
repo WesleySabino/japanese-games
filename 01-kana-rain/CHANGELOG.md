@@ -1,6 +1,6 @@
 # Kana Rain releases
 
-## 1.11.0-local.1 — local preview, 2026-10-25
+## 1.11.0 — 2026-10-25
 
 - Add calm menu music: koto and shakuhachi with a light taiko and suikinkutsu water drops, in the miyako-bushi scale (B C E F♯ G) of a koto in hirajoshi tuning. It plays only on the title screen, starts after the first tap, click or key, and fades out when the rain begins.
 - Synthesize it live with Web Audio in `src/music.js` (about 20 KB of source): no audio file or third-party sound, nothing extra to download, and the offline shell caches it with the game code. The loop is scheduled on the audio clock, so it repeats without a seam. The composition and its sound are CC0-1.0, documented in `music/PROVENANCE.md` and `music/LICENSE-MUSIC.txt`.
