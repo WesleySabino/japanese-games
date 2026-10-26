@@ -5,7 +5,7 @@ const path=require('node:path');
 
 const root=path.resolve(__dirname,'..'),rootReal=fs.realpathSync(root),output=path.resolve(root,'dist');
 const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','privacy.html','manifest.webmanifest','sw.js'];
-const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/difficulty.js','src/novelty.js','src/game.js','assets/nihongo-analytics.js','assets/nihongo-analytics.css'];
+const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/music.js','src/difficulty.js','src/novelty.js','src/game.js','assets/nihongo-analytics.js','assets/nihongo-analytics.css'];
 const CORE_FILES=SOURCE_FILES.filter(file=>file.startsWith('src/')&&file.endsWith('.js'));
 const RUNTIME_FILE='assets/game-runtime.js';
 const IMAGE_FILES=[
@@ -19,6 +19,8 @@ const AUDIO_METADATA=[
   'kana-audio-bundle/LICENSE-AUDIO.txt','kana-audio-bundle/LICENSE-MIT.txt',
   'kana-audio-bundle/PROVENANCE.md'
 ];
+// The menu music is synthesized by src/music.js; these document it like the recordings.
+const MUSIC_METADATA=['music/LICENSE-MUSIC.txt','music/PROVENANCE.md'];
 const origin='https://local-build.invalid/';
 
 function inside(base,file){
@@ -91,7 +93,7 @@ function productionPlan(){
     if(typeof recording!=='string'||!/^audio\/[a-z0-9-]+\.mp3$/i.test(recording))throw new Error('Invalid audio recording path: '+recording);
   }
   const runtime=CORE_FILES.map(file=>'/* '+file+' */\n'+read(file)+'\n;').join('\n');
-  const files=[...ROOT_FILES,...SOURCE_FILES,RUNTIME_FILE,...IMAGE_FILES,...AUDIO_METADATA,...recordings.map(file=>'kana-audio-bundle/'+file)].sort();
+  const files=[...ROOT_FILES,...SOURCE_FILES,RUNTIME_FILE,...IMAGE_FILES,...AUDIO_METADATA,...MUSIC_METADATA,...recordings.map(file=>'kana-audio-bundle/'+file)].sort();
   const allowed=new Set(files);
   if(allowed.size!==files.length)throw new Error('Duplicate production file in allowlist');
   const entries=files.map(file=>file===RUNTIME_FILE?{file,generated:runtime,bytes:Buffer.byteLength(runtime)}:{file,...sourceFile(file),...(file==='index.html'?{bytes:Buffer.byteLength(productionHtml(file))}:{})});

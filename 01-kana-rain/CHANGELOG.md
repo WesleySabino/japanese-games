@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.11.0-local.1 — local preview, 2026-10-25
+
+- Add calm menu music: koto and shakuhachi with a light taiko and suikinkutsu water drops, in the miyako-bushi scale (B C E F♯ G) of a koto in hirajoshi tuning. It plays only on the title screen, starts after the first tap, click or key, and fades out when the rain begins.
+- Synthesize it live with Web Audio in `src/music.js` (about 20 KB of source): no audio file or third-party sound, nothing extra to download, and the offline shell caches it with the game code. The loop is scheduled on the audio clock, so it repeats without a seam. The composition and its sound are CC0-1.0, documented in `music/PROVENANCE.md` and `music/LICENSE-MUSIC.txt`.
+- Follow the existing sound button and Settings toggle (now labelled for pronunciation, music and effects) and stop in hidden tabs. The music sits about 31 dB under the pronunciations, drops 10 dB while one plays and 16 dB under each interface tone, so tones stay above it.
+- Add `tests/music.test.cjs` (exact loop timing, gestures, fades, ducking) and `pnpm test:music` (real-browser lifecycle on desktop and phone, measured levels and loop joins).
+
 ## 1.10.5 — 2026-10-24
 
 - Import a progress JSON from My Kana Garden, inspect a preview, cancel or apply, and export the current state before applying. Files remain on the device; imports are unavailable during a running session.

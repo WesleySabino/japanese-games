@@ -85,6 +85,9 @@ jobs:
       - name: Run Katakana matching and keyboard browser checks
         run: pnpm run test:katakana-bridge
 
+      - name: Run menu music browser checks
+        run: pnpm run test:music
+
       - name: Build the static site
         run: pnpm build
 

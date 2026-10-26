@@ -1,0 +1,12 @@
+Kana Rain menu music
+
+CC0-1.0. Composed for Kana Rain and synthesized in the browser by src/music.js; no recording, sample, sound font or third-party music is used.
+
+SPDX identifier: CC0-1.0
+License reference: https://creativecommons.org/publicdomain/zero/1.0/
+Legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+This notice covers the composition (melody, accompaniment and arrangement) and
+the sound the game produces from it. src/music.js is part of the game's source
+code and keeps the same terms as the rest of that code. Provenance and the
+synthesis recipe are described in PROVENANCE.md.

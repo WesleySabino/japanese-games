@@ -40,6 +40,8 @@
   let padFamily=null,padTarget=null,padChangedAt=-Infinity,padFocusFamily=null,padKeyboardFocus=false;
   A.enabled=gd.sound!==false;
   const sfx=kind=>window.KanaSfx?.play(kind);
+  // Menu music follows the title screen and the sound setting.
+  const music=()=>window.KanaMusic?.sync();
   const panelOrigins=new Map();
   let importText=null,importBusy=false,importReadId=0;
   let progressDirty=true,keyboardSignature=null,fieldSize={width:0,height:0};
@@ -107,7 +109,7 @@
     closeDialogs();$('welcome').classList.remove('hidden');$('gameHud').classList.add('hidden');$('answerDock').classList.add('hidden');
     document.body.classList.remove('is-playing');document.body.classList.add('is-menu');
     keyboardOpen=false;keyboard();enableSetup(true);$('fieldSpirit').className='spirit idle';document.body.classList.remove('low-hearts','heart-hit');$('heartLoss').classList.add('hidden');$('startBtn').focus({preventScroll:true});
-    syncAnimationState();
+    syncAnimationState();music();
     exposeLesson();
   }
   function showPause(){
@@ -252,7 +254,7 @@
     if(!modeAvailable(cfg.mode))cfg.mode='hira';
     if(mapScript==='katakana'&&!modeAvailable('kata'))mapScript='hiragana';
     document.querySelectorAll('[data-script]').forEach(b=>{const selected=b.dataset.script===mapScript;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
-    A.enabled=gd.sound!==false;renderMenu();renderSound();renderEffects();renderProgress(true);
+    A.enabled=gd.sound!==false;music();renderMenu();renderSound();renderEffects();renderProgress(true);
   }
   async function previewProgressFile(){
     const file=$('importFile').files?.[0];if(!file||running()||importBusy)return;
@@ -318,7 +320,7 @@
     gd.difficulty=cfg.difficulty;L.flush();
     G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
-    document.body.classList.remove('is-menu');document.body.classList.add('is-playing');
+    document.body.classList.remove('is-menu');document.body.classList.add('is-playing');music();
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
     $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana'}[cfg.mode]);
     $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();resetPad();keyboard();focusAnswer();
@@ -653,10 +655,10 @@
     b.querySelector('use').setAttribute('href',enabled?'#icon-sound':'#icon-muted');
     b.querySelector('.control-label').textContent=soundUnavailable?'Sound unavailable':enabled?'Sound on':'Sound off';
     b.setAttribute('aria-pressed',enabled);b.setAttribute('aria-label',soundUnavailable?'Sound unavailable':enabled?'Mute sound':'Enable sound');b.title=soundUnavailable?'Sound unavailable':enabled?'Mute sound':'Enable sound';b.disabled=soundUnavailable;
-    settings.setAttribute('aria-pressed',enabled);settings.setAttribute('aria-label',soundUnavailable?'Sound unavailable':enabled?'Mute pronunciation and effects':'Enable pronunciation and effects');settings.disabled=soundUnavailable;
+    settings.setAttribute('aria-pressed',enabled);settings.setAttribute('aria-label',soundUnavailable?'Sound unavailable':enabled?'Mute pronunciation, music and effects':'Enable pronunciation, music and effects');settings.disabled=soundUnavailable;
     textIfChanged($('settingsSoundState'),soundUnavailable?'Unavailable':enabled?'On':'Off');
   }
-  function toggleSound(){A.enabled=!A.enabled;gd.sound=A.enabled;L.flush();renderSound();if(A.enabled)sfx('menu');}
+  function toggleSound(){A.enabled=!A.enabled;gd.sound=A.enabled;L.flush();renderSound();music();if(A.enabled)sfx('menu');}
   $('soundBtn').onclick=$('settingsSoundBtn').onclick=toggleSound;
   $('effectsBtn').onclick=()=>{gd.reducedEffects=!gd.reducedEffects;L.flush();renderEffects();};
   $('skipCountdown').onclick=completeCountdown;

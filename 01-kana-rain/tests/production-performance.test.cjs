@@ -40,10 +40,10 @@ test('compact audio lookup ships kana only while keeping complete source provena
   assert.ok(fs.statSync(path.join(root,'kana-audio-bundle/runtime-manifest.json')).size<6000);
   const plan=productionPlan(),files=plan.entries.map(x=>x.file);
   const runtime=plan.entries.find(x=>x.file==='assets/game-runtime.js').generated;
-  const order=['data.js','learner.js','audio.js','sfx.js','difficulty.js','novelty.js','game.js'].map(x=>runtime.indexOf('/* src/'+x+' */'));
+  const order=['data.js','learner.js','audio.js','sfx.js','music.js','difficulty.js','novelty.js','game.js'].map(x=>runtime.indexOf('/* src/'+x+' */'));
   assert.ok(order.every((x,i)=>x>=0&&(i===0||x>order[i-1])));
   assert.doesNotMatch(runtime,/KanaNoveltyHud|renderNoveltyHud/,'the runtime retains admission rules without the removed renderer');
-  for(const file of ['kana-audio-bundle/manifest.json','kana-audio-bundle/original-manifest.json','kana-audio-bundle/PROVENANCE.md','kana-audio-bundle/LICENSE-AUDIO.txt'])assert.ok(files.includes(file));
+  for(const file of ['kana-audio-bundle/manifest.json','kana-audio-bundle/original-manifest.json','kana-audio-bundle/PROVENANCE.md','kana-audio-bundle/LICENSE-AUDIO.txt','music/PROVENANCE.md','music/LICENSE-MUSIC.txt'])assert.ok(files.includes(file));
   assert.equal(plan.entries.find(x=>x.file==='index.html').bytes,Buffer.byteLength(productionHtml('index.html')));
 });
 

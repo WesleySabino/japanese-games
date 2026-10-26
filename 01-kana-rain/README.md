@@ -6,7 +6,7 @@ Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type 
 
 The illustrated garden, correct-answer/mistake/expiration counters, streaks, accelerating rain, pronunciation audio, touch sound pad and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
 
-The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens. Settings includes the same sound toggle as the main sound button: both mute pronunciation and interface effects and remember the existing preference.
+The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens. Settings includes the same sound toggle as the main sound button: both mute pronunciation, menu music and interface effects and remember the existing preference.
 
 [Production game](https://kana-rain.nihongogrove.top/) · [Local preview](http://127.0.0.1:4173/) · [Specification](SPECIFICATION.md) · [Development](DEVELOPMENT.md) · [Learning design](LEARNING_DESIGN.md) · [New-kana rules](NOVELTY_BALANCE.md)
 
@@ -81,6 +81,8 @@ IndexedDB also retains one bounded checkpoint (`jp-learner-v1:checkpoint:v1`), r
 
 Pronunciations use only the supplied `kana-audio-bundle/` recordings. All 208 kana map to 104 runtime MP3 files, with shared pronunciation files for the alphabets and separately recorded homophones. The source bundle retains its 112 recordings and full provenance; eight historical word examples are excluded from the game/offline build. Correct answers, corrections, expirations, lesson tiles and review cards retain audio. The complete manifest, licenses and provenance remain available; gameplay loads a compact lookup.
 
+The title screen plays a quiet koto and shakuhachi piece in the miyako-bushi scale. It is synthesized live by `src/music.js` (no audio file), starts after the first gesture, follows the sound control, stops in hidden tabs and fades out when the rain begins. It sits about 31 dB under the pronunciations and steps under interface tones while they sound. Provenance, levels and the CC0-1.0 notice are in `music/`; `pnpm test:music` checks the lifecycle, the levels and the loop joins.
+
 The service worker caches the application, optimized gameplay images, audio lookup and recordings. Wait for **Your garden is ready offline** before relying on offline play. The art gallery loads source artwork separately on demand. Release cache changes do not reset learner storage.
 
 Google Analytics 4 (`G-F69S8JDW5M`) loads only after explicit opt-in on the approved production HTTPS hosts. Local previews show the settings without contacting Google. DNT and Global Privacy Control keep analytics off. Analytics and privacy is inside Settings; opening it pauses active rain. No answers, counts, historical scores, kana IDs or learner records are sent. The functional consent cookie stores the choice for 180 days across the approved sites. See [privacy](privacy.html) and the analytics tests for the full boundary.
@@ -89,7 +91,7 @@ Activity events still use the existing `practice_start` / `practice_complete` na
 
 ## Structure and checks
 
-`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/difficulty.js` defines the common rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved.
+`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/music.js` synthesizes the menu music; `src/difficulty.js` defines the common rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved.
 
 ```sh
 pnpm test
@@ -100,6 +102,7 @@ pnpm test:novelty-presentation
 pnpm test:novelty-pace
 pnpm test:sound-pad
 pnpm test:katakana-bridge
+pnpm test:music
 pnpm build
 pnpm test:quick-wins
 pnpm test:update

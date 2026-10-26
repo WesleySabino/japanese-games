@@ -57,13 +57,14 @@ Os comandos de navegador são:
 | `pnpm test:novelty-pace` | Três dificuldades, persistência, controles bloqueados durante partida e menu responsivo. |
 | `pnpm test:sound-pad` | Geometria, duas etapas, toque, bounce, cancelamento, teclado e evidência preservada. |
 | `pnpm test:katakana-bridge` | Desbloqueio, progressão contínua, saves legados, entrada, homófonos e proteção contra revelação prematura. |
+| `pnpm test:music` | Música do menu: silêncio antes do gesto, só na tela de título, botões de som, aba oculta, abaixamento sob efeitos e pronúncias, celular, níveis medidos e junções do loop. |
 | `pnpm test:quick-wins` | Ações dos resultados, foco do pad e áudio sincronizado sobre o **build de produção**, conferindo que `dist/` corresponde às fontes. |
 | `pnpm test:update` | Atualização de um build histórico fixado para o candidato no mesmo endereço, preservação dos dados, jogo online/offline e recuperação após instalação interrompida. |
 | `pnpm test:storage` | Dez cenários: quota nativa, fallback/exportação, fechamento/reabertura, abas alternadas, 24 respostas simultâneas, fechamento de aba pendente e concorrência com IndexedDB cheio. |
 | `pnpm test:mixed-version-storage` | Runtime antigo e atual na mesma origem, gravação/fechamento da aba antiga, proteção da cópia principal, checkpoint e limite de reset. |
 | `pnpm test:import` | Escolha real de arquivo, backup, prévia/cancelamento, rejeição de arquivos inválidos, mesclagem sem duplicação, estimativas de familiaridade, quota, reload e controles responsivos. |
 
-O CI em `.github/workflows/kana-rain.yml` usa Linux, Node 22 e Chromium. Executa testes Node, seis suítes de navegador sobre as fontes, build e cinco suítes sobre `dist/`, incluindo importação. O navegador de celular é emulado. O benchmark opcional `node tests/runtime-browser.benchmark.cjs` não está no CI e sua comparação pública depende da disponibilidade e da versão publicada.
+O CI em `.github/workflows/kana-rain.yml` usa Linux, Node 22 e Chromium. Executa testes Node, sete suítes de navegador sobre as fontes, build e cinco suítes sobre `dist/`, incluindo importação. O navegador de celular é emulado. O benchmark opcional `node tests/runtime-browser.benchmark.cjs` não está no CI e sua comparação pública depende da disponibilidade e da versão publicada.
 
 Todos os testes devem usar dados sintéticos e perfis descartáveis. Os cenários offline precisam permitir service workers no seu contexto isolado. Não usar o progresso pessoal como fixture. Artefatos de testes ficam ignorados pelo Git e fora do pacote publicado.
 
