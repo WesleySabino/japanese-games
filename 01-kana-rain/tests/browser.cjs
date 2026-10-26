@@ -542,6 +542,7 @@ async function exerciseDesktopResults(errors){
   assert.equal(await page.locator('#welcome').isVisible(),true);
   assert.ok(await page.evaluate(()=>KanaAudio.ready.then(()=>KanaAudio.available)));
   assert.ok(await page.evaluate(()=>!!window.KanaSfx),'the offline shell includes interface audio');
+  assert.ok(await page.evaluate(()=>!!window.KanaMusic),'the offline shell includes the menu music');
   assert.ok(await page.evaluate(async()=>{const r=await fetch('kana-audio-bundle/audio/a.mp3');return r.ok&&(await r.arrayBuffer()).byteLength>1000;}));
   await context.setOffline(false);
   const mobileContext=await gameContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});

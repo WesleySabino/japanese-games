@@ -89,6 +89,7 @@
         oscillator.start(start);
         oscillator.stop(finish + .005);
       });
+      root.KanaMusic?.duck(Math.max(...cues[kind].map(([, delay, duration]) => delay + duration)));
       lastKind = kind;
       playCount++;
       return true;
@@ -129,6 +130,8 @@
 
   root.KanaSfx = Object.freeze({
     play,
+    // Shared with KanaMusic, so one gesture unlocks a single context.
+    get context() { return context; },
     get lastKind() { return lastKind; },
     get playCount() { return playCount; }
   });
