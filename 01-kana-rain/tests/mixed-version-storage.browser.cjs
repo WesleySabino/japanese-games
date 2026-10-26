@@ -14,6 +14,8 @@ const oldSource = Buffer.from(fs.readFileSync(path.join(__dirname, 'fixtures/lea
 const oldHash = 'b908462e680bf53855f36a68ab6d66dc60b0fea4d9e3758d124094bb8846fa5d';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 assert.equal(hash(oldSource), oldHash, 'pinned 1.10.2 learner source must remain unchanged');
+const previousSource = Buffer.from(fs.readFileSync(path.join(__dirname, 'fixtures/learner-1.11.1.js'), 'utf8').replace(/\r\n/g, '\n'));
+assert.equal(hash(previousSource), 'cdeac72f7937c24bcc0aabb5308d1313afd40bda2830604a406ee21855e91a72', 'pinned protected-key runtime must remain unchanged');
 const currentSource = fs.readFileSync(path.join(__dirname, '../src/learner.js'));
 const noveltySource = fs.readFileSync(path.join(__dirname, '../src/novelty.js'));
 const report = { startedAt: new Date().toISOString(), passed: false, syntheticProgressOnly: true,
@@ -37,10 +39,11 @@ async function serve() {
     let body, type;
     if (file === '/current.js') { body = currentSource; type = 'text/javascript'; }
     else if (file === '/legacy.js') { body = oldSource; type = 'text/javascript'; }
+    else if (file === '/previous.js') { body = previousSource; type = 'text/javascript'; }
     else if (file === '/novelty.js') { body = noveltySource; type = 'text/javascript'; }
     else if (file === '/blank.html') { body = '<!doctype html><title>Disposable storage probe</title>'; type = 'text/html'; }
-    else if (file === '/current.html' || file === '/legacy.html') {
-      const runtime = file === '/current.html' ? 'current' : 'legacy';
+    else if (['/current.html', '/legacy.html', '/previous.html'].includes(file)) {
+      const runtime = file.slice(1, -5);
       body = '<!doctype html><title>Synthetic ' + runtime + ' learner</title><script src="/' + runtime + '.js"></script><script src="/novelty.js"></script>';
       type = 'text/html';
     }
@@ -189,6 +192,35 @@ async function resetBoundary() {
     return { explicitResetPreserved: true, staleOldTabCouldNotResurrectProgress: true };
   } finally { await close(ctx); }
 }
+async function protectedRuntimeCoexistence() {
+  const ctx = await context();
+  try {
+    const reader = await probe(ctx), fixture = seed(), previous = await open(ctx, 'previous'), current = await open(ctx);
+    const events = await Promise.all([add(current, 'synthetic:optimized', 'kana:ア', 4), add(previous, 'synthetic:previous', 'kana:イ', 2)]);
+    await Promise.all([current, previous].map(page => page.evaluate(() => Learner.flush())));
+    // Hold the ordinary native origin lock so the previous runtime must close
+    // with a real pending journal, rather than winning a timing race in the test.
+    await reader.evaluate(() => { window.heldSaveLock = navigator.locks.request('jp-learner-v1:commit', () => { window.lockHeld = true; return new Promise(resolve => window.releaseSaveLock = resolve); }); });
+    await reader.waitForFunction(() => window.lockHeld);
+    const pending = await previous.evaluate(() => {
+      Learner.recordExposure('kana:ウ', 'form→sound', { exposureId: 'synthetic:previous-reference', gameId: 'kana-rain', deferSave: true });
+      Learner.record('kana:ウ', 'form→sound', { attemptId: 'synthetic:previous-pending', correct: true, firstAttempt: true, assistance: false, gameId: 'kana-rain', deferSave: true });
+      window.pendingCommit = Learner.flush();
+      return { event: Learner.attempts().find(e => e.attemptId === 'synthetic:previous-pending'), exposure: Learner.exposures().find(e => e.exposureId === 'synthetic:previous-reference'), journal: Object.keys(localStorage).some(k => k.startsWith('jp-learner-v1:pending:') && localStorage.getItem(k).includes('synthetic:previous-pending')) };
+    });
+    assert.equal(pending.journal, true); await previous.close();
+    await reader.evaluate(() => window.releaseSaveLock());
+    await current.evaluate(() => Learner.flush());
+    const expected = [fixture.attemptLedger[0], ...events, pending.event];
+    for (const saved of Object.values(await disk(reader))) {
+      check(saved, expected);
+      assert.deepEqual(saved.exposureLedger.find(e => e.exposureId === pending.exposure.exposureId), pending.exposure);
+      assert.equal(saved.exposureLedger.length, 1);
+    }
+    await current.close(); const reloaded = await open(ctx); check(await exported(reloaded), expected);
+    return { previousRelease: '1.11.1', sameProtectedKey: true, concurrentAnswersRetained: true, previousClosedWhileLockBlocked: true, pendingReferenceRetained: true, preservedAttempts: expected.length, reloadPreserved: true };
+  } finally { await close(ctx); }
+}
 async function run(name, work) {
   if (process.argv[2] && process.argv[2] !== name) return;
   const result = { name, passed: false }; report.scenarios.push(result); let timer;
@@ -206,6 +238,7 @@ async function run(name, work) {
     await run('legacy-overwrite-while-current-closed', () => staleClose(true));
     await run('checkpoint-after-corruption', corruptPrimary);
     await run('reset-survives-old-runtime', resetBoundary);
+    await run('protected-runtime-concurrent-close', protectedRuntimeCoexistence);
     assert.ok(report.scenarios.length, 'unknown scenario filter');
     report.passed = report.scenarios.every(s => s.passed) && !report.pageErrors.length && !report.outsideRequests.length;
   } catch (error) { report.failure = error.stack; console.error(error); }

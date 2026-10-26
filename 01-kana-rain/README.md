@@ -130,6 +130,8 @@ Feedback images are prepared after the critical scene images in low-priority tas
 
 For an opt-in storage diagnostic, run `pnpm benchmark:save`. It uses disposable local Chromium profiles and generated histories only, and reports timings separately from correctness. See [TESTING](TESTING.md) for sizes, results and limits; this diagnostic does not modify the learner protocol or a personal save.
 
+Use `pnpm benchmark:save --baseline` to measure the pinned 1.11.1 learner, then the command without arguments for current code, with other browser/CPU-heavy work stopped. Reports are separate in `tests/artifacts/save-performance/baseline/` and `candidate/`. Full history and settings must survive both runs; timing percentiles are diagnostic, not a CI performance threshold or measured game FPS.
+
 The garden, spirit poses and water sprites keep the established teal, ivory and gold presentation. The public `art.html` gallery, runtime WebP images, source masters and [art prompts](assets/PROMPTS.md) remain. The gallery's concepts and atlases are public assets and also document the current art direction. Superseded mockups, infographics and prototypes are recoverable from Git history.
 
 `pnpm build` creates `dist/` from an explicit production allowlist. It excludes private exports, prototypes, development scripts, tests and design documents. A build does not perform publication; deployment uses the verified release package. HTTPS or localhost is required for the service worker. Index/about metadata, canonical URLs, sitemap and robots retain the production address.
