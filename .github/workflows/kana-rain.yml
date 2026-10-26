@@ -91,6 +91,9 @@ jobs:
       - name: Build the static site
         run: pnpm build
 
+      - name: Run nonblocking feedback image preparation browser checks
+        run: pnpm run test:effects
+
       - name: Run results, sound-pad focus and audio settings browser checks
         run: pnpm run test:quick-wins
 

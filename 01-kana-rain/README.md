@@ -103,6 +103,7 @@ pnpm test:novelty-pace
 pnpm test:sound-pad
 pnpm test:katakana-bridge
 pnpm test:music
+pnpm test:effects
 pnpm build
 pnpm test:quick-wins
 pnpm test:update
@@ -124,6 +125,10 @@ Browser suites use isolated profiles and temporary localhost servers. The sound-
 For exploring all kana without earning rows, open `/?all`. It temporarily exposes the catalogue without changing earned row counts; answer evidence still saves. Use a disposable browser profile for tests. [Development](DEVELOPMENT.md) documents the architecture, performance invariants, asset preparation and release checks.
 
 ## Artwork and release
+
+Feedback images are prepared after the critical scene images in low-priority tasks. The same stained drop, splash and ripple remain in use; failed preparation never delays input or prevents play. `test:effects` checks preparation order, cancellation, failure handling and real feedback on desktop and phone.
+
+For an opt-in storage diagnostic, run `pnpm benchmark:save`. It uses disposable local Chromium profiles and generated histories only, and reports timings separately from correctness. See [TESTING](TESTING.md) for sizes, results and limits; this diagnostic does not modify the learner protocol or a personal save.
 
 The garden, spirit poses and water sprites keep the established teal, ivory and gold presentation. The public `art.html` gallery, runtime WebP images, source masters and [art prompts](assets/PROMPTS.md) remain. The gallery's concepts and atlases are public assets and also document the current art direction. Superseded mockups, infographics and prototypes are recoverable from Git history.
 

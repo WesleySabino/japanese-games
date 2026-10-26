@@ -104,9 +104,11 @@ function productionPlan(){
   const manifest=JSON.parse(read('manifest.webmanifest'));
   validateReference(manifest.start_url||'./','manifest.webmanifest',allowed);
   for(const icon of manifest.icons||[])validateReference(icon.src,'manifest.webmanifest',allowed);
-  const shell=read('sw.js').match(/\bconst\s+SHELL\s*=\s*\[([\s\S]*?)\]\s*;/);
-  if(!shell)throw new Error('Cannot validate the service worker shell allowlist');
-  for(const match of shell[1].matchAll(/(['"])([^'"]*)\1/g))validateReference(match[2],'sw.js',allowed);
+  for(const name of ['SHELL','SOURCE_SCRIPTS']){
+    const shell=read('sw.js').match(new RegExp('\\bconst\\s+'+name+'\\s*=\\s*\\[([\\s\\S]*?)\\]\\s*;'));
+    if(!shell)throw new Error('Cannot validate the service worker '+name+' allowlist');
+    for(const match of shell[1].matchAll(/(['"])([^'"]*)\1/g))validateReference(match[2],'sw.js',allowed);
+  }
   return {entries,recordings:recordings.length,bytes:entries.reduce((sum,entry)=>sum+entry.bytes,0)};
 }
 function build(plan){
