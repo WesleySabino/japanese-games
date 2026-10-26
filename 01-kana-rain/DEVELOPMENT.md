@@ -12,6 +12,7 @@ Preserve these runtime invariants:
 - Cache field and sprite dimensions with `ResizeObserver`. Geometry reads during creation or resizing are legitimate; avoid repeated layout reads in the frame loop.
 - Rebuild progress panels only when dirty and visible. Build the fixed sound pad once, then update its stage. Update HUD text and classes only when their visible values change.
 - Animate decorative rain with transforms and freeze it outside active play. Preserve reduced-effects and viewport/safe-area behavior when changing visuals.
+- Prepare feedback images only after the critical scene, in low-priority tasks. Keep preparation optional and decoded image references alive; never await it from input, scoring or the animation loop.
 
 Persistence belongs to `src/learner.js`. Continue reading the legacy `jp-learner-v1` key while writing `jp-learner-v1:protected:v1`; retain schema-v2 exports and IndexedDB database `kana-garden` version 1 / store `learner`. Bootstrap unions compatible primary, checkpoint and legacy snapshots, then replays tab-owned write-ahead journals (`jp-learner-v1:pending:<writer>`). Timestamps/vectors select preferences only after checking facts; they never prove that evidence is complete. Schema-v1 migration keeps legacy aggregates without fabricating independent evidence. Preserve old attempts, exposures, retired-mode facets, earned rows, accuracy, historical point records and additive game-data fields when normalizing settings.
 
@@ -29,7 +30,7 @@ Keep artwork masters/prompts and the complete audio manifests, recordings, licen
 
 `scripts/build.cjs` owns the production allowlist. It emits the ordered runtime, inlines/rebases home-page styles, and copies the public pages and approved assets. Source CSS remains necessary for other public pages. Deploy the contents of `dist/`; building does not publish. Keep private exports, tests and artifacts outside the allowlist.
 
-Coordinate packaging with `sw.js`: its shell supports source previews, conditionally caches the production bundle, and downloads unique audio files with bounded concurrency. Keep release cache names synchronized with runtime/asset releases. Cache navigation destinations separately, preserve canonical page aliases, and normalize cached redirected HTML responses on offline navigation without dropping status or headers. A missing offline destination must not silently become another page.
+Coordinate packaging with `sw.js`: cache index.html once, inspect its runtime reference, then install either the production bundle or the source modules. Retain the CSS used by secondary pages and all unique audio files with bounded download concurrency. Keep release cache names synchronized with runtime/asset releases. Cache navigation destinations separately, preserve canonical page aliases, and normalize cached redirected HTML responses on offline navigation without dropping status or headers. A missing offline destination must not silently become another page.
 
 Game analytics have a strict schema:
 

@@ -1,14 +1,18 @@
-const CACHE='kana-rain-v45-release-1.11.0';
+const CACHE='kana-rain-v46-release-1.11.1';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
-const SHELL=['./','index.html','about.html','art.html','privacy.html','assets/nihongo-analytics.js','assets/nihongo-analytics.css','src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/music.js','src/difficulty.js','src/novelty.js','src/game.js','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/runtime-manifest.json'];
+// Public secondary pages still use the separate CSS; only the home page inlines it.
+const SHELL=['index.html','about.html','art.html','privacy.html','assets/nihongo-analytics.js','assets/nihongo-analytics.css','src/style.css','manifest.webmanifest','assets/garden.webp','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp','assets/splash.webp','assets/ripple.webp','assets/icon.png','kana-audio-bundle/runtime-manifest.json'];
+const SOURCE_SCRIPTS=['src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/music.js','src/difficulty.js','src/novelty.js','src/game.js'];
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE);
-    await cache.addAll(SHELL.map(url));
-    // Source previews use separate scripts; production has one ordered runtime bundle.
+    // Read the entry document once before selecting the matching code. The fetch
+    // handler maps root navigations to index.html, so a second './' copy is unused.
+    await cache.add(url('index.html'));
     const html=await (await cache.match(url('index.html'))).text();
-    if(html.includes('src="assets/game-runtime.js"'))await cache.add(url('assets/game-runtime.js'));
+    const scripts=html.includes('src="assets/game-runtime.js"')?['assets/game-runtime.js']:SOURCE_SCRIPTS;
+    await cache.addAll([...SHELL.filter(p=>p!=='index.html'),...scripts].map(url));
     const manifest=await (await cache.match(url('kana-audio-bundle/runtime-manifest.json'))).json();
     const recordings=[...new Set(Object.values(manifest.byKana))];
     // Keep download concurrency bounded on mobile.

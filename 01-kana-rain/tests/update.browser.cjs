@@ -137,7 +137,8 @@ async function snapshot(page) {
 }
 async function assertCache(page, release) {
   await page.waitForFunction(async cache => (await caches.keys()).includes(cache), release.cache);
-  const shell = [...release.files.get('/sw.js').toString().match(/\bconst SHELL=\[([^]*?)\];/)[1].matchAll(/'([^']+)'/g)].map(m => m[1] === './' ? '/' : '/' + m[1]);
+  const worker = release.files.get('/sw.js').toString();
+  const shell = [...worker.match(/\bconst SHELL=\[([^]*?)\];/)[1].matchAll(/'([^']+)'/g)].map(m => m[1] === './' ? '/' : '/' + m[1]);
   const audio = Object.values(JSON.parse(release.files.get('/kana-audio-bundle/runtime-manifest.json')).byKana).map(file => '/kana-audio-bundle/' + file);
   const required = [...new Set([...shell, ...audio, '/assets/game-runtime.js'])];
   await page.waitForFunction(async ({ cache, required }) => {
@@ -152,6 +153,13 @@ async function assertCache(page, release) {
   }, release.cache);
   for (const entry of entries) assert.equal(entry.sha256, hash(release.files.get(entry.file === '/' ? '/index.html' : entry.file)), 'cached bytes match release: ' + entry.file);
   assert.equal(entries.filter(e => e.file.endsWith('.mp3')).length, 104, 'all 104 recordings cached');
+  if (worker.includes('const SOURCE_SCRIPTS=')) {
+    const sourceScripts = [...worker.match(/\bconst SOURCE_SCRIPTS=\[([^]*?)\];/)[1].matchAll(/'([^']+)'/g)].map(m => '/' + m[1]);
+    assert.equal(entries.filter(e => sourceScripts.includes(e.file)).length, 0, 'production caches the runtime once, without separate core modules');
+    assert.equal(entries.filter(e => e.file === '/').length, 0, 'root navigation reuses index.html without duplicate entry HTML');
+    assert.ok(entries.some(e => e.file === '/src/style.css'), 'art gallery keeps its required external stylesheet offline');
+    assert.ok(entries.some(e => e.file === '/assets/nihongo-analytics.css'), 'secondary public pages keep their stylesheet offline');
+  }
   assert.equal(await page.evaluate(async () => (await (await caches.open('update-tests-unrelated')).match('/unrelated-sentinel'))?.text()), 'keep me');
   return { cache: release.cache, checkedFiles: entries.length, recordings: 104 };
 }

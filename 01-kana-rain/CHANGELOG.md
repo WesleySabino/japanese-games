@@ -1,5 +1,11 @@
 # Kana Rain releases
 
+## 1.11.1 — 2026-10-26
+
+- Prepare the existing stained-drop, splash and ripple images after critical scene resources, outside the input path. Decode failures remain optional; images, effects and gameplay rules stay the same.
+- Select the service worker shell from the cached home page: production installs the bundled runtime, source previews install individual modules. Keep the styles required by secondary pages, offline navigation and all 104 pronunciation recordings.
+- Add focused feedback preparation and cache installation regressions, plus an opt-in native-storage diagnostic using large synthetic histories. Learner persistence, schema and personal progress are unchanged.
+
 ## 1.11.0 — 2026-10-25
 
 - Add calm menu music: koto and shakuhachi with a light taiko and suikinkutsu water drops, in the miyako-bushi scale (B C E F♯ G) of a koto in hirajoshi tuning. It plays only on the title screen, starts after the first tap, click or key, and fades out when the rain begins.

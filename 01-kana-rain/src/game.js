@@ -45,6 +45,44 @@
   const panelOrigins=new Map();
   let importText=null,importBusy=false,importReadId=0;
   let progressDirty=true,keyboardSignature=null,fieldSize={width:0,height:0};
+  // Keep feedback bitmaps decoded before their first use, without delaying the
+  // menu or input. The initial scene gets its turn first; later images get one
+  // low-priority task each and remain referenced for the lifetime of this page.
+  function prepareFeedbackImages(){
+    if(typeof Image!=='function')return;
+    const images=[],scene=['garden.webp','spirit.webp','drop.webp'],feedback=['drop-stained.webp','splash.webp','ripple.webp'],total=scene.length+feedback.length;
+    let next=null,task=0,stopped=false;
+    const usesIdle=typeof window.requestIdleCallback==='function';
+    function cancel(){if(!task)return;if(usesIdle)window.cancelIdleCallback(task);else clearTimeout(task);task=0;}
+    function schedule(){
+      if(!next||task||stopped||document.hidden)return;
+      const run=()=>{task=0;if(stopped||document.hidden)return;const work=next;next=null;work();};
+      task=usesIdle?window.requestIdleCallback(run,{timeout:1500}):setTimeout(run,200);
+    }
+    function image(file){
+      return new Promise(resolve=>{
+        const bitmap=new Image();images.push(bitmap);bitmap.decoding='async';bitmap.fetchPriority='low';
+        let timer,settled=false;
+        const finish=()=>{if(settled)return;settled=true;clearTimeout(timer);bitmap.onload=bitmap.onerror=null;resolve();};
+        // Failure, an older browser or a stalled request must not block play or
+        // leave a preparation chain pending forever. There are no retry loops.
+        timer=setTimeout(finish,8000);bitmap.onerror=finish;
+        if(typeof bitmap.decode!=='function')bitmap.onload=finish;
+        bitmap.src=new URL('assets/'+file,document.baseURI).href;
+        if(typeof bitmap.decode==='function')Promise.resolve().then(()=>bitmap.decode()).then(finish,finish);
+      });
+    }
+    function prepareNext(){
+      const file=feedback.shift();if(!file)return;
+      image(file).then(()=>{next=prepareNext;schedule();});
+    }
+    function sceneReady(){next=()=>{Promise.all(scene.map(image)).then(()=>{next=prepareNext;schedule();});};schedule();}
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)cancel();else schedule();});
+    window.addEventListener('pagehide',()=>{stopped=true;cancel();});
+    // This listener also retains the Image objects across session changes/BFCache.
+    window.addEventListener('pageshow',()=>{stopped=false;if(images.length<total||next)schedule();});
+    if(document.readyState==='complete')sceneReady();else window.addEventListener('load',sceneReady,{once:true});
+  }
   const mobile=()=>matchMedia('(pointer:coarse)').matches || innerWidth<=650;
   const running=()=>G && !G.over;
   // Both alphabets are answered by sound; a katakana's support label is its known hiragana.
@@ -724,6 +762,7 @@
   new ResizeObserver(fitField).observe($('field'));fitField();
   new ResizeObserver(()=>document.documentElement.style.setProperty('--dock-height',$('answerDock').getBoundingClientRect().height+'px')).observe($('answerDock'));
   renderMenu();renderSound();exposeLesson();
+  prepareFeedbackImages();
   let storageWarning=false;
   L.subscribePersistence?.(s=>{
     $('saveStatus').textContent=s.state==='saving'?'Saving progress…':s.state==='unsaved'?'Progress is only in memory':s.state==='saved'||s.state==='restored'?'Progress saved on this device':s.state==='checking'?'Checking saved progress…':'Ready to save progress';

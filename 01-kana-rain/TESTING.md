@@ -1,5 +1,21 @@
 # Testes do Kana Rain
 
+## Otimização 1.11.1 — 26 de outubro de 2026
+
+Medição nesta máquina Windows x64, Node 24.20.0 e Chromium headless 151.0.7922.34, sem limitação artificial de CPU e sem outras suítes de navegador em paralelo. Os percentis abaixo descrevem somente sete amostras por aba (mais um aquecimento); com essa amostragem, p95 coincide com o maior valor de uma aba. Não são garantia de desempenho no aparelho do jogador.
+
+| Histórico sintético inicial | JSON | p95 de commit completo, uma aba | p95 de commit completo, duas abas |
+|---|---:|---:|---:|
+| 100 respostas / 1.000 referências | 0,23 MiB | 10,7 ms | 47,8 ms |
+| 1.000 respostas / 10.000 referências | 2,30 MiB | 111,2 ms | 563,0 ms |
+| 5.000 respostas / 50.000 referências | 11,58 MiB | 359,8 ms | 1.498,2 ms |
+
+Os seis cenários preservaram todos os eventos e configurações, inclusive ao fechar com gravação pendente e recarregar. O p95 do registro+journal síncrono foi de até 0,8 ms; a consolidação posterior produziu tarefas longas nos históricos médio/grande. A primeira oportunidade de RAF pode acontecer antes dessas tarefas, portanto não serve como prova de fluidez. O perfil maior excedeu naturalmente a quota do localStorage: o IndexedDB manteve os snapshots e os journals pequenos protegeram fatos pendentes quando disponíveis. O backend efetivo de cada amostra consta do relatório. A fonte do learner manteve o SHA-256 `cdeac72f7937c24bcc0aabb5308d1313afd40bda2830604a406ee21855e91a72`; otimizar essa consolidação é uma etapa posterior, com o protocolo de proteção preservado.
+
+`pnpm test:effects` exercita o build publicado em perfis novos de desktop e celular: preparação depois da cena crítica, menu/entrada disponíveis enquanto decode está pendente, uma imagem secundária por tarefa, ocultação/descarte, falhas de rede/decode e fallback sem as APIs opcionais. As imagens e as regras da partida permanecem iguais. `cache-install.test.cjs` verifica a escolha de shell de produção/fonte, URLs sem duplicação, páginas/estilos/104 áudios e falhas sem ativação ou remoção do cache anterior. `test:update` confirma isso no CacheStorage nativo, com jogo online/offline e saves históricos.
+
+`pnpm benchmark:save` é um diagnóstico optativo, sem limite de tempo que aprove/reprove desempenho. Usa apenas páginas locais com o learner, IndexedDB/localStorage/Web Locks reais e seis perfis descartáveis: 100/1.000, 1.000/10.000 e 5.000/50.000 respostas/referências, em uma ou duas abas. Cada aba faz um aquecimento e sete amostras medidas. O relatório em `tests/artifacts/save-performance/` inclui inicialização, custo síncrono de registro/journal, commit completo, JSON, escritas, tarefas longas e a próxima oportunidade de requestAnimationFrame. Essa oportunidade não mede apresentação de pixels, e páginas sem o renderizador não medem FPS da partida. Os hashes de todos os eventos sintéticos iniciais, respostas novas, configurações, encerramento pendente e releitura são verificados; quota e backend efetivo são relatados. Não usa exports pessoais e não modifica o protocolo do learner.
+
 Atualização de 23 de outubro de 2026: proteção contra retrocesso de saves validada na prévia 1.10.4-local.1 e promovida para 1.10.4, sem restauração de progresso pessoal. As auditorias históricas abaixo partiram da 1.10.2 e acompanharam a promoção da 1.10.3. Escopo: somente este jogo; não inclui os testes de `japanese-core`, arquivos históricos ou outros repositórios.
 
 O pacote 1.10.4 usa o cache `kana-rain-v43-release-1.10.4`. A prévia validada usava `kana-rain-v43-local-save-guard` e a versão anterior usava `kana-rain-v42-release-1.10.3`. As evidências históricas conservam o identificador usado naquela validação. A suíte nova de versões misturadas cobre a escrita de um runtime antigo ainda em memória; a suíte anterior de duas abas, sozinha, não cobria esse caso.
