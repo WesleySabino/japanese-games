@@ -15,7 +15,7 @@
     rain: { '/': 'Kana Rain', '/about.html': 'Kana Rain | About', '/art.html': 'Kana Rain | Artwork', '/privacy.html': 'Kana Rain | Privacy' },
     core: { '/': 'Japanese Core', '/practice': 'Japanese Core | Practice', '/progress': 'Japanese Core | Progress', '/settings': 'Japanese Core | Settings', '/privacy.html': 'Japanese Core | Privacy' }
   };
-  const modes = app === 'rain' ? ['hira', 'kata', 'review'] : ['reading', 'listening', 'writing', 'spaced_review'];
+  const modes = app === 'rain' ? ['hira', 'kata', 'journey', 'review'] : ['reading', 'listening', 'writing', 'spaced_review'];
   const completionReasons = app === 'rain' ? ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed'] : ['timer_elapsed', 'hearts_lost', 'manual_finish', 'completed', 'practice_set_complete'];
   const schemas = {
     app_open: { target_app: ['core', 'rain'] },

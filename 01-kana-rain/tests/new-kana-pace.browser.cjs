@@ -100,7 +100,7 @@ async function profileRulesAndLocks(){
 }
 async function scope(){
   const page=await context({width:1366,height:768});await page.goto(url+'/?all');await page.waitForFunction(()=>!!window.KanaRain);
-  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
+  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata','journey']);
   for(const mode of ['mix','pair','words','practice']){
     const result=await page.evaluate(mode=>{const el=document.querySelector('#mode');el.value=mode;el.dispatchEvent(new Event('change'));return {mode:KanaRain.settings.mode,candidates:KanaRain.candidates(mode)};},mode);
     assert.ok(['hira','kata'].includes(result.mode));assert.deepEqual(result.candidates,[]);

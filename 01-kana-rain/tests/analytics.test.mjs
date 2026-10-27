@@ -155,6 +155,7 @@ test('event allowlist rejects arbitrary names, values, and extra learner fields'
   assert.equal(b.events().length, before);
   for (const mode of ['mix','pair','words','spaced_review']) assert.equal(b.api.track('practice_start', { practice_mode: mode }), false);
   assert.equal(b.api.track('practice_start', { practice_mode: 'review' }), true);
+  assert.equal(b.api.track('practice_start', { practice_mode: 'journey' }), true);
   const core = browser({ host: 'kana.nihongogrove.top', app: 'core', cookie: 'ng_analytics_consent=accepted' });
   assert.equal(core.api.track('practice_start', { practice_mode: 'spaced_review' }), true);
   assert.equal(b.api.track('practice_complete', { practice_mode: 'hira', completion_reason: 'timer_elapsed' }), true);

@@ -402,7 +402,7 @@ async function exerciseDesktopResults(errors){
   await assertWholeViewport(page,'Desktop title');
   await screenshot(page,'desktop');
   assert.equal(await page.locator('#welcome').isVisible(),true);
-  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
+  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata','journey']);
   assert.equal(await page.locator('#difficultySelect option:disabled').count(),0);
   assert.equal(await page.locator('#difficultySelect').inputValue(),'easy');
   await page.locator('#settingsBtn').click();
@@ -524,7 +524,7 @@ async function exerciseDesktopResults(errors){
   assert.equal(await page.evaluate(id=>Learner.state(id).facets['form→sound'].correct,first),1);
   // Explore mode cannot revive retired modes, but keeps Katakana available for QA.
   await page.goto('http://127.0.0.1:4180/?all');await page.waitForFunction(()=>window.KanaRain);
-  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata']);
+  assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata','journey']);
   await page.locator('#mode').selectOption('kata');await page.locator('#startBtn').click();await readyToPlay(page);
   assert.equal(await page.evaluate(()=>KanaRain.state.drops.every(d=>d.responseFormat==='romaji'&&JPData.kanaById[d.id].script==='katakana')),true);
   assert.equal(await page.locator('#answerForm').isVisible(),true,'desktop Katakana is typed like Hiragana');
