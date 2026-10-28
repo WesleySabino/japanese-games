@@ -1,0 +1,872 @@
+{
+  "version": "1.12.0",
+  "commit": "3b6024aa7c32206770b5d09f207774eb725ad07f",
+  "cache": "kana-rain-v48-release-1.12.0",
+  "payloadSha256": "356beaca34e5b8f110bd9954c49224c9706c0eea7ae415b91fa2c488e3f63c54",
+  "entries": [
+    {
+      "file": "about.html",
+      "bytes": 15994,
+      "sha256": "3c5ea08eb89b33c40214a2fc245e29c436bf67b98b2ff16eec34bbd314ff38dd",
+      "storage": "payload"
+    },
+    {
+      "file": "art.html",
+      "bytes": 4348,
+      "sha256": "bbd5a30f09d113bd8c9930beff74f428e096f2ab6c444d05885fd10d8ba407fa",
+      "storage": "payload"
+    },
+    {
+      "file": "assets/concepts/garden-mood.png",
+      "bytes": 2640746,
+      "sha256": "dad98d20bf89a85fe32c8c10d2923f1774628dc865983d5f7b64dae6358c578b",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/concepts/visual-development.png",
+      "bytes": 2726688,
+      "sha256": "49100fe573a53a9f1ff8cd86ce9bb93d48b24bd0aa1922636fde4dfe13680195",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/drop-stained.webp",
+      "bytes": 13954,
+      "sha256": "e80b709bb0dcd5518a6de31007219723be3f0f65752a54678b7e3cbc63b6b4e3",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/drop.webp",
+      "bytes": 15416,
+      "sha256": "655e0c3a824aad163f84b25c30de57e80775b85b6248ab40427a9b6ba17b2ca7",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/game-runtime.js",
+      "bytes": 157035,
+      "sha256": "b02bd188bd1149da6af83436a0f8bc9937cf1f24dcd21ca4ae1af4495c7b34de",
+      "storage": "payload"
+    },
+    {
+      "file": "assets/garden.webp",
+      "bytes": 209382,
+      "sha256": "39e9aabf675f3465ea3e79f8b85f760f37a5d3d0570a658e66e73ef4d150caf9",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/icon.png",
+      "bytes": 46249,
+      "sha256": "715f442d6213e454ce70c0fb44c9067e63170906adc3ec41c4548e714118b2d6",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/nihongo-analytics.css",
+      "bytes": 2219,
+      "sha256": "a991152482c914c955cab552742bb8d672e74873bd25d98762e582de3e4fbf2d",
+      "storage": "payload"
+    },
+    {
+      "file": "assets/nihongo-analytics.js",
+      "bytes": 12243,
+      "sha256": "0613c8e2a5f1de19021bed9c92e16264cf442e4f07cc13d0b03f0979c3ad975c",
+      "storage": "payload"
+    },
+    {
+      "file": "assets/ripple.webp",
+      "bytes": 14840,
+      "sha256": "0281e080bad7dd56927915356625122037eb6876867840aa5d1073a4faf2d20d",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/social-garden.png",
+      "bytes": 2843966,
+      "sha256": "f9e8d37d1f043fb58888bc7dff62bf01cab1376238efaa2a4eb7679fbb30c524",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/spirit-atlas.png",
+      "bytes": 1364273,
+      "sha256": "db4169ca4c97bf57505f416c292f54a40c1b3da48b0afc50c29f480526084945",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/spirit.webp",
+      "bytes": 59134,
+      "sha256": "b88699d6d0d6d2ee9e367316c4ad59c0770b251edb152a468bd7b7467bc94232",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/splash.webp",
+      "bytes": 12308,
+      "sha256": "7694cd0bc6724413eb396b1f3e688fa701adb305246b1e3072e0fb71fb76d55e",
+      "storage": "shared"
+    },
+    {
+      "file": "assets/water-atlas.png",
+      "bytes": 1394406,
+      "sha256": "a7ea09f97c2f327abda7463647e1b98f311844a27f98c1ca1626c51154f88355",
+      "storage": "shared"
+    },
+    {
+      "file": "index.html",
+      "bytes": 94659,
+      "sha256": "83546cdac18345960d7bae9c94076fb8aedf7a3d21c677bd7b8299c6158c737b",
+      "storage": "payload"
+    },
+    {
+      "file": "kana-audio-bundle/LICENSE-AUDIO.txt",
+      "bytes": 622,
+      "sha256": "acecbc8c4bbb52862b24c1a499624f6fbab1915353e63cd906ece5e5b7f664de",
+      "storage": "payload"
+    },
+    {
+      "file": "kana-audio-bundle/LICENSE-MIT.txt",
+      "bytes": 1083,
+      "sha256": "e9f3b73469f4e2a1b7e00cab6d4bd4e4d889388828c352ab10cef8c4213e2994",
+      "storage": "payload"
+    },
+    {
+      "file": "kana-audio-bundle/PROVENANCE.md",
+      "bytes": 8436,
+      "sha256": "89c238ccf7aa104666937b77ed902fd1d5e9ce8edb7ed0230d802c550f8026c2",
+      "storage": "payload"
+    },
+    {
+      "file": "kana-audio-bundle/audio/a.mp3",
+      "bytes": 9239,
+      "sha256": "21308e0393cda80f987f4f921ddc9657aa562166d0bf1967b343908f6afca582",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ba.mp3",
+      "bytes": 9657,
+      "sha256": "06a0e8fd8df2df9015891e8e42c382c46d174699897d0c78fbde6dbb012eeac8",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/be.mp3",
+      "bytes": 9657,
+      "sha256": "620d98e63730dc13b71eac665271c39bf0bf3958b981e6c57a9ae2f73388cb36",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/bi.mp3",
+      "bytes": 10075,
+      "sha256": "af76a667d55e89485ad8ae223378b07808f9c82188e62dafff46ba959980d09a",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/bo.mp3",
+      "bytes": 10075,
+      "sha256": "5cf4fd499a6a5ecc40430989a3c04519ad3e31fd65b727a84f45a3acc9868bbb",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/bu.mp3",
+      "bytes": 9657,
+      "sha256": "ef92607ddafe3cef4fc84de7671386475f4dd251cdf58c3d5fa924cf55ce63d6",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/bya.mp3",
+      "bytes": 10493,
+      "sha256": "dba63de1dcd1996ed3f4f97d25e964463b576ea122f83fda5595acfaf55cd73d",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/byo.mp3",
+      "bytes": 10911,
+      "sha256": "974edf09180dd6131e9fef4b4ddf937b59dbc98e77b4f6df81306baff12fe82c",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/byu.mp3",
+      "bytes": 10493,
+      "sha256": "c950f1343e52e7f96cc9dbff6c549e1a9063fb8516683d3d2158a80d615bdc05",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/cha.mp3",
+      "bytes": 10075,
+      "sha256": "82e8b9b805031fe47659adea643d80dfb36979e06321dfb3d1b6d569d3f2c549",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/chi.mp3",
+      "bytes": 9239,
+      "sha256": "55f0ee4cb248e4defd04138271fdc1bbf22f51640190b5cf486a83f5ced61391",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/cho.mp3",
+      "bytes": 9657,
+      "sha256": "a0c9ca2c3a42b3cde4829a5bbbbe24db7acd6bae17c499eba8d703aca487a5db",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/chu.mp3",
+      "bytes": 8821,
+      "sha256": "b9db870d880a9c01fe50856694fdac8df4c49778161ea9679517c345ef48d3c5",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/da.mp3",
+      "bytes": 9239,
+      "sha256": "0e55035b42ec50a9a333724f412b0086147bb66966b9a61530b65eb24284a516",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/de.mp3",
+      "bytes": 9657,
+      "sha256": "da042657b1956ca1f16559ac84af1e20129c51de0268f1967a04d8a8c4ec894c",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/di.mp3",
+      "bytes": 9239,
+      "sha256": "46ecb7e2b6bec97f1897e227b153892fe8f71d8e73df26090bc7a7361820b8a5",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/do.mp3",
+      "bytes": 10075,
+      "sha256": "7c4e5486d304835c53c0212d280c243796fff6a6c13d0990d2ad5b6377e9458f",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/du.mp3",
+      "bytes": 10493,
+      "sha256": "45a06d7eb0bef11641b4a14fedec54e687df8086790c89a0beafee634b0dd9f9",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/e.mp3",
+      "bytes": 8821,
+      "sha256": "ee061f69c97639692d8be720843af9a637fcdf5b338b4f2c1e5496f228200892",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/fu.mp3",
+      "bytes": 8821,
+      "sha256": "d3c4f5d1493d364133dbdecd2d7cf538e75c908ecd396218b8d19b79315ccaf1",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ga.mp3",
+      "bytes": 9657,
+      "sha256": "f87715d14b727a45730b97e108f16687776211303cada3eaad0eb44e7bade327",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ge.mp3",
+      "bytes": 9657,
+      "sha256": "6c8edda4feb458eb5d23c4684186900b77a4bf0939dae2647bf06e17ee545a1f",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/gi.mp3",
+      "bytes": 10911,
+      "sha256": "440ca10462ef8fdf72f296dc2b01ca6d9dd254a1f8c810d499c7321e0488119d",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/go.mp3",
+      "bytes": 9657,
+      "sha256": "1969d42326236658929fdbbb408167160101a3735fe1d552e574f928daaca448",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/gu.mp3",
+      "bytes": 9657,
+      "sha256": "75fa8e83ca1725a31247495053fc8320bf3f81630c3590040c6798801e2f51c6",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/gya.mp3",
+      "bytes": 10911,
+      "sha256": "8339676714fe79c2201d7cbcc255cbbe4cc36d6435a7d83a596fd6a4457beb7b",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/gyo.mp3",
+      "bytes": 10911,
+      "sha256": "eea5ad2e75893e05c2707fd4641cb0a7213fa5ed47bef685c45bf2d51bdf239b",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/gyu.mp3",
+      "bytes": 10493,
+      "sha256": "5dedaf1c89057b0caa171f5d34367c310e74c4239b4b6a60127df773a7e8fa27",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ha.mp3",
+      "bytes": 9239,
+      "sha256": "f02665644308b6d605525a2bdcd98add06b28e1287e259c51d017cbf3ee0c854",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/he.mp3",
+      "bytes": 9239,
+      "sha256": "ab27eac5f6ce9422b6c7bf29960767efad0049c3d5e4292072697740f004de4f",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/hi.mp3",
+      "bytes": 8403,
+      "sha256": "78457914db2de862b90e724d159fc4106e5cdb0bc09c4dfc83031ad8685d405a",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ho.mp3",
+      "bytes": 9239,
+      "sha256": "7f463f23874c2c598ec072a96b6fef21e0c59ed0413fc13b63639cdf60e4c226",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/hya.mp3",
+      "bytes": 9657,
+      "sha256": "04f7c4764c1f417170f79ec0df7defd2b17f1cde93221f3233e800701deb02db",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/hyo.mp3",
+      "bytes": 9657,
+      "sha256": "6a8ef07e580eb00e8f61920cf6ffdab7322cdd02640a409f8a0fd5c102f446fe",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/hyu.mp3",
+      "bytes": 9657,
+      "sha256": "fc63e02af946cc713e5cc4eb9893ad463bedeab8586662c65c426f8d9c668046",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/i.mp3",
+      "bytes": 8403,
+      "sha256": "5b7d3e678bb19b92781fa3c8440186a0152dd0bae6b7976a6d779f9caa30316a",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ja.mp3",
+      "bytes": 10493,
+      "sha256": "c6b841e6dc69a387ae6b33fff9d481312f3df0e097ac2c8bcc38746bd922e5f5",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ji.mp3",
+      "bytes": 9239,
+      "sha256": "a8f526de72ae9f7f77608d57728c457e60a788330628bee90fd836d39ebade40",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/jo.mp3",
+      "bytes": 10493,
+      "sha256": "c22b4f48698870e796a99803b4f8a277f84d6696ba4b882ca0b66a7af402098c",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ju.mp3",
+      "bytes": 10075,
+      "sha256": "992b502a658893a3f83dabc41317c662d0f839d625cad5c4e4e531992502716a",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ka.mp3",
+      "bytes": 9239,
+      "sha256": "e9f421af838d373e7f7c462f1699f60775c91063e4b7f647aee770ee23fe0f0b",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ke.mp3",
+      "bytes": 9239,
+      "sha256": "c48e185811954c91619cdb3f7dd64af2f15393b0f7940ca914e6d3250df66741",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ki.mp3",
+      "bytes": 10075,
+      "sha256": "e23f2e6c596128d4ad027134661a13a2d5e31044ef85fbad4a4121c280ab496b",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ko.mp3",
+      "bytes": 9239,
+      "sha256": "84ea0ccef54d6b88fc208e5b7c60bd3bbe77757294044a684f103725491e2298",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ku.mp3",
+      "bytes": 8821,
+      "sha256": "cfc505fa1a692c1efc8965685a4cdc4ed89605f44581a1cfbdda285b3ff8a5e0",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/kya.mp3",
+      "bytes": 9657,
+      "sha256": "f3075bc62e4092fe4a501292d677ae25d2f09601089be06a8084b4ffef9a56b9",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/kyo.mp3",
+      "bytes": 9239,
+      "sha256": "ec1ad0ea2b26da9eef0340754f153b9ae32c4eca890b8ae25116f264f608a83c",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/kyu.mp3",
+      "bytes": 10075,
+      "sha256": "8ed31e6637cfc6af04801cb387f5d659b9a2a657f3c1cb86282f6e5f615ed1ee",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ma.mp3",
+      "bytes": 9657,
+      "sha256": "b2fd250cae9e6a4ecae7d41af8072cb573b035cdb79ead736f72516bc063583b",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/me.mp3",
+      "bytes": 9657,
+      "sha256": "e7e7755bce6fe9425534ab7d0476b3179dc9c44e7cc6c02dbb075ac5647a6ef7",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/mi.mp3",
+      "bytes": 10075,
+      "sha256": "e19ac63f626661c27c60469a114782517fbd57b2fa9b2587d0d586eadd935ae4",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/mo.mp3",
+      "bytes": 9657,
+      "sha256": "b8543d63f75fb90cb38959d360b57110b1441d6d01865f811b75364cb41d381e",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/mu.mp3",
+      "bytes": 9657,
+      "sha256": "df97869374c218de7b0d46c6e3a151cc31a8366b4b9524f500e58991f6b64b01",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/mya.mp3",
+      "bytes": 10911,
+      "sha256": "d0fa62967fcba0c88a549501e431bb68ea9f106cfe81088fc7c44fbee208f978",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/myo.mp3",
+      "bytes": 10911,
+      "sha256": "0eb50a4e819f49d373063811a917f425ad4a463c6a85dee36507bc8449f45050",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/myu.mp3",
+      "bytes": 10911,
+      "sha256": "7544a9328dd078a2719df8891123ec9057c55f15959a9d94a2192719fbcea29f",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/n.mp3",
+      "bytes": 9238,
+      "sha256": "1c898705173db4ec46e4469bc53aa16f3ce5682df3f5b2dcf79187a1b1fc9f40",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/na.mp3",
+      "bytes": 9239,
+      "sha256": "c6d5f6168545ed5a025de817f63618c2ae293b1abeae870d66dd05ce8d1dedfa",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ne.mp3",
+      "bytes": 9239,
+      "sha256": "f9503380dfe672eab61cb45b2e2ef1b76b8633a7b54a1c86383ac436f83fcc01",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ni.mp3",
+      "bytes": 7985,
+      "sha256": "3936bed056756d97e01c4a4fb29525a57a48afe5e55d069a80c5e318a4b2d343",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/no.mp3",
+      "bytes": 9657,
+      "sha256": "817fc3dac70d73bb033ad3f99bc88692c48e56f3d8413cc2e57400c1523b9843",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/nu.mp3",
+      "bytes": 9657,
+      "sha256": "0034913e3b049d4369d5ff687d20ee626b97e19d8c5d78dbfb089f5bcd2c7495",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/nya.mp3",
+      "bytes": 10493,
+      "sha256": "46b1aa55c47a70f939d766d290f08e49f124c71b3610dd486a231d63d82678dd",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/nyo.mp3",
+      "bytes": 10493,
+      "sha256": "086a4da788c90306203516fd5826aa15e6c5efe2a918cf22d149c88859b419a8",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/nyu.mp3",
+      "bytes": 10493,
+      "sha256": "cbbfc37e65fde362a5bb82cf9ff2ee4c2a94bcfc9f445a980d20e9b9919c4b75",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/o.mp3",
+      "bytes": 8821,
+      "sha256": "9b01b8890267fe84315e86dda4128b1ae7aa2427275bde87d67f9e456ca5aa35",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pa.mp3",
+      "bytes": 8821,
+      "sha256": "a8bbe48004906464b50aafd879c354147f295149394ac36ede7401d8ee59dbc1",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pe.mp3",
+      "bytes": 9239,
+      "sha256": "47848aba82d31a27ab40705811b8abdff06d9c63424d664993ac311c1a16762e",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pi.mp3",
+      "bytes": 9657,
+      "sha256": "24911fce09f4e7800fdcc29ffcec7e319e050b68e6a42a7a136227bdd93b0a30",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/po.mp3",
+      "bytes": 8821,
+      "sha256": "d1b7c660a0700d9456091667e0750cbc6f57b12f1c0c5b59ddfba8975c1d035c",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pu.mp3",
+      "bytes": 8403,
+      "sha256": "bde0149eaa991df0c49a8a816bfafa084e82bd25d96ca303968463b99b79ab4d",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pya.mp3",
+      "bytes": 10075,
+      "sha256": "723b0c5234272b4718e31d57849d939544bab818d096ac29dc49dfba156fd046",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pyo.mp3",
+      "bytes": 9657,
+      "sha256": "4b547384f027855f1404588da434eed433510b4ecd2171f4a6f23781344fc6c4",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/pyu.mp3",
+      "bytes": 9657,
+      "sha256": "c8b896c86790e11fad66e2e5ab70528ef145100dc91667b37fbc49f3d5e563c4",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ra.mp3",
+      "bytes": 10493,
+      "sha256": "2b2ec2a1f7ebe9b2bfae47ca31936a5b6460ff40b328a6e8c41f9ed7e4e5241d",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/re.mp3",
+      "bytes": 10075,
+      "sha256": "8338e54014894bca982911d6723e1dfc79973925bd2a49c174dfafbfe35762cb",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ri.mp3",
+      "bytes": 10911,
+      "sha256": "76661300b70e695d1d12e9e9b13615c8253b9fa40cdf21fbae684490ba697a2b",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ro.mp3",
+      "bytes": 10075,
+      "sha256": "396338e6ea20394dcd6baa664bbddadd96e14ec05a5262a74af18337c4412c45",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ru.mp3",
+      "bytes": 9239,
+      "sha256": "520e9f84eb5203536a8a2e35a88e4aec80e9b5e942b5bf4e653d7a98c257a9b4",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/rya.mp3",
+      "bytes": 10911,
+      "sha256": "f7eabf52d0e6615a5d273bca38f179092b088fc3739965fabd88fee065148371",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ryo.mp3",
+      "bytes": 10493,
+      "sha256": "1b9d6828f23e6586e68e0dcea6a4effd8051735ff9147da509c9d461aeba7613",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ryu.mp3",
+      "bytes": 10493,
+      "sha256": "2c482b42b604e81d7f71f229b3450b3f0e71022509196b830e78fbbf83259fa4",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/sa.mp3",
+      "bytes": 10493,
+      "sha256": "b70b8bbebc6d4880a3ef05bc263989fbcc20371b24b5677fc54fdcb1a9844686",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/se.mp3",
+      "bytes": 10493,
+      "sha256": "f4afc7fe1b07ca58e80bfbc477c98add0a65d2e9501485fa9755871b87f40aef",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/sha.mp3",
+      "bytes": 10075,
+      "sha256": "ecf8b1f96e5fd9ae633230f5e052337ff834a525a8f9471600c6f5fc11304b04",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/shi.mp3",
+      "bytes": 10493,
+      "sha256": "5f02d9ea6d6992b780ed6dc986bb4b2bf4dbeebe9c2b8f5869e21dbf38948483",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/sho.mp3",
+      "bytes": 10493,
+      "sha256": "f4adc43f9b397643c68da69f25b398dbc3e600ed1206e429746ad55ed9291bdd",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/shu.mp3",
+      "bytes": 9657,
+      "sha256": "ded3430bea83b79c20d41d16cb6633190d1d33832f42ceb468afaf202cb0cf36",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/so.mp3",
+      "bytes": 10075,
+      "sha256": "c0c7aa1428147bb50590a90d8406e28979c29b4fe9e01c0e556e7de5dd543b69",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/su.mp3",
+      "bytes": 9657,
+      "sha256": "c6fc6d1068546823c97b8e83ed5bf0789fc0a2dc397fde6d1241a5e3164465a4",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ta.mp3",
+      "bytes": 8821,
+      "sha256": "51e5cb0e45bf841076ac8443e6121878c04971e739a80c7bd1f556f84d3f225f",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/te.mp3",
+      "bytes": 9239,
+      "sha256": "260ea204129d2cf6ad2c50941c47adbee258df3bf3505ee0c419061d28ab0bc2",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/to.mp3",
+      "bytes": 9239,
+      "sha256": "2019356387d42f6a0f3ffb2f91c321432f3552489c76821fc3e5b8f9ec4a38fa",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/tsu.mp3",
+      "bytes": 8821,
+      "sha256": "21f500a5ab18ef3ec87f51e67fab5840f17e3adcbaa9c53f07f6f01c072f7812",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/u.mp3",
+      "bytes": 8403,
+      "sha256": "3485b54f91f01f4be0a24b83d2899d160b513e608147a8e4daf8572e4b47b3b7",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/wa.mp3",
+      "bytes": 10075,
+      "sha256": "60b1645a6d21b3690aefd5c21ee7acbec2efdbd2975c3a9b7c9374f03bb3cc62",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/wo.mp3",
+      "bytes": 8821,
+      "sha256": "8331d8b5be4d64282ccd7428f7323d2a672a8417ad31691c573ab28451dda669",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ya.mp3",
+      "bytes": 10075,
+      "sha256": "2f877ed0c34d63ce3d39e38f396f1d1ddc8c91d565ff6948b6bc488a6890c1ad",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/yo.mp3",
+      "bytes": 10075,
+      "sha256": "6343493c09b558cc0768b51227006e4793cd61cecba2749364e3b38b5c23bda2",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/yu.mp3",
+      "bytes": 10075,
+      "sha256": "1d468dcf8cdf5c8c7a43257331e4b4f1ca26975e28fb0cd210b62079e0253c69",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/za.mp3",
+      "bytes": 9239,
+      "sha256": "28054e1380001574e51a4844ff6e6894ad3bd63e1c75ad545aa3a03597a33641",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/ze.mp3",
+      "bytes": 10075,
+      "sha256": "e48f71e72bdbc123819064926c19b990b7d9dfaa4bfcbbc7f25a80c5ad30428c",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/zo.mp3",
+      "bytes": 10075,
+      "sha256": "9d905baaf300ece273dfac532e7b7de767010c9e1385e9f0f6a9706e4348f31d",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/audio/zu.mp3",
+      "bytes": 10493,
+      "sha256": "a926b5f426266b83bd8566bf64e57315ed2b04e368aa2c77abbe39bad2704c52",
+      "storage": "shared"
+    },
+    {
+      "file": "kana-audio-bundle/manifest.json",
+      "bytes": 193261,
+      "sha256": "dcf1981bc3ce7acf1cb409a5b186df199c54856a020c75d03f7cb67f1ebcee78",
+      "storage": "payload"
+    },
+    {
+      "file": "kana-audio-bundle/original-manifest.json",
+      "bytes": 85998,
+      "sha256": "1c08a854e10a82c05720e77a0a1fe5dc11862d6dfb75a844adeb1a42e7f5e70d",
+      "storage": "payload"
+    },
+    {
+      "file": "kana-audio-bundle/runtime-manifest.json",
+      "bytes": 4815,
+      "sha256": "d9ad6cd01a13f2836873a8ef82c99320c7f1658ff2c4e6a8554f883f54c87797",
+      "storage": "payload"
+    },
+    {
+      "file": "manifest.webmanifest",
+      "bytes": 376,
+      "sha256": "131e3e251a11a8f670503d282bc648e0c13ab609929dab33ba14aec3a999b69b",
+      "storage": "payload"
+    },
+    {
+      "file": "music/LICENSE-MUSIC.txt",
+      "bytes": 616,
+      "sha256": "58f87d2601aa278aa442f73f6d89d38d56b85cde9453680bf0e8f7642be0d26d",
+      "storage": "payload"
+    },
+    {
+      "file": "music/PROVENANCE.md",
+      "bytes": 4285,
+      "sha256": "611f621737c66973464c7bbd5e97d1b1f249750498e3b9a10de877c02e5e36ce",
+      "storage": "payload"
+    },
+    {
+      "file": "privacy.html",
+      "bytes": 6018,
+      "sha256": "ad1b0e2708132b59e180c8ffb0a9ec16836468a9cdba501e42af4a7180bae81d",
+      "storage": "payload"
+    },
+    {
+      "file": "robots.txt",
+      "bytes": 483,
+      "sha256": "ec2460317ae2eadb10f8f88fc479abb4174e9e2cbc1d2c49cd9ba3651431676b",
+      "storage": "payload"
+    },
+    {
+      "file": "sitemap.xml",
+      "bytes": 324,
+      "sha256": "3d8638a789a4d7b149f574db72d62847580c709f600c99d49056c67b26e42591",
+      "storage": "payload"
+    },
+    {
+      "file": "src/audio.js",
+      "bytes": 1321,
+      "sha256": "6faf2a37a29664dada3059b954587411caf629fc473c0a96af12835992cee50b",
+      "storage": "payload"
+    },
+    {
+      "file": "src/data.js",
+      "bytes": 6858,
+      "sha256": "a00cb3c853855819d686c8ed021e78316593252379afd2aa3ec409af98ef2aaf",
+      "storage": "payload"
+    },
+    {
+      "file": "src/difficulty.js",
+      "bytes": 998,
+      "sha256": "695bd1dfd28bd395ef0e6e9d0b46260b375df5e42c1f499c1e95f13426a80959",
+      "storage": "payload"
+    },
+    {
+      "file": "src/game.js",
+      "bytes": 67084,
+      "sha256": "dcbd65c0896aedd71176186341771928b17500be84a94efbd0769597f8f1456a",
+      "storage": "payload"
+    },
+    {
+      "file": "src/learner.js",
+      "bytes": 48317,
+      "sha256": "11c250e1e483920d2e2dff3ed64bdcbf6fa3fd3fe65b7fbf43de147f21f7688d",
+      "storage": "payload"
+    },
+    {
+      "file": "src/music.js",
+      "bytes": 19981,
+      "sha256": "878640afeb0f8a5a368bde3b4824cb328de5a7c8ef7d5ca0fbfc217f3c442f7d",
+      "storage": "payload"
+    },
+    {
+      "file": "src/novelty.js",
+      "bytes": 6454,
+      "sha256": "4c4f1efa77da843ed9bcfa18e084f4707b8d69f2dce8765f7bfa0f5d4581ded6",
+      "storage": "payload"
+    },
+    {
+      "file": "src/sfx.js",
+      "bytes": 5842,
+      "sha256": "a3dd6539ba0b3e48d962cb23a9980a9db40ca644ef454eda5f6d71745b918c9e",
+      "storage": "payload"
+    },
+    {
+      "file": "src/style.css",
+      "bytes": 66465,
+      "sha256": "fd72178b03ae6ce598b5cdfb3a8a96138fa7b88e4d617e6b943791e9ebe42f57",
+      "storage": "payload"
+    },
+    {
+      "file": "sw.js",
+      "bytes": 3319,
+      "sha256": "a3b93ecc26df60569223a2ef923cb8d503e055776021ff7a9af35e8a10bf6f89",
+      "storage": "payload"
+    }
+  ]
+}

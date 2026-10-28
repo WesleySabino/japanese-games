@@ -7,10 +7,12 @@ const http = require('node:http');
 const vm = require('node:vm');
 const { chromium } = require('playwright');
 const { root, hash, currentBuild, baselineBuild } = require('./helpers/update-fixture.cjs');
+const baselineVersion = process.argv[2] || '1.10.1';
+assert.ok(['1.10.1', '1.12.0'].includes(baselineVersion), 'choose a pinned update baseline');
 const out = path.join(__dirname, 'artifacts/update');
 const report = { startedAt: new Date().toISOString(), passed: false, syntheticProgressOnly: true, userProfileAccess: false, productionAccess: false, serviceWorkers: 'allowed in disposable localhost contexts', checks: [], pageErrors: [], outsideRequests: [], contextsOpened: 0, contextsClosed: 0 };
 const contexts = new Set();
-const protectedKeys = ['rows', 'best', 'accuracy', 'katakanaUnlocked', 'novelty', 'katakanaNovelty', 'sound', 'reducedEffects', 'syntheticLegacyField'];
+const protectedKeys = ['rows', 'best', 'accuracy', 'katakanaUnlocked', 'journeyMixedUnlocked', 'novelty', 'katakanaNovelty', 'sound', 'reducedEffects', 'syntheticLegacyField'];
 let browser, server, origin, old, candidate, served, broken = false, networkDown = false, currentPage;
 const requests = [];
 const failedAsset = '/kana-audio-bundle/audio/kyo.mp3';
@@ -32,6 +34,7 @@ function preserved(before, after, exactGame = true) {
     assert.deepEqual(a.accuracy.historicalSynthetic, b.accuracy.historicalSynthetic, 'historical accuracy survives new play');
     for (const script of ['hiragana', 'katakana']) assert.ok(a.rows[script] >= b.rows[script], 'earned rows never decrease');
     assert.equal(a.katakanaUnlocked, true);
+    assert.equal(a.journeyMixedUnlocked, true);
     assert.equal(a.sound, b.sound); assert.equal(a.reducedEffects, b.reducedEffects);
   }
 }
@@ -53,7 +56,7 @@ async function syntheticSave() {
   const seen = Object.fromEntries(D.kana.filter(k => k.script === 'hiragana' || k.row === 'a' || ['kana:カ', 'kana:キ'].includes(k.id)).map(k => [k.id, true]));
   const recent = Array.from({ length: 60 }, (_, i) => ({ roundId: 'update:pressure:' + i, firstCorrect: i < 54, timeout: i >= 58, miss: i >= 54 && i < 58, familiar: true }));
   Object.assign(L.gameData('kana-rain'), {
-    rows: { hiragana: 27, katakana: 2 }, katakanaUnlocked: true,
+    rows: { hiragana: 27, katakana: 2 }, katakanaUnlocked: true, journeyMixedUnlocked: true,
     best: { 'hira:normal:180': 1981, 'words:normal:180': 444, 'arcade-v2:hira:easy:180': 321 },
     accuracy: { historicalSynthetic: { correct: 7, total: 9 } }, sound: false, reducedEffects: true,
     syntheticLegacyField: { retained: ['unknown additive data', 42] },
@@ -266,7 +269,7 @@ async function scenario(mobile, interrupted = false) {
 (async () => {
   fs.mkdirSync(out, { recursive: true });
   try {
-    old = baselineBuild(); candidate = currentBuild(); served = old;
+    old = baselineBuild(baselineVersion); candidate = currentBuild(); served = old;
     assert.notEqual(candidate.cache, old.cache, 'a version update needs a distinct service worker cache');
     report.baseline = { version: old.version, commit: old.commit, cache: old.cache };
     report.candidate = { version: candidate.version, cache: candidate.cache, runtimeSha256: hash(candidate.files.get('/assets/game-runtime.js')) };

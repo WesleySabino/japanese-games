@@ -16,6 +16,8 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 assert.equal(hash(oldSource), oldHash, 'pinned 1.10.2 learner source must remain unchanged');
 const previousSource = Buffer.from(fs.readFileSync(path.join(__dirname, 'fixtures/learner-1.11.1.js'), 'utf8').replace(/\r\n/g, '\n'));
 assert.equal(hash(previousSource), 'cdeac72f7937c24bcc0aabb5308d1313afd40bda2830604a406ee21855e91a72', 'pinned protected-key runtime must remain unchanged');
+const productionSource = Buffer.from(fs.readFileSync(path.join(__dirname, 'fixtures/learner-1.12.0.js'), 'utf8').replace(/\r\n/g, '\n'));
+assert.equal(hash(productionSource), '11c250e1e483920d2e2dff3ed64bdcbf6fa3fd3fe65b7fbf43de147f21f7688d', 'pinned 1.12.0 production runtime must remain unchanged');
 const currentSource = fs.readFileSync(path.join(__dirname, '../src/learner.js'));
 const noveltySource = fs.readFileSync(path.join(__dirname, '../src/novelty.js'));
 const report = { startedAt: new Date().toISOString(), passed: false, syntheticProgressOnly: true,
@@ -28,7 +30,7 @@ function seed() {
   return { version: 2, created: 1, sequence: 1, updatedAt: 100, items: {}, errorLog: [], reveals: {}, exposureLedger: [],
     attemptLedger: [{ attemptId: 'synthetic:baseline', itemId: 'kana:あ', facet: 'form→sound', at: 100000,
       gameId: 'kana-rain', correct: true, outcome: 'correct', assistance: false, firstAttempt: true }],
-    games: { 'kana-rain': { rows: { hiragana: 21, katakana: 1 }, best: { synthetic: 700 }, katakanaUnlocked: true,
+    games: { 'kana-rain': { rows: { hiragana: 21, katakana: 1 }, best: { synthetic: 700 }, katakanaUnlocked: true, journeyMixedUnlocked: true,
       sound: false, sessions: 1, syntheticMetadata: { preserve: 42 }, novelty: {
         version: 1, pace: 'calm', seen: { 'kana:あ': true }, recent: [], blocked: false, cooldownRemaining: 0
       } } } };
@@ -40,9 +42,10 @@ async function serve() {
     if (file === '/current.js') { body = currentSource; type = 'text/javascript'; }
     else if (file === '/legacy.js') { body = oldSource; type = 'text/javascript'; }
     else if (file === '/previous.js') { body = previousSource; type = 'text/javascript'; }
+    else if (file === '/production.js') { body = productionSource; type = 'text/javascript'; }
     else if (file === '/novelty.js') { body = noveltySource; type = 'text/javascript'; }
     else if (file === '/blank.html') { body = '<!doctype html><title>Disposable storage probe</title>'; type = 'text/html'; }
-    else if (['/current.html', '/legacy.html', '/previous.html'].includes(file)) {
+    else if (['/current.html', '/legacy.html', '/previous.html', '/production.html'].includes(file)) {
       const runtime = file.slice(1, -5);
       body = '<!doctype html><title>Synthetic ' + runtime + ' learner</title><script src="/' + runtime + '.js"></script><script src="/novelty.js"></script>';
       type = 'text/html';
@@ -108,6 +111,7 @@ function check(saved, events, row = 4) {
   assert.equal(new Set(saved.attemptLedger.map(e => e.attemptId)).size, events.length);
   assert.equal(saved.games['kana-rain'].rows.hiragana, 21); assert.equal(saved.games['kana-rain'].rows.katakana, row);
   assert.equal(saved.games['kana-rain'].katakanaUnlocked, true);
+  assert.equal(saved.games['kana-rain'].journeyMixedUnlocked, true);
   assert.deepEqual(saved.games['kana-rain'].best, { synthetic: 700 });
   assert.deepEqual(saved.games['kana-rain'].syntheticMetadata, { preserve: 42 });
   assert.equal(saved.games['kana-rain'].sound, false);
@@ -192,10 +196,10 @@ async function resetBoundary() {
     return { explicitResetPreserved: true, staleOldTabCouldNotResurrectProgress: true };
   } finally { await close(ctx); }
 }
-async function protectedRuntimeCoexistence() {
+async function protectedRuntimeCoexistence(runtime = 'previous', version = '1.11.1') {
   const ctx = await context();
   try {
-    const reader = await probe(ctx), fixture = seed(), previous = await open(ctx, 'previous'), current = await open(ctx);
+    const reader = await probe(ctx), fixture = seed(), previous = await open(ctx, runtime), current = await open(ctx);
     const events = await Promise.all([add(current, 'synthetic:optimized', 'kana:ア', 4), add(previous, 'synthetic:previous', 'kana:イ', 2)]);
     await Promise.all([current, previous].map(page => page.evaluate(() => Learner.flush())));
     // Hold the ordinary native origin lock so the previous runtime must close
@@ -218,7 +222,7 @@ async function protectedRuntimeCoexistence() {
       assert.equal(saved.exposureLedger.length, 1);
     }
     await current.close(); const reloaded = await open(ctx); check(await exported(reloaded), expected);
-    return { previousRelease: '1.11.1', sameProtectedKey: true, concurrentAnswersRetained: true, previousClosedWhileLockBlocked: true, pendingReferenceRetained: true, preservedAttempts: expected.length, reloadPreserved: true };
+    return { previousRelease: version, sameProtectedKey: true, concurrentAnswersRetained: true, previousClosedWhileLockBlocked: true, pendingReferenceRetained: true, preservedAttempts: expected.length, reloadPreserved: true };
   } finally { await close(ctx); }
 }
 async function run(name, work) {
@@ -239,6 +243,7 @@ async function run(name, work) {
     await run('checkpoint-after-corruption', corruptPrimary);
     await run('reset-survives-old-runtime', resetBoundary);
     await run('protected-runtime-concurrent-close', protectedRuntimeCoexistence);
+    await run('production-1.12.0-concurrent-close', () => protectedRuntimeCoexistence('production', '1.12.0'));
     assert.ok(report.scenarios.length, 'unknown scenario filter');
     report.passed = report.scenarios.every(s => s.passed) && !report.pageErrors.length && !report.outsideRequests.length;
   } catch (error) { report.failure = error.stack; console.error(error); }

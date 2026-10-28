@@ -1,6 +1,8 @@
 # Testes do Kana Rain
 
-## Prévia de otimização — 1.12.1-local.1
+## Otimização — 1.12.1
+
+Validação da publicação: `pnpm test:update 1.12.0` usa os 144 arquivos exatos da versão anterior (todos conferidos contra os hashes da publicação), com testes de atualização na mesma origem, online/offline e instalação interrompida. A suíte nativa de versões misturadas mantém também uma aba da 1.12.0, grava pelas duas versões e fecha a antiga com journal pendente. Ambas exigem preservação do acesso misto Journey, além dos eventos, linhas conquistadas, recordes e configurações. As fixtures contêm somente código/arquivos públicos; nenhum progresso pessoal é publicado.
 
 `save-batching.test.cjs` acrescenta cinco cenários: acerto e referências visuais/sonoras com journal imediato e uma consolidação enfileirada; fechamento antes de obter o lock; fatos novos e aliases mutáveis durante a transação; rejeição do lock/quota com revisão de erro correta e nova tentativa; cópias privadas com semântica JSON equivalente à 1.12.0 fixada. As regressões diferenciais anteriores continuam ativas.
 

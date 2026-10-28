@@ -30,9 +30,10 @@ function currentBuild() {
   }
   return { files, cache: cacheName(files), version: require('../../package.json').version };
 }
-function baselineBuild() {
-  const manifest = JSON.parse(fs.readFileSync(path.join(fixture, '1.10.1.json'), 'utf8'));
-  const compressed = fs.readFileSync(path.join(fixture, '1.10.1.payload.json.gz'));
+function baselineBuild(version = '1.10.1') {
+  assert.ok(['1.10.1', '1.12.0'].includes(version), 'choose a pinned historical release');
+  const manifest = JSON.parse(fs.readFileSync(path.join(fixture, version + '.json'), 'utf8'));
+  const compressed = fs.readFileSync(path.join(fixture, version + '.payload.json.gz'));
   assert.equal(hash(compressed), manifest.payloadSha256, 'historical payload integrity');
   const payload = JSON.parse(zlib.gunzipSync(compressed));
   const files = new Map();
@@ -48,7 +49,7 @@ function baselineBuild() {
 }
 
 // Explicit maintenance operation: run against dist/ built by the pinned historical checkout.
-function capture(directory) {
+function capture(directory, version = '1.10.1') {
   const base = fs.realpathSync(directory), files = [];
   function walk(folder, prefix = '') {
     for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
@@ -66,16 +67,20 @@ function capture(directory) {
     if (!shared) payload[file] = bytes.toString('base64');
     entries.push({ file, bytes: bytes.length, sha256: hash(bytes), storage: shared ? 'shared' : 'payload' });
   }
-  const version = '1.10.1', cache = cacheName(map);
-  assert.equal(cache, 'kana-rain-v38-release-1.10.1', 'capture the pinned release, never the current candidate');
+  const pins = {
+    '1.10.1': { cache: 'kana-rain-v38-release-1.10.1', commit: '4e02aee67272e21111875087e6a7a033fed5e4b7' },
+    '1.12.0': { cache: 'kana-rain-v48-release-1.12.0', commit: '3b6024aa7c32206770b5d09f207774eb725ad07f' }
+  }, pin = pins[version], cache = cacheName(map);
+  assert.ok(pin, 'capture only a pinned release');
+  assert.equal(cache, pin.cache, 'capture the pinned release, never the current candidate');
   const compressed = zlib.gzipSync(JSON.stringify(payload), { level: 9 });
   fs.mkdirSync(fixture, { recursive: true });
-  fs.writeFileSync(path.join(fixture, '1.10.1.payload.json.gz'), compressed);
-  fs.writeFileSync(path.join(fixture, '1.10.1.json'), JSON.stringify({ version, commit: '4e02aee67272e21111875087e6a7a033fed5e4b7', cache, payloadSha256: hash(compressed), entries }, null, 2) + '\n');
+  fs.writeFileSync(path.join(fixture, version + '.payload.json.gz'), compressed);
+  fs.writeFileSync(path.join(fixture, version + '.json'), JSON.stringify({ version, commit: pin.commit, cache, payloadSha256: hash(compressed), entries }, null, 2) + '\n');
   console.log('Captured ' + files.length + ' historical files; compressed text payload ' + compressed.length + ' bytes');
 }
 module.exports = { root, hash, currentBuild, baselineBuild };
 if (require.main === module) {
-  assert.equal(process.argv[2], '--capture'); assert.equal(process.argv.length, 4);
-  capture(process.argv[3]);
+  assert.ok(['--capture', '--capture-1.12.0'].includes(process.argv[2])); assert.equal(process.argv.length, 4);
+  capture(process.argv[3], process.argv[2] === '--capture-1.12.0' ? '1.12.0' : '1.10.1');
 }

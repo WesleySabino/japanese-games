@@ -1,11 +1,11 @@
 # Kana Rain releases
 
-## Unreleased — 1.12.1-local.1
+## 1.12.1 — 2026-10-28
 
 - Group flushes queued for the same Web Lock before its transaction starts, while capturing and synchronously journaling each caller's facts. New changes during a transaction still queue a follow-up. Rejected locks and newer failure warnings remain observable.
 - Copy already-private snapshot trees directly instead of serializing and parsing complete histories again. Keep the original JSON boundary for public data, storage reads and imports, independent durable/public snapshots, full-content cache comparisons and transaction-end reconciliation. Storage format and keys are unchanged.
 - Remove moving drop/spirit filters and control backdrop blurs in Reduced effects, retaining target and danger markers. Skip splash/ripple DOM creation in that mode and for OS reduced-motion preferences. Normal visuals and pronunciation remain available.
-- Add native batching, large-history concurrent-close, visual and differential regressions against the pinned 1.12.0 learner. Local preview only; not deployed.
+- Add native batching, large-history concurrent-close, visual and differential regressions against the pinned 1.12.0 learner. Pin the complete 1.12.0 build to test same-origin online/offline updates, interrupted installations and coexistence with its old open tabs. Retain all storage keys, schema and user history.
 
 ## 1.12.0 — 2026-10-27
 
