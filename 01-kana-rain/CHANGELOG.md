@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## 1.12.0 — 2026-10-27
+
+- Add a third mode, Journey: finish Hiragana, introduce the five Katakana vowels, then interleave both scripts without starting a new session. Honor previously earned access and save additive mixed access after vowel readiness; later mistakes never relock it.
+- Plan each script separately and alternate eligible drops so a full Hiragana catalogue cannot crowd out Katakana. Keep all admission brakes, reusable Katakana learning slots, adaptive rain, shared sound controls and per-script accuracy counters.
+- Keep focused reviews from both alphabets, preserve historical facts and storage formats, and provide a localhost-only sample-progress demonstration excluded from production.
+- Add progression, counting, reload, two-tab and offline regressions plus desktop/phone layout captures. Keep the sample-progress preview and private exports out of the production package.
+
 ## 1.11.2 — 2026-10-26
 
 - Reduce consolidation work by reusing a private normalized IndexedDB snapshot only when its complete serialized content matches, and retaining the commit-owned durable snapshot instead of cloning it again. Public memory still receives an independent copy and final reconciliation is unchanged.

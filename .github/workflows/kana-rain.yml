@@ -91,6 +91,9 @@ jobs:
       - name: Build the static site
         run: pnpm build
 
+      - name: Run Journey progression, mixed rain, two-tab and offline browser checks
+        run: pnpm run test:journey
+
       - name: Run nonblocking feedback image preparation browser checks
         run: pnpm run test:effects
 

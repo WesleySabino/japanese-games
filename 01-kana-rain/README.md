@@ -1,8 +1,24 @@
 # Kana Rain
 
-**Release: 1.10.5 — 24 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.12.0 — 27 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
+
+## Journey — both alphabets
+
+The third alphabet choice, **Journey (both)**, starts with Hiragana, switches to Katakana in the same session after Hiragana completion, then interleaves both scripts after the five Katakana vowels reach the existing readiness rule (two correct first answers and 85% first-answer accuracy). Existing Katakana access is honored. Mixed access is an earned, additive flag; later mistakes do not relock it. Both alphabets keep their original histories, row unlocks, readings, input controls, shared failure pause and script-appropriate longer brake. Separate Hiragana and Katakana modes remain available.
+
+For a demonstration with a private local export:
+
+```powershell
+node scripts/preview-journey.cjs --progress 'C:/path/to/kana-rain-progress.json' --port 4198
+```
+
+Open `http://127.0.0.1:4198/`. This localhost-only server imports additively into a separate local origin using the validated importer, confirms IndexedDB, reloads, and selects Journey. Reopening retains local practice rather than repeating the import. It never changes production or the source JSON. Only the public asset allowlist and two local preview endpoints are served. The preview script, export and bootstrap are excluded from production. The preview intentionally disables service workers to avoid stale local assets; the production build is tested offline separately. Do not expose or tunnel this private preview server.
+
+Run `pnpm test` and `pnpm build && pnpm test:journey` for the new progression and native browser scenarios.
+
+## Existing game
 
 The illustrated garden, correct-answer/mistake/expiration counters, streaks, accelerating rain, pronunciation audio, touch sound pad and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
 

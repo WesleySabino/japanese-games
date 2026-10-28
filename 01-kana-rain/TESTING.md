@@ -1,5 +1,15 @@
 # Testes do Kana Rain
 
+## Journey — prévia local de 2026-10-27
+
+`tests/journey.test.cjs` cobre o início sem katakana, transição dentro da partida no último acerto qualificante de hiragana, passagem das cinco vogais de katakana para a mistura, distribuição entre alfabetos, continuidade das apresentações, freios por erro/expiração, precisão por alfabeto, duas formas homófonas visíveis, teclado/sound pad, revisão de ambos, recarga, preservação de eventos e modos antigos, exploração sem ganhar grupos e acesso misto que só é removido pelo reset explícito.
+
+`pnpm build` seguido de `pnpm test:journey` executa o pacote real em Chromium descartável: transição por resposta real, PC 1366×768, celulares 390×844 e 360×640 e paisagem 844×390, controles compartilhados e geometria sem sobreposição, duas abas que gravam e fecham, e recarga/jogo/gravação offline com o service worker real. A suíte usa apenas dados sintéticos; capturas e relatório ficam em `tests/artifacts/journey/`. As suítes anteriores continuam sendo regressões dos modos separados e da persistência.
+
+O servidor opcional `scripts/preview-journey.cjs` usa um export privado somente em localhost, através do importador aditivo validado. Ele é excluído da distribuição. Dados pessoais nunca entram em fixtures ou commits. A demonstração tem uma origem diferente da produção e confirma IndexedDB antes de recarregar.
+
+Verificação local em 2026-10-27: 283 testes de código passaram, incluindo os 11 novos casos de Journey. Build e todas as suítes de navegador passaram: Journey (7 cenários), smoke geral, melhorias de aprendizado, apresentação/ritmo de novidades, sound pad, Katakana, quick wins, efeitos, música, atualização, armazenamento, convivência entre versões e importação. Os relatórios privados desta rodada ficam em `.release/journey/` no repositório; isso descreve cobertura funcional, sem percentual de cobertura de linhas.
+
 ## Consolidação 1.11.2 — comparação com a 1.11.1
 
 A otimização conserva o schema, todos os eventos e o journal síncrono. O cache de normalização compara o conteúdo JSON completo de cada snapshot do IndexedDB; contadores, vetores e timestamps iguais não bastam. O snapshot durável é privado e a memória pública mantém uma cópia independente. A reconciliação ao concluir a transação continua sendo executada.

@@ -160,9 +160,26 @@
   function candidates(mode=cfg.mode){
     if(mode==='hira')return unlocked('hiragana').map(k=>k.id);
     if(mode==='kata')return unlocked('katakana').map(k=>k.id);
+    if(mode==='journey'){
+      const stage=journeyStage();
+      return (stage==='hiragana'?unlocked('hiragana'):stage==='katakana'?unlocked('katakana'):[...unlocked('hiragana'),...unlocked('katakana')]).map(k=>k.id);
+    }
     return [];
   }
-  function modeAvailable(mode){return mode==='hira'||mode==='kata'&&(explore||gd.katakanaUnlocked);}
+  function journeyStage(){
+    if(!modeAvailable('kata'))return 'hiragana';
+    // Give the first Katakana row a focused introduction before mixing scripts.
+    return gd.journeyMixedUnlocked===true?'mixed':'katakana';
+  }
+  function unlockJourneyMix(){
+    if(gd.journeyMixedUnlocked||!modeAvailable('kata'))return;
+    if(D.kana.filter(k=>k.script==='katakana'&&k.row==='a').every(k=>N.hasSeen(novelty,k.id)&&readiness(k).ready)){
+      gd.journeyMixedUnlocked=true;L.flush();
+    }
+  }
+  function reviewCandidates(){return cfg.mode==='journey'?[...unlocked('hiragana'),...(modeAvailable('kata')?unlocked('katakana'):[])].map(k=>k.id):candidates();}
+  const journeyNames={hiragana:'Journey · Hiragana',katakana:'Journey · Katakana begins',mixed:'Journey · Mixed rain'};
+  function modeAvailable(mode){return mode==='hira'||mode==='journey'||mode==='kata'&&(explore||gd.katakanaUnlocked);}
   function unlockKatakana(){
     if(explore||gd.katakanaUnlocked||gd.rows.hiragana<D.rowsOrder.length)return;
     if(D.kana.filter(k=>k.script==='hiragana').every(k=>readiness(k).ready)){gd.katakanaUnlocked=true;L.flush();}
@@ -241,11 +258,11 @@
     cfg.difficulty=id;N.setPace(novelty,R.profiles[id].pace);N.setPace(katakanaNovelty,R.profiles[id].pace);cfg.noveltyPace=N.profile(novelty).id;gd.difficulty=id;L.flush();renderMenu();
   }
   function renderMenu(){
-    unlockKatakana();
-    const names={hira:'Hiragana',kata:'Katakana'};
+    unlockKatakana();unlockJourneyMix();
+    const names={hira:'Hiragana',kata:'Katakana',journey:'Journey (both)'};
     [...$('mode').options].forEach(o=>{o.disabled=!modeAvailable(o.value);o.textContent=names[o.value]+(o.disabled?' · Complete Hiragana first':'');});
     if(!running()&&!modeAvailable(cfg.mode))cfg.mode='hira';$('mode').value=cfg.mode;$('mode').disabled=!!running();
-    $('menuHint').innerHTML='Romaji · <kbd>Enter</kbd> to begin';
+    $('menuHint').innerHTML=cfg.mode==='journey'?escapeText({hiragana:'Grow your Hiragana, then discover Katakana.',katakana:'Learn the five Katakana vowels, then mix both alphabets.',mixed:'Hiragana and Katakana in one rain. Same sound controls.'}[journeyStage()]):'Romaji · <kbd>Enter</kbd> to begin';
     document.querySelectorAll('[data-script]').forEach(b=>{b.disabled=b.dataset.script==='katakana'&&!modeAvailable('kata');});
     if(mapScript==='katakana'&&!modeAvailable('kata'))mapScript='hiragana';
     renderDifficulty();
@@ -352,15 +369,16 @@
     if(G&&!G.over)return;
     stopLoop();clearTimeout(feedbackTimer);clearTimeout(milestoneTimer);clearTimeout(heartTimer);feedbackPriority=-1;feedbackUntil=0;currentFeedback=null;feedbackQueue=[];
     $('feedback').className='feedback';$('milestoneFeedback').className='milestone-feedback';$('heartLoss').classList.add('hidden');document.body.classList.remove('heart-hit');$('field').querySelectorAll('.drop,.effect').forEach(e=>e.remove());
-    const profile=R.profiles[cfg.difficulty],weather=R.atTime(cfg.difficulty,0);
-    const reviewIds=Array.isArray(options.reviewIds)?[...new Set(options.reviewIds)].filter(id=>candidates().includes(id)):null;
+    const weather=R.atTime(cfg.difficulty,0);
+    const reviewIds=Array.isArray(options.reviewIds)?[...new Set(options.reviewIds)].filter(id=>reviewCandidates().includes(id)):null;
     const sessionDuration=reviewIds?.length?60:cfg.duration,now=performance.now();
     gd.difficulty=cfg.difficulty;L.flush();
     G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
+    G.journeyStage=journeyStage();G.nextScript='katakana';
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');music();
     $('answer').disabled=false;$('submitBtn').disabled=false;$('answer').value='';
-    $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+profile.name+' · '+({hira:'Hiragana',kata:'Katakana'}[cfg.mode]);
+    renderGameLabel();
     $('lives').classList.remove('hidden');enableSetup(false);hud();keyboardOpen=mobile();resetPad();keyboard();focusAnswer();
     fitField();initializeRounds();syncAnimationState();wakeLoop();
   }
@@ -374,24 +392,28 @@
   // Admission controls first presentations, never the unlocked repertoire or rain curve.
   const starter=id=>D.kanaById[id]?.row==='a';
   function canPresent(id){
-    if(!D.kanaById[id])return false;
+    const kana=D.kanaById[id];if(!kana)return false;
+    // Deferred queue entries cannot outlive the current Journey curriculum phase.
+    if(G.mode==='journey'&&!(G.reviewIds||candidates()).includes(id))return false;
     // Keep the debut identity until its drop leaves, even though it is now persisted as seen.
     if(G.drops.some(d=>d.id===id&&d.isIntroduction))return false;
     if(N.hasSeen(novelty,id))return true;
     if(G.drops.some(d=>d.isIntroduction))return false;
-    const known=(G.reviewIds||candidates()).some(id=>N.hasSeen(novelty,id));
+    const known=(G.reviewIds||candidates()).some(id=>(G.mode!=='journey'||D.kanaById[id].script===kana.script)&&N.hasSeen(novelty,id));
     // Bootstrap an empty alphabet; once familiar content exists, vowels respect both brakes.
     if(starter(id)&&!known)return true;
-    if((G.mode==='kata'?katakanaNovelty:novelty).blocked||novelty.cooldownRemaining>0)return false;
+    if((G.mode==='kata'||G.mode==='journey'&&kana.script==='katakana'?katakanaNovelty:novelty).blocked||novelty.cooldownRemaining>0)return false;
     if(starter(id))return true;
     // Katakana practice can move on once an introduced Katakana is ready;
     // keep every debut in the session history and retain Hiragana's total limit.
-    const learning=G.mode==='kata'?[...G.newIds].filter(id=>!readiness(D.kanaById[id]).ready).length:G.newIds.size;
+    const learning=G.mode==='kata'||G.mode==='journey'&&kana.script==='katakana'?[...G.newIds].filter(id=>D.kanaById[id].script===kana.script&&!readiness(D.kanaById[id]).ready).length:[...G.newIds].filter(id=>D.kanaById[id].script===kana.script).length;
     return learning<N.constants.maxNew&&(!known||G.familiarSinceIntroduction>=N.constants.warmup);
   }
   function nextEntry(){
     if(!G.queue.length)refill();
-    let index=G.queue.findIndex(e=>canPresent(e.id));
+    const eligible=e=>canPresent(e.id);
+    let index=G.mode==='journey'&&G.journeyStage==='mixed'?G.queue.findIndex(e=>D.kanaById[e.id]?.script===G.nextScript&&eligible(e)):-1;
+    if(index<0)index=G.queue.findIndex(eligible);
     if(index<0){
       // A queued debut may become blocked after a miss. Keep it deferred and keep the rain going.
       const known=(G.reviewIds||candidates()).filter(id=>N.hasSeen(novelty,id)&&canPresent(id));
@@ -399,12 +421,17 @@
       G.queue.push(...plan.map(id=>({id})));
       index=G.queue.findIndex(e=>canPresent(e.id));
     }
-    return index<0?null:G.queue.splice(index,1)[0];
+    if(index<0)return null;
+    const entry=G.queue.splice(index,1)[0];
+    if(G.mode==='journey'&&G.journeyStage==='mixed')G.nextScript=D.kanaById[entry.id].script==='hiragana'?'katakana':'hiragana';
+    return entry;
   }
   function refill(){
-    const plan=L.selectRound(G.reviewIds||candidates(),{facet:facet(),size:8,maxNew:3});
+    const ids=G.reviewIds||candidates();
+    // Plan each script independently so 104 familiar Hiragana cannot crowd out Katakana.
+    const plan=G.mode==='journey'&&G.journeyStage==='mixed'?['katakana','hiragana'].flatMap(script=>L.selectRound(ids.filter(id=>D.kanaById[id].script===script),{facet:facet(),size:4,maxNew:2})):L.selectRound(ids,{facet:facet(),size:8,maxNew:3});
     // Seed the first garden in curriculum order; reviews are interleaved thereafter.
-    if(G.attempts)L.shuffle(plan);
+    if(G.attempts&&(G.mode!=='journey'||ids.some(id=>N.hasSeen(novelty,id))))L.shuffle(plan);
     plan.forEach(id=>G.queue.push({id}));
   }
   function generateRound(plan,rng=Math.random){if(!D.kanaById[plan.id])throw new RangeError('Only kana can appear in Kana Rain.');return {id:plan.id,x:rng(),facet:FACET,responseFormat:'romaji'};}
@@ -501,13 +528,16 @@
     L.record(ev.itemId,ev.facet,ev);G.events.push(ev);G.inputStartedAt=null;G.inputPausedMs=0;
     // Count submitted answers, not keystrokes or unique kana. Expirations are separate.
     if(detail.outcome!=='timeout'){G.attempts++;if(correct===true)G.correct++;else if(correct===false)G.errors++;}
-    const stat=gd.accuracy[cfg.mode] || (gd.accuracy[cfg.mode]={attempts:0,correct:0});
+    // Journey feeds the existing per-alphabet counters, including their merge/recovery rules.
+    const statMode=cfg.mode==='journey'?(katakanaIds.has(d.id)?'kata':'hira'):cfg.mode;
+    const stat=gd.accuracy[statMode] || (gd.accuracy[statMode]={attempts:0,correct:0});
     if(detail.outcome!=='timeout'){stat.attempts++;if(correct)stat.correct++;}
-    if(correct===false){N.pause(novelty);if(G.mode==='kata')N.pause(katakanaNovelty);G.familiarSinceIntroduction=0;}
+    const katakanaRound=D.kanaById[d.id].script==='katakana';
+    if(correct===false){N.pause(novelty);if(katakanaRound)N.pause(katakanaNovelty);G.familiarSinceIntroduction=0;}
     if(correct||detail.outcome==='timeout'){
       // Earlier wrong answers make this a reading miss, unless the drop was the kana's debut.
       const outcome={roundId:d.roundId,firstCorrect:correct===true&&firstAttempt,timeout:detail.outcome==='timeout',miss:!d.isIntroduction&&!firstAttempt,familiar:!d.isIntroduction,failureRecorded:!firstAttempt};
-      N.finish(novelty,outcome);if(G.mode==='kata')N.finish(katakanaNovelty,outcome);
+      N.finish(novelty,outcome);if(katakanaRound)N.finish(katakanaNovelty,outcome);
       if(detail.outcome==='timeout'||!firstAttempt)G.familiarSinceIntroduction=0;
       else if(!d.isIntroduction)G.familiarSinceIntroduction++;
     }
@@ -548,8 +578,7 @@
     else updateTarget();
   }
   function checkUnlock(){
-    if(explore)return;
-    const scripts=cfg.mode==='hira'?['hiragana']:['katakana'];
+    const scripts=explore?[]:cfg.mode==='journey'?(modeAvailable('kata')?['hiragana','katakana']:['hiragana']):cfg.mode==='hira'?['hiragana']:['katakana'];
     scripts.forEach(sc=>{if(gd.rows[sc]>=D.rowsOrder.length)return;
       if(unlocked(sc).every(k=>readiness(k).ready)){
         gd.rows[sc]++;L.flush();const row=D.rowsOrder[gd.rows[sc]-1];
@@ -557,7 +586,14 @@
         flash('A new row is growing: '+label,false,4000,3);sfx('unlock');G.queue=[];
       }
     });
-    unlockKatakana();
+    unlockKatakana();unlockJourneyMix();
+    if(G.mode==='journey'&&!G.reviewIds&&G.journeyStage!==journeyStage()){
+      G.journeyStage=journeyStage();G.queue=[];G.nextScript='katakana';
+      renderGameLabel();celebrate(G.journeyStage==='mixed'?'Both alphabets, one rain!':'Your Katakana rain begins!','unlock');
+    }
+  }
+  function renderGameLabel(){
+    $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+R.profiles[G.difficulty].name+' · '+(G.mode==='journey'?journeyNames[G.journeyStage]:{hira:'Hiragana',kata:'Katakana'}[G.mode]);
   }
   function submitMatchedAnswer(drop,value,method='typing'){
     G.pendingAnswer=null;drop.submittedResponse=value;drop.submittedMethod=method;$('answer').value='';hit(drop);
@@ -640,9 +676,9 @@
     $('resultMessage').textContent=reason+'. '+(G.correct?'Every answer is practice.':'Listen to a few kana, then try again.');
     $('resultStats').innerHTML=`<div><b>${G.correct}</b><small>CORRECT ANSWERS</small></div><div><b>${G.errors}</b><small>WRONG ANSWERS</small></div><div><b>${G.expirations}</b><small>EXPIRED DROPS</small></div>`;
     $('resultDetails').textContent=`${firstCorrect.length} first-try · ${corrected.length} after correction · Best streak ${G.bestStreak}`;
-    renderNextRow(cfg.mode==='kata'?'katakana':'hiragana');
+    renderNextRow(cfg.mode==='kata'||cfg.mode==='journey'&&modeAvailable('kata')?'katakana':'hiragana');
     const review=[...new Set([...G.mistakes,...G.missed,...[...G.confs].flatMap(c=>c.split('|'))])].filter(canShowFeedbackKana);
-    lastReview=review.filter(id=>candidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
+    lastReview=review.filter(id=>reviewCandidates().includes(id));$('reviewPracticeBtn').classList.toggle('hidden',!lastReview.length);
     $('resultReview').innerHTML=review.length?'<p class="review-heading"><b>A little more practice</b><span class="review-hint">Tap to listen</span></p><div class="review-grid">'+review.map(id=>{
       const char=symbol(id),reading=readingLabel(id);
       const tag=A.hasRecording(char)?'button':'div';

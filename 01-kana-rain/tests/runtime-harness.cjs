@@ -13,7 +13,7 @@ async function runtime(options = {}) {
     constructor(id = '') {
       this.id = id; this.value = ''; this.style = { setProperty() {} }; this.dataset = {}; this.children = [];
       this.open = false; this.width = 800; this.height = 600; this.spriteWidth = 65; this.spriteHeight = 85;
-      this.options = ['hira', 'kata'].map(value => ({ value }));
+      this.options = ['hira', 'kata', 'journey'].map(value => ({ value }));
       const classes = new Set();
       this.classList = {
         add: (...values) => values.forEach(value => classes.add(value)),
