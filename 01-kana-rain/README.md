@@ -1,10 +1,10 @@
 # Kana Rain
 
-**Published release: 1.11.2 — 26 October 2026.** Journey below is a local, unpublished preview. See [release history](CHANGELOG.md).
+**Release: 1.12.0 — 27 October 2026.** See [release history](CHANGELOG.md).
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 
-## Local Journey preview
+## Journey — both alphabets
 
 The third alphabet choice, **Journey (both)**, starts with Hiragana, switches to Katakana in the same session after Hiragana completion, then interleaves both scripts after the five Katakana vowels reach the existing readiness rule (two correct first answers and 85% first-answer accuracy). Existing Katakana access is honored. Mixed access is an earned, additive flag; later mistakes do not relock it. Both alphabets keep their original histories, row unlocks, readings, input controls, shared failure pause and script-appropriate longer brake. Separate Hiragana and Katakana modes remain available.
 
