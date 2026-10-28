@@ -502,6 +502,11 @@ kbd { display:inline-block; padding:1px 4px; font:11px "Segoe UI",sans-serif; bo
 .reduce-effects .rain-lines { opacity:.035; }
 .reduce-effects .drop.pop { opacity:0; }
 .reduce-effects .effect, .reduce-effects.heart-hit .game-world::after { display:none; }
+.reduce-effects .drop,.reduce-effects #fieldSpirit,.reduce-effects .main-menu .primary { filter:none!important; }
+.reduce-effects .menu-button,.reduce-effects .session-selectors,.reduce-effects .utility-controls button,.reduce-effects .hud-actions button,.reduce-effects .answer-bar,.reduce-effects .countdown-overlay,.reduce-effects .game-dialog::backdrop { backdrop-filter:none; }
+.reduce-effects .menu-button,.reduce-effects .answer-bar { box-shadow:none; }
+/* Keep selection and danger legible without a moving blur/shadow layer. */
+.reduce-effects .drop.target { color:#fff5ca; text-shadow:0 1px 2px #082b31; }
 @keyframes heartImpact { from { opacity:1; } to { opacity:0; } }
 
 @media (min-width:350px) and (max-width:760px) {

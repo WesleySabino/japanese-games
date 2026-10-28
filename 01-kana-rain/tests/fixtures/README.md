@@ -1,5 +1,9 @@
 # Persistence compatibility fixture
 
+## Smoother-save baseline 1.12.0
+
+`learner-1.12.0.js` is the unchanged learner from the 1.12.0 release (`3b6024aa7c32206770b5d09f207774eb725ad07f`). Its LF-normalized SHA-256 is `11c250e1e483920d2e2dff3ed64bdcbf6fa3fd3fe65b7fbf43de147f21f7688d`. It contains only source and is never shipped. `save-batching.test.cjs` checks synchronous journals, shared queued commits, changes during a transaction, rejected locks and JSON-compatible private snapshot copying against this baseline.
+
 `learner-1.10.2.js` is the original learner from this repository at commit `6bdf542` (`01-kana-rain/src/learner.js`). It is retained only to test an old runtime closing or writing during an upgrade; it is not shipped in the game.
 
 SHA-256 after normalizing CRLF to LF: `b908462e680bf53855f36a68ab6d66dc60b0fea4d9e3758d124094bb8846fa5d`.

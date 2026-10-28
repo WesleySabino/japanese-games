@@ -63,7 +63,7 @@ async function runtime(options = {}) {
   const storage = new Map(options.storage || []), context = vm.createContext({
     document, location: { hostname: '127.0.0.1', search: options.explore ? '?all' : '' }, navigator: {}, performance: { now: () => now },
     URL, URLSearchParams, Blob, console, queueMicrotask, ResizeObserver, NihongoAnalytics: options.analytics,
-    innerWidth: options.mobile ? 390 : 1000, innerHeight: 800, matchMedia: () => ({ matches: !!options.mobile }),
+    innerWidth: options.mobile ? 390 : 1000, innerHeight: 800, matchMedia: query => ({ matches: query.includes('prefers-reduced-motion') ? !!options.reducedMotion : !!options.mobile }),
     localStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
     requestAnimationFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; },
     cancelAnimationFrame: id => frames.delete(id), setTimeout: () => 1, clearTimeout() {}, confirm: () => true,

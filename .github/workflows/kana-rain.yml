@@ -94,6 +94,9 @@ jobs:
       - name: Run Journey progression, mixed rain, two-tab and offline browser checks
         run: pnpm run test:journey
 
+      - name: Run batched saves, large-history tab closing and reduced effects browser checks
+        run: pnpm run test:smoother-saving
+
       - name: Run nonblocking feedback image preparation browser checks
         run: pnpm run test:effects
 

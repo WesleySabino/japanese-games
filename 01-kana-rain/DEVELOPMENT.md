@@ -6,8 +6,13 @@ See [TESTING](TESTING.md) for the current test inventory, functional coverage, v
 
 The app is static HTML, CSS and JavaScript. Source previews load `data`, `learner`, `audio`, `sfx`, `music`, `difficulty`, `novelty`, then `game`; the production bundle preserves that order. The game awaits `Learner.ready` before reading saved state. Keep the `window.KanaRain` module boundary (`generateRound`, `render`, `score`, `dispose` and session controls) available to integration tests. `score` decorates evidence; it is not a point-scoring system.
 
+Queued-save optimization: every `flush` still captures and writes its tab-owned journal synchronously. Only calls waiting for the same Web Lock share a promise/commit; the batch is detached as soon as the lock callback starts. Facts arriving during the transaction create a new job. Imports that already hold the lock bypass batching. The latest batch revision controls status, and rejection clears only that batch. No-lock fallbacks retain their synchronous behavior.
+
+`copySnapshot` accepts only private JSON-shaped snapshots that have already crossed `copy`/normalization. It allocates independent arrays/objects and preserves JSON numeric/null/omission semantics. Never substitute it for the public, import or raw-read JSON boundary. Durable/public ownership, full-content comparison and final reconciliation are required even when a queue has no new operations; public readers can hold mutable aliases.
+
 Preserve these runtime invariants:
 
+- A reduced-effects or OS reduced-motion splash/ripple is skipped before creating a DOM node. Reduced effects removes drop/spirit filters and HUD/input backdrop blurs; target arrows, danger badges, heart counts and input behavior remain.
 - Schedule animation frames only for active play or countdowns. Pause, hidden tabs and disposal stop the loop; resuming starts with a fresh frame clock. Simulation and pending-input delays use active time.
 - Cache field and sprite dimensions with `ResizeObserver`. Geometry reads during creation or resizing are legitimate; avoid repeated layout reads in the frame loop.
 - Rebuild progress panels only when dirty and visible. Build the fixed sound pad once, then update its stage. Update HUD text and classes only when their visible values change.
