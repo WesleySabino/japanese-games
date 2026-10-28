@@ -5,13 +5,23 @@
 var KEY='jp-learner-v1',DAY=86400000,MIN=60000,mem,db=null,store=null,revision=0,listeners=[];
 // Old runtimes can still replace KEY on pagehide. They never write this primary.
 var PRIMARY=KEY+':protected:v1',BACKUP=KEY+':checkpoint:v1';
-var readCache={},databaseCache={};
+var readCache={},databaseCache={},queuedCommit=null;
 var attemptIds=new Set(),exposureIds=new Set();
 // Each tab owns its write-ahead journal. Never overwrite another tab's pending work.
 var writer=root.crypto&&root.crypto.randomUUID?root.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);
 var LOG=KEY+':pending:',LOCK=KEY+':commit',pending=[],serial=0,checkpoint;
 var IMPORT_LOCKED={},MAX_IMPORT_BYTES=32*1024*1024,importRejections=Object.create(null);
 function copy(value){return value===undefined?undefined:JSON.parse(JSON.stringify(value));}
+// Private snapshots have already crossed the JSON validation/copy boundary.
+// Copy their trees without allocating and parsing a second full-history string.
+// Never use this on public game data, imported objects or raw storage reads:
+// those must retain JSON's toJSON/getter/Date behavior through copy().
+function copySnapshot(value){
+if(value===null||typeof value!=='object')return typeof value==='number'?Number.isFinite(value)?value===0?0:value:null:value;
+var out,i,v;
+if(Array.isArray(value)){out=new Array(value.length);for(i=0;i<value.length;i++){v=value[i];out[i]=v===undefined||typeof v==='function'||typeof v==='symbol'?null:copySnapshot(v);}return out;}
+out={};var keys=Object.keys(value);for(i=0;i<keys.length;i++){var k=keys[i];v=value[k];if(v===undefined||typeof v==='function'||typeof v==='symbol')continue;var next=copySnapshot(v);if(k==='__proto__')Object.defineProperty(out,k,{value:next,enumerable:true,writable:true,configurable:true});else out[k]=next;}return out;
+}
 function epoch(data){return data._sync&&data._sync.epoch||{id:'legacy:'+data.created,at:0};}
 function sameEpoch(a,b){return a.id===b.id||a.at===0&&b.at===0;}
 function newerEpoch(a,b){return a.at>b.at||a.at===b.at&&a.id>b.id;}
@@ -96,7 +106,7 @@ var primary=ac&&!bc?a:bc&&!ac?b:preferB?b:a,other=primary===a?b:a;
 // Prove inclusion from event IDs and earned data, never from revision alone.
 // The common subset case needs no serialization or aggregate replay.
 if((primary===a?ac:bc)&&coversSnapshot(primary,other))return primary;
-var data=copy(primary),divergent=!ac&&!bc,rebuild=false;
+var data=copySnapshot(primary),divergent=!ac&&!bc,rebuild=false;
 data.attemptLedger=unionFacts(primary.attemptLedger,other.attemptLedger,'attemptId');data.exposureLedger=unionFacts(primary.exposureLedger,other.exposureLedger,'exposureId');
 if(divergent)data.attemptLedger.sort(function(p,q){return (p.at||0)-(q.at||0)||p.attemptId.localeCompare(q.attemptId);});
 Object.keys(other.items).forEach(function(id){var old=other.items[id],s=data.items[id];if(!s){data.items[id]=copy(old);rebuild=true;return;}if(old.legacyFacets){var legacy=maximums(s.legacyFacets,old.legacyFacets);if(JSON.stringify(legacy)!==JSON.stringify(s.legacyFacets)){s.legacyFacets=legacy;rebuild=true;}}if(old.legacyConfusions)s.legacyConfusions=maximums(s.legacyConfusions,old.legacyConfusions);s.flags=maximums(s.flags,old.flags);s.firstSeen=Math.min(s.firstSeen||Infinity,old.firstSeen||Infinity);});
@@ -150,7 +160,7 @@ joined._sync=copy(syncInfo(left));if(imported.manualReconstruction)joined.manual
 function importSummary(imported,joined,current){var gd=joined.games['kana-rain']||{},now=Date.now();return {attempts:imported.attemptLedger.length,exposures:imported.exposureLedger.length,addedAttempts:joined.attemptLedger.length-current.attemptLedger.length,addedExposures:joined.exposureLedger.length-current.exposureLedger.length,hiraganaRows:(gd.rows||{}).hiragana||0,katakanaRows:(gd.rows||{}).katakana||0,katakanaUnlocked:gd.katakanaUnlocked===true,hiraganaFamiliar:Object.keys(joined.items).filter(function(id){var f=joined.items[id].facets['form→sound'];return /^kana:[ぁ-ゖ]/.test(id)&&f&&f.correct&&.6*retrievability(f,now)+.4*Math.min(1,Math.log1p(f.stability)/Math.log1p(60))>=.55;}).length,manualEstimate:!!joined.manualReconstruction};}
 function previewImport(json){var imported=parseImport(json),current=copy(mem);return importSummary(imported,joinImported(current,imported),current);}
 function merged(base,operations){
-var data=copy(base),info=syncInfo(data),rebuild=false,ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;})),exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
+var data=copySnapshot(base),info=syncInfo(data),rebuild=false,ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;})),exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
 // Concurrent writers may be linearized in either order; a writer's own sequence
 // must always win over wall-clock timestamps (which can move backwards).
 operations.slice().sort(function(a,b){return a.writer.localeCompare(b.writer)||a.seq-b.seq;}).forEach(function(op){
@@ -238,7 +248,7 @@ var restoredBackend=null;
 var initial=choose(choose(stored(PRIMARY),stored(BACKUP)),stored(KEY));mem=initial?copy(initial):fresh();if(initial)restoredBackend='journal';
 remember();var durable=copy(mem);
 var ready=new Promise(function(resolve){
-var done=false;function finish(){if(done)return;done=true;try{durable=merged(durable,logs());adopt(copy(durable));}catch(e){}publish({state:restoredBackend?'restored':'ready',saved:!!restoredBackend,backend:restoredBackend,journal:restoredBackend==='journal',indexedDB:restoredBackend==='indexedDB'});resolve();}
+var done=false;function finish(){if(done)return;done=true;try{durable=merged(durable,logs());adopt(copySnapshot(durable));}catch(e){}publish({state:restoredBackend?'restored':'ready',saved:!!restoredBackend,backend:restoredBackend,journal:restoredBackend==='journal',indexedDB:restoredBackend==='indexedDB'});resolve();}
 if(!root.indexedDB){finish();return;}
 var request;try{request=root.indexedDB.open('kana-garden',1);}catch(e){finish();return;}
 request.onupgradeneeded=function(){request.result.createObjectStore('learner');};
@@ -251,11 +261,15 @@ read.onsuccess=function(){if(!done){var saved=candidate(read.result,key);if(save
 });
 // A bounded previous copy is best effort. Its own transaction may fail quota
 // without rolling back an already completed primary commit.
-function checkpointSnapshot(previous,snapshot){if(!db)return;try{var tx=db.transaction('learner','readwrite'),s=tx.objectStore('learner'),read=s.get(BACKUP);tx.onerror=tx.onabort=function(){};read.onsuccess=function(){var old=read.result,base=previous&&sameEpoch(epoch(previous),epoch(snapshot))?previous:snapshot;if(old&&old.snapshot&&sameEpoch(epoch(old.snapshot),epoch(snapshot))&&Date.now()-(old.at||0)<MIN)return;try{s.put({at:Date.now(),snapshot:copy(base)},BACKUP);}catch(e){}};read.onerror=function(e){if(e&&e.preventDefault)e.preventDefault();};}catch(e){}}
+function checkpointSnapshot(previous,snapshot){if(!db)return;try{var tx=db.transaction('learner','readwrite'),s=tx.objectStore('learner'),read=s.get(BACKUP);tx.onerror=tx.onabort=function(){};read.onsuccess=function(){var old=read.result,base=previous&&sameEpoch(epoch(previous),epoch(snapshot))?previous:snapshot;if(old&&old.snapshot&&sameEpoch(epoch(old.snapshot),epoch(snapshot))&&Date.now()-(old.at||0)<MIN)return;try{s.put({at:Date.now(),snapshot:copySnapshot(base)},BACKUP);}catch(e){}};read.onerror=function(e){if(e&&e.preventDefault)e.preventDefault();};}catch(e){}}
 function flush(locked){
 capture();var token=++revision,journalOK=writePending(),hasLocks=!!(root.navigator&&root.navigator.locks);
 publish({state:'saving',saved:false,revision:token});
 if(journalOK)publish({state:'saving',saved:true,backend:'journal',journal:true,indexedDB:false,revision:token});
+// Each caller has already captured and synchronously journaled its own facts.
+// Share only the pending Web Lock job, before its storage transaction starts.
+if(locked!==IMPORT_LOCKED&&hasLocks&&queuedCommit){queuedCommit.token=token;queuedCommit.journalOK=journalOK;return queuedCommit.promise;}
+var batch=null;
 function commit(){return new Promise(function(resolve){
 var settled=false,snapshot,previous,canonicalOK=false;
 function finish(idbOK){if(settled)return;settled=true;
@@ -268,12 +282,13 @@ durable=snapshot;
 if(hasLocks){var info=syncInfo(snapshot);pending=pending.filter(function(op){return sameEpoch(op.epoch,info.epoch)?op.seq>(info.applied[writer]||0):newerEpoch(op.epoch,info.epoch);});writePending();}
 }
 if(snapshot){capture();writePending();adopt(merged(snapshot,pending));}
-var result={state:journalOK||idbOK?'saved':'unsaved',saved:journalOK||idbOK,backend:journalOK&&idbOK?'journal+indexedDB':journalOK?'journal':idbOK?'indexedDB':null,journal:journalOK,indexedDB:idbOK,revision:token};if(token===revision)publish(result);resolve(result);
+var finishedToken=batch?batch.token:token;
+var result={state:journalOK||idbOK?'saved':'unsaved',saved:journalOK||idbOK,backend:journalOK&&idbOK?'journal+indexedDB':journalOK?'journal':idbOK?'indexedDB':null,journal:journalOK,indexedDB:idbOK,revision:finishedToken};if(finishedToken===revision)publish(result);resolve(result);
 }
 function prepare(saved){capture();journalOK=writePending();snapshot=merged(choose(choose(durable,journalData()),saved),logs());
 var raw=JSON.stringify(snapshot);databaseCache[PRIMARY]={raw:raw,data:snapshot};
 if(store)try{store.setItem(PRIMARY,raw);readCache[PRIMARY]={raw:raw,data:snapshot};canonicalOK=true;journalOK=true;}catch(e){}
-adopt(copy(snapshot));return snapshot;
+adopt(copySnapshot(snapshot));return snapshot;
 }
 if(!db){try{prepare(null);}catch(e){journalOK=false;}finish(false);return;}
 try{var tx=db.transaction('learner','readwrite'),objectStore=tx.objectStore('learner'),remaining=2,saved=null;
@@ -283,9 +298,10 @@ tx.oncomplete=function(){if(snapshot)checkpointSnapshot(previous,snapshot);finis
 });}
 // Web Locks serialize journal commits too when IndexedDB is unavailable/full.
 // pagehide only needs the synchronous, tab-owned write-ahead journal above.
-function lockFailed(){var result={state:journalOK?'saved':'unsaved',saved:journalOK,backend:journalOK?'journal':null,journal:journalOK,indexedDB:false,revision:token};if(token===revision)publish(result);return result;}
+function lockFailed(){if(queuedCommit===batch)queuedCommit=null;var ok=batch?batch.journalOK:journalOK,failedToken=batch?batch.token:token;var result={state:ok?'saved':'unsaved',saved:ok,backend:ok?'journal':null,journal:ok,indexedDB:false,revision:failedToken};if(failedToken===revision)publish(result);return result;}
 if(locked===IMPORT_LOCKED||!hasLocks)return commit();
-try{return root.navigator.locks.request(LOCK,commit).catch(lockFailed);}catch(e){return Promise.resolve(lockFailed());}
+batch={token:token,journalOK:journalOK,promise:null};queuedCommit=batch;
+try{batch.promise=root.navigator.locks.request(LOCK,function(){if(queuedCommit===batch)queuedCommit=null;return commit();}).catch(lockFailed);return batch.promise;}catch(e){return Promise.resolve(lockFailed());}
 }
 function nextId(prefix){mem.sequence++;return prefix+':'+writer+':'+mem.sequence;}
 function replace(data){var at=Math.max(Date.now(),epoch(mem).at+1);mem=data;attemptIds=new Set(mem.attemptLedger.map(function(e){return e.attemptId;}));exposureIds=new Set(mem.exposureLedger.map(function(e){return e.exposureId;}));mem._sync={epoch:{id:writer+':replace:'+String(++serial),at:at},applied:{}};var op={writer:writer,seq:serial,epoch:copy(mem._sync.epoch),at:at,replace:copy(mem)};pending=[op];mem._sync.applied[writer]=serial;remember();return flush();}

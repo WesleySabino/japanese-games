@@ -1,5 +1,25 @@
 # Testes do Kana Rain
 
+## Otimização — 1.12.1
+
+Validação da publicação: `pnpm test:update 1.12.0` usa os 144 arquivos exatos da versão anterior (todos conferidos contra os hashes da publicação), com testes de atualização na mesma origem, online/offline e instalação interrompida. A suíte nativa de versões misturadas mantém também uma aba da 1.12.0, grava pelas duas versões e fecha a antiga com journal pendente. Ambas exigem preservação do acesso misto Journey, além dos eventos, linhas conquistadas, recordes e configurações. As fixtures contêm somente código/arquivos públicos; nenhum progresso pessoal é publicado.
+
+`save-batching.test.cjs` acrescenta cinco cenários: acerto e referências visuais/sonoras com journal imediato e uma consolidação enfileirada; fechamento antes de obter o lock; fatos novos e aliases mutáveis durante a transação; rejeição do lock/quota com revisão de erro correta e nova tentativa; cópias privadas com semântica JSON equivalente à 1.12.0 fixada. As regressões diferenciais anteriores continuam ativas.
+
+`reduced-effects.test.cjs` cobre efeitos normais no desktop/toque, modo reduzido e preferência do sistema: acertos/expirações permanecem iguais, enquanto splash/ripple desativados nem geram nós. `pnpm test:smoother-saving` confirma a única escrita principal em IndexedDB real por acerto+feedback, filtros e marcadores no PC/celular, preferência de movimento atualizada durante a partida e duas abas com 4.000 respostas/25.000 referências, fechando uma com o lock bloqueado. Todos os fatos sintéticos antigos são comparados após recarga. Nenhum perfil pessoal ou produção é acessado.
+
+Verificação local em 2026-10-28: **292/292 testes de código**, build e as 15 suítes de navegador passaram: smoother-saving, Journey, smoke geral, katakana, quick wins, sound pad, apresentação e ritmo de novidades, melhorias de aprendizado, efeitos, música, atualização online/offline, armazenamento, convivência entre versões e importação. O resultado agregado está em `.release/smoother-saving-20261028/checks.json`. A cópia de progresso da demonstração permanece isolada em localhost; não houve publicação nem alteração do progresso de produção.
+
+Diagnóstico antes/depois nesta máquina, Chromium headless 151.0.7922.34, quatro amostras medidas após aquecimento, um perfil por vez, sem outros testes pesados em paralelo:
+
+| Histórico sintético grande | Maior tempo até consolidação terminar, antes → depois | Maior intervalo entre callbacks de animação, antes → depois |
+|---|---:|---:|
+| CPU normal, efeitos normais, sem áudio | 312 → 104 ms | 117 → 67 ms |
+| CPU 4× limitada, efeitos reduzidos, sem áudio | 1.160 → 459 ms | 467 → 400 ms |
+| CPU 4× limitada, efeitos reduzidos, com áudio | 1.256 → 500 ms | 467 → 400 ms |
+
+O custo JSON por resposta no perfil lento sem áudio caiu de cerca de 597–637 ms para 112–137 ms; são somas de execução durante as consolidações, não latência de um único callback. Permanecem pausas perceptíveis no cenário extremo: a leitura/desserialização nativa de snapshots grandes e a consolidação continuam na thread da página. Esses intervalos não medem pixels apresentados nem garantem FPS em hardware real. Os relatórios privados desta rodada estão em `.release/smoother-saving-20261028/`; não são conteúdo publicado nem gates de tempo do CI.
+
 ## Journey — prévia local de 2026-10-27
 
 `tests/journey.test.cjs` cobre o início sem katakana, transição dentro da partida no último acerto qualificante de hiragana, passagem das cinco vogais de katakana para a mistura, distribuição entre alfabetos, continuidade das apresentações, freios por erro/expiração, precisão por alfabeto, duas formas homófonas visíveis, teclado/sound pad, revisão de ambos, recarga, preservação de eventos e modos antigos, exploração sem ganhar grupos e acesso misto que só é removido pelo reset explícito.

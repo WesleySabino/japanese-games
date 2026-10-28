@@ -1,6 +1,8 @@
 # Kana Rain
 
-**Release: 1.12.0 — 27 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.12.1 — 28 October 2026.** See [release history](CHANGELOG.md).
+
+Queued saves share a consolidation while every caller still journals immediately; private snapshots use independent tree copies instead of another JSON round trip. Reduced effects also removes moving filters/backdrop blurs and avoids creating hidden splash/ripple nodes. Storage keys, schema, history, progression, normal visuals and audio are retained. Run `pnpm test:smoother-saving` after `pnpm build` for native single-commit, large-history two-tab/close and reduced-effects regressions.
 
 Kana Rain is a small HTML/CSS/JavaScript arcade game: read a falling kana, type its sound, and keep the rain clear. Katakana opens after hiragana and is answered the same way. Hiragana and Katakana are the only playable alphabets. Instructions and controls are in English; the reading content is Japanese.
 

@@ -94,6 +94,9 @@ jobs:
       - name: Run Journey progression, mixed rain, two-tab and offline browser checks
         run: pnpm run test:journey
 
+      - name: Run batched saves, large-history tab closing and reduced effects browser checks
+        run: pnpm run test:smoother-saving
+
       - name: Run nonblocking feedback image preparation browser checks
         run: pnpm run test:effects
 
@@ -102,6 +105,9 @@ jobs:
 
       - name: Run version update, retained progress and offline recovery browser checks
         run: pnpm run test:update
+
+      - name: Run update from the Journey production release with preserved progress
+        run: pnpm run test:update 1.12.0
 
       - name: Run native storage quota, browser restart and multi-tab regressions
         run: pnpm run test:storage

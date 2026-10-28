@@ -83,6 +83,7 @@
     window.addEventListener('pageshow',()=>{stopped=false;if(images.length<total||next)schedule();});
     if(document.readyState==='complete')sceneReady();else window.addEventListener('load',sceneReady,{once:true});
   }
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   const mobile=()=>matchMedia('(pointer:coarse)').matches || innerWidth<=650;
   const running=()=>G && !G.over;
   // Both alphabets are answered by sound; a katakana's support label is its known hiragana.
@@ -543,7 +544,7 @@
     }
     L.flush();return ev;
   }
-  function effect(d,type){const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
+  function effect(d,type){if(gd.reducedEffects||reducedMotion.matches)return;const e=document.createElement('div');e.className='effect '+type;e.style.left=d.x+'px';e.style.top=Math.max(0,d.y)+(type==='ripple'?d.h-45:20)+'px';$('field').appendChild(e);setTimeout(()=>e.remove(),600);}
   function remove(d,pop=false){if(G.pendingAnswer?.drop===d)G.pendingAnswer=null;dropResizeObserver.unobserve?.(d.el);G.drops=G.drops.filter(x=>x!==d);if(pop){d.el.classList.add('pop');setTimeout(()=>d.el.remove(),220);}else d.el.remove();}
   function hit(d){
     record(d,true,{response:d.submittedResponse,reason:'accepted',inputMethod:d.submittedMethod});G.streak=d.wrong?0:G.streak+1;
