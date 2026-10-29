@@ -25,9 +25,7 @@
   }
   let katakanaNovelty=createKatakanaNovelty();
   const explore=new URLSearchParams(location.search).has('all');
-  // The saved novelty pace is authoritative: old rain difficulty must not change it.
-  const difficultyForPace=id=>Object.keys(R.profiles).find(key=>R.profiles[key].pace===id)||'easy';
-  let cfg={mode:'hira',duration:180,difficulty:difficultyForPace(N.profile(novelty).id),playStyle:'arcade',noveltyPace:N.profile(novelty).id}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
+  let cfg={mode:'hira',duration:180,playStyle:'arcade',noveltyPace:N.profile(novelty).id}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
   // Sound pad: a fixed grid of consonant families, replaced in place by that family's sounds.
   // Cells come from the catalogue, so each of the 104 readings per script has exactly one two-tap path.
   // [family, name, main letter, other spellings in the row]
@@ -250,14 +248,6 @@
     $('unlockDetails').innerHTML=rows.map(({k,correct,accuracy,attempts,ready})=>`<div class="unlock-item ${ready?'ready':'pending'}"><span lang="ja">${k.char}</span><span>${k.romaji}</span><small>${Math.min(2,correct)}/2 first-try hits · ${attempts?Math.floor(accuracy*100)+'%':'No answers yet'}</small><span aria-label="${ready?'Ready':'Keep practicing'}">${ready?'✓':'○'}</span></div>`).join('');
   }
   function spirit(mood){clearTimeout(spiritTimer);$('fieldSpirit').className='spirit '+mood;spiritTimer=setTimeout(()=>$('fieldSpirit').className='spirit idle',900);}
-  function renderDifficulty(){
-    $('difficultySelect').value=cfg.difficulty;$('difficultySelect').disabled=!!running();
-    $('difficultyNote').textContent={easy:'New kana return more cautiously after mistakes or expired drops.',normal:'A balanced return of new kana after mistakes or expired drops.',hard:'New kana return sooner after mistakes or expired drops.'}[cfg.difficulty];
-  }
-  function changeDifficulty(id){
-    if(running()||!Object.hasOwn(R.profiles,id))return;
-    cfg.difficulty=id;N.setPace(novelty,R.profiles[id].pace);N.setPace(katakanaNovelty,R.profiles[id].pace);cfg.noveltyPace=N.profile(novelty).id;gd.difficulty=id;L.flush();renderMenu();
-  }
   function renderMenu(){
     unlockKatakana();unlockJourneyMix();
     const names={hira:'Hiragana',kata:'Katakana',journey:'Journey (both)'};
@@ -266,7 +256,6 @@
     $('menuHint').innerHTML=cfg.mode==='journey'?escapeText({hiragana:'Grow your Hiragana, then discover Katakana.',katakana:'Learn the five Katakana vowels, then mix both alphabets.',mixed:'Hiragana and Katakana in one rain. Same sound controls.'}[journeyStage()]):'Romaji · <kbd>Enter</kbd> to begin';
     document.querySelectorAll('[data-script]').forEach(b=>{b.disabled=b.dataset.script==='katakana'&&!modeAvailable('kata');});
     if(mapScript==='katakana'&&!modeAvailable('kata'))mapScript='hiragana';
-    renderDifficulty();
     const sc=mapScript, rows=unlocked(sc), count=explore?D.rowsOrder.length:gd.rows[sc], row=D.rowsOrder[count-1];
     const current=rows.filter(k=>k.row===row);$('rowName').textContent=rowNames[row]||row.toUpperCase()+'-row';
     $('lesson').innerHTML=current.map(k=>`<button data-kana="${k.char}" data-known="${L.mastery(k.id,FACET)>=.55}" aria-label="Listen to ${k.char}, ${readingLabel(k.id)}">${k.char}<small>${readingLabel(k.id)}</small></button>`).join('');
@@ -306,7 +295,7 @@
   function refreshImportedProgress(){
     gd=L.gameData(GAME);gd.rows=gd.rows||{hiragana:1,katakana:1};gd.best=gd.best||{};gd.accuracy=gd.accuracy||{};
     novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});katakanaNovelty=createKatakanaNovelty();
-    cfg.noveltyPace=N.profile(novelty).id;cfg.difficulty=difficultyForPace(cfg.noveltyPace);
+    cfg.noveltyPace=N.profile(novelty).id;
     if(!modeAvailable(cfg.mode))cfg.mode='hira';
     if(mapScript==='katakana'&&!modeAvailable('kata'))mapScript='hiragana';
     document.querySelectorAll('[data-script]').forEach(b=>{const selected=b.dataset.script===mapScript;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
@@ -346,7 +335,7 @@
       importMessage(error instanceof Error?error.message:'The import could not be completed. Your current history has been kept.','error');$('importStatus').focus({preventScroll:true});
     }
   }
-  function enableSetup(value){for(const id of ['mode','difficultySelect'])$(id).disabled=!value;$('startBtn').disabled=!value;if(value)renderMenu();else renderDifficulty();}
+  function enableSetup(value){$('mode').disabled=!value;$('startBtn').disabled=!value;if(value)renderMenu();}
   function cancelCountdown(){if(G)G.countingDown=false;$('countdownOverlay').classList.add('hidden');stopLoop();}
   function beginCountdown(title='Ready for the rain?'){
     if(!running())return;
@@ -370,11 +359,14 @@
     if(G&&!G.over)return;
     stopLoop();clearTimeout(feedbackTimer);clearTimeout(milestoneTimer);clearTimeout(heartTimer);feedbackPriority=-1;feedbackUntil=0;currentFeedback=null;feedbackQueue=[];
     $('feedback').className='feedback';$('milestoneFeedback').className='milestone-feedback';$('heartLoss').classList.add('hidden');document.body.classList.remove('heart-hit');$('field').querySelectorAll('.drop,.effect').forEach(e=>e.remove());
-    const weather=R.atTime(cfg.difficulty,0);
+    // Reapply the single admission policy after saves from an older open tab.
+    // This retains earned data and the existing pressure history in both scripts.
+    novelty=N.create(gd,{attempts:L.attempts?.(),exposures:L.exposures?.(),items:L.all?.()});katakanaNovelty=createKatakanaNovelty();cfg.noveltyPace=N.profile(novelty).id;
+    const weather=R.atTime(0);
     const reviewIds=Array.isArray(options.reviewIds)?[...new Set(options.reviewIds)].filter(id=>reviewCandidates().includes(id)):null;
     const sessionDuration=reviewIds?.length?60:cfg.duration,now=performance.now();
-    gd.difficulty=cfg.difficulty;L.flush();
-    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,difficulty:cfg.difficulty,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
+    L.flush();
+    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
     G.journeyStage=journeyStage();G.nextScript='katakana';
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');music();
@@ -477,9 +469,9 @@
       // Complete an exact prefix after a brief typing pause; active time freezes with play.
       if(G.pendingAnswer){G.pendingAnswer.remaining-=dt;if(G.pendingAnswer.remaining<=0)completePendingAnswer();}
       if(G.over||G.paused)return;
-      const weather=R.atTime(G.difficulty,rainSeconds());G.speed=weather.speed;G.gap=weather.gap;
+      const weather=R.atTime(rainSeconds());G.speed=weather.speed;G.gap=weather.gap;
       if(!G.queue.length)refill();
-      const cap=Math.min(R.profiles[G.difficulty].maxDrops,2+Math.floor(G.correct/8));
+      const cap=Math.min(R.rain.maxDrops,2+Math.floor(G.correct/8));
       if(G.drops.length<cap && G.sinceSpawn>G.gap && G.queue.length){
         const e=nextEntry(),d=spawn(e);
         if(d){
@@ -575,7 +567,7 @@
     clearTimeout(heartTimer);document.body.classList.remove('heart-hit');void $('heartLoss').offsetWidth;document.body.classList.add('heart-hit');$('heartLoss').classList.remove('hidden');
     sfx('heart');heartTimer=setTimeout(()=>{document.body.classList.remove('heart-hit');$('heartLoss').classList.add('hidden');},900);
     spirit('worried');effect(d,'ripple');remove(d);G.queue.splice(Math.min(2,G.queue.length),0,{id:d.id});hud();invalidateProgress();
-    if(G.lives===0)end(`All 3 hearts lost · ${R.profiles[G.difficulty].name}`,'hearts_lost');
+    if(G.lives===0)end('All 3 hearts lost','hearts_lost');
     else updateTarget();
   }
   function checkUnlock(){
@@ -594,7 +586,7 @@
     }
   }
   function renderGameLabel(){
-    $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+R.profiles[G.difficulty].name+' · '+(G.mode==='journey'?journeyNames[G.journeyStage]:{hira:'Hiragana',kata:'Katakana'}[G.mode]);
+    $('gameLabel').textContent=(G.reviewIds?'Review · ':'')+(G.mode==='journey'?journeyNames[G.journeyStage]:{hira:'Hiragana',kata:'Katakana'}[G.mode]);
   }
   function submitMatchedAnswer(drop,value,method='typing'){
     G.pendingAnswer=null;drop.submittedResponse=value;drop.submittedMethod=method;$('answer').value='';hit(drop);
@@ -719,7 +711,6 @@
   $('startBtn').onclick=$('againBtn').onclick=start;
   $('backBtn').onclick=showMenu;
   $('mode').onchange=()=>{if(running())return;const selected=$('mode').value;if(modeAvailable(selected))cfg.mode=selected;renderMenu();};
-  $('difficultySelect').onchange=()=>changeDifficulty($('difficultySelect').value);
   document.querySelectorAll('[data-script]').forEach(b=>b.onclick=()=>{mapScript=b.dataset.script;document.querySelectorAll('[data-script]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b);});renderMenu();if($('progressDialog').open)exposeReference();else if(!$('welcome').classList.contains('hidden'))exposeLesson();});
   const listen=async e=>{const b=e.target.closest('[data-kana]');if(b){const k=D.kana.find(k=>k.char===b.dataset.kana);if(!k)return;if(running())pause(true,false);exposeReading(k.id,'reference-audio');if(!await A.play(b.dataset.kana)&&A.enabled)flash('Audio is unavailable. The lesson reading is shown on the tile.',true);}};
   $('lesson').onclick=$('masteryMap').onclick=$('resultReview').onclick=listen;
@@ -763,7 +754,7 @@
   $('settingsBtn').onclick=$('pauseSettingsBtn').onclick=()=>openPanel('settingsDialog');
   $('closeSettings').onclick=$('saveSettings').onclick=()=>closePanel('settingsDialog');
   $('helpBtn').onclick=$('pauseHelpBtn').onclick=()=>openPanel('helpDialog');$('closeHelp').onclick=()=>closePanel('helpDialog');
-  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);katakanaNovelty=createKatakanaNovelty();cfg.mode='hira';cfg.difficulty='easy';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
+  $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);katakanaNovelty=createKatakanaNovelty();cfg.mode='hira';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   $('importBackupBtn').onclick=()=>$('exportBtn').onclick();
   $('importBtn').onclick=()=>{if(running()||importBusy)return;clearImportPreview();$('importFile').click();};
@@ -813,5 +804,5 @@
   }).catch(()=>$('offlineStatus').textContent='Offline setup unavailable in this browser.');}
   else $('offlineStatus').textContent='Offline setup is unavailable in this browser.';
   // Public module boundary for the future minigame shell and meaningful integration tests.
-  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},difficultyProfiles:R.profiles,get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
+  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
 })();

@@ -418,25 +418,27 @@ test('legacy practice and retired-mode evidence survive simplification, export a
     for(const key of ['items','attemptLedger'])assert.deepEqual(after[key],before[key],key+' historical data stays verbatim');
     assert.deepEqual(after.exposureLedger.slice(0,before.exposureLedger.length),before.exposureLedger);
     for(const key of ['rows','best','accuracy','featuresIntro','scriptIntro'])assert.deepEqual(after.games['kana-rain'][key],before.games['kana-rain'][key],key+' survives removed modes');
-    assert.equal(current.app.settings.playStyle,'arcade');assert.equal(current.app.settings.duration,180);assert.equal(current.app.settings.difficulty,'normal','old novelty pace takes precedence over old rain difficulty');
+    assert.equal(current.app.settings.playStyle,'arcade');assert.equal(current.app.settings.duration,180);assert.equal(current.app.settings.difficulty,undefined,'retired choices never become active settings');
+    assert.equal(current.app.gameData.novelty.pace,'calm');assert.equal(current.app.gameData.difficulty,'hard','legacy metadata remains in the export');
     current.app.start();current.skip();assert.equal(current.app.state.score,undefined,'point scoring is retired');assert.equal(current.app.state.bestKey,undefined,'counts never compete with historical point records');assert.equal(current.app.state.totalLives,3);assert.equal(current.app.state.t,180);
     current.app.end('Migration check');
   }
 });
 
-test('single difficulty persists its recovery profile and locks across active and paused sessions',async()=>{
-  const profiles={easy:['calm',60,55],normal:['balanced',30,25],hard:['bold',12,10]};
-  const g=await game();assert.equal(g.app.settings.difficulty,'easy');
-  for(const [difficulty,[pace,size,hits]] of Object.entries(profiles)){
-    g.el('difficultySelect').value=difficulty;g.el('difficultySelect').onchange();
-    assert.equal(g.app.gameData.novelty.pace,pace);assert.equal(g.app.settings.difficulty,difficulty);
-    const rules=g.context.KanaNovelty.constantsFor(g.app.gameData.novelty);assert.equal(rules.windowSize,size);assert.equal(rules.recoveryHits,hits);
-    const restored=await game({map:g.map});assert.equal(restored.app.settings.difficulty,difficulty);restored.app.start();restored.skip();
-    assert.equal(restored.el('difficultySelect').disabled,true);assert.equal(restored.app.state.totalLives,3);assert.equal(restored.app.state.sessionDuration,180);assert.equal(restored.app.state.speed,.1);
-    restored.el('difficultySelect').value=difficulty==='hard'?'easy':'hard';restored.el('difficultySelect').onchange();assert.equal(restored.app.settings.difficulty,difficulty);
-    restored.app.pause(true);restored.el('difficultySelect').onchange();assert.equal(restored.app.gameData.novelty.pace,pace);
-    restored.app.end('Profile check');
-  }
+test('default recovery is the former calm profile throughout reload, play, pause and review',async()=>{
+  const g=await game();assert.equal(g.app.settings.difficulty,undefined);
+  const restored=await game({map:g.map});
+  const check=()=>{
+    assert.equal(restored.app.gameData.novelty.pace,'calm');assert.equal(restored.app.gameData.katakanaNovelty.pace,'calm');
+    const rules=restored.context.KanaNovelty.constantsFor(restored.app.gameData.novelty);assert.equal(rules.windowSize,60);assert.equal(rules.recoveryHits,55);
+    assert.equal(restored.nodes.has('difficultySelect'),false,'runtime never requests the retired selector');assert.equal(restored.nodes.has('difficultyNote'),false);
+  };
+  check();restored.app.start();restored.skip();check();
+  assert.equal(restored.app.state.totalLives,3);assert.equal(restored.app.state.sessionDuration,180);assert.equal(restored.app.state.speed,.1);
+  assert.equal(restored.app.state.difficulty,undefined);restored.app.pause(true);check();restored.app.pause(false);check();
+  restored.app.end('Default profile check');restored.app.gameData.novelty.seen['kana:あ']=true;
+  restored.app.start({reviewIds:['kana:あ']});restored.skip();check();assert.equal(restored.app.state.sessionDuration,60);assert.equal(restored.app.state.totalLives,3);
+  restored.app.end('Review profile check');
 });
 
 test('results name the next row and the first-try hits each kana still needs',async()=>{

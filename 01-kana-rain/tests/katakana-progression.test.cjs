@@ -356,12 +356,11 @@ test('four real corrected familiar Katakana rounds retain the own long brake aft
   assert.notEqual(nextKatakana(g, 'kana:カ').id, 'kana:カ', 'open learning slots cannot bypass Katakana reading pressure');
 });
 
-test('Katakana pressure persists across mode changes and pace changes, and explicit reset replaces both states', async () => {
-  const own = { version: 1, pace: 'calm', seen: { 'kana:ア': true }, recent: [], blocked: true, cooldownRemaining: 0 };
+test('Katakana pressure survives retired pace normalization and mode changes, and explicit reset replaces both states', async () => {
+  const own = { version: 1, pace: 'bold', seen: { 'kana:ア': true }, recent: [], blocked: true, cooldownRemaining: 0 };
   const g = await garden({ katakanaUnlocked: true, katakanaNovelty: own, novelty: hiraganaPressure() });
   const pressure = g.app.gameData.katakanaNovelty;
-  g.el('difficultySelect').value = 'hard'; g.el('difficultySelect').onchange();
-  assert.equal(g.app.gameData.novelty.pace, 'bold'); assert.equal(pressure.pace, 'bold');
+  assert.equal(g.app.gameData.novelty.pace, 'calm'); assert.equal(pressure.pace, 'calm');
   for (const mode of ['kata', 'hira', 'kata']) {
     g.el('mode').value = mode; g.el('mode').onchange();
     assert.equal(g.app.gameData.katakanaNovelty, pressure);

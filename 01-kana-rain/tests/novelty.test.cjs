@@ -241,7 +241,8 @@ test('immediate pause survives JSON restart and cannot be cleared by corrections
   assert.equal(restored.cooldownRemaining,10);
   for(let i=0;i<9;i++)resolved(restored,'familiar:'+i,{familiar:true});
   assert.equal(restored.cooldownRemaining,1);Novelty.setPace(restored,'bold');
-  assert.equal(restored.cooldownRemaining,1,'switching difficulty does not bypass the pause');
+  assert.equal(restored.pace,'calm','retired profiles cannot be revived programmatically');
+  assert.equal(restored.cooldownRemaining,1,'a retired setting cannot bypass the pause');
   resolved(restored,'tenth',{familiar:true});assert.equal(restored.cooldownRemaining,0);
 });
 

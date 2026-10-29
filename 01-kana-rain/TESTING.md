@@ -1,5 +1,17 @@
 # Testes do Kana Rain
 
+## Ritmo único — prévia 1.13.0-local.1
+
+`single-pace.test.cjs` valida saves antigos dos dois perfis retirados em Hiragana, Katakana e Journey: tentativas, referências, familiaridade, linhas, recordes, acesso misto, histórico de pressão e pausas sobrevivem à partida e à recarga. Um controle diferencial carrega os módulos públicos fixados da 1.12.0 e compara a curva e 150 transições de admissão com o antigo padrão. Os 306 testes Node passaram, sem casos ignorados. Seis regressões adicionais de aba antiga/replay/admissão falharam antes das respectivas correções e passaram depois: uma preferência antiga nunca reabre o freio durante consolidação, inicialização ou antes da próxima resposta.
+
+`pnpm test:novelty-pace` confirma em Chromium nativo a política única, preferências antigas normalizadas, ausência de seletor/rótulos no menu, ajuda, HUD e resultados, preservação de dados após recarga e geometria em 11 viewports. Os testes gerais mantêm contagens, três corações, adaptação após acertos/expirações, inputs e foco. O replay de journals no learner também usa a regra fixa 60/55, inclusive antes do carregamento de novelty.js ou após uma aba antiga gravar outra preferência. Os módulos/fixtures históricos, schema e chaves de armazenamento permanecem intactos.
+
+A prévia usa a mesma origem local `http://127.0.0.1:4198/` e a cópia separada do progresso da demonstração anterior. Não altera a produção, o perfil de produção ou o arquivo de exportação. Relatórios e logs privados desta rodada ficam em `.release/single-pace-20261029/` e `tests/artifacts/`; não são distribuídos.
+
+Verificação em 2026-10-29: build e as 15 suítes usuais de navegador passaram, mais a atualização a partir da 1.12.0. Após o ajuste final de reconciliação, passaram novamente smoother-saving, Journey, ritmo de novidades, os 10 cenários nativos de armazenamento, os 6 de versões misturadas, importação e ambas as suítes de atualização. A verificação dirigida de perda do runtime descrita abaixo é uma condição de publicação pendente, separada dessas suítes aprovadas.
+
+**Condição antes de publicar:** a verificação dirigida de perda somente do download do runtime reproduziu uma mistura de HTML novo com JavaScript antigo por um service worker legado. Isso impede a inicialização naquele cenário e ainda requer uma estratégia de shell consistente/recuperação. A prévia local desativa workers e funciona; as suítes de atualização comuns, inclusive falha de MP3, não cobrem essa falha específica. O registro e o script de reprodução estão em `.release/single-pace-partial-update-proof.json` e `.release/single-pace-partial-update-probe.cjs`. Não publicar esta prévia sem tratar e testar essa condição; ver [Development](DEVELOPMENT.md).
+
 ## Otimização — 1.12.1
 
 Validação da publicação: `pnpm test:update 1.12.0` usa os 144 arquivos exatos da versão anterior (todos conferidos contra os hashes da publicação), com testes de atualização na mesma origem, online/offline e instalação interrompida. A suíte nativa de versões misturadas mantém também uma aba da 1.12.0, grava pelas duas versões e fecha a antiga com journal pendente. Ambas exigem preservação do acesso misto Journey, além dos eventos, linhas conquistadas, recordes e configurações. As fixtures contêm somente código/arquivos públicos; nenhum progresso pessoal é publicado.

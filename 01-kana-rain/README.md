@@ -1,6 +1,6 @@
 # Kana Rain
 
-**Release: 1.12.1 — 28 October 2026.** See [release history](CHANGELOG.md).
+**Production: 1.12.1 — 28 October 2026. Local preview: 1.13.0-local.1.** See [release history](CHANGELOG.md).
 
 Queued saves share a consolidation while every caller still journals immediately; private snapshots use independent tree copies instead of another JSON round trip. Reduced effects also removes moving filters/backdrop blurs and avoids creating hidden splash/ripple nodes. Storage keys, schema, history, progression, normal visuals and audio are retained. Run `pnpm test:smoother-saving` after `pnpm build` for native single-commit, large-history two-tab/close and reduced-effects regressions.
 
@@ -22,9 +22,9 @@ Run `pnpm test` and `pnpm build && pnpm test:journey` for the new progression an
 
 ## Existing game
 
-The illustrated garden, correct-answer/mistake/expiration counters, streaks, accelerating rain, pronunciation audio, touch sound pad and saved progress remain the core experience. The title screen now asks for only **Alphabet** and **Difficulty**. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
+The illustrated garden, correct-answer/mistake/expiration counters, streaks, accelerating rain, pronunciation audio, touch sound pad and saved progress remain the core experience. The title screen asks only for **Alphabet**. All sessions use one shared pace and cautious new-kana recovery. Settings contains device effects and analytics/privacy controls; session setup is no longer repeated there.
 
-The title menu fits the available height without internal scrolling. Alphabet/difficulty fields are centered, and the entry and input hints occupy separate lines so they remain readable on short screens. Settings includes the same sound toggle as the main sound button: both mute pronunciation, menu music and interface effects and remember the existing preference.
+The title menu fits the available height without internal scrolling. The alphabet field is centered, and the entry and input hints occupy separate lines so they remain readable on short screens. Settings includes the same sound toggle as the main sound button: both mute pronunciation, menu music and interface effects and remember the existing preference.
 
 [Production game](https://kana-rain.nihongogrove.top/) · [Local preview](http://127.0.0.1:4173/) · [Specification](SPECIFICATION.md) · [Development](DEVELOPMENT.md) · [Learning design](LEARNING_DESIGN.md) · [New-kana rules](NOVELTY_BALANCE.md)
 
@@ -43,7 +43,7 @@ Open http://127.0.0.1:4173/. A different port can be supplied through `PORT`. No
 ## One arcade loop
 
 - Regular runs last **three minutes**. Every run starts with **three hearts**, including the one-minute mistake-review shortcut.
-- All difficulty levels share the former Normal rain curve: a 10-second initial fall, capped at 3.5×. The curve follows the player, not the clock: each correct answer advances it by 1.6 seconds and each expiration steps it back 20 seconds, never below the opening pace. Pauses freeze the clock, falling drops and automatic-submit delay.
+- The adaptive rain curve has a 10-second initial fall, capped at 3.5×. The curve follows the player, not the clock: each correct answer advances it by 1.6 seconds and each expiration steps it back 20 seconds, never below the opening pace. Pauses freeze the clock, falling drops and automatic-submit delay.
 - Each expired drop costs one heart, clears unfinished input and cancels any pending automatic answer. Losing all hearts ends the run. Wrong submissions stain and accelerate the affected drop without immediately taking a heart.
 - Both alphabets use romaji typing or the sound pad. Any visible matching drop can be answered; forced invalid submissions and listening use the highlighted priority drop. Common alternate readings are accepted; copying the displayed kana is not a reading answer.
 - Katakana keeps Hiragana as its support instead of romaji: a new katakana shows its hiragana partner (シ over し), and corrections, review cards and garden tiles name it (ネ = ね). The answer is still the sound: シ → `shi`.
@@ -55,19 +55,13 @@ Open http://127.0.0.1:4173/. A different port can be supplied through `PORT`. No
 - Phone portrait uses a compact status row and keeps listen, garden and sound beside the input. The pad uses two family rows when its actual width allows 36 px touch targets, otherwise three. Phone drops have 60% of their earlier width and height; the larger falling path leaves the normalized rain timing, adaptive curve and learning rules unchanged.
 - In portrait the pad sits under the rain; in short landscape it sits beside it. On a phone the answer field is never focused while the pad is open, so the native keyboard opens only through the keyboard button. Physical keyboards keep working everywhere, and desktop starts with typing (the pad stays available). Safe areas and rotation are preserved without page scrolling; rotation keeps normalized drop progress.
 
-## Difficulty means new-kana recovery
+## New-kana recovery
 
-There is one selector. It changes when new kana resume after a rough streak; it does not change hearts, rain speed, scoring or session length.
-
-| Difficulty | Recovery requirement after first presentations pause |
-|---|---|
-| Easy — default | 55 first-try hits in the latest 60 completed drops |
-| Normal | 25 first-try hits in the latest 30 completed drops |
-| Hard | 10 first-try hits in the latest 12 completed drops |
+All sessions use the same recovery policy: **55 first-try hits in the latest 60 completed drops** after the longer brake closes. There is no difficulty selector or difficulty label.
 
 Any wrong submission or expiration pauses first presentations immediately, including a debut. New kana wait for **ten consecutive first-try hits on familiar drops**; corrections and debut hits do not advance that recovery. Another failure resets the ten-hit pause. Familiar rain continues, and restarting or reloading retains the pause.
 
-Two expirations or four familiar first-answer misses in the selected window also close the longer brake. A miss is a wrong first answer on a kana already seen before that drop. Recovery needs the entire window, the selected hit target, at most one expiration and fewer than four misses. These window targets apply **after that brake closes**, not before every debut. Assisted first-try hits count. History retains up to 60 completed drops across runs and reloads.
+Two expirations or four familiar first-answer misses in the latest 60 completed drops also close the longer brake. A miss is a wrong first answer on a kana already seen before that drop. Recovery needs the entire window, 55 first-try hits, at most one expiration and fewer than four misses. These window targets apply **after that brake closes**, not before every debut. Assisted first-try hits count. History retains up to 60 completed drops across runs and reloads.
 
 Katakana's longer brake uses its own Katakana outcomes, so earlier Hiragana errors cannot strand a new alphabet on ア. The immediate ten-hit pause remains shared across alphabets. The original novelty state and history remain intact for Hiragana and compatibility; the additive `katakanaNovelty` state is initialized once from actual Katakana evidence and then saved across runs and reloads. Changing alphabets never clears either state.
 
@@ -109,7 +103,7 @@ Activity events still use the existing `practice_start` / `practice_complete` na
 
 ## Structure and checks
 
-`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/music.js` synthesizes the menu music; `src/difficulty.js` defines the common rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved.
+`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/music.js` synthesizes the menu music; `src/difficulty.js` defines the single rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved.
 
 ```sh
 pnpm test

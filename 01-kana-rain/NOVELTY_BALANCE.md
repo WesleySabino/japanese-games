@@ -8,21 +8,17 @@ Any submitted wrong answer, including one on a debut, immediately sets `cooldown
 
 Only a first-try correct answer on a drop that was familiar before it appeared reduces the remaining count. Corrections and successful debut drops are neutral; another wrong answer or expiration resets the count. Thus ten consecutive familiar first-try hits are required after the latest failure. Assisted first-try hits qualify; this is admission pressure, not independent-recall certification.
 
-The countdown is saved outside the session. Restart, reload, alphabet change and difficulty change cannot clear it. It is separate from `blocked`: an isolated failure need not demand the longer full-window recovery.
+The countdown is saved outside the session. Restart, reload, alphabet change cannot clear it. It is separate from `blocked`: an isolated failure need not demand the longer full-window recovery.
 
 ## Longer brake
 
-| Difficulty | Stored profile | First-try recovery target | Completed-drop window |
-|---|---|---|---|
-| Easy — default | `calm` | 55 | 60 |
-| Normal | `balanced` | 25 | 30 |
-| Hard | `bold` | 10 | 12 |
+Every session uses the same stored `calm` profile: **55 first-try hits in the latest 60 completed drops**. No alternative profiles are offered or executed.
 
-Two or more expirations **or** four or more familiar first-answer misses in the selected tail set `blocked`. Reopening requires all of: the full window, its first-try hit target, at most one expiration, and fewer than four familiar misses. Both this brake and the short pause must permit a new presentation.
+Two or more expirations **or** four or more familiar first-answer misses in the latest 60 completed drops set `blocked`. Reopening requires all of: the full window, its first-try hit target, at most one expiration, and fewer than four familiar misses. Both this brake and the short pause must permit a new presentation.
 
 A familiar miss is a wrong first answer on a kana seen before its drop appeared. It enters the completed-drop window once when corrected or expired. Several wrong submissions on one drop remain one familiar miss, and a wrong debut does not manufacture a familiar miss. All expirations count independently of familiarity or prior typing. Intermediate wrong submissions start the short pause immediately but do not fabricate a completed outcome.
 
-These window targets apply after the longer brake closes, not before every debut. The original window retains up to 60 distinct completed outcomes across runs, scripts and focused reviews; it stays intact and continues to govern Hiragana. Katakana instead uses a persistent window of its own completed outcomes, with the same selected difficulty and thresholds. Earlier Hiragana failures do not count as Katakana failures. The immediate ten-hit pause is still the original shared counter. Switching difficulty evaluates both corresponding tails without erasing history or the short pause.
+These window targets apply after the longer brake closes, not before every debut. The original window retains up to 60 distinct completed outcomes across runs, scripts and focused reviews; it stays intact and continues to govern Hiragana. Katakana instead uses a persistent window of its own completed outcomes, with the same fixed window and thresholds. Earlier Hiragana failures do not count as Katakana failures. The immediate ten-hit pause is still the original shared counter. Old saved profile names normalize to `calm` without erasing either history or the short pause.
 
 ## Presentation limits and continued practice
 
@@ -46,19 +42,19 @@ When no valid novelty state exists, the existing evidence replay recognizes prio
 
 ## Verification
 
-Unit and browser regressions cover immediate wrong-answer deferral before completion, one versus two expirations, nine versus ten familiar first-try hits, a new failure during recovery, debut/correction neutrality, starter bootstrap, queue fallback, restart/reload, difficulty switches, legacy history and pending errors. Synthetic export/reload checks retain items, ledgers, rows, accuracy and records. Adaptive-rain regressions continue to verify unchanged hit/expiration effects, zero floor and shared ceiling. Production packaging excludes learner exports, tests and local helpers.
+Unit and browser regressions cover immediate wrong-answer deferral before completion, one versus two expirations, nine versus ten familiar first-try hits, a new failure during recovery, debut/correction neutrality, starter bootstrap, queue fallback, restart/reload, legacy profile normalization, legacy history and pending errors. Synthetic export/reload checks retain items, ledgers, rows, accuracy and records. Adaptive-rain regressions continue to verify unchanged hit/expiration effects, zero floor and shared ceiling. Production packaging excludes learner exports, tests and local helpers.
 
 The thresholds are conservative design choices based on the reported overload, not a claim of proven learning efficacy. The old simulation below omitted cognitive overload and must not be used as validation of this fix.
 
 ## Shared adaptive rain
 
-Difficulty does not alter hearts, the rain curve, answer counting or run length. Every run has three hearts and the former Normal curve: 10-second initial falls, acceleration capped at 3.5×. **The curve reads an effective time instead of the clock:** `max(0, correct × 1.6 − expirations × 20)` seconds, where `correct` counts the run's correct answers (corrections included) and `expirations` its expired drops. `rainSeconds()` in `src/game.js` computes it; `src/difficulty.js` and its frozen curve are unchanged.
+Every run has three hearts and the same adaptive curve: 10-second initial falls, acceleration capped at 3.5×. **The curve reads an effective time instead of the clock:** `max(0, correct × 1.6 − expirations × 20)` seconds, where `correct` counts the run's correct answers (corrections included) and `expirations` its expired drops. `rainSeconds()` in `src/game.js` computes it; `src/difficulty.js` exposes one frozen curve.
 
 So 50 correct answers reach the pace that 80 seconds of play used to, and the 3.5× ceiling arrives after about 94 net correct answers. Each expiration steps the pace back 20 seconds, which 12½ correct answers repay; the pace never drops below the opening one. Time alone no longer speeds the rain; pauses and countdowns change nothing. Every run starts from the opening pace.
 
 Regular runs are three minutes; focused review is one minute. Expiration clears unfinished input and pending auto-submit; ordinary pauses preserve input.
 
-The presets are player choices from approved playtests, not proven optimal learning values. Easy retains the preferred 55/60 balance as default. Normal and Hard bring novelty back after shorter recovery windows.
+The fixed 55/60 recovery policy is a conservative design choice, not a proven optimal learning value. The retired presets below are retained only as historical rationale.
 
 ## Historical 1.7.0 simulation — not validation of the current brake
 

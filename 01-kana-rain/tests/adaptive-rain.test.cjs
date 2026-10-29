@@ -4,15 +4,14 @@ const Difficulty = require('../src/difficulty.js');
 const { runtime, play } = require('./runtime-harness.cjs');
 
 // The shared curve reads an effective time: +1.6 s per correct answer, -20 s per expiration, never below 0.
-const curve = (correct, expirations, id = 'easy') => {
-  const { speed, gap } = Difficulty.atTime(id, Math.max(0, correct * 1.6 - expirations * 20));
+const curve = (correct, expirations) => {
+  const { speed, gap } = Difficulty.atTime(Math.max(0, correct * 1.6 - expirations * 20));
   return { speed, gap };
 };
 const weather = g => ({ speed: g.app.state.speed, gap: g.app.state.gap });
 
-async function rain(difficulty = 'easy') {
+async function rain() {
   const g = await runtime();
-  g.el('difficultySelect').value = difficulty; g.el('difficultySelect').onchange();
   g.app.start(); g.skip();
   return g;
 }
@@ -77,17 +76,15 @@ test('the effective time never drops below the opening pace', async () => {
   assert.deepEqual(weather(g), curve(13, 1)); assert.ok(g.app.state.speed > 0.1, 'the 13th hit accelerates again');
 });
 
-test('every difficulty shares the adaptive curve and its 3.5x ceiling', async () => {
-  for (const id of ['easy', 'normal', 'hard']) {
-    const g = await rain(id);
-    assert.equal(g.app.state.difficulty, id);
+test('the default rain retains its adaptive curve and 3.5x ceiling', async () => {
+    const g = await rain();
+    assert.equal(g.app.state.difficulty, undefined);
     g.app.state.correct = 60; g.tick();
-    assert.deepEqual(weather(g), curve(60, 0, id));
+    assert.deepEqual(weather(g), curve(60, 0));
     g.app.state.correct = 1000; g.tick();
-    const cap = Difficulty.atTime(id, 150);
-    assert.deepEqual(weather(g), { speed: cap.speed, gap: cap.gap }, id + ' stops at the existing ceiling');
-    assert.equal(g.app.state.speed, 3.5 / Difficulty.profiles[id].fallSeconds);
-  }
+    const cap = Difficulty.atTime(150);
+    assert.deepEqual(weather(g), { speed: cap.speed, gap: cap.gap }, 'stops at the existing ceiling');
+    assert.equal(g.app.state.speed, 3.5 / Difficulty.rain.fallSeconds);
 });
 
 test('a new run starts again from the opening pace', async () => {

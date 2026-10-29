@@ -2,19 +2,21 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const Novelty=require('../src/novelty.js');
 
-const profiles=[['calm','Calm',60,55],['balanced','Balanced',30,25],['bold','Bold',12,10]];
+// Legacy names all resolve to the one default; keep exercising their persisted inputs.
+const profiles=[['calm',60,55],['balanced',60,55],['bold',60,55]];
 const finish=(state,id,extra={})=>Novelty.finish(state,{roundId:id,firstCorrect:true,timeout:false,familiar:true,...extra});
 const miss=(state,id)=>finish(state,id,{firstCorrect:false,miss:true});
 const expire=(state,id)=>finish(state,id,{firstCorrect:false,timeout:true});
 const attempt=(id,extra={})=>({attemptId:id,roundId:id,itemId:'kana:あ',facet:'form→sound',gameId:'kana-rain',firstAttempt:true,outcome:'correct',correct:true,...extra});
 
-test('new kana pace profiles are fixed and default safely to Calm',()=>{
+test('the only active new-kana profile is fixed and legacy values resolve to its rules',()=>{
   assert.equal(Object.isFrozen(Novelty.profiles),true);
-  for(const [id,label,windowSize,recoveryHits] of profiles){
-    assert.deepEqual(Novelty.profiles[id],{id,label,windowSize,recoveryHits});
-    assert.equal(Object.isFrozen(Novelty.profiles[id]),true);
-    assert.equal(Novelty.profile(id),Novelty.profiles[id]);
-    assert.equal(Novelty.profile({pace:id}),Novelty.profiles[id]);
+  assert.deepEqual(Object.keys(Novelty.profiles),['calm']);
+  assert.deepEqual(Novelty.profiles.calm,{id:'calm',windowSize:60,recoveryHits:55});
+  assert.equal(Object.isFrozen(Novelty.profiles.calm),true);
+  for(const [id,windowSize,recoveryHits] of profiles){
+    assert.equal(Novelty.profile(id),Novelty.profiles.calm);
+    assert.equal(Novelty.profile({pace:id}),Novelty.profiles.calm);
     assert.deepEqual(Novelty.constantsFor({pace:id}),{windowSize,recoveryHits,missLimit:4,timeoutLimit:2,cooldownHits:10,maxNew:2,warmup:3});
   }
   for(const invalid of [undefined,null,'unknown','constructor','__proto__',{}, {pace:'unknown'}]){
@@ -22,7 +24,7 @@ test('new kana pace profiles are fixed and default safely to Calm',()=>{
   }
 });
 
-for(const [pace,,windowSize,recoveryHits] of profiles){
+for(const [pace,windowSize,recoveryHits] of profiles){
   test(`${pace} recovery also requires at most one expiration in its ${windowSize}-drop window`,()=>{
     const state=Novelty.create({});Novelty.setPace(state,pace);
     for(let i=0;i<4;i++)miss(state,'miss:'+i);
@@ -35,7 +37,7 @@ for(const [pace,,windowSize,recoveryHits] of profiles){
     assert.equal(state.recent.slice(-windowSize).filter(round=>round.timeout).length,1);
     assert.ok(state.recent.slice(-windowSize).filter(round=>round.firstCorrect).length>=recoveryHits);
     assert.equal(state.cooldownRemaining,0,'the qualifying familiar hits also clear the ten-hit pause');
-    assert.equal(state.recent.length,60,'smaller selected windows retain the real 60-drop history');
+    assert.equal(state.recent.length,60,'every legacy input retains the real 60-drop history');
   });
 
   test(`${pace} needs a full window and reopens only below four misses and at the hit target`,()=>{
@@ -75,7 +77,7 @@ for(const [pace,,windowSize,recoveryHits] of profiles){
   });
 }
 
-test('switching pace evaluates the same real history without resetting hysteresis or seen kana',()=>{
+test('retired pace requests cannot shorten recovery or reset hysteresis and seen kana',()=>{
   const state=Novelty.create({});
   Novelty.markSeen(state,'kana:び');
   for(let i=0;i<4;i++)miss(state,'miss:'+i);
@@ -84,20 +86,23 @@ test('switching pace evaluates the same real history without resetting hysteresi
   assert.equal(state.cooldownRemaining,2);
   const recentBefore=JSON.stringify(state.recent),seenBefore=JSON.stringify(state.seen);
   Novelty.setPace(state,'balanced');
-  assert.equal(state.pace,'balanced');assert.equal(state.blocked,true,'a new profile does not invent the missing samples');
+  assert.equal(state.pace,'calm');assert.equal(state.blocked,true,'a retired profile does not invent the missing samples');
   Novelty.setPace(state,'bold');
-  assert.equal(state.blocked,true,'8 hits and four misses still fail the 12-drop rule');
+  assert.equal(state.blocked,true,'the retired short window is never used');
   finish(state,'ninth-hit');
-  assert.equal(state.blocked,true,'three misses leave only 9 of the 10 hits Bold needs');
+  assert.equal(state.blocked,true,'nine hits cannot replace the default full window');
   finish(state,'tenth-hit');
-  assert.equal(state.blocked,false);
+  assert.equal(state.blocked,true,'the short pause recovering cannot reopen the chronic brake');
   assert.equal(state.cooldownRemaining,0);
   Novelty.setPace(state,'calm');
-  assert.equal(state.blocked,true,'switching back sees the four real misses in the longer window');
+  assert.equal(state.blocked,true,'the default still sees the four real misses');
   Novelty.setPace(state,'bold');
-  assert.equal(state.blocked,false,'the same shorter qualifying tail can reopen immediately');
+  assert.equal(state.blocked,true,'the retired shorter qualifying tail cannot reopen immediately');
   assert.equal(JSON.stringify(state.seen),seenBefore);
   assert.equal(JSON.stringify(state.recent.slice(0,-2)),recentBefore,'changing profiles neither drops nor fabricates rounds');
+  for(let i=0;i<46;i++)finish(state,'full:'+i);
+  assert.equal(state.recent.length,60);assert.equal(state.blocked,true,'four misses still block in a full window');
+  finish(state,'old-miss-ages-out');assert.equal(state.blocked,false,'a genuine qualifying default window reopens');
 });
 
 test('switching any pace cannot clear, restart or make debut hits pay down the persistent pause',()=>{
@@ -120,23 +125,27 @@ test('switching any pace cannot clear, restart or make debut hits pay down the p
   for(const [pace]of profiles){Novelty.setPace(restored,pace);assert.equal(restored.cooldownRemaining,0);}
 });
 
-test('pace changes re-evaluate the same expiration tail without deleting samples or changing cooldown',()=>{
+test('retired pace requests retain the full expiration tail and cannot bypass default recovery',()=>{
   const state=Novelty.create({});
   expire(state,'expired:1');expire(state,'expired:2');
   for(let i=0;i<10;i++)finish(state,'clean:'+i);
   assert.equal(state.cooldownRemaining,0);assert.equal(state.blocked,true);
-  Novelty.setPace(state,'bold');assert.equal(state.blocked,true,'both expirations remain in the 12-drop tail');
-  finish(state,'qualifying');assert.equal(state.blocked,false,'one expiration and 11 hits recover Bold');
+  Novelty.setPace(state,'bold');assert.equal(state.blocked,true,'both expirations remain in the default tail');
+  finish(state,'next-hit');assert.equal(state.blocked,true,'a former short-window threshold cannot recover the default');
   const history=JSON.stringify(state.recent);
   for(const pace of ['calm','balanced']){
-    Novelty.setPace(state,pace);assert.equal(state.blocked,true,'the longer tail retains both real expirations');
+    Novelty.setPace(state,pace);assert.equal(state.blocked,true,'the default tail retains both real expirations');
     assert.equal(state.cooldownRemaining,0);assert.equal(JSON.stringify(state.recent),history);
   }
-  Novelty.setPace(state,'bold');assert.equal(state.blocked,false);
+  Novelty.setPace(state,'bold');assert.equal(state.blocked,true);
   assert.equal(state.cooldownRemaining,0);assert.equal(JSON.stringify(state.recent),history);
+  for(let i=0;i<46;i++)finish(state,'more:'+i);
+  assert.equal(state.recent.length,59);assert.equal(state.blocked,true);
+  finish(state,'full');assert.equal(state.blocked,true,'the full window still holds two expirations');
+  finish(state,'one-expires');assert.equal(state.blocked,false,'one expiration and 59 hits qualify without changing rules');
 });
 
-test('Bold keeps 60 completed drops available when switching back to Calm',()=>{
+test('a retired Bold request still keeps the full 60 completed drops',()=>{
   const state=Novelty.create({});Novelty.setPace(state,'bold');
   for(let i=0;i<65;i++)finish(state,'round:'+i);
   assert.equal(state.recent.length,60);assert.equal(state.recent[0].roundId,'round:5');
@@ -171,7 +180,7 @@ test('existing version 1 state acquires Calm without replaying evidence or reset
   assert.equal(JSON.stringify(evidence),before);
 });
 
-test('selected pace and the shared evidence history survive save and reload',()=>{
+test('default pace and the shared evidence history survive save and reload despite a retired request',()=>{
   const attempts=[attempt('hit')];
   for(let i=0;i<4;i++)attempts.push(attempt('miss:'+i+':1',{roundId:'miss:'+i,outcome:'incorrect',correct:false}),attempt('miss:'+i+':2',{roundId:'miss:'+i,firstAttempt:false}));
   attempts.push(attempt('timeout:1',{outcome:'timeout',correct:null}),attempt('timeout:2',{outcome:'timeout',correct:null}));
@@ -180,7 +189,7 @@ test('selected pace and the shared evidence history survive save and reload',()=
   const gameData={rows:{hiragana:15,katakana:1},best:{hira:1981}},state=Novelty.create(gameData,evidence);
   Novelty.setPace(state,'bold');
   const before=JSON.stringify(gameData),saved=JSON.parse(before),restored=Novelty.create(saved,{attempts:[attempt('do-not-replay')]});
-  assert.equal(restored.pace,'bold');assert.equal(restored.blocked,true);assert.equal(restored.recent.length,7);
+  assert.equal(restored.pace,'calm');assert.equal(restored.blocked,true);assert.equal(restored.recent.length,7);
   assert.equal(restored.cooldownRemaining,10);
   assert.deepEqual(restored.recent.map(round=>round.miss),[false,true,true,true,true,false,false]);
   assert.equal(JSON.stringify(saved),before);assert.equal(JSON.stringify(evidence),evidenceBefore);

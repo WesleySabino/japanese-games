@@ -177,7 +177,7 @@ async function responsive(){
   for(const [width,height] of [[1920,1080],[1440,900],[1366,768],[1200,768],[1024,768],[910,864],[830,768],[800,768],[761,768],[390,844],[320,568],[844,390],[640,360],[568,320]]){
     const page=await context({width,height});await start(page);await noCounter(page);
     // Stress the longest run label, including widths between phone and desktop layouts.
-    await page.locator('#gameLabel').evaluate(el=>{el.textContent='Review · Normal · Katakana';});
+    await page.locator('#gameLabel').evaluate(el=>{el.textContent='Review · Journey · Katakana begins';});
     const label=`${width}x${height}`;
     await screenshot(page,'layout-'+label);
     const layout=await page.evaluate(()=>{
@@ -229,7 +229,7 @@ async function responsive(){
 }
 async function smallScreenTarget(){
   const page=await context({width:320,height:568});
-  await page.locator('#difficultySelect').selectOption('easy');await start(page);
+  await start(page);
   const first=await page.evaluate(()=>KanaRain.state.target.roundId);
   await page.locator('#answer').fill('partial');
   await page.evaluate(()=>{KanaRain.state.queue.unshift({id:'kana:あ'});KanaRain.state.sinceSpawn=100000;});

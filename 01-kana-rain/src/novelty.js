@@ -3,13 +3,12 @@
   'use strict';
   const constants=Object.freeze({windowSize:60,missLimit:4,timeoutLimit:2,recoveryHits:55,cooldownHits:10,maxNew:2,warmup:3});
   const profiles=Object.freeze({
-    calm:Object.freeze({id:'calm',label:'Calm',windowSize:60,recoveryHits:55}),
-    balanced:Object.freeze({id:'balanced',label:'Balanced',windowSize:30,recoveryHits:25}),
-    bold:Object.freeze({id:'bold',label:'Bold',windowSize:12,recoveryHits:10})
+    calm:Object.freeze({id:'calm',windowSize:60,recoveryHits:55})
   });
   const GAME='kana-rain',FACET='form→sound';
   const isKana=id=>typeof id==='string'&&id.startsWith('kana:');
-  function profile(value){const id=typeof value==='string'?value:value?.pace;return Object.hasOwn(profiles,id)?profiles[id]:profiles.calm;}
+  // Legacy pace selections remain readable but no longer change admission rules.
+  function profile(){return profiles.calm;}
   function constantsFor(state){const selected=profile(state);return {...constants,windowSize:selected.windowSize,recoveryHits:selected.recoveryHits};}
   function hasSeen(state,id){return state.seen[id]===true;}
   function markSeen(state,id){if(isKana(id))state.seen[id]=true;return state;}
@@ -37,7 +36,7 @@
     else if(firstCorrect&&familiar&&state.cooldownRemaining>0)state.cooldownRemaining--;
     state.recent.push({roundId:event.roundId,firstCorrect,timeout:event.timeout===true,miss:event.miss===true&&!firstCorrect,familiar});
     if(state.recent.length>constants.windowSize)state.recent.splice(0,state.recent.length-constants.windowSize);
-    // Keep all 60 real samples even for shorter profiles so switching back loses no history.
+    // Retain all 60 real samples, including history saved by earlier versions.
     return updateGate(state);
   }
   function create(gameData,evidence={}){
