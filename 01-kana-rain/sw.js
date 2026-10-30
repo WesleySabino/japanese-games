@@ -1,4 +1,4 @@
-const CACHE='kana-rain-v51-local-atomic-shell';
+const CACHE='kana-rain-v51-release-1.13.0';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
 // Public secondary pages still use the separate CSS; only the home page inlines it.
