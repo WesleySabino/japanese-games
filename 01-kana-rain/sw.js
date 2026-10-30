@@ -1,4 +1,4 @@
-const CACHE='kana-rain-v50-local-single-pace';
+const CACHE='kana-rain-v51-local-atomic-shell';
 const BASE=new URL('./',self.location.href);
 const url=p=>new URL(p,BASE).href;
 // Public secondary pages still use the separate CSS; only the home page inlines it.
@@ -11,7 +11,9 @@ self.addEventListener('install',event=>{
     // handler maps root navigations to index.html, so a second './' copy is unused.
     await cache.add(url('index.html'));
     const html=await (await cache.match(url('index.html'))).text();
-    const scripts=html.includes('src="assets/game-runtime.js"')?['assets/game-runtime.js']:SOURCE_SCRIPTS;
+    // Atomic production HTML contains its current runtime. The stable external
+    // bundle is retained only for older documents still loading in another tab.
+    const scripts=html.includes('data-game-runtime')||html.includes('src="assets/game-runtime.js"')?['assets/game-runtime.js']:SOURCE_SCRIPTS;
     await cache.addAll([...SHELL.filter(p=>p!=='index.html'),...scripts].map(url));
     const manifest=await (await cache.match(url('kana-audio-bundle/runtime-manifest.json'))).json();
     const recordings=[...new Set(Object.values(manifest.byKana))];
@@ -31,22 +33,17 @@ self.addEventListener('fetch',event=>{
     const requested=new URL(event.request.url);
     if(event.request.mode==='navigate'){requested.search='';requested.hash='';}
     // Cache each destination separately so visiting the artwork cannot replace the offline game.
-    const pageAliases={'/about':'about.html','/art':'art.html','/privacy':'privacy.html'};
-    const target=event.request.mode==='navigate'&&pageAliases[requested.pathname]?url(pageAliases[requested.pathname]):event.request.mode==='navigate'&&requested.pathname===BASE.pathname?url('index.html'):requested.href;
+    const pageAliases=Object.fromEntries(['about','art','privacy'].map(name=>[url(name),url(name+'.html')]));
+    const target=event.request.mode==='navigate'&&pageAliases[requested.href]?pageAliases[requested.href]:event.request.mode==='navigate'&&requested.pathname===BASE.pathname?url('index.html'):requested.href;
     const cached=await cache.match(target);
-    if(/\.(webp|png|mp3)$/.test(target)&&cached)return cached;
-    try{
-      const response=await fetch(event.request);
-      if(response.ok)await cache.put(target,response.clone());
-      return response;
-    }catch(error){
-      if(cached){
-        // Hosting may redirect index.html to /. Navigation cannot reuse a
-        // redirected Response, even when its successful body is in the cache.
-        if(event.request.mode==='navigate'&&cached.redirected)return new Response(cached.body,{status:cached.status,statusText:cached.statusText,headers:cached.headers});
-        return cached;
-      }
-      throw error;
+    // Installed HTML, CSS and code belong to one complete generation. An
+    // update may replace them only through install + activate, never piecemeal.
+    if(cached){
+      if(event.request.mode==='navigate'&&cached.redirected)return new Response(cached.body,{status:cached.status,statusText:cached.statusText,headers:cached.headers});
+      return cached;
     }
+    const response=await fetch(event.request);
+    if(response.ok)try{await cache.put(target,response.clone());}catch{}
+    return response;
   })());
 });

@@ -6,12 +6,12 @@ const path=require('node:path');
 const vm=require('node:vm');
 const origin='https://example.test';
 
-function worker(cached,network=async()=>{throw new TypeError('Offline');}){
+function worker(cached,network=async()=>{throw new TypeError('Offline');},{quota=false}={}){
   const handlers={},matches=[];
   const context=vm.createContext({
     URL,Response,
     self:{location:{href:origin+'/sw.js'},addEventListener(type,handler){handlers[type]=handler;}},
-    caches:{async open(){return {async match(key){matches.push(key);return cached;},async put(){}};}},
+    caches:{async open(){return {async match(key){matches.push(key);return cached;},async put(){if(quota)throw new Error('Cache quota full');}};}},
     fetch:network,
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname,'../sw.js'),'utf8'),context);
@@ -42,9 +42,17 @@ test('offline script fallback retains the original cached response',async()=>{
   assert.equal(await worker(cached).request('/assets/game-runtime.js','cors'),cached);
 });
 
-test('online navigation preserves the current network response',async()=>{
+test('online navigation keeps the complete installed generation until activation',async()=>{
   const cached=new Response('old'),fresh=new Response('latest');
-  assert.equal(await worker(cached,async()=>fresh).request('/'),fresh);
+  let calls=0;assert.equal(await worker(cached,async()=>{calls++;return fresh;}).request('/'),cached);assert.equal(calls,0);
+});
+
+test('a destination outside the installed cache preserves its network response',async()=>{
+  const fresh=new Response('new page');assert.equal(await worker(undefined,async()=>fresh).request('/other-page'),fresh);
+});
+
+test('an uncached online page stays usable when cache storage cannot accept more files',async()=>{
+  const fresh=new Response('available online');assert.equal(await worker(undefined,async()=>fresh,{quota:true}).request('/other-page'),fresh);
 });
 
 test('offline cache misses remain visible failures instead of an unrelated fallback page',async()=>{

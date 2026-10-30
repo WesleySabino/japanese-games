@@ -1,5 +1,12 @@
 # Kana Rain releases
 
+## Unreleased — 1.13.0-local.2
+
+- Embed the current runtime after the complete game DOM, alongside its current styles, so new HTML cannot fall back to incompatible older game code. Preserve a stable compatibility URL for supported cached entry documents, selecting their matching historical runtime.
+- Serve installed shell files from their complete cache generation. Activate updates only after all required assets and 104 recordings are present. Preserve learner keys, IndexedDB, journals and all progress facts.
+- Add native partial-download and online/offline recovery tests against the 1.10.1, 1.12.0 and 1.12.1 production documents, including failed runtime, HTML and recording requests. Retain exact public hashes for the new historical fixture.
+- Align the alphabet selector with the three main-menu buttons using a shared responsive width and geometric regressions across 11 viewports. Local validation only.
+
 ## Unreleased — 1.13.0-local.1
 
 - Use one default play policy with the former Easy behavior: the same three hearts, adaptive rain, 60-drop reading window and 55-hit recovery. Retire the other selectable recovery profiles.

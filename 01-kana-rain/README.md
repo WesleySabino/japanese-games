@@ -1,6 +1,8 @@
 # Kana Rain
 
-**Production: 1.12.1 — 28 October 2026. Local preview: 1.13.0-local.1.** See [release history](CHANGELOG.md).
+**Production: 1.12.1 — 28 October 2026. Local preview: 1.13.0-local.2.** See [release history](CHANGELOG.md).
+
+The local candidate packages the current game code and styles atomically with its document. Installed shell files are served from one complete cache generation; an interrupted update keeps the prior generation. Frozen public compatibility assets let supported older cached documents finish loading without executing mismatched current code. Progress storage is unchanged. The alphabet selector now aligns with the main-menu buttons at every breakpoint. No publication has been made for this preview.
 
 Queued saves share a consolidation while every caller still journals immediately; private snapshots use independent tree copies instead of another JSON round trip. Reduced effects also removes moving filters/backdrop blurs and avoids creating hidden splash/ripple nodes. Storage keys, schema, history, progression, normal visuals and audio are retained. Run `pnpm test:smoother-saving` after `pnpm build` for native single-commit, large-history two-tab/close and reduced-effects regressions.
 

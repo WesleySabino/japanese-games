@@ -8,7 +8,7 @@ const vm = require('node:vm');
 const { chromium } = require('playwright');
 const { root, hash, currentBuild, baselineBuild } = require('./helpers/update-fixture.cjs');
 const baselineVersion = process.argv[2] || '1.10.1';
-assert.ok(['1.10.1', '1.12.0'].includes(baselineVersion), 'choose a pinned update baseline');
+assert.ok(['1.10.1', '1.12.0', '1.12.1'].includes(baselineVersion), 'choose a pinned update baseline');
 const out = path.join(__dirname, 'artifacts/update');
 const report = { startedAt: new Date().toISOString(), passed: false, syntheticProgressOnly: true, userProfileAccess: false, productionAccess: false, serviceWorkers: 'allowed in disposable localhost contexts', checks: [], pageErrors: [], outsideRequests: [], contextsOpened: 0, contextsClosed: 0 };
 const contexts = new Set();
@@ -158,7 +158,7 @@ async function assertCache(page, release) {
   assert.equal(entries.filter(e => e.file.endsWith('.mp3')).length, 104, 'all 104 recordings cached');
   if (worker.includes('const SOURCE_SCRIPTS=')) {
     const sourceScripts = [...worker.match(/\bconst SOURCE_SCRIPTS=\[([^]*?)\];/)[1].matchAll(/'([^']+)'/g)].map(m => '/' + m[1]);
-    assert.equal(entries.filter(e => sourceScripts.includes(e.file)).length, 0, 'production caches the runtime once, without separate core modules');
+    assert.equal(entries.filter(e => sourceScripts.includes(e.file)).length, 0, 'production uses its atomic document or compatibility bundle, without separate core modules');
     assert.equal(entries.filter(e => e.file === '/').length, 0, 'root navigation reuses index.html without duplicate entry HTML');
     assert.ok(entries.some(e => e.file === '/src/style.css'), 'art gallery keeps its required external stylesheet offline');
     assert.ok(entries.some(e => e.file === '/assets/nihongo-analytics.css'), 'secondary public pages keep their stylesheet offline');
@@ -272,7 +272,9 @@ async function scenario(mobile, interrupted = false) {
     old = baselineBuild(baselineVersion); candidate = currentBuild(); served = old;
     assert.notEqual(candidate.cache, old.cache, 'a version update needs a distinct service worker cache');
     report.baseline = { version: old.version, commit: old.commit, cache: old.cache };
-    report.candidate = { version: candidate.version, cache: candidate.cache, runtimeSha256: hash(candidate.files.get('/assets/game-runtime.js')) };
+    const html = candidate.files.get('/index.html').toString(), inline = html.match(/<script\b[^>]*\bdata-game-runtime(?:\s[^>]*)?>([\s\S]*?)<\/script>/i);
+    assert.ok(inline, 'current production document contains its atomic runtime');
+    report.candidate = { version: candidate.version, cache: candidate.cache, runtimeSha256: hash(Buffer.from(inline[1])), compatibilityRuntimeSha256: hash(candidate.files.get('/assets/game-runtime.js')), atomicRuntime: true };
     await startServer(); report.origin = origin;
     const channel = process.env.PLAYWRIGHT_BROWSER_CHANNEL;
     browser = await chromium.launch({ headless: true, ...(channel ? { channel } : {}) });

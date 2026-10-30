@@ -114,11 +114,15 @@ async function menuGeometry(page,label){
     welcome.scrollTop=50;welcome.scrollLeft=50;
     const scroll={width:welcome.scrollWidth,height:welcome.scrollHeight,clientWidth:welcome.clientWidth,clientHeight:welcome.clientHeight,top:welcome.scrollTop,left:welcome.scrollLeft};
     welcome.scrollTop=0;welcome.scrollLeft=0;
-    return {welcome:rect(welcome),panel:rect(panel),scroll,
+    return {welcome:rect(welcome),panel:rect(panel),scroll,buttons:[...document.querySelectorAll('.main-menu .menu-button')].map(rect),
       flow:['.title-lockup','.main-menu','.session-selectors','.session-summary','#menuCounts','#menuHint'].map(visible).filter(Boolean),
       selects:[...panel.querySelectorAll('select')].map(el=>{const style=getComputedStyle(el);return {id:el.id,select:rect(el),label:rect(el.closest('label')),caption:rect(el.closest('label').querySelector('.setup-label')),textAlign:style.textAlign,textAlignLast:style.textAlignLast,paddingLeft:parseFloat(style.paddingLeft),paddingRight:parseFloat(style.paddingRight)};})};
   });
   const {welcome,panel,scroll}=layout;
+  assert.equal(layout.buttons.length,3,label+' has all three main-menu options');
+  for(const button of layout.buttons)for(const edge of ['left','right','width']){
+    assert.ok(Math.abs(panel[edge]-button[edge])<=1,label+' alphabet frame shares the menu button '+edge+': '+JSON.stringify({panel,button}));
+  }
   assert.ok(scroll.width<=scroll.clientWidth+1&&scroll.height<=scroll.clientHeight+1,label+' welcome content fits without its own scrollbar: '+JSON.stringify({scroll,flow:layout.flow,panel}));
   assert.equal(scroll.top,0,label+' welcome cannot scroll vertically');assert.equal(scroll.left,0,label+' welcome cannot scroll horizontally');
   for(const item of layout.flow){
