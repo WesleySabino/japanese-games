@@ -1,5 +1,16 @@
 # Kana Rain releases
 
+## 1.13.0 — 2026-10-29
+
+- Embed the current runtime after the complete game DOM, alongside its current styles, so new HTML cannot fall back to incompatible older game code. Preserve a stable compatibility URL for supported cached entry documents, selecting their matching historical runtime.
+- Serve installed shell files from their complete cache generation. Activate updates only after all required assets and 104 recordings are present. Preserve learner keys, IndexedDB, journals and all progress facts.
+- Add native partial-download and online/offline recovery tests against the 1.10.1, 1.12.0 and 1.12.1 production documents, including failed runtime, HTML and recording requests. Retain exact public hashes for the new historical fixture.
+- Align the alphabet selector with the three main-menu buttons using a shared responsive width and geometric regressions across 11 viewports.
+
+- Use one default play policy with the former Easy behavior: the same three hearts, adaptive rain, 60-drop reading window and 55-hit recovery. Retire the other selectable recovery profiles.
+- Remove the difficulty selector, explanatory selection note and difficulty names from menus, HUD, results, instructions and the public help page. Keep the alphabet field centered in its own frame on desktop and phones.
+- Normalize legacy profile selections without deleting attempts, exposures, earned rows, records, pressure history or failure cooldowns. Keep legacy record fields readable; do not change the learner storage schema or keys.
+
 ## 1.12.1 — 2026-10-28
 
 - Group flushes queued for the same Web Lock before its transaction starts, while capturing and synchronously journaling each caller's facts. New changes during a transaction still queue a follow-up. Rejected locks and newer failure warnings remain observable.

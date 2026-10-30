@@ -31,7 +31,7 @@ function currentBuild() {
   return { files, cache: cacheName(files), version: require('../../package.json').version };
 }
 function baselineBuild(version = '1.10.1') {
-  assert.ok(['1.10.1', '1.12.0'].includes(version), 'choose a pinned historical release');
+  assert.ok(['1.10.1', '1.12.0', '1.12.1'].includes(version), 'choose a pinned historical release');
   const manifest = JSON.parse(fs.readFileSync(path.join(fixture, version + '.json'), 'utf8'));
   const compressed = fs.readFileSync(path.join(fixture, version + '.payload.json.gz'));
   assert.equal(hash(compressed), manifest.payloadSha256, 'historical payload integrity');
@@ -69,7 +69,8 @@ function capture(directory, version = '1.10.1') {
   }
   const pins = {
     '1.10.1': { cache: 'kana-rain-v38-release-1.10.1', commit: '4e02aee67272e21111875087e6a7a033fed5e4b7' },
-    '1.12.0': { cache: 'kana-rain-v48-release-1.12.0', commit: '3b6024aa7c32206770b5d09f207774eb725ad07f' }
+    '1.12.0': { cache: 'kana-rain-v48-release-1.12.0', commit: '3b6024aa7c32206770b5d09f207774eb725ad07f' },
+    '1.12.1': { cache: 'kana-rain-v49-release-1.12.1', commit: 'a3d71ae4d76c1471b478997a93a201d8992eb0c8' }
   }, pin = pins[version], cache = cacheName(map);
   assert.ok(pin, 'capture only a pinned release');
   assert.equal(cache, pin.cache, 'capture the pinned release, never the current candidate');
@@ -81,6 +82,6 @@ function capture(directory, version = '1.10.1') {
 }
 module.exports = { root, hash, currentBuild, baselineBuild };
 if (require.main === module) {
-  assert.ok(['--capture', '--capture-1.12.0'].includes(process.argv[2])); assert.equal(process.argv.length, 4);
-  capture(process.argv[3], process.argv[2] === '--capture-1.12.0' ? '1.12.0' : '1.10.1');
+  assert.ok(['--capture', '--capture-1.12.0', '--capture-1.12.1'].includes(process.argv[2])); assert.equal(process.argv.length, 4);
+  capture(process.argv[3], process.argv[2] === '--capture' ? '1.10.1' : process.argv[2].slice('--capture-'.length));
 }

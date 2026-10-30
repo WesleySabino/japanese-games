@@ -21,7 +21,9 @@ async function tab(map, options = {}) {
   const context = vm.createContext({ localStorage: store, crypto: { randomUUID }, console, navigator: options.navigator || {},
     addEventListener: (name, fn) => events.set(name, fn) });
   context.window = context;
-  vm.runInContext(source('learner'), context); vm.runInContext(source('novelty'), context);
+  const previous=options.previous?require('./helpers/update-fixture.cjs').baselineBuild('1.12.0'):null;
+  vm.runInContext(previous?previous.files.get('/src/learner.js').toString():source('learner'), context);
+  if(options.novelty!==false)vm.runInContext(previous?previous.files.get('/src/novelty.js').toString():source('novelty'), context);
   await context.Learner.ready;
   const L = context.Learner, gd = L.gameData('kana-rain');
   return { L, gd, N: context.KanaNovelty, hide: () => events.get('pagehide')(), saved: () => JSON.parse(L.export()) };
@@ -115,4 +117,57 @@ test('a new Katakana failure resets the pause even when the stale tab already di
   b.L.record('kana:ア', 'form→sound', { correct: false, firstAttempt: true, gameId: 'kana-rain', deferSave: true });
   b.N.pause(b.gd.novelty); b.N.pause(b.gd.katakanaNovelty); await b.L.flush();
   assert.equal((await tab(map)).gd.katakanaNovelty.cooldownRemaining, 10);
+});
+
+function defaultBrakeFixture(){
+  const saved=seed();
+  for(const [name,char]of [['novelty','あ'],['katakanaNovelty','ア']])saved.games['kana-rain'][name]={version:1,pace:'calm',seen:{['kana:'+char]:true},blocked:true,cooldownRemaining:0,
+    recent:Array.from({length:60},(_,i)=>({roundId:name+':old:'+i,firstCorrect:i>=6,timeout:i<2,miss:i>=2&&i<6,familiar:true}))};
+  return saved;
+}
+function finishDefaultHits(t){
+  for(const [name,char]of [['novelty','あ'],['katakanaNovelty','ア']]){
+    const roundId=name+':new-hit';
+    hit(t,'kana:'+char,{attemptId:roundId,roundId});
+    t.N.finish(t.gd[name],{roundId,firstCorrect:true,familiar:true});
+    assert.equal(t.gd[name].blocked,true,'four real misses still close the default gate before consolidation');
+  }
+}
+for(const pace of ['balanced','bold'])test(`a stale 1.12.0 ${pace} preference cannot shorten either default gate during flush, close and reload`,async()=>{
+  const fixture=defaultBrakeFixture(),map=new Map([[KEY,JSON.stringify(fixture)]]),current=await tab(map),previous=await tab(map,{previous:true});
+  assert.equal(previous.N.profile(pace).windowSize,pace==='bold'?12:30,'the stale tab really uses the published policy');
+  for(const name of ['novelty','katakanaNovelty']){current.N.create({novelty:current.gd[name]});previous.N.setPace(previous.gd[name],pace);}
+  await previous.L.flush();
+  for(const name of ['novelty','katakanaNovelty'])assert.equal(JSON.parse(map.get(KEY+':protected:v1')).games['kana-rain'][name].pace,pace,'the old tab preference really reaches shared storage');
+  await current.L.flush();
+  for(const name of ['novelty','katakanaNovelty']){assert.equal(current.gd[name].pace,'calm','the active tab normalizes an adopted old preference');assert.equal(current.gd[name].blocked,true,'default pressure applies before another answer');}
+  finishDefaultHits(current);await current.L.flush();
+  for(const name of ['novelty','katakanaNovelty'])assert.equal(current.gd[name].blocked,true,name+' stays blocked after consolidation');
+  const before=current.saved();await previous.hide();await current.hide();const reloaded=await tab(map);
+  for(const name of ['novelty','katakanaNovelty']){
+    assert.equal(reloaded.gd[name].blocked,true,name+' stays blocked after both tabs close and reload');
+    assert.equal(reloaded.gd[name].pace,'calm');
+    assert.deepEqual(plain(reloaded.gd[name].recent),plain(before.games['kana-rain'][name].recent));
+    assert.equal(reloaded.gd[name].recent.length,60);assert.equal(reloaded.gd[name].recent.filter(r=>r.miss).length,4);
+  }
+  assert.deepEqual(reloaded.saved().attemptLedger,before.attemptLedger);assert.equal(reloaded.L.attempts().length,2);
+  assert.deepEqual(plain(reloaded.gd.rows),fixture.games['kana-rain'].rows);assert.deepEqual(plain(reloaded.gd.best),fixture.games['kana-rain'].best);
+});
+
+for(const pace of ['balanced','bold'])test(`preload replay of a pending ${pace} journal uses the default gate before novelty.js loads`,async()=>{
+  const fixture=defaultBrakeFixture();for(const name of ['novelty','katakanaNovelty'])fixture.games['kana-rain'][name].pace=pace;
+  const map=new Map([[KEY,JSON.stringify(fixture)]]),current=await tab(map,{navigator:{locks:{request:()=>new Promise(()=>{})}}});
+  // Same as a new active tab receiving the old preference after its initial normalization.
+  finishDefaultHits(current);current.hide();
+  const journals=[...map].filter(([key])=>key.startsWith(KEY+':pending:'));assert.equal(journals.length,1);
+  assert.equal(JSON.parse(journals[0][1]).flatMap(op=>op.novelty).length,2,'both real gate operations were journaled');
+  const reloaded=await tab(map,{novelty:false});assert.equal(reloaded.N,undefined,'replay really ran before the policy module existed');
+  for(const name of ['novelty','katakanaNovelty']){
+    assert.equal(reloaded.gd[name].blocked,true,name+' remains blocked during preload journal replay');
+    assert.equal(reloaded.gd[name].pace,'calm');
+    assert.equal(reloaded.gd[name].recent.length,60);assert.equal(reloaded.gd[name].recent.filter(r=>r.miss).length,4);
+  }
+  assert.equal(reloaded.L.attempts().length,2);await reloaded.L.flush();await reloaded.hide();
+  const again=await tab(map);assert.equal(again.L.attempts().length,2,'repeated recovery never reapplies facts');
+  for(const name of ['novelty','katakanaNovelty'])assert.equal(again.gd[name].blocked,true,name+' still blocked after durable reload');
 });

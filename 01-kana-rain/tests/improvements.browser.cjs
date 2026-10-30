@@ -52,7 +52,7 @@ async function responsive() {
     await geometry(page, `${width}x${height} menu`);
     assert.equal(await page.locator('#practiceSelect,#settingsPracticeSelect,#durationSelect,#noveltyPaceSelect').count(), 0);
     assert.equal(await page.evaluate(() => KanaRain.settings.playStyle), 'arcade');
-    assert.equal(await page.locator('#difficultySelect').isEnabled(), true);
+    assert.equal(await page.locator('#difficultySelect,#difficultyNote').count(), 0);
 
     assert.equal(await page.locator('.ng-analytics-settings').isVisible(), false);
     await page.locator('#settingsBtn').click();

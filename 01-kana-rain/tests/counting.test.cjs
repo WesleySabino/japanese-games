@@ -39,7 +39,7 @@ test('two wrong submissions followed by correction count 1 correct, 2 wrong and 
   assert.equal(g.app.gameData.novelty.cooldownRemaining, 10, 'correction does not recover the failure pause');
   assert.equal(g.app.gameData.novelty.recent.at(-1).miss, true);
   g.tick();
-  const curve = Difficulty.atTime('easy', 1.6);
+  const curve = Difficulty.atTime(1.6);
   assert.equal(g.app.state.speed, curve.speed); assert.equal(g.app.state.gap, curve.gap);
   g.app.end('Synthetic correction check'); assertResults(g, [1, 2, 0]);
   assert.match(g.el('resultDetails').textContent, /0 first-try · 1 after correction/);

@@ -159,6 +159,14 @@ joined._sync=copy(syncInfo(left));if(imported.manualReconstruction)joined.manual
 }
 function importSummary(imported,joined,current){var gd=joined.games['kana-rain']||{},now=Date.now();return {attempts:imported.attemptLedger.length,exposures:imported.exposureLedger.length,addedAttempts:joined.attemptLedger.length-current.attemptLedger.length,addedExposures:joined.exposureLedger.length-current.exposureLedger.length,hiraganaRows:(gd.rows||{}).hiragana||0,katakanaRows:(gd.rows||{}).katakana||0,katakanaUnlocked:gd.katakanaUnlocked===true,hiraganaFamiliar:Object.keys(joined.items).filter(function(id){var f=joined.items[id].facets['form→sound'];return /^kana:[ぁ-ゖ]/.test(id)&&f&&f.correct&&.6*retrievability(f,now)+.4*Math.min(1,Math.log1p(f.stability)/Math.log1p(60))>=.55;}).length,manualEstimate:!!joined.manualReconstruction};}
 function previewImport(json){var imported=parseImport(json),current=copy(mem);return importSummary(imported,joinImported(current,imported),current);}
+// Reconcile gate metadata as well as new rounds: a live older tab can write a
+// shorter-policy result without appending any facts. Do this on private copies,
+// before persistence/adoption, so memory and disk share the same current policy.
+function defaultReadingGate(s){
+if(!s||s.version!==1||!Array.isArray(s.recent)||typeof s.blocked!=='boolean')return;
+s.pace='calm';var recent=s.recent.slice(-60),misses=recent.filter(function(r){return typeof r.miss==='boolean'?r.miss:r.firstCorrect!==true&&r.timeout!==true;}).length,timeouts=recent.filter(function(r){return r.timeout===true;}).length;
+if(misses>=4||timeouts>=2)s.blocked=true;else if(s.blocked&&recent.length===60&&recent.filter(function(r){return r.firstCorrect===true;}).length>=55)s.blocked=false;
+}
 function merged(base,operations){
 var data=copySnapshot(base),info=syncInfo(data),rebuild=false,ids=new Set(data.attemptLedger.map(function(e){return e.attemptId;})),exposures=new Set(data.exposureLedger.map(function(e){return e.exposureId;}));
 // Concurrent writers may be linearized in either order; a writer's own sequence
@@ -179,16 +187,16 @@ if(applied)(op.novelty||[]).forEach(function(n){var gd=data.games[n.game],s=gd&&
 if(!applied)(op.novelty||[]).forEach(function(n){var gd=data.games[n.game]||(data.games[n.game]={}),s=gd[n.name];if(!s)return;
 n.seen.forEach(function(id){s.seen[id]=true;});if(n.pause)s.cooldownRemaining=10;if(n.blocked)s.blocked=true;
 n.rounds.forEach(function(round){if(root.KanaNovelty)root.KanaNovelty.finish(s,Object.assign({failureRecorded:true},round));else if(!s.recent.some(function(r){return r.roundId===round.roundId;})){if(round.timeout)s.cooldownRemaining=10;else if(round.firstCorrect&&round.familiar&&s.cooldownRemaining>0)s.cooldownRemaining--;s.recent.push(copy(round));if(s.recent.length>60)s.recent.shift();}});
-// Keep the admission gate conservative even when this script loads before novelty.js.
-var size=s.pace==='bold'?12:s.pace==='balanced'?30:60,recent=s.recent.slice(-size),misses=recent.filter(function(r){return r.miss===true;}).length,timeouts=recent.filter(function(r){return r.timeout;}).length;
-if(misses>=4||timeouts>=2)s.blocked=true;else if(s.blocked&&recent.length===size&&recent.filter(function(r){return r.firstCorrect;}).length>=(size===12?10:size-5))s.blocked=false;
+defaultReadingGate(s);
 });
 (op.exposures||[]).forEach(function(ev){if(exposures.has(ev.exposureId))return;exposures.add(ev.exposureId);data.exposureLedger.push(copy(ev));var key=ev.itemId+'|'+ev.facet;if(!data.reveals[key]||ev.at>=data.reveals[key].at)data.reveals[key]=Object.assign({},ev,{intervening:[]});});
 (op.attempts||[]).forEach(function(ev){if(ids.has(ev.attemptId))return;ids.add(ev.attemptId);rebuild=true;if(!data.items[ev.itemId]&&op.items[ev.itemId])data.items[ev.itemId]=copy(op.items[ev.itemId]);data.attemptLedger.push(copy(ev));if(ev.firstAttempt&&ev.outcome!=='timeout')Object.keys(data.reveals).forEach(function(k){var r=data.reveals[k];if(r.itemId!==ev.itemId&&ev.at>=r.at&&!r.intervening.includes(ev.itemId))r.intervening.push(ev.itemId);});});
 info.applied[op.writer]=Math.max(info.applied[op.writer]||0,op.seq);data.sequence=Math.max(data.sequence||0,op.sequence||0);data.updatedAt=Math.max(data.updatedAt||0,op.at);
 });
 // Rebuild aggregates from the union of immutable facts, never add saved totals twice.
-return rebuild?normalized(data):data;
+if(rebuild)data=normalized(data);
+var rain=data.games['kana-rain'];if(rain){defaultReadingGate(rain.novelty);defaultReadingGate(rain.katakanaNovelty);}
+return data;
 }
 function adopt(data){reconcile(mem,data);attemptIds=new Set(mem.attemptLedger.map(function(e){return e.attemptId;}));exposureIds=new Set(mem.exposureLedger.map(function(e){return e.exposureId;}));remember();}
 var status={state:'checking',saved:false,backend:null,journal:false,indexedDB:false,revision:0};

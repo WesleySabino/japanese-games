@@ -134,7 +134,7 @@ async function exerciseResponsiveMatrix(errors,sizes=[[320,568],[360,640],[390,8
     const label=width+'×'+height;
     await page.setViewportSize({width,height});await page.goto('http://127.0.0.1:4180');await page.waitForFunction(()=>window.KanaRain);
     await assertWholeViewport(page,label+' menu');
-    for(const id of ['startBtn','gardenBtn','settingsBtn','mode','difficultySelect'])await assertInViewport(page,'#'+id,label+' menu '+id);
+    for(const id of ['startBtn','gardenBtn','settingsBtn','mode'])await assertInViewport(page,'#'+id,label+' menu '+id);
     if(width===320)await screenshot(page,'smallest-portrait-menu');
     if(width===568)await screenshot(page,'smallest-landscape-menu');
     await page.locator('#settingsBtn').tap();await assertPanelFits(page,'settingsDialog','closeSettings',label+' settings');
@@ -177,7 +177,7 @@ async function exerciseStableInput(errors){
       for(let i=0;i<6;i++)Learner.record('kana:あ','form→sound',{gameId:'kana-rain',correct:true,rtMs:500,firstAttempt:true,assistance:false,responseFormat:'romaji',now:Date.now()-(5-i)*7*86400000});
       Learner.flush();
     });
-    await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#difficultySelect').selectOption('easy');await page.locator('#startBtn').tap();await readyToPlay(page);
+    await page.reload();await page.waitForFunction(()=>window.KanaRain);await page.locator('#startBtn').tap();await readyToPlay(page);
     assert.equal(await page.evaluate(()=>Learner.mastery('kana:あ','form→sound')>=.75&&Learner.state('kana:あ').facets['form→sound'].independentFirstCorrect>=2),true,'fixture reaches the former automatic script-change threshold');
     const firstRound=await page.evaluate(()=>KanaRain.state.target.roundId);
     assert.equal(await page.evaluate(()=>KanaRain.state.target.responseFormat),'romaji');
@@ -220,7 +220,7 @@ async function exerciseQuickWins(errors){
   const tonesAvailable=await page.evaluate(()=>KanaSfx.playCount>0);
   await page.locator('#closeSettings').click();await page.waitForTimeout(60);
   const beforeSelect=await page.evaluate(()=>KanaSfx.playCount);
-  await page.locator('#difficultySelect').selectOption('hard');await page.waitForTimeout(100);
+  await page.locator('#mode').selectOption('journey');await page.waitForTimeout(100);
   if(tonesAvailable){
     assert.ok(await page.evaluate(()=>KanaSfx.playCount)>beforeSelect,'native select changes play an interface tone');
     assert.equal(await page.evaluate(()=>KanaSfx.lastKind),'confirm');
@@ -228,7 +228,7 @@ async function exerciseQuickWins(errors){
   await page.locator('#soundBtn').click();await page.waitForTimeout(100);
   assert.equal(await page.evaluate(()=>KanaAudio.enabled),false);
   const mutedCount=await page.evaluate(()=>KanaSfx.playCount);
-  await page.locator('#difficultySelect').selectOption('normal');
+  await page.locator('#mode').selectOption('hira');
   await page.locator('#settingsBtn').click();await page.locator('#closeSettings').click();await page.waitForTimeout(100);
   assert.equal(await page.evaluate(()=>KanaSfx.playCount),mutedCount,'muted native clicks and select changes produce no tones');
   await page.locator('#soundBtn').click();await page.waitForTimeout(100);
@@ -403,15 +403,14 @@ async function exerciseDesktopResults(errors){
   await screenshot(page,'desktop');
   assert.equal(await page.locator('#welcome').isVisible(),true);
   assert.deepEqual(await page.locator('#mode option').evaluateAll(options=>options.map(option=>option.value)),['hira','kata','journey']);
-  assert.equal(await page.locator('#difficultySelect option:disabled').count(),0);
-  assert.equal(await page.locator('#difficultySelect').inputValue(),'easy');
+  assert.equal(await page.locator('#difficultySelect,#difficultyNote').count(),0);
+  assert.equal(await page.evaluate(()=>Object.hasOwn(KanaRain.settings,'difficulty')),false);
   await page.locator('#settingsBtn').click();
   assert.equal(await page.locator('#settingsDialog').isVisible(),true);
   assert.equal(await page.locator('#settingsMode,[data-difficulty],[data-duration],#practiceSelect,#noveltyPaceSelect').count(),0);
   await page.locator('#saveSettings').click();
   assert.equal(await page.locator('#settingsDialog').isVisible(),false);
   assert.equal(await page.evaluate(()=>KanaRain.settings.duration),180);
-  await page.locator('#difficultySelect').selectOption('normal');
   await page.locator('#settingsBtn').click();await page.keyboard.press('Escape');
   assert.equal(await page.locator('#settingsDialog').isVisible(),false);
   assert.equal(await page.locator('#welcome').isVisible(),true);
@@ -477,7 +476,7 @@ async function exerciseDesktopResults(errors){
   await page.locator('#pauseSettingsBtn').click();
   assert.equal(await page.locator('#settingsDialog').isVisible(),true);
   await assertFrozen(page);await assertWholeViewport(page,'Desktop paused settings');
-  assert.equal(await page.locator('#difficultySelect').isDisabled(),true,'difficulty cannot change during a session');
+  assert.equal(await page.locator('#difficultySelect,#difficultyNote').count(),0,'difficulty has no active controls');
   assert.equal(await page.locator('#mode').isDisabled(),true);
   await page.locator('#closeSettings').click();
   assert.equal(await page.locator('#pauseOverlay').isVisible(),true);
@@ -507,7 +506,7 @@ async function exerciseDesktopResults(errors){
   const normalSession=await page.evaluate(()=>({settings:KanaRain.settings,best:{...KanaRain.gameData.best}}));
   await page.locator('#reviewPracticeBtn').click();await readyToPlay(page);
   assert.equal(await page.evaluate(()=>KanaRain.state.sessionDuration),60);
-  assert.equal(await page.evaluate(()=>KanaRain.state.difficulty),normalSession.settings.difficulty);
+  assert.equal(await page.evaluate(()=>Object.hasOwn(KanaRain.state,'difficulty')),false);
   assert.deepEqual(await page.evaluate(()=>KanaRain.settings),normalSession.settings,'focused review preserves the user session settings');
   assert.equal(await page.evaluate(id=>KanaRain.state.reviewIds.includes(id),typo.id),true);
   assert.equal(await page.evaluate(()=>KanaRain.state.drops.concat(KanaRain.state.queue).every(d=>KanaRain.state.reviewIds.includes(d.id))),true);
@@ -552,7 +551,6 @@ async function exerciseDesktopResults(errors){
   await mobile.locator('#gardenBtn').tap();
   await assertWholeViewport(mobile,'Mobile progress menu');
   await mobile.locator('#returnGarden').tap();
-  await mobile.locator('#difficultySelect').selectOption('easy');
   await mobile.locator('#startBtn').tap();await readyToPlay(mobile);await mobile.waitForFunction(()=>KanaRain.state.drops.length>0);
   assert.equal(await mobile.evaluate(()=>KanaRain.state.totalLives),3);
   await assertHeartsVisible(mobile,'Mobile');
@@ -595,35 +593,35 @@ async function exerciseDesktopResults(errors){
   await mobile.locator('#resumeBtn').tap();
   await readyToPlay(mobile);
   await mobileContext.close();
-  // Every novelty difficulty shares a rain curve that accelerates with correct answers, not active time.
+  // The default rain curve accelerates with correct answers, not active time.
   // Each expiration removes one of the universal three hearts.
   const difficultyContext=await gameContext();
-  for(const [difficulty,hearts] of [['easy',3],['normal',3],['hard',3]]){
+  for(const [label,hearts] of [['default',3]]){
     const level=await difficultyContext.newPage();level.on('pageerror',e=>errors.push(e.message));
     await level.goto('http://127.0.0.1:4180');await level.waitForFunction(()=>window.KanaRain);
-    await level.locator('#difficultySelect').selectOption(difficulty);await level.locator('#startBtn').click();
+    await level.locator('#startBtn').click();
     await readyToPlay(level);
     await level.waitForFunction(()=>KanaRain.state.drops.length>0);
-    assert.equal(await level.evaluate(()=>KanaRain.state.difficulty),difficulty);
+    assert.equal(await level.evaluate(()=>Object.hasOwn(KanaRain.state,'difficulty')),false);
     assert.equal(await level.evaluate(()=>KanaRain.state.totalLives),hearts);
     assert.equal(await level.evaluate(()=>KanaRain.state.lives),hearts);
-    await assertHeartsVisible(level,difficulty);
+    await assertHeartsVisible(level,label);
     assert.match(await level.locator('#lives').getAttribute('aria-label'),new RegExp('^'+hearts+'(?: of '+hearts+')? hearts?'));
-    if(difficulty==='easy')await screenshot(level,'difficulty-easy');
+    await screenshot(level,'default-rain');
     const initial=await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap}));
     await level.evaluate(()=>{KanaRain.state.elapsed=90;});
     await level.waitForFunction(()=>KanaRain.state.elapsed>90);
-    assert.deepEqual(await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap})),initial,difficulty+' does not accelerate with time alone');
+    assert.deepEqual(await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap})),initial,label+' does not accelerate with time alone');
     await level.evaluate(()=>{KanaRain.state.correct=56;});
     await level.waitForFunction(speed=>KanaRain.state.speed>speed,initial.speed);
-    const faster=await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap,expected:KanaDifficulty.atTime(KanaRain.state.difficulty,56*1.6)}));
-    assert.equal(faster.speed,faster.expected.speed,difficulty+' reads 56 correct answers as 89.6 s of the shared curve');assert.equal(faster.gap,faster.expected.gap);
-    assert.ok(faster.gap<initial.gap,difficulty+' shortens the spawn interval as answers accumulate');
+    const faster=await level.evaluate(()=>({speed:KanaRain.state.speed,gap:KanaRain.state.gap,expected:KanaDifficulty.atTime(56*1.6)}));
+    assert.equal(faster.speed,faster.expected.speed,label+' reads 56 correct answers as 89.6 s of the shared curve');assert.equal(faster.gap,faster.expected.gap);
+    assert.ok(faster.gap<initial.gap,label+' shortens the spawn interval as answers accumulate');
     await level.evaluate(()=>{KanaRain.state.correct=0;});
     for(let i=0;i<hearts;i++){
       await level.waitForFunction(()=>KanaRain.state.drops.length>0);
       await level.locator('#pauseBtn').click();
-      const token=difficulty+'-miss-'+i;
+      const token=label+'-miss-'+i;
       await level.evaluate(token=>{
         const g=KanaRain.state;g.drops.forEach(d=>d.progress=0);g.drops[0].progress=1;g.drops[0].el.dataset.forcedMiss=token;g.sinceSpawn=9999;
       },token);
@@ -632,11 +630,11 @@ async function exerciseDesktopResults(errors){
       const remaining=hearts-i-1;
       await level.waitForFunction(n=>KanaRain.state.lives===n,remaining);
       assert.match(await level.locator('#lives').getAttribute('aria-label'),new RegExp('^'+remaining+'(?: of '+hearts+')? hearts?'));
-      assert.equal(await level.locator('[data-forced-miss="'+token+'"]').count(),0,difficulty+' missed drop is removed');
-      assert.equal(await level.evaluate(()=>KanaRain.state.over),remaining===0,difficulty+' ends only after its final heart');
+      assert.equal(await level.locator('[data-forced-miss="'+token+'"]').count(),0,label+' missed drop is removed');
+      assert.equal(await level.evaluate(()=>KanaRain.state.over),remaining===0,label+' ends only after its final heart');
       assert.equal(await level.locator('#results').isVisible(),remaining===0);
       assert.equal(await level.evaluate(()=>document.body.classList.contains('low-hearts')),remaining===1);
-      if(remaining>0)await assertHeartsVisible(level,difficulty+' '+remaining+' hearts remaining');
+      if(remaining>0)await assertHeartsVisible(level,label+' '+remaining+' hearts remaining');
       if(remaining>0){
         assert.equal(await level.evaluate(()=>document.body.classList.contains('heart-hit')),true);
         assert.equal(await level.locator('#heartLoss').isVisible(),true);
@@ -644,7 +642,7 @@ async function exerciseDesktopResults(errors){
     }
     assert.equal(await level.evaluate(()=>KanaRain.state.attempts),0,'expired drops do not invent submitted answers');
     assert.equal(await level.evaluate(()=>KanaRain.state.events.filter(event=>event.outcome==='timeout').length),hearts);
-    assert.match(await level.locator('#resultMessage').textContent(),new RegExp('All '+hearts+' hearts? lost'),difficulty+' loss message uses its chosen heart allowance');
+    assert.match(await level.locator('#resultMessage').textContent(),new RegExp('All '+hearts+' hearts? lost'),label+' loss message uses its heart allowance');
     await level.close();
   }
   // Practicing the entire vowel row with unaided evidence unlocks the K-row during play.

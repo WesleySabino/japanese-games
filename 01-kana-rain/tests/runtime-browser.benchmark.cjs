@@ -37,7 +37,6 @@ async function measure(url) {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(url); await page.waitForFunction(() => !!window.KanaRain);
   const menuRainState = await page.locator('.rain-lines').evaluate(el => getComputedStyle(el).animationPlayState);
-  await page.locator('#difficultySelect').selectOption('easy');
   await page.locator('#startBtn').click(); await page.locator('#skipCountdown').click();
   await page.waitForFunction(() => !KanaRain.state.paused && !KanaRain.state.countingDown);
   await page.waitForTimeout(100);

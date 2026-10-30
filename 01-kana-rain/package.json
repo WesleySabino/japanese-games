@@ -1,8 +1,8 @@
 {
   "name": "kana-rain",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "private": true,
-  "description": "An offline-first kana arcade with three hearts and selectable new-kana difficulty",
+  "description": "An offline-first kana arcade with three hearts and adaptive rain",
   "scripts": {
     "start": "node scripts/serve.cjs",
     "test": "node --test tests/*.test.cjs tests/*.test.mjs",
@@ -20,6 +20,7 @@
     "benchmark:save": "node tests/save-performance.browser.cjs",
     "test:quick-wins": "node tests/quick-wins.browser.cjs",
     "test:update": "node tests/update.browser.cjs",
+    "test:partial-update": "node tests/partial-update.browser.cjs",
     "test:storage": "node tests/storage.browser.cjs",
     "test:import": "node tests/import.browser.cjs",
     "test:mixed-version-storage": "node tests/mixed-version-storage.browser.cjs",

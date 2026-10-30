@@ -37,48 +37,40 @@ test('reset replaces saved evidence with an empty model',()=>{
   const {L,map}=model();L.record('kana:あ','form→sound',{correct:true});L.reset();assert.equal(Object.keys(L.all()).length,0);assert.equal(Object.keys(JSON.parse(map.get('jp-learner-v1:protected:v1')).items).length,0);
 });
 
-test('difficulty choices vary novelty recovery while sharing three hearts and Normal rain',()=>{
-  assert.deepEqual(Object.keys(Difficulty.profiles).sort(),['easy','hard','normal']);
-  for(const [id,hearts,fallSeconds] of [['easy',3,10],['normal',3,10],['hard',3,10]]){
-    assert.equal(Difficulty.profiles[id].hearts,hearts,id);
-    const start=Difficulty.atTime(id,0);
-    assert.equal(start.fallSeconds,fallSeconds,id);
-    assert.equal(start.speed,1/fallSeconds,id);
-  }
+test('the single rain configuration retains three hearts and the ten-second opening fall',()=>{
+  assert.equal(Difficulty.profiles,undefined,'retired choices are not an active runtime API');
+  assert.equal(Difficulty.rain.hearts,3);
+  const start=Difficulty.atTime(0);
+  assert.equal(start.fallSeconds,10);assert.equal(start.speed,.1);
+  assert.equal(start.gap,2400);assert.equal(Difficulty.rain.maxDrops,5);
 });
 
-test('the shared curve accelerates each difficulty and increases its spawn frequency',()=>{
-  for(const [id,rampSeconds] of [['easy',60],['normal',60],['hard',60]]){
-    const initial=Difficulty.atTime(id,0),later=Difficulty.atTime(id,rampSeconds);
-    assert.equal(later.fallSeconds,initial.fallSeconds/2,id+' doubles the fall speed after one ramp interval');
-    assert.equal(later.speed,initial.speed*2,id);
-    assert.equal(later.gap,initial.gap/Math.sqrt(2),id+' increases spawn frequency gradually');
-  }
+test('the single curve retains its speed and spawn ramp',()=>{
+  const initial=Difficulty.atTime(0),later=Difficulty.atTime(Difficulty.rain.rampSeconds);
+  assert.equal(later.fallSeconds,initial.fallSeconds/2,'fall speed doubles after one ramp interval');
+  assert.equal(later.speed,initial.speed*2);
+  assert.equal(later.gap,initial.gap/Math.sqrt(2),'spawn frequency increases gradually');
 });
 
-test('long sessions keep difficulty timing finite, monotonic, and within its speed and spawn limits',()=>{
-  for(const [id,maxMultiplier] of [['easy',3.5],['normal',3.5],['hard',3.5]]){
-    const p=Difficulty.profiles[id],atCap=Difficulty.atTime(id,(maxMultiplier-1)*p.rampSeconds),late=Difficulty.atTime(id,36000);
-    assert.equal(atCap.fallSeconds,p.fallSeconds/maxMultiplier,id);
-    assert.deepEqual(late,atCap,id+' stops accelerating at its maximum');
-    let previous=Difficulty.atTime(id,0);
+test('long sessions keep timing finite, monotonic, and within the existing speed and spawn limits',()=>{
+    const p=Difficulty.rain,maxMultiplier=3.5,atCap=Difficulty.atTime((maxMultiplier-1)*p.rampSeconds),late=Difficulty.atTime(36000);
+    assert.equal(atCap.fallSeconds,p.fallSeconds/maxMultiplier);
+    assert.deepEqual(late,atCap,'acceleration stops at the existing maximum');
+    let previous=Difficulty.atTime(0);
     for(const seconds of [15,30,60,90,180,600,36000]){
-      const current=Difficulty.atTime(id,seconds);
-      assert.ok(Number.isFinite(current.speed)&&Number.isFinite(current.fallSeconds)&&Number.isFinite(current.gap),id);
-      assert.ok(current.speed>=previous.speed&&current.speed<=maxMultiplier/p.fallSeconds,id+' speed remains bounded');
-      assert.ok(current.gap<=previous.gap&&current.gap>=p.minGap,id+' spawn interval remains bounded');
-      assert.ok(current.fallSeconds>0,id);
+      const current=Difficulty.atTime(seconds);
+      assert.ok(Number.isFinite(current.speed)&&Number.isFinite(current.fallSeconds)&&Number.isFinite(current.gap));
+      assert.ok(current.speed>=previous.speed&&current.speed<=maxMultiplier/p.fallSeconds,'speed remains bounded');
+      assert.ok(current.gap<=previous.gap&&current.gap>=p.minGap,'spawn interval remains bounded');
+      assert.ok(current.fallSeconds>0);
       previous=current;
     }
-  }
 });
 
 test('the difficulty module exposes the same timing to browser and Node consumers',()=>{
   const context=vm.createContext({window:{}});
   vm.runInContext(fs.readFileSync(path.join(root,'src/difficulty.js'),'utf8'),context);
   assert.ok(context.window.KanaDifficulty);
-  for(const id of ['easy','normal','hard']){
-    assert.equal(context.window.KanaDifficulty.profiles[id].hearts,Difficulty.profiles[id].hearts);
-    assert.deepEqual(JSON.parse(JSON.stringify(context.window.KanaDifficulty.atTime(id,90))),Difficulty.atTime(id,90));
-  }
+  assert.deepEqual(JSON.parse(JSON.stringify(context.window.KanaDifficulty.rain)),Difficulty.rain);
+  for(const seconds of [0,60,90,36000])assert.deepEqual(JSON.parse(JSON.stringify(context.window.KanaDifficulty.atTime(seconds))),Difficulty.atTime(seconds));
 });

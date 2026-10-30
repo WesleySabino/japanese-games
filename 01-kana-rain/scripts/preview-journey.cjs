@@ -9,7 +9,7 @@ const progress=fs.readFileSync(path.resolve(file),'utf8'),saved=JSON.parse(progr
 if(![1,2].includes(saved.version)||!saved.items||!saved.games||Buffer.byteLength(progress)>32*1024*1024)throw Error('Choose a Kana Rain export of at most 32 MiB.');
 const id=crypto.createHash('sha256').update(progress).digest('hex');
 const port=Number(value('--port')||4198);if(!Number.isInteger(port)||port<1024||port>65535)throw Error('Invalid preview port.');
-const plan=require('./build.cjs').productionPlan(),allowed=new Map(plan.entries.map(e=>['/'+e.file,e]));
+const build=require('./build.cjs'),plan=build.productionPlan(),allowed=new Map(plan.entries.map(e=>['/'+e.file,e]));
 const bootstrap=`(async()=>{
   const until=async check=>{for(let i=0;i<1200;i++){if(check())return;await new Promise(r=>setTimeout(r,50));}throw Error('Preview preparation timed out.');};
   await until(()=>window.KanaRain);
@@ -40,7 +40,7 @@ const server=http.createServer((req,res)=>{
   else{
     const entry=allowed.get(name==='/'?'/index.html':name);
     if(!entry){res.writeHead(404).end();return;}
-    bytes=entry.generated??fs.readFileSync(entry.absolute);type=mime[path.extname(entry.file)]||'application/octet-stream';
+    bytes=entry.file==='index.html'?build.productionHtml(entry.file):entry.generated??fs.readFileSync(entry.absolute);type=mime[path.extname(entry.file)]||'application/octet-stream';
     if(entry.file==='index.html')bytes=String(bytes).replace('</head>','<script defer src="/__preview__/bootstrap.js"></script></head>');
   }
   res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-store','Cross-Origin-Resource-Policy':'same-origin','X-Content-Type-Options':'nosniff','Set-Cookie':'ng_analytics_consent=denied; SameSite=Strict; Path=/'});

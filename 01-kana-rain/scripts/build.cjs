@@ -2,12 +2,20 @@
 'use strict';
 const fs=require('node:fs');
 const path=require('node:path');
+const {createHash}=require('node:crypto');
+const vm=require('node:vm');
 
 const root=path.resolve(__dirname,'..'),rootReal=fs.realpathSync(root),output=path.resolve(root,'dist');
 const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','privacy.html','manifest.webmanifest','sw.js'];
 const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/music.js','src/difficulty.js','src/novelty.js','src/game.js','assets/nihongo-analytics.js','assets/nihongo-analytics.css'];
 const CORE_FILES=SOURCE_FILES.filter(file=>file.startsWith('src/')&&file.endsWith('.js'));
 const RUNTIME_FILE='assets/game-runtime.js';
+// Old cached entry documents still request this stable URL. Freeze its contract;
+// current entry documents carry their own runtime and never execute this asset.
+const COMPATIBILITY_SHA256=Object.freeze({
+  '1.10.1':'b4403850d0982fcb263784f66bb435983645ee0f52bca516cff15c0223431f69',
+  '1.12.1':'39b5e1368120b426775cf39a24d8907f29c3c09da952646522a25991c6f1fdef'
+});
 const IMAGE_FILES=[
   'assets/garden.webp','assets/social-garden.png','assets/spirit.webp','assets/drop.webp','assets/drop-stained.webp',
   'assets/splash.webp','assets/ripple.webp','assets/icon.png',
@@ -58,7 +66,9 @@ function validateCss(text,from,allowed){
   for(const match of css.matchAll(/@import\s+(['"])([^'"]+)\1/gi))validateReference(match[2],from,allowed);
 }
 function validateHtml(file,allowed,contents=read(file)){
-  const html=contents.replace(/<!--[\s\S]*?-->/g,'');
+  // Inline runtime source is JavaScript, not HTML attributes/CSS references.
+  // Preserve actual script opening tags so external script URLs stay validated.
+  const html=contents.replace(/(<script\b[^>]*>)[\s\S]*?<\/script\s*>/gi,'$1</script>').replace(/<!--[\s\S]*?-->/g,'');
   for(const match of html.matchAll(/\b(?:src|href|poster)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>\x60]+))/gi)){
     validateReference(match[1]??match[2]??match[3],file,allowed);
   }
@@ -78,12 +88,42 @@ function inlineGameStyles(html,gameCss,analyticsCss){
   return html.replace(/<link\b[^>]*\bhref="src\/style\.css"[^>]*>/i,()=>'<style data-game-styles>\n'+css+'\n</style>')
     .replace(/<link\b[^>]*\bhref="\/assets\/nihongo-analytics\.css"[^>]*>/i,()=>'<style data-analytics-styles>\n'+analyticsCss+'\n</style>');
 }
+function gameRuntime(){return CORE_FILES.map(file=>'/* '+file+' */\n'+read(file)+'\n;').join('\n');}
+function frozenCompatibilityRuntime(version){
+  if(!Object.hasOwn(COMPATIBILITY_SHA256,version))throw new Error('Unsupported compatibility runtime: '+version);
+  const bytes=fs.readFileSync(sourceFile('compatibility/runtime-'+version+'.js').absolute);
+  if(createHash('sha256').update(bytes).digest('hex')!==COMPATIBILITY_SHA256[version])throw new Error('Frozen '+version+' compatibility runtime changed');
+  return bytes;
+}
+function compatibilityRuntime(){
+  // Import controls distinguish the two supported historical DOM contracts.
+  // Branches contain original code, without eval or dynamic code downloads.
+  const source='/* Frozen cached-entry compatibility; current HTML never requests this URL. */\n'+
+    'if(document.getElementById("importBtn")&&document.getElementById("applyImportBtn")){\n'+frozenCompatibilityRuntime('1.12.1').toString()+
+    '\n}else{\n'+frozenCompatibilityRuntime('1.10.1').toString()+'\n}\n';
+  new vm.Script(source,{filename:RUNTIME_FILE});
+  return Buffer.from(source);
+}
+function inlineGameRuntime(html,runtime){
+  // HTML's script parser sees closing tags even inside JavaScript strings. Avoid
+  // both premature closing and its legacy escaped/double-escaped comment state.
+  const escaped=runtime.replace(/<\/script/gi,match=>'<\\/'+match.slice(2)).replace(/<!--/g,'<\\!--');
+  new vm.Script(escaped,{filename:'inline-game-runtime.js'});
+  let output=html;
+  for(const source of CORE_FILES){
+    const tag='<script defer src="'+source+'"></script>';
+    if(!output.includes(tag))throw new Error('Missing source runtime tag: '+source);
+    output=output.replace(tag,'');
+  }
+  if(!output.includes('</body>'))throw new Error('Entry document has no closing body');
+  // Inline scripts ignore defer. Placing this after the complete DOM also avoids
+  // a dependency on a separately fetched runtime controlled by an older worker.
+  return output.replace('</body>',()=>'<script data-game-runtime>\n'+escaped+'\n</script>\n</body>');
+}
 function productionHtml(file){
   const html=read(file);
   if(file!=='index.html')return html;
-  let output=inlineGameStyles(html,read('src/style.css'),read('assets/nihongo-analytics.css'));
-  for(const [index,source] of CORE_FILES.entries())output=output.replace('<script defer src="'+source+'"></script>',index===0?'<script defer src="'+RUNTIME_FILE+'"></script>':'');
-  return output;
+  return inlineGameRuntime(inlineGameStyles(html,read('src/style.css'),read('assets/nihongo-analytics.css')),gameRuntime());
 }
 function productionPlan(){
   const audioManifest=JSON.parse(read('kana-audio-bundle/runtime-manifest.json'));
@@ -92,11 +132,15 @@ function productionPlan(){
   for(const recording of recordings){
     if(typeof recording!=='string'||!/^audio\/[a-z0-9-]+\.mp3$/i.test(recording))throw new Error('Invalid audio recording path: '+recording);
   }
-  const runtime=CORE_FILES.map(file=>'/* '+file+' */\n'+read(file)+'\n;').join('\n');
+  const runtime=compatibilityRuntime();
   const files=[...ROOT_FILES,...SOURCE_FILES,RUNTIME_FILE,...IMAGE_FILES,...AUDIO_METADATA,...MUSIC_METADATA,...recordings.map(file=>'kana-audio-bundle/'+file)].sort();
   const allowed=new Set(files);
   if(allowed.size!==files.length)throw new Error('Duplicate production file in allowlist');
-  const entries=files.map(file=>file===RUNTIME_FILE?{file,generated:runtime,bytes:Buffer.byteLength(runtime)}:{file,...sourceFile(file),...(file==='index.html'?{bytes:Buffer.byteLength(productionHtml(file))}:{})});
+  const entries=files.map(file=>{
+    if(file===RUNTIME_FILE)return {file,generated:runtime,bytes:runtime.length};
+    if(file.endsWith('.html')){const generated=productionHtml(file);return {file,...sourceFile(file),generated,bytes:Buffer.byteLength(generated)};}
+    return {file,...sourceFile(file)};
+  });
   const approvedLookup=require('./prepare-runtime-audio.cjs').runtimePlan();
   if(JSON.stringify(approvedLookup.byKana)!==JSON.stringify(audioManifest.byKana))throw new Error('Runtime pronunciation lookup is stale');
   for(const file of ROOT_FILES.filter(file=>file.endsWith('.html')))validateHtml(file,allowed,productionHtml(file));
@@ -130,7 +174,7 @@ function build(plan){
   }
 }
 
-module.exports={inlineGameStyles,productionHtml,productionPlan};
+module.exports={inlineGameStyles,inlineGameRuntime,gameRuntime,frozenCompatibilityRuntime,compatibilityRuntime,productionHtml,productionPlan};
 if(require.main===module)try{
   if(process.argv.slice(2).some(arg=>arg!=='--check'))throw new Error('Usage: node scripts/build.cjs [--check]');
   const plan=productionPlan(),check=process.argv.includes('--check');

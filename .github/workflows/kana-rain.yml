@@ -109,6 +109,12 @@ jobs:
       - name: Run update from the Journey production release with preserved progress
         run: pnpm run test:update 1.12.0
 
+      - name: Run update from the previous production release with preserved progress
+        run: pnpm run test:update 1.12.1
+
+      - name: Run interrupted shell download and generation consistency checks
+        run: pnpm run test:partial-update
+
       - name: Run native storage quota, browser restart and multi-tab regressions
         run: pnpm run test:storage
 
