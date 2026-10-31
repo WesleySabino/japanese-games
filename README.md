@@ -1,6 +1,29 @@
-# Kana Rain
+# Japanese Games
 
-This repository holds **Kana Rain**, a short-session arcade game for reading hiragana and katakana.
+**Open-source games for learning Japanese, released under the [MIT License](LICENSE).**
+
+Use, study, modify, fork, redistribute, or build on the project, including for
+commercial use, under the MIT terms. Keep the copyright and license notices.
+Contributions from everyone are welcome: code, testing, Japanese content,
+documentation, accessibility, artwork, and ideas for future games.
+
+This repository currently contains **Kana Rain**, a short-session arcade game
+for reading hiragana and katakana. Future games can live alongside it in their
+own directories.
+
+[Contribute](CONTRIBUTING.md) · [Report a bug](https://github.com/WesleySabino/japanese-games/issues/new?template=bug_report.yml) · [Suggest a game or feature](https://github.com/WesleySabino/japanese-games/issues/new?template=game_proposal.yml)
+
+For a vulnerability or personal-data exposure, use the [private reporting
+instructions](SECURITY.md) instead of a public issue.
+
+## Games
+
+| Game | Description | Source | Play |
+|---|---|---|---|
+| Kana Rain | An offline-capable hiragana and katakana reading arcade with keyboard and touch controls. | [01-kana-rain](01-kana-rain/README.md) | [Play](https://kana-rain.nihongogrove.top/) |
+
+Want to build another Japanese-learning game? See the [new-game contribution
+guide](CONTRIBUTING.md#add-another-game).
 
 [Play Kana Rain](https://kana-rain.nihongogrove.top/) · [How to play](https://kana-rain.nihongogrove.top/about.html)
 
@@ -12,6 +35,19 @@ The game is public and requires no account. Progress stays in the browser on the
 |---|---|
 | `01-kana-rain/` | Game source, tests, assets, public pages and build. |
 | `.github/workflows/kana-rain.yml` | CI: unit tests, browser tests and the static build. |
+| `.github/workflows/pages.yml` | Publishes Kana Rain from `main` to GitHub Pages. |
+| `CONTRIBUTING.md` | How to report issues, submit changes, and add future games. |
+| `LICENSE` | MIT license for original project material. |
+| `THIRD_PARTY_NOTICES.md` | Asset-specific terms and upstream notices. |
+| `SECURITY.md` | Private reporting and privacy precautions for contributions. |
+
+## License
+
+Project code, documentation, and original artwork use the [MIT License](LICENSE).
+The pronunciation recordings and menu composition/synthesized sound retain
+their **CC0-1.0** notices. Imported audio metadata retains its original MIT
+copyright notice. See [third-party and asset notices](THIRD_PARTY_NOTICES.md)
+for the exact scope and provenance. Preserve these notices in copies and forks.
 
 ## Documentation
 
@@ -29,9 +65,11 @@ Retired prototypes, presentations and imported research copies remain recoverabl
 
 ## Run Kana Rain locally
 
-Use **Node.js 22 or later** and **pnpm 11** (CI pins pnpm 11.25.0). From the project root:
+Use **Node.js 22 or later** and **pnpm 11** (CI pins pnpm 11.25.0). To get started:
 
 ```sh
+git clone https://github.com/WesleySabino/japanese-games.git
+cd japanese-games
 cd 01-kana-rain
 pnpm install --frozen-lockfile
 pnpm start

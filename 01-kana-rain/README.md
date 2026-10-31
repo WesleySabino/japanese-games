@@ -1,5 +1,11 @@
 # Kana Rain
 
+Part of [Japanese Games](../README.md), an open-source collection of
+Japanese-learning games. Code, documentation, and original artwork are
+available under the [MIT License](../LICENSE); audio and music keep their
+[separate notices](../THIRD_PARTY_NOTICES.md).
+[Contributions are welcome](../CONTRIBUTING.md).
+
 **Release: 1.13.0 — 29 October 2026.** See [release history](CHANGELOG.md).
 
 The production build packages the current game code and styles atomically with its document. Installed shell files are served from one complete cache generation; an interrupted update keeps the prior generation. Frozen public compatibility assets let supported older cached documents finish loading without executing mismatched current code. Progress storage is unchanged. The alphabet selector now aligns with the main-menu buttons at every breakpoint.

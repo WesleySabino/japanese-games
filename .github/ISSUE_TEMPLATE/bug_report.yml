@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible problem in a game.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Use synthetic progress in examples. Do not attach personal exports, credentials, private emails, or screenshots with personal data. For security or exposure reports, follow SECURITY.md."
+  - type: input
+    id: game
+    attributes:
+      label: Game and version
+      placeholder: "Kana Rain 1.13.0"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Describe what you did, what happened, and what you expected.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      placeholder: "Chrome on Android, portrait"
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional details
+      description: Include relevant errors or anonymized screenshots, if available.

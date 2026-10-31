@@ -1,0 +1,22 @@
+name: Game or feature proposal
+description: Suggest a new Japanese-learning game or an improvement.
+title: "[Idea]: "
+body:
+  - type: input
+    id: game
+    attributes:
+      label: Existing game or new game
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the player experience, the Japanese skill it practices, and why it would help.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and alternatives
+      description: Mention controls, accessibility, assets, or an implementation you would like to contribute.

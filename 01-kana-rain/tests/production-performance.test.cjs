@@ -69,7 +69,9 @@ test('compatibility dispatcher selects exactly one runtime from the actual legac
 });
 
 test('ordinary source modules and secondary pages retain their current working-tree content',()=>{
-  const plan=productionPlan();assert.equal(plan.entries.length,144,'compatibility adds no public URLs');
+  const plan=productionPlan();assert.equal(plan.entries.length,145,'includes the license without adding compatibility URLs');
+  assert.ok(plan.entries.some(entry=>entry.file==='LICENSE.txt'),'static distributions include the MIT license');
+  assert.equal(fs.readFileSync(path.join(root,'LICENSE.txt'),'utf8').replace(/\r\n/g,'\n'),fs.readFileSync(path.join(root,'..','LICENSE'),'utf8').replace(/\r\n/g,'\n'),'distributed MIT terms match the repository license');
   for(const entry of plan.entries.filter(e=>e.file.startsWith('src/'))){assert.equal(entry.generated,undefined);assert.deepEqual(fs.readFileSync(entry.absolute),fs.readFileSync(path.join(root,entry.file)));}
   assert.equal(productionHtml('art.html'),fs.readFileSync(path.join(root,'art.html'),'utf8'));
 });

@@ -6,7 +6,7 @@ const {createHash}=require('node:crypto');
 const vm=require('node:vm');
 
 const root=path.resolve(__dirname,'..'),rootReal=fs.realpathSync(root),output=path.resolve(root,'dist');
-const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','privacy.html','manifest.webmanifest','sw.js'];
+const ROOT_FILES=['index.html','about.html','robots.txt','sitemap.xml','art.html','privacy.html','manifest.webmanifest','sw.js','LICENSE.txt'];
 const SOURCE_FILES=['src/style.css','src/data.js','src/learner.js','src/audio.js','src/sfx.js','src/music.js','src/difficulty.js','src/novelty.js','src/game.js','assets/nihongo-analytics.js','assets/nihongo-analytics.css'];
 const CORE_FILES=SOURCE_FILES.filter(file=>file.startsWith('src/')&&file.endsWith('.js'));
 const RUNTIME_FILE='assets/game-runtime.js';
