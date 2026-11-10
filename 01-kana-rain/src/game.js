@@ -26,6 +26,19 @@
   let katakanaNovelty=createKatakanaNovelty();
   const explore=new URLSearchParams(location.search).has('all');
   let cfg={mode:'hira',duration:180,playStyle:'arcade',noveltyPace:N.profile(novelty).id}, G=null, raf=0, mapScript='hiragana', keyboardOpen=false, composing=false, feedbackTimer, spiritTimer, milestoneTimer, heartTimer, feedbackPriority=-1, feedbackUntil=0, currentFeedback=null, feedbackQueue=[], lastReview=[];
+  // One session phase owns the legacy flags. See STATE_MACHINES.md for the
+  // independent input, curriculum, persistence and resource lifecycles.
+  const SESSION_TRANSITIONS=Object.freeze({
+    paused:Object.freeze({COUNTDOWN:'countdown',END:'ended'}),
+    countdown:Object.freeze({PLAY:'playing',PAUSE:'paused',END:'ended'}),
+    playing:Object.freeze({PAUSE:'paused',END:'ended'}),
+    ended:Object.freeze({})
+  });
+  function transitionSession(event){
+    const next=G&&SESSION_TRANSITIONS[G.phase]?.[event];
+    if(!next)return false;
+    G.phase=next;return true;
+  }
   // Sound pad: a fixed grid of consonant families, replaced in place by that family's sounds.
   // Cells come from the catalogue, so each of the 104 readings per script has exactly one two-tap path.
   // [family, name, main letter, other spellings in the row]
@@ -41,7 +54,21 @@
   // Menu music follows the title screen and the sound setting.
   const music=()=>window.KanaMusic?.sync();
   const panelOrigins=new Map();
-  let importText=null,importBusy=false,importReadId=0;
+  const IMPORT_TRANSITIONS=Object.freeze({
+    idle:Object.freeze({READ:'reading',CANCEL:'idle'}),
+    reading:Object.freeze({READ:'reading',PREVIEW:'preview',REJECT:'error',CANCEL:'idle'}),
+    preview:Object.freeze({READ:'reading',APPLY:'applying',CANCEL:'idle'}),
+    applying:Object.freeze({SAVED:'idle',FAILED:'preview'}),
+    error:Object.freeze({READ:'reading',CANCEL:'idle'})
+  });
+  let importFlow={phase:'idle',text:null,revision:0};
+  const importBusy=()=>importFlow.phase==='applying';
+  function transitionImport(event,text=importFlow.text){
+    const next=IMPORT_TRANSITIONS[importFlow.phase][event];
+    if(!next)return false;
+    importFlow={phase:next,text:next==='preview'||next==='applying'?text:null,revision:importFlow.revision+1};
+    return true;
+  }
   let progressDirty=true,keyboardSignature=null,fieldSize={width:0,height:0};
   // Keep feedback bitmaps decoded before their first use, without delaying the
   // menu or input. The initial scene gets its turn first; later images get one
@@ -118,13 +145,17 @@
     if(mobile()&&keyboardOpen){$('answer').inputMode='none';$('answer').blur();return;}
     $('answer').inputMode='text';$('answer').focus({preventScroll:true});
   }
-  function closeDialogs(){document.querySelectorAll('dialog.game-dialog[open]').forEach(d=>d.close());}
+  function closeDialogs(){
+    if($('progressDialog').open)clearImportPreview();
+    document.querySelectorAll('dialog.game-dialog[open]').forEach(d=>d.close());panelOrigins.clear();
+  }
   function openPanel(id){
+    if(importBusy())return;
     const current=document.querySelector('dialog[open]');
-    const origin=current?.id==='pauseOverlay'?'pause':current?.id==='results'?'results':running()&&(!G.paused||G.countingDown)?'game':'title';
-    panelOrigins.set(id,origin);
+    if(current?.id===id)return;
+    const origin=panelOrigins.get(current?.id)||(current?.id==='pauseOverlay'?'pause':current?.id==='results'?'results':running()?G.phase==='paused'?'pause':'game':'title');
     if(running())pause(true,false);
-    closeDialogs();renderMenu();
+    closeDialogs();panelOrigins.set(id,origin);renderMenu();
     if(id==='progressDialog'){$('gardenContext').textContent=running()?'GAME PAUSED':'ONE DROP AT A TIME';renderImportAvailability();exposeReference();}
     if(id==='settingsDialog')$('settingsNote').textContent=(running()?'Your current session is paused. ':'')+'Progress stays on this device when storage is available; export a backup from My Kana Garden.';
     $(id).showModal();
@@ -133,7 +164,7 @@
     $(id).querySelector('.dialog-panel').scrollTop=0;
   }
   function closePanel(id){
-    if(id==='progressDialog'){if(importBusy)return;clearImportPreview();}
+    if(id==='progressDialog'){if(importBusy())return;clearImportPreview();}
     A.stop();$(id).close();
     const origin=panelOrigins.get(id);panelOrigins.delete(id);
     if(origin==='pause' && running())showPause();
@@ -280,15 +311,16 @@
     $('importStatus').textContent=text;$('importStatus').dataset.kind=kind;
   }
   function renderImportAvailability(){
-    const blocked=!!running();
-    $('importBtn').disabled=blocked||importBusy;
+    const blocked=!!running(),busy=importBusy();
+    $('importBtn').disabled=blocked||busy;
     $('importAvailability').textContent=blocked?'Finish your current session before importing progress. You can export a backup at any time.':'Choose a JSON file, review it, then apply. Export a backup first if you want a separate copy of your current progress.';
-    for(const id of ['applyImportBtn','cancelImportBtn','importBackupBtn','exportBtn','closeGarden','returnGarden'])$(id).disabled=importBusy;
-    $('applyImportBtn').disabled=blocked||importBusy||!importText;
-    $('importPreview').setAttribute('aria-busy',String(importBusy));
+    for(const id of ['applyImportBtn','cancelImportBtn','importBackupBtn','exportBtn','closeGarden','returnGarden'])$(id).disabled=busy;
+    $('applyImportBtn').disabled=blocked||importFlow.phase!=='preview';
+    $('importPreview').setAttribute('aria-busy',String(busy||importFlow.phase==='reading'));
   }
   function clearImportPreview(clearStatus=true){
-    importReadId++;importText=null;$('importFile').value='';$('importPreview').classList.add('hidden');
+    if(!transitionImport('CANCEL'))return;
+    $('importFile').value='';$('importPreview').classList.add('hidden');
     $('importSummary').replaceChildren();$('importFilename').textContent='';
     if(clearStatus)importMessage('');renderImportAvailability();
   }
@@ -302,61 +334,66 @@
     A.enabled=gd.sound!==false;music();renderMenu();renderSound();renderEffects();renderProgress(true);
   }
   async function previewProgressFile(){
-    const file=$('importFile').files?.[0];if(!file||running()||importBusy)return;
-    const readId=++importReadId;importText=null;$('importPreview').classList.add('hidden');renderImportAvailability();
+    const file=$('importFile').files?.[0];if(!file||running()||!$('progressDialog').open||!transitionImport('READ'))return;
+    const readId=importFlow.revision;$('importPreview').classList.add('hidden');renderImportAvailability();
     importMessage('Reading progress file…');
     try{
       if(file.size>32*1024*1024)throw new Error('Choose a progress file of 32 MB or smaller.');
       const text=await file.text();
-      if(readId!==importReadId||!$('progressDialog').open)return;
+      if(readId!==importFlow.revision||!$('progressDialog').open)return;
       const summary=L.previewImport(text);
       const rows=[['Answers in the file',summary.attempts],['Reading and audio references',summary.exposures],['New answer records',summary.addedAttempts],['New reference records',summary.addedExposures],['Hiragana rows after import',summary.hiraganaRows],['Katakana rows after import',summary.katakanaRows],['Familiar Hiragana after import',summary.hiraganaFamiliar],['Katakana access after import',summary.katakanaUnlocked?'Available':'Locked']];
       $('importSummary').replaceChildren(...rows.flatMap(([label,value])=>{const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=String(value);return [dt,dd];}));
       $('importFilename').textContent=file.name;$('importEstimateNote').classList.toggle('hidden',!summary.manualEstimate);
-      importText=text;$('importPreview').classList.remove('hidden');importMessage('Preview ready. Your progress has not changed.');renderImportAvailability();
+      transitionImport('PREVIEW',text);$('importPreview').classList.remove('hidden');importMessage('Preview ready. Your progress has not changed.');renderImportAvailability();
       $('importPreviewTitle').focus({preventScroll:true});$('importPreview').scrollIntoView({block:'nearest',behavior:'instant'});
     }catch(error){
-      if(readId!==importReadId)return;
-      importText=null;importMessage(error instanceof Error?error.message:'This file could not be read. Choose a Kana Rain progress JSON file.','error');renderImportAvailability();$('importStatus').focus({preventScroll:true});
+      if(readId!==importFlow.revision||!$('progressDialog').open)return;
+      transitionImport('REJECT');importMessage(error instanceof Error?error.message:'This file could not be read. Choose a Kana Rain progress JSON file.','error');renderImportAvailability();$('importStatus').focus({preventScroll:true});
     }
   }
   async function applyProgressImport(){
-    if(!importText||running()||importBusy)return;
-    importBusy=true;renderImportAvailability();importMessage('Combining and saving your progress…');
+    if(running()||!$('progressDialog').open||!transitionImport('APPLY'))return;
+    renderImportAvailability();importMessage('Combining and saving your progress…');
     try{
-      const result=await L.importProgress(importText);
+      const result=await L.importProgress(importFlow.text);
       refreshImportedProgress();
       if(result?.saved!==true||!result.indexedDB&&!result.journal)throw new Error('The import could not be saved on this device. Export your current progress before leaving and try again when storage is available.');
-      importBusy=false;clearImportPreview(false);
+      transitionImport('SAVED');clearImportPreview(false);
       importMessage(result.indexedDB?'Import saved on this device. Your existing history and settings were kept.':'Import saved in the device recovery journal. Your existing history and settings were kept. The main save is still pending; export a backup before leaving.','success');
       $('importStatus').focus({preventScroll:true});
     }catch(error){
-      importBusy=false;renderImportAvailability();
+      transitionImport('FAILED');renderImportAvailability();
       importMessage(error instanceof Error?error.message:'The import could not be completed. Your current history has been kept.','error');$('importStatus').focus({preventScroll:true});
     }
   }
   function enableSetup(value){$('mode').disabled=!value;$('startBtn').disabled=!value;if(value)renderMenu();}
-  function cancelCountdown(){if(G)G.countingDown=false;$('countdownOverlay').classList.add('hidden');stopLoop();}
+  function cancelCountdown(){if(G?.countingDown)transitionSession('PAUSE');$('countdownOverlay').classList.add('hidden');stopLoop();}
   function beginCountdown(title='Ready for the rain?'){
     if(!running())return;
-    if(!G.paused){G.paused=true;G.pauseAt=performance.now();}
-    G.countingDown=true;G.countdownEnd=performance.now()+3000;G.countdownValue=3;
+    if(document.hidden){pause(true);return;}
+    if(!transitionSession('COUNTDOWN'))return;
+    G.countdownEnd=performance.now()+3000;G.countdownValue=3;
     $('countdownTitle').textContent=title;$('countdownNumber').textContent='3';$('countdownOverlay').classList.remove('hidden');
     $('answer').disabled=true;$('submitBtn').disabled=true;$('skipCountdown').focus({preventScroll:true});sfx('tick');
     syncAnimationState();wakeLoop();
   }
   function completeCountdown(){
-    if(!running()||!G.countingDown)return;cancelCountdown();
+    if(!running()||!G.countingDown)return;
+    if(document.hidden){pause(true);return;}
+    if(!transitionSession('PLAY'))return;
+    $('countdownOverlay').classList.add('hidden');stopLoop();
     const now=performance.now();G.drops.forEach(d=>d.pausedMs+=Math.max(0,now-Math.max(G.pauseAt??now,d.born)));
     if(G.inputStartedAt!=null)G.inputPausedMs+=Math.max(0,now-Math.max(G.pauseAt??now,G.inputStartedAt));
-    G.paused=false;G.last=now;$('answer').disabled=false;$('submitBtn').disabled=false;focusAnswer();spirit('idle');
+    G.last=now;$('answer').disabled=false;$('submitBtn').disabled=false;focusAnswer();spirit('idle');
     scheduleFeedback();
     // Count real gameplay once; countdowns on pause/resume are not new sessions.
     if(!G.analyticsStarted){G.analyticsStarted=true;window.NihongoAnalytics?.track('practice_start',{practice_mode:G.reviewIds?'review':G.mode});}
     syncAnimationState();wakeLoop();
   }
   function start(options={}){
-    if(G&&!G.over)return;
+    if(running()||importBusy())return;
+    composing=false;A.stop();
     stopLoop();clearTimeout(feedbackTimer);clearTimeout(milestoneTimer);clearTimeout(heartTimer);feedbackPriority=-1;feedbackUntil=0;currentFeedback=null;feedbackQueue=[];
     $('feedback').className='feedback';$('milestoneFeedback').className='milestone-feedback';$('heartLoss').classList.add('hidden');document.body.classList.remove('heart-hit');$('field').querySelectorAll('.drop,.effect').forEach(e=>e.remove());
     // Reapply the single admission policy after saves from an older open tab.
@@ -366,7 +403,7 @@
     const reviewIds=Array.isArray(options.reviewIds)?[...new Set(options.reviewIds)].filter(id=>reviewCandidates().includes(id)):null;
     const sessionDuration=reviewIds?.length?60:cfg.duration,now=performance.now();
     L.flush();
-    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,paused:true,countingDown:false,over:false,target:null,lastWarning:-10};
+    G={mode:cfg.mode,playStyle:'arcade',sessionId:L.beginSession?.(GAME)||`${GAME}:${Date.now()}`,roundSerial:0,events:[],inputStartedAt:null,inputPausedMs:0,totalLives:3,t:sessionDuration,sessionDuration,reviewIds:reviewIds?.length?reviewIds:null,elapsed:0,lives:3,streak:0,bestStreak:0,correct:0,errors:0,attempts:0,expirations:0,drops:[],queue:[],confs:new Set(),missed:new Set(),mistakes:new Set(),newIds:new Set(),last:now,pauseAt:now,sinceSpawn:0,speed:weather.speed,gap:weather.gap,phase:'paused',get paused(){return this.phase==='paused'||this.phase==='countdown';},get countingDown(){return this.phase==='countdown';},get over(){return this.phase==='ended';},target:null,lastWarning:-10};
     G.journeyStage=journeyStage();G.nextScript='katakana';
     closeDialogs();$('welcome').classList.add('hidden');$('gameHud').classList.remove('hidden');$('answerDock').classList.remove('hidden');
     document.body.classList.remove('is-menu');document.body.classList.add('is-playing');music();
@@ -457,7 +494,7 @@
   }
   function loop(now){
     raf=0;
-    if(!G||G.over)return;const dt=Math.min(.1,Math.max(0,(now-G.last)/1000));G.last=now;
+    if(!G||G.over||document.hidden)return;const dt=Math.min(.1,Math.max(0,(now-G.last)/1000));G.last=now;
     if(G.countingDown){
       const remaining=Math.min(3,Math.ceil((G.countdownEnd-now)/1000));
       if(remaining<=0)completeCountdown();
@@ -647,9 +684,12 @@
   }
   function pause(value=(G?.countingDown||!G?.paused),showDialog=true){
     if(!running())return;
-    if(value)cancelCountdown();
+    // A hidden tab or an open panel retains ownership of its pause. Visibility
+    // alone never resumes play; the next explicit Resume starts a fresh countdown.
+    if(!value&&(document.hidden||document.querySelector('dialog[open]')&&!$('pauseOverlay').open)){if(document.hidden)pause(true,showDialog);return;}
+    if(value){A.stop();cancelCountdown();}
     if(G.paused===value){if(value){stopLoop();syncAnimationState();if(showDialog&&!document.querySelector('dialog[open]'))showPause();}return;}
-    if(value){if(currentFeedback)currentFeedback.ms=Math.max(0,feedbackUntil-performance.now());clearTimeout(feedbackTimer);G.paused=true;G.pauseAt=performance.now();A.stop();spirit('sleep');$('pauseHint').textContent='';if(showDialog){closeDialogs();showPause();}}
+    if(value){if(currentFeedback)currentFeedback.ms=Math.max(0,feedbackUntil-performance.now());clearTimeout(feedbackTimer);transitionSession('PAUSE');G.pauseAt=performance.now();spirit('sleep');$('pauseHint').textContent='';if(showDialog){closeDialogs();showPause();}}
     else{
       if($('pauseOverlay').open)$('pauseOverlay').close();
       beginCountdown('Ready to continue?');
@@ -657,7 +697,7 @@
     G.last=performance.now();
     if(value)stopLoop();syncAnimationState();
   }
-  function dispose(){cancelCountdown();A.stop();feedbackQueue=[];clearFeedback();if(G){G.pendingAnswer=null;G.over=true;G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}resetPad();syncAnimationState();L.flush();}
+  function dispose(){cancelCountdown();A.stop();composing=false;feedbackQueue=[];clearFeedback();if(G){G.pendingAnswer=null;transitionSession('END');G.drops.forEach(d=>{dropResizeObserver.unobserve?.(d.el);d.el.remove();});G.drops=[];}resetPad();syncAnimationState();L.flush();}
   function end(reason,completionReason='manual_finish'){
     if(!G||G.over)return;
     const firstCorrect=G.events.filter(e=>e.firstAttempt&&e.correct),corrected=G.events.filter(e=>e.correct&&!e.firstAttempt);
@@ -757,10 +797,10 @@
   $('resetBtn').onclick=()=>{if(!confirm('Reset all learning progress on this device?'))return;dispose();L.reset();gd=L.gameData(GAME);gd.rows={hiragana:1,katakana:1};gd.katakanaUnlocked=false;gd.best={};gd.accuracy={};novelty=N.create(gd);katakanaNovelty=createKatakanaNovelty();cfg.mode='hira';cfg.noveltyPace=N.profile(novelty).id;L.flush();$('answer').disabled=true;$('submitBtn').disabled=true;showMenu();};
   $('exportBtn').onclick=()=>{const blob=new Blob([L.export()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='kana-rain-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   $('importBackupBtn').onclick=()=>$('exportBtn').onclick();
-  $('importBtn').onclick=()=>{if(running()||importBusy)return;clearImportPreview();$('importFile').click();};
+  $('importBtn').onclick=()=>{if(running()||importBusy())return;clearImportPreview();$('importFile').click();};
   $('importFile').onchange=previewProgressFile;
   $('applyImportBtn').onclick=applyProgressImport;
-  $('cancelImportBtn').onclick=()=>{if(importBusy)return;clearImportPreview();importMessage('Import cancelled. Your progress has not changed.');$('importBtn').focus({preventScroll:true});};
+  $('cancelImportBtn').onclick=()=>{if(importBusy())return;clearImportPreview();importMessage('Import cancelled. Your progress has not changed.');$('importBtn').focus({preventScroll:true});};
   document.querySelectorAll('dialog.game-dialog').forEach(d=>d.addEventListener('cancel',e=>{e.preventDefault();if(d.id==='pauseOverlay')pause(false);else if(d.id==='results')showMenu();else closePanel(d.id);}));
   window.addEventListener('nihongo-analytics-settings-open',()=>{if(running())pause(true);});
   document.addEventListener('keydown',e=>{
@@ -769,7 +809,7 @@
     if(e.key==='Escape'&&running()){e.preventDefault();pause();}
     else if(e.key==='Enter'&&!running()&&!['SELECT','BUTTON','INPUT'].includes(e.target.tagName)){e.preventDefault();start();}
   });
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){pause(true);stopLoop();}syncAnimationState();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){A.stop();pause(true);stopLoop();}syncAnimationState();});
   function fitField(){
     const W=$('field').clientWidth,H=$('field').clientHeight;
     if(running())G.drops.forEach(d=>{
@@ -804,5 +844,5 @@
   }).catch(()=>$('offlineStatus').textContent='Offline setup unavailable in this browser.');}
   else $('offlineStatus').textContent='Offline setup is unavailable in this browser.';
   // Public module boundary for the future minigame shell and meaningful integration tests.
-  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
+  window.KanaRain={id:GAME,capabilities:{facets:[FACET],itemTypes:['kana'],input:['typing','sound-composer'],timed:true,playStyles:['arcade']},generateRound,render,score,dispose,start,pause,end,candidates,accepted,padPath:id=>{const c=padPath(id);return c&&{family:c.family,slot:c.slot,reading:c.reading};},get lifecycle(){return Object.freeze({session:G?.phase||'idle',panel:document.querySelector('dialog[open]')?.id||null,import:importFlow.phase});},get state(){return G;},get settings(){return {...cfg};},get gameData(){return gd;}};
 })();

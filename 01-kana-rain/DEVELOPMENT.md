@@ -4,6 +4,8 @@ Use [README](README.md) for setup and the full check sequence, [SPECIFICATION](S
 
 See [TESTING](TESTING.md) for the current test inventory, functional coverage, verification results and prioritized gaps. Test counts are not a measured code-coverage percentage.
 
+See [STATE_MACHINES](STATE_MACHINES.md) for the runtime workflow inventory, transition owners, cancellation rules and focused regressions. Session and import transitions have explicit local tables in `game.js`; `KanaRain.lifecycle` provides a read-only phase snapshot for debugging and automation. Use session controls rather than assigning the derived `paused`, `countingDown` or `over` flags.
+
 The app is static HTML, CSS and JavaScript. Source previews load `data`, `learner`, `audio`, `sfx`, `music`, `difficulty`, `novelty`, then `game`; the production bundle preserves that order. The game awaits `Learner.ready` before reading saved state. Keep the `window.KanaRain` module boundary (`generateRound`, `render`, `score`, `dispose` and session controls) available to integration tests. `score` decorates evidence; it is not a point-scoring system.
 
 The single play policy is fixed: `KanaDifficulty` retains its asset/global name for loader compatibility but exposes only `rain` and `atTime(elapsed)`. There are no selectable difficulty profiles or difficulty state in the game. Novelty uses only the `calm` 60-drop/55-hit policy; old profile names normalize without clearing pressure, cooldowns or evidence. Leave historical `gameData.difficulty` and old best keys untouched as inert compatibility data. Do not migrate or reset shared learner storage to remove a UI setting.

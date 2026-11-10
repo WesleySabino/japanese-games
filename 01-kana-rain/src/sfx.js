@@ -16,14 +16,14 @@
     warning: [[392, 0, .06], [392, .105, .06]]
   });
   let context = null, output = null, resuming = null, unavailable = false;
-  let lastKind = null, playCount = 0, lastMenuAt = -Infinity;
+  let lastKind = null, playCount = 0, lastMenuAt = -Infinity, generation = 0;
   const voices = new Set();
   const enabled = () => !!root.KanaAudio?.enabled;
 
   // Create/resume audio only in response to a gesture. Game events can then use
   // the running context, without deferred sounds waiting for a future gesture.
   function prime() {
-    if (!AudioContextClass || unavailable) return;
+    if (!AudioContextClass || unavailable || document.hidden) return;
     try {
       if (!context || context.state === 'closed') {
         context = new AudioContextClass();
@@ -41,6 +41,7 @@
   }
 
   function silence() {
+    generation++;
     if (!context) return;
     const now = context.currentTime;
     voices.forEach(voice => {
@@ -53,13 +54,14 @@
   }
 
   async function play(kind = 'menu') {
-    if (!enabled() || !context || unavailable) return false;
+    if (!enabled() || !context || unavailable || document.hidden) return false;
+    const token = generation, requestedContext = context;
     if (context.state !== 'running' && resuming) {
       // A browser that declines to unlock audio must not leave promises or old
       // interface tones waiting indefinitely.
       await Promise.race([resuming, new Promise(resolve => root.setTimeout(resolve, 80))]);
     }
-    if (!enabled() || context.state !== 'running') return false;
+    if (token !== generation || context !== requestedContext || !enabled() || document.hidden || context.state !== 'running') return false;
     kind = Object.prototype.hasOwnProperty.call(cues, kind) ? kind : 'menu';
     const now = context.currentTime;
     if ((kind === 'menu' || kind === 'tick') && now - lastMenuAt < .035) return false;
@@ -113,6 +115,7 @@
 
   document.addEventListener('pointerdown', prime, { capture: true, passive: true });
   document.addEventListener('keydown', prime, { capture: true, passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) silence(); });
   document.addEventListener('click', event => {
     prime();
     const button = event.target.closest?.('button');

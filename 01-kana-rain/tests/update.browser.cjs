@@ -8,7 +8,7 @@ const vm = require('node:vm');
 const { chromium } = require('playwright');
 const { root, hash, currentBuild, baselineBuild } = require('./helpers/update-fixture.cjs');
 const baselineVersion = process.argv[2] || '1.10.1';
-assert.ok(['1.10.1', '1.12.0', '1.12.1'].includes(baselineVersion), 'choose a pinned update baseline');
+assert.ok(['1.10.1', '1.12.0', '1.12.1', '1.13.0'].includes(baselineVersion), 'choose a pinned update baseline');
 const out = path.join(__dirname, 'artifacts/update');
 const report = { startedAt: new Date().toISOString(), passed: false, syntheticProgressOnly: true, userProfileAccess: false, productionAccess: false, serviceWorkers: 'allowed in disposable localhost contexts', checks: [], pageErrors: [], outsideRequests: [], contextsOpened: 0, contextsClosed: 0 };
 const contexts = new Set();

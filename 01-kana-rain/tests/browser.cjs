@@ -394,6 +394,7 @@ async function exerciseDesktopResults(errors){
     await browser.close();server.kill();return;
   }
   await require('./input.browser.cjs').checkPrefixInput(browser,'http://127.0.0.1:4180/');
+  await require('./lifecycle.browser.cjs').checkLifecycle(browser,'http://127.0.0.1:4180/');
   const context=await gameContext({viewport:{width:1440,height:1000}});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));

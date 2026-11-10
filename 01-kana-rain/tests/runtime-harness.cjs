@@ -36,8 +36,11 @@ async function runtime(options = {}) {
     setAttribute(key, value) { this[key] = value; }
     querySelector(selector) { this.nested ||= new Map(); if (!this.nested.has(selector)) this.nested.set(selector, new Element(this.id + selector)); return this.nested.get(selector); }
     querySelectorAll() { return []; }
-    addEventListener() {}
+    addEventListener(name, fn) { this.listeners ||= new Map(); this.listeners.set(name, fn); }
     appendChild(child) { this.children.push(child); }
+    replaceChildren(...children) { this.children = children; }
+    scrollIntoView() {}
+    click() { this.onclick?.(); }
     contains(child) { return this.children.includes(child); }
     focus() { document.activeElement = this; }
     blur() { if (document.activeElement === this) document.activeElement = null; }
@@ -68,7 +71,7 @@ async function runtime(options = {}) {
     requestAnimationFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; },
     cancelAnimationFrame: id => frames.delete(id), setTimeout: () => 1, clearTimeout() {}, confirm: () => true,
     addEventListener: (name, fn) => listeners.set(name, fn),
-    KanaAudio: { enabled: true, ready: Promise.resolve(), available: true, play: async () => false, stop() {}, hasRecording: () => false }
+    KanaAudio: { enabled: true, ready: Promise.resolve(), available: true, play: async () => false, stop() {}, hasRecording: () => false, ...options.audio }
   });
   context.window = context;
   for (const name of ['data', 'learner', 'difficulty', 'novelty', 'game']) {

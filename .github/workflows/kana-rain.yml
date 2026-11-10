@@ -112,6 +112,9 @@ jobs:
       - name: Run update from the previous production release with preserved progress
         run: pnpm run test:update 1.12.1
 
+      - name: Run update from the atomic-shell production release with preserved progress
+        run: pnpm run test:update 1.13.0
+
       - name: Run interrupted shell download and generation consistency checks
         run: pnpm run test:partial-update
 

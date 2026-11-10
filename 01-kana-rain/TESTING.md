@@ -1,5 +1,15 @@
 # Testes do Kana Rain
 
+## Ciclos de vida explícitos
+
+O [mapa de máquinas de estado](STATE_MACHINES.md) cobre os fluxos do runtime e seus responsáveis. `lifecycle.test.cjs` verifica transições da sessão, eventos repetidos, retorno entre painéis, retomada em aba oculta, composição IME entre partidas, leitura de importação substituída, aplicação protegida e nova tentativa após falha. `audio-lifecycle.test.cjs` verifica cancelamento durante carregamento e `Audio.play()`, substituição de pedidos e falhas de áudio. `sfx.test.cjs` cobre cancelamento de tons ativos e de continuações pendentes quando a página fica oculta.
+
+`pnpm test:browser` inclui `lifecycle.browser.cjs`: diálogos e foco nativos, Escape, troca de painéis, reinício após composição IME e controles por teclado/toque no desktop e celular. As capturas ficam em `tests/artifacts/lifecycle/`. A visibilidade é injetada com `document.hidden` e evento de visibilidade, como na suíte de música; isso verifica as guardas da aplicação, sem simular suspensão do sistema operacional. A geração de cache muda para entregar o runtime atualizado como um pacote completo.
+
+`pnpm test:update 1.13.0` instala o pacote público anterior, fixado pelo commit `c3ba0758ac94ff8fa555ab3a903434003fe7448a`, e exige preservação exata de histórico sintético, preferências, linhas e acessos antes/depois da ativação, em PC e celular, online/offline e com instalação interrompida. Esse caminho também faz parte do CI; nenhuma exportação pessoal ou perfil real é usado.
+
+Validação local em 2026-11-09 para a 1.13.1: todos os 31 arquivos de testes Node, build e 19 execuções de suítes de navegador passaram, incluindo as quatro origens de atualização (1.10.1, 1.12.0, 1.12.1 e 1.13.0), 17 cenários de atualização parcial, 10 cenários nativos de armazenamento, versões concorrentes e histórico grande com fechamento durante gravação bloqueada. Os testes novos de ciclo de vida e áudio reproduziram as falhas antes das correções. O código do learner, o schema e as chaves de armazenamento continuam iguais; os testes comparam fatos antigos e verificam novas gravações e recarga. Capturas locais de desktop e celular também foram revisadas.
+
 ## Atualização parcial e alinhamento do menu — prévia 1.13.0-local.2
 
 `pnpm test:partial-update` usa Chromium, service workers, CacheStorage e IndexedDB reais em contextos descartáveis de localhost, com dados sintéticos e requisições externas bloqueadas. Instala os pacotes públicos fixados 1.10.1, 1.12.0 e 1.12.1 antes de trocar o servidor para o candidato na mesma origem. O novo HTML contém o código atual; o URL externo de compatibilidade escolhe o runtime histórico correspondente aos controles do documento antigo. Nenhum teste limpa ou reimporta o progresso durante a atualização.

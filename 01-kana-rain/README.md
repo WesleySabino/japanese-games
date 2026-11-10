@@ -6,7 +6,9 @@ available under the [MIT License](../LICENSE); audio and music keep their
 [separate notices](../THIRD_PARTY_NOTICES.md).
 [Contributions are welcome](../CONTRIBUTING.md).
 
-**Release: 1.13.0 — 29 October 2026.** See [release history](CHANGELOG.md).
+**Release: 1.13.1 — 9 November 2026.** See [release history](CHANGELOG.md).
+
+Session and import phases now have explicit transitions. Hidden-tab resumes stay paused, panels retain their return destination, unfinished IME composition clears between sessions, and cancelled audio/import work cannot affect a later screen. The [state-machine map](STATE_MACHINES.md) records the runtime workflows, their owners and regression checks.
 
 The production build packages the current game code and styles atomically with its document. Installed shell files are served from one complete cache generation; an interrupted update keeps the prior generation. Frozen public compatibility assets let supported older cached documents finish loading without executing mismatched current code. Progress storage is unchanged. The alphabet selector now aligns with the main-menu buttons at every breakpoint.
 
@@ -111,7 +113,7 @@ Activity events still use the existing `practice_start` / `practice_complete` na
 
 ## Structure and checks
 
-`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/music.js` synthesizes the menu music; `src/difficulty.js` defines the single rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved.
+`src/data.js` is the kana catalogue; `src/learner.js` owns shared evidence, scheduling and persistence; `src/audio.js` resolves recordings; `src/sfx.js` supplies tones; `src/music.js` synthesizes the menu music; `src/difficulty.js` defines the single rain curve and three hearts; `src/novelty.js` owns admission and recovery profiles; `src/game.js` owns the arcade game. `window.KanaRain` retains the module boundary (`id`, `capabilities`, `generateRound`, `render`, `score`, `dispose`). Shared learner compatibility is preserved. The [state-machine map](STATE_MACHINES.md) documents workflow owners, transitions and regression coverage; `KanaRain.lifecycle` exposes session, panel and import phases for local inspection.
 
 ```sh
 pnpm test

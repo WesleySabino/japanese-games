@@ -1,5 +1,14 @@
 # Kana Rain releases
 
+## 1.13.1 — 2026-11-09
+
+- Give session and import workflows explicit transition tables and expose a read-only lifecycle snapshot for debugging and automation. Document the runtime state machines, owners and compatibility contracts.
+- Keep hidden tabs paused, retain panel return destinations across panel changes, prevent resuming behind open panels, and clear unfinished IME composition between sessions.
+- Invalidate superseded import reads and protect applying imports from panel changes or new sessions. Keep failed imports retryable.
+- Cancel stale pronunciation and interface-tone continuations, including pending playback/context-resume promises. Stop audio when a paused page hides.
+- Add lifecycle, cancellation, desktop/touch and focus regressions. Advance the complete offline cache generation while retaining the learner protocol, saved-progress format and curriculum rules.
+- Pin the preceding 1.13.0 GitHub Pages build and check the exact upgrade in CI with synthetic saved history, online/offline reload and interrupted installation.
+
 ## 1.13.0 — 2026-10-29
 
 - Embed the current runtime after the complete game DOM, alongside its current styles, so new HTML cannot fall back to incompatible older game code. Preserve a stable compatibility URL for supported cached entry documents, selecting their matching historical runtime.
